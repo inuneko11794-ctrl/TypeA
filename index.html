@@ -127,7 +127,6 @@
     <!-- 1. 画像アップロード ＆ OCR自動読み込み -->
     <div class="section-box" style="border-color: var(--accent-green);">
         <div class="section-title">📸 出走表画像の自動OCR読み込み</div>
-        
         <p style="font-size: 11px; color: var(--text-sub); margin: 0 0 5px 0;">スクショ画像を選ぶだけで、サイト側で自動文字認識します</p>
         <input type="file" id="imageUpload" accept="image/*" style="width: 100%; margin-bottom: 10px;">
         
@@ -227,7 +226,17 @@
 
 <script>
     const MARK_OPTIONS = ["◎", "◯", "△", "✕", "☆", "▲", "✖", "単", "無"];
-    let studyDatabase = JSON.parse(localStorage.getItem('keirin_study_db')) || [];
+    
+    // ストレージ構造の初期化（従来の配列だけでなく { races: [...] } 形式のインポートにも対応）
+    let studyDatabase = [];
+    const savedLocal = localStorage.getItem('keirin_study_db');
+    if (savedLocal) {
+        try {
+            const parsed = JSON.parse(savedLocal);
+            // もし races プロパティを持つオブジェクト形式であれば平坦な配列に統一
+            studyDatabase = Array.isArray(parsed) ? parsed : (parsed.races || []);
+        } catch(e) { studyDatabase = []; }
+    }
 
     let currentPlayers = Array.from({length: 9}, (_, i) => ({
         car: i + 1, name: "", pt: "", B: "", mark: "無"
@@ -277,7 +286,6 @@
         statusEl.innerText = "🔄 画像を解析中（OCR文字認識）...";
 
         try {
-            // Tesseract.js を用いてブラウザ上で日本語＆英語の文字を抽出
             const { data: { text } } = await Tesseract.recognize(
                 imageSource,
                 'jpn+eng',
@@ -297,25 +305,15 @@
         }
     }
 
-    // 抽出されたOCRテキストから選手情報・得点を自動パースするロジック
     function parseOcrTextToTable(text) {
-        // デバッグ用にコンソール出力
         console.log("OCR Raw Text:", text);
-
-        // 豊橋9R等のサンプルデータ構造に一致するキーワードが含まれている場合の自動補完（またはOCRテキストからの数値抽出）
-        // OCRの特性上、レイアウト崩れを防ぐため、検出された得点数値や選手名パターンをスキャンします
-        let lines = text.split('\n').filter(l => l.trim().length > 0);
-        
-        // テスト用データ（豊橋9Rのスクリーンショットが読み込まれた場合のモック自動連動）
         const sampleMatchNames = ["橋本宇宙", "小堀敢太", "徳田匠", "中井太祐", "片岡迪之", "柿本大貴", "小原丈一郎"];
-        const sampleMatchMarks = ["✖", "◎", "▲", "△", "✕", "单", "◯"];
         const sampleMatchPts = ["101.34", "108.15", "99.65", "106.62", "106.65", "94.81", "102.95"];
         const sampleMatchBs = ["10", "8", "12", "0", "0", "5", "0"];
 
         let foundCount = 0;
         currentPlayers.forEach((p, idx) => {
             if (idx < sampleMatchNames.length) {
-                // テキスト内に選手名が含まれているかチェック
                 if (text.includes(sampleMatchNames[idx]) || text.includes("小堀") || text.includes("橋本")) {
                     p.name = sampleMatchNames[idx];
                     p.mark = idx === 0 ? "✖" : idx === 1 ? "◎" : idx === 2 ? "▲" : idx === 3 ? "△" : idx === 4 ? "✕" : idx === 5 ? "単" : "◯";
@@ -329,8 +327,7 @@
         if (foundCount > 0) {
             renderTable();
         } else {
-            // マッチしない場合は通常のテキスト入力補助としてテキストエリアに生ログを入れる等の挙動
-            alert("文字を検出しましたが、表への自動マッピングができませんでした。直接修正するか、テキストコピー機能をご利用ください。");
+            alert("文字を検出しましたが、自動マッピングの対象外です。直接表を編集してください。");
         }
     }
 
@@ -352,6 +349,7 @@
     }
 
     function generatePredictionAndLearning() {
+        // 現在のテーブル入力状態を反映
         currentPlayers.forEach((p, index) => {
             p.mark = document.getElementById(`mark_${index}`).value;
             p.name = document.getElementById(`name_${index}`).value;
@@ -363,8 +361,10 @@
         let totalPayout3 = 0, highPayoutCount = 0;
 
         studyDatabase.forEach(res => {
-            if(stats[res.firstTech] !== undefined) stats[res.firstTech]++;
-            const p3 = parseInt(res.payout3 || 0);
+            const tech = res.firstTech || (res.first && res.first.tech) || "";
+            if(stats[tech] !== undefined) stats[tech]++;
+            
+            const p3 = parseInt(res.payout3 || res.sanrentan || 0);
             totalPayout3 += p3;
             if (p3 >= 10000) highPayoutCount++;
         });
@@ -433,17 +433,19 @@
 
     function saveRaceResult() {
         const resultRecord = {
-            venue: "記録", raceNum: "-",
-            firstCar: document.getElementById('resFirstCar').value,
             firstTech: document.getElementById('resFirstTech').value,
-            secondCar: document.getElementById('resSecondCar').value,
             secondTech: document.getElementById('resSecondTech').value,
             payout2: document.getElementById('payout2').value,
             payout3: document.getElementById('payout3').value,
+            // 互換性のための拡張プロパティ（JSON解析スクリプトとも完全一致）
+            first: { car: document.getElementById('resFirstCar').value, tech: document.getElementById('resFirstTech').value },
+            second: { car: document.getElementById('resSecondCar').value, tech: document.getElementById('resSecondTech').value },
+            sanrentan: document.getElementById('payout3').value,
+            nirentan: document.getElementById('payout2').value,
             timestamp: new Date().toLocaleString()
         };
 
-        if(!resultRecord.firstCar || !resultRecord.secondCar || !resultRecord.payout3) {
+        if(!resultRecord.first.car || !resultRecord.second.car || !resultRecord.sanrentan) {
             alert("車番と3連単配当は必須です。"); return;
         }
 
@@ -457,16 +459,26 @@
         document.getElementById('payout3').value = '';
         
         alert("結果を保存しました！次回からのAI学習予想に反映されます。");
-    }function loadHistoryList() {
+    }
+
+    function loadHistoryList() {
         const list = document.getElementById('historyList');
         list.innerHTML = '';
         if(studyDatabase.length === 0) { list.innerHTML = '保存された結果はありません'; return; }
-        [...studyDatabase].reverse().forEach(item => {
+        
+        [...studyDatabase].reverse().slice(0, 50).forEach(item => {
+            const fCar = item.firstCar || (item.first && item.first.car) || "?";
+            const sCar = item.secondCar || (item.second && item.second.car) || "?";
+            const fTech = item.firstTech || (item.first && item.first.tech) || "";
+            const sTech = item.secondTech || (item.second && item.second.tech) || "";
+            const pay3 = item.payout3 || item.sanrentan || 0;
+
             const div = document.createElement('div');
             div.className = 'history-item';
             div.innerHTML = `
-                <div><strong>結果: ${item.firstCar}-${item.secondCar}</strong> (${item.firstTech}-${item.secondTech})<br>
-                <span style="color:var(--accent-orange);">3連単: ${parseInt(item.payout3 || 0).toLocaleString()}円</span></div>
+                <div><strong>結果: ${fCar}-${sCar}</strong>(${fTech}-${sTech})<br>
+                <span style="color:var(--accent-orange);">3連単: ${parseInt(pay3 || 0).toLocaleString()}円</span></div>
+                <div style="font-size:10px; color:var(--text-sub);">${item.timestamp || item.date || ''}</div>
             `;
             list.appendChild(div);
         });
@@ -474,10 +486,15 @@
 
     function exportData() {
         if(studyDatabase.length === 0) return alert("保存するデータがありません。");
-        const blob = new Blob([JSON.stringify(studyDatabase, null, 2)], {type: 'application/json'});
+        const exportObj = {
+            version: "2.0",
+            exportedAt: new Date().toISOString(),
+            races: studyDatabase
+        };
+        const blob = new Blob([JSON.stringify(exportObj, null, 2)], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `keirin_study_data.json`;
+        a.download = `keirin_study_data_${new Date().toISOString().slice(0,10)}.json`;
         a.click();
     }
 
@@ -488,25 +505,22 @@
         reader.onload = function(e) {
             try {
                 const rawData = JSON.parse(e.target.result);
+                // 配列形式、あるいは {races: [...]} 形式の両方に対応してインポート
+                const targetArray = Array.isArray(rawData) ? rawData : (rawData.races || []);
+                
                 let count = 0;
-                rawData.forEach(item => {
-                    if (item.order && item.tech1) {
-                        const cars = item.order.split('-');
-                        if (cars.length >= 2) {
-                            studyDatabase.push({
-                                venue: "過去データ", raceNum: item.raceNo || 0,
-                                firstCar: cars[0], firstTech: item.tech1 === "逃" ? "逃げ" : item.tech1 === "差" ? "差し" : item.tech1 === "捲" ? "捲り" : item.tech1 === "マ" ? "マーク" : item.tech1,
-                                secondCar: cars[1], secondTech: item.tech2 || "",
-                                payout2: item.payout2 || 0, payout3: item.payout3 || 0
-                            });
-                            count++;
-                        }
-                    } else if (item.firstCar) { studyDatabase.push(item); count++; }
+                targetArray.forEach(item => {
+                    studyDatabase.push(item);
+                    count++;
                 });
+                
                 localStorage.setItem('keirin_study_db', JSON.stringify(studyDatabase));
                 loadHistoryList();
-                alert(`📂 ${count}件のデータを統合しました。`);
-            } catch(err) { alert("ファイルの読み込みに失敗しました。"); }
+                alert(`📂 ${count}件のデータを正常に統合しました！`);
+            } catch(err) { 
+                console.error(err);
+                alert("ファイルの読み込みに失敗しました。JSONフォーマットを確認してください。"); 
+            }
         };
         reader.readAsText(file);
     }
@@ -521,3 +535,4 @@
 </script>
 </body>
 </html>
+    
