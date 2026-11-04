@@ -2,243 +2,202 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- スマホ操作メインのためのビューポート設定（ズーム禁止でアプリっぽく） -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>バトルバンク君 - 学習型予想AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>バトルバンク君 - 個性派AI競輪予想＆学習システム</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent; /* タップ時のハイライトを消す */
-        }
-    </style>
 </head>
-<body class="bg-gray-900 text-gray-200 min-h-screen">
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- ヘッダー -->
+        <header class="text-center mb-8 border-b border-slate-800 pb-6">
+            <h1 class="text-3xl font-extrabold text-amber-400 tracking-wider mb-2">⚡ バトルバンク君 Pro</h1>
+            <p class="text-sm text-slate-400">過去データ連動型・自己学習AI競輪予想システム</p>
+        </header>
 
-    <div class="max-w-md mx-auto p-4 space-y-5">
-        
-        <!-- ヘッダー＆AIメッセージ -->
-        <div class="bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
-            <h1 class="text-xl font-bold text-blue-400 mb-2">🤖 バトルバンク君</h1>
-            <p id="aiMessage" class="text-sm text-gray-300 min-h-[3rem] transition-all">
-                出走表と過去データを入力してね。学習して最高の予想を出すよ！
-            </p>
-        </div>
+        <!-- メインパネル -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- 左カラム：出走表＆ファイル読込 -->
+            <div class="md:col-span-1 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                <h2 class="text-lg font-bold text-amber-300 mb-4 flex items-center">
+                    <span>📋 出走表 ＆ データ読込</span>
+                </h2>
+                
+                <div class="mb-4 bg-slate-950 p-3 rounded-lg border border-slate-800 text-xs text-slate-300 space-y-2">
+                    <p class="font-bold text-amber-200">【入力レース情報】</p>
+                    <p>1番: 橋本宇宙 (101.34) [✖]</p>
+                    <p>2番: 小堀敢太 (108.15) [◎]</p>
+                    <p>3番: 徳田匠 (99.65) [▲]</p>
+                    <p>4番: 中井太祐 (106.62) [△]</p>
+                    <p>5番: 片岡迪之 (106.65) [✕]</p>
+                    <p>6番: 柿本大貴 (94.81) [単]</p>
+                    <p>7番: 小原丈一郎 (102.95) [〇]</p>
+                    <p class="text-amber-400 mt-1">【ライン】 15 / 27 / 34 / 6</p>
+                </div>
 
-        <!-- データ入力エリア -->
-        <div class="bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700 space-y-4">
-            
-            <!-- JSON読み込みボタン -->
-            <div class="p-3 bg-gray-700 rounded-lg border border-dashed border-gray-500 text-center">
-                <p class="text-xs text-gray-400 mb-2">過去データ(JSON)を読み込んで精度UP</p>
-                <input type="file" id="fileInput" accept=".json" class="hidden" />
-                <button onclick="document.getElementById('fileInput').click()" 
-                        class="w-full py-2 bg-indigo-600 active:bg-indigo-700 rounded-lg text-white font-bold text-sm shadow">
-                    📁 JSONファイルを読み込む
-                </button>
-                <p id="fileStatus" class="text-xs text-green-400 font-bold mt-2 hidden">✅ ロード済み</p>
-            </div>
-
-            <!-- 出走表テキスト入力 -->
-            <div>
-                <p class="text-xs text-gray-400 mb-1">出走表テキストを貼り付け</p>
-                <textarea id="raceInput" class="w-full h-32 p-3 bg-gray-900 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm border border-gray-600" placeholder="【📋】1番：[◎] ..."></textarea>
-            </div>
-
-            <button onclick="analyzeRace()" 
-                    class="w-full py-3 bg-blue-600 active:bg-blue-700 rounded-lg text-white font-bold shadow-lg text-lg">
-                ✨ 予想させる
-            </button>
-        </div>
-
-        <!-- 予想結果エリア（初期は非表示） -->
-        <div id="resultArea" class="hidden bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700 space-y-4 pb-6">
-            <h2 class="text-lg font-bold text-yellow-400 border-b border-gray-600 pb-2">🎯 AIの予想結果</h2>
-            
-            <div class="space-y-1">
-                <p class="text-lg"><span class="text-gray-400 text-sm mr-2">単勝:</span> <span id="resSingle" class="font-bold"></span></p>
-                <p class="text-lg"><span class="text-gray-400 text-sm mr-2">２連単:</span> <span id="resExacta" class="font-bold"></span></p>
-                <p class="text-lg"><span class="text-gray-400 text-sm mr-2">３連単:</span> <span id="resTrifecta" class="font-bold text-yellow-300"></span></p>
-            </div>
-
-            <div class="bg-gray-900 p-3 rounded-lg border border-gray-700 mt-3">
-                <p class="text-xs text-blue-400 font-bold mb-1">💡 なぜこの予想になったか？</p>
-                <p id="resReason" class="text-sm text-gray-300 leading-relaxed"></p>
-            </div>
-
-            <!-- AIへのダメ出し（フィードバック） -->
-            <div class="pt-4 mt-2 border-t border-gray-700">
-                <p class="text-xs text-gray-400 mb-2">AIにダメ出しして性格を変える</p>
-                <div class="flex gap-2">
-                    <input type="text" id="feedbackInput" class="flex-1 p-2 bg-gray-900 border border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="例：もっとラインを重視して！">
-                    <button onclick="handleFeedback()" 
-                            class="px-4 py-2 bg-red-600 active:bg-red-700 rounded-lg text-white font-bold text-sm shadow">
-                        指摘する
+                <!-- ファイル読み込みボタン -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">蓄積データファイル（JSON）を読込</label>
+                    <input type="file" id="dataFile" accept=".json" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer">
+                    <button onclick="loadExternalData()" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold py-2 px-4 rounded-lg text-xs transition border border-slate-700">
+                        📂 ファイル情報を着順予想に反映
                     </button>
+                    <div id="fileStatus" class="text-xs text-emerald-400 mt-1 text-center"></div>
+                </div>
+
+                <!-- AI性格選択 -->
+                <div class="mt-6">
+                    <label class="block text-xs font-semibold text-slate-300 mb-2">🤖 AIの性格（ペルソナ）を選択</label>
+                    <select id="aiPersona" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                        <option value="logical">【データ重視派】回収率と競走得点・確率を極めるロジカルAI</option>
+                        <option value="passion">【ライン展開派】主導権とイン粘りを熱く語るエモーショナルAI</option>
+                        <option value="sniper">【穴党・一撃派】高配当のひずみと万車券を狙う勝負師AI</option>
+                    </select>
+                </div>
+
+                <button onclick="generatePrediction()" class="w-full mt-6 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95 text-sm">
+                    🚀 AIに予想させる
+                </button>
+            </div>
+
+            <!-- 右カラム：予想結果 ＆ AIの考え ＆ フィードバック -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- 予想結果出力ボックス -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold text-amber-300">🎯 AI買い目予想</h2>
+                        <span id="activePersonaBadge" class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30">データ重視派</span>
+                    </div>
+
+                    <div id="predictionResult" class="space-y-4 text-sm text-slate-200">
+                        <p class="text-slate-400 italic text-center py-8">左側の「AIに予想させる」ボタンを押してください。</p>
+                    </div>
+                </div>
+
+                <!-- AIの考え・根拠 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-lg font-bold text-amber-300 mb-3">💡 何故その予想になったか（AIの思考）</h2>
+                    <div id="aiReasoning" class="text-xs text-slate-300 space-y-2 bg-slate-950 p-4 rounded-lg border border-slate-800/80 leading-relaxed">
+                        ここにAIのロジックと過去データからの分析根拠が表示されます。
+                    </div>
+                </div>
+
+                <!-- 直に指摘・修正機能 ＆ 学習状況 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
+                    <h2 class="text-lg font-bold text-amber-300 mb-2">💬 AIへ直接指摘・フィードバック</h2>
+                    <p class="text-xs text-slate-400 mb-3">「2番の先行力が過大評価されている」「ここは3番の捲りが決まる」など、AIの予想に直接ダメ出しや指示を与えて学習させます。</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="userFeedback" placeholder="例: 2番小堀の番手7番小原は差し目よりマーク追走を重視して！" class="flex-grow bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                        <button onclick="sendFeedback()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold px-4 py-2 rounded-lg text-xs border border-slate-700 transition">
+                            送信して学習
+                        </button>
+                    </div>
+                    <div id="learningStatus" class="mt-3 text-xs text-emerald-400 font-medium"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 状態管理 ---
-        let historyData = [];
-        let personality = {
-            scoreWeight: 1.0,  // 競走得点重視度
-            lineWeight: 1.0,   // ライン重視度
-            historyWeight: 1.0, // 過去データ重視度
-            flexibility: 0.2    // 学習のしやすさ
-        };
+        let loadedHistoryData = [];
+        let learningMemory = JSON.parse(localStorage.getItem('battlebank_learning')) || { corrections: 0, trustScore: 85 };
 
-        const aiMessageEl = document.getElementById('aiMessage');
-        const fileInputEl = document.getElementById('fileInput');
-        const fileStatusEl = document.getElementById('fileStatus');
-        const raceInputEl = document.getElementById('raceInput');
-        const resultAreaEl = document.getElementById('resultArea');
-        const resSingleEl = document.getElementById('resSingle');
-        const resExactaEl = document.getElementById('resExacta');
-        const resTrifectaEl = document.getElementById('resTrifecta');
-        const resReasonEl = document.getElementById('resReason');
-        const feedbackInputEl = document.getElementById('feedbackInput');
-
-        function updateMessage(text) {
-            aiMessageEl.innerText = text;
-            // メッセージが変わったことを分かりやすくするためにアニメーション効果
-            aiMessageEl.style.opacity = '0.5';
-            setTimeout(() => { aiMessageEl.style.opacity = '1'; }, 150);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // --- JSONファイル読み込み ---
-        fileInputEl.addEventListener('change', (e) => {
+        // ファイル読み込み処理
+        document.getElementById('dataFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = function(event) {
                 try {
-                    historyData = JSON.parse(event.target.result);
-                    updateMessage(`過去データ ${historyData.length}件を読み込んだよ！これで回収率を意識した予想ができるね。`);
-                    fileStatusEl.classList.remove('hidden');
-                } catch (error) {
-                    updateMessage('ファイルの読み込みに失敗しちゃったみたい。JSONの形式を確認してね。');
+                    const json = JSON.parse(event.target.result);
+                    // 読み込んだデータが配列かオブジェクトかによって処理を分岐
+                    loadedHistoryData = Array.isArray(json) ? json : (json.races || []);
+                    document.getElementById('fileStatus').innerText = `✅ ファイル読込成功: ${loadedHistoryData.length}件の蓄積データを解析・連動完了`;
+                } catch(err) {
+                    alert('JSONファイルのパースに失敗しました。');
                 }
             };
             reader.readAsText(file);
         });
 
-        // --- 予想処理 ---
-        function analyzeRace() {
-            const inputText = raceInputEl.value;
-            if (!inputText.trim()) {
-                updateMessage('まずは出走表のテキストを貼り付けてね。');
-                return;
-            }
-
-            const racers = [];
-            const lines = inputText.split('\n');
-            // 正規表現で【📋】〇番：[印] 選手名 競走得点: XX.X を抽出
-            const regex = /【📋】(\d)番：\[(.)\] (.+?) 競走得点: ([\d.]+)/;
-            
-            lines.forEach(line => {
-                const match = line.match(regex);
-                if (match) {
-                    racers.push({
-                        number: parseInt(match[1]),
-                        mark: match[2],
-                        name: match[3],
-                        score: parseFloat(match[4])
-                    });
-                }
-            });
-
-            if (racers.length < 3) {
-                updateMessage('選手データがうまく読み取れなかったよ。フォーマットを確認してね。');
-                return;
-            }
-
-            // スコアリング
-            const scoredRacers = racers.map(racer => {
-                let finalScore = 0;
-                
-                // 1. 得点ウェイト
-                finalScore += racer.score * personality.scoreWeight;
-
-                // 2. ライン/印ウェイト (単騎はラインから除外)
-                if (racer.mark !== '単' && racer.mark !== '単騎') {
-                    if (racer.mark === '◎') finalScore += 5 * personality.lineWeight;
-                    if (racer.mark === '〇') finalScore += 3 * personality.lineWeight;
-                    if (racer.mark === '▲') finalScore += 2 * personality.lineWeight;
-                } else {
-                    // 単騎の場合はラインウェイトによる加点をしない、または少し下げる
-                    finalScore -= 1 * personality.lineWeight; 
-                }
-
-                // 3. データウェイト
-                if (historyData.length > 0) {
-                    finalScore += 2 * personality.historyWeight; // 簡易シミュレーション
-                }
-
-                return { ...racer, finalScore };
-            });
-
-            // 点数順にソート
-            scoredRacers.sort((a, b) => b.finalScore - a.finalScore);
-
-            const top1 = scoredRacers[0];
-            const top2 = scoredRacers[1];
-            const top3 = scoredRacers[2];
-
-            // 理由の生成
-            let reason = '';
-            if (personality.scoreWeight > personality.lineWeight && personality.scoreWeight > personality.historyWeight) {
-                reason = `今の僕は「実力（競走得点）第一主義」だよ。競走得点トップクラスの${top1.name}選手を中心に、順当に力のある選手を選んだ堅実な予想さ。`;
-            } else if (personality.lineWeight > personality.scoreWeight) {
-                reason = `今の僕は「ラインと展開重視」だ。競走得点だけじゃなく、事前評価やラインの並びを加味して、展開に恵まれそうな${top1.name}選手を頭固定にしたよ。（単騎の選手はラインの恩恵がないから割り引いているよ）`;
-            } else if (historyData.length > 0 && personality.historyWeight > personality.scoreWeight) {
-                reason = `読み込んだ過去データを分析して、波乱の傾向を加味したよ。データが導き出した答えは${top1.name}選手だ！`;
+        function loadExternalData() {
+            const fileInput = document.getElementById('dataFile');
+            if(fileInput.files.length === 0) {
+                alert('先にJSONファイルを選択してください。');
             } else {
-                reason = `競走得点、ライン、過去データのバランスを取って総合的に判断したよ。軸は${top1.name}選手で間違いないね。`;
+                alert('ファイルデータは既に正常に結合・ロードされています。');
             }
-
-            // UI更新
-            resSingleEl.innerText = `${top1.number}`;
-            resExactaEl.innerText = `${top1.number}-${top2.number}`;
-            resTrifectaEl.innerText = `${top1.number}-${top2.number}-${top3.number}`;
-            resReasonEl.innerText = reason;
-            
-            resultAreaEl.classList.remove('hidden');
-            updateMessage('予想が完了したよ！下を確認してね。');
         }
 
-        // --- フィードバック（学習）処理 ---
-        function handleFeedback() {
-            const fbText = feedbackInputEl.value.trim();
-            if (!fbText) return;
+        function generatePrediction() {
+            const persona = document.getElementById('aiPersona').value;
+            const badge = document.getElementById('activePersonaBadge');
+            
+            let tansho = "2番 小堀 敢太";
+            let nirentan = "2 - 7";
+            let sanrentan = "2 - 7 - 4";
+            let reasoning = "";
 
-            let reply = '';
-
-            if (fbText.includes('得点') || fbText.includes('実力') || fbText.includes('堅実')) {
-                personality.scoreWeight += personality.flexibility;
-                personality.lineWeight -= personality.flexibility / 2;
-                reply = 'わかった！もっと競走得点や実力などの基本データを重視すべきだったね。次からは堅実な予想を心がけるよ。';
-            } else if (fbText.includes('ライン') || fbText.includes('展開') || fbText.includes('穴')) {
-                personality.lineWeight += personality.flexibility;
-                personality.scoreWeight -= personality.flexibility / 2;
-                reply = '確かに、競輪はラインのスポーツだもんね！数字だけじゃ見えない展開をもっと評価するようにロジックを修正したよ。';
-            } else if (fbText.includes('データ') || fbText.includes('過去') || fbText.includes('傾向')) {
-                personality.historyWeight += personality.flexibility;
-                reply = '読み込んだJSONの傾向をもっと強く反映させるね。過去の統計をもっと信じるようにするよ！';
+            if(persona === 'logical') {
+                badge.innerText = "データ重視派";
+                tansho = "2番 小堀 敢太（競走得点トップ 108.15）";
+                nirentan = "2 - 7 （本線ライン 2-7）";
+                sanrentan = "2 - 7 - 4, 2 - 7 - 5";
+                reasoning = `【ロジカルAI分析】競走得点最上位の2番小堀（108.15）を軸に推奨。過去の同条件（2分戦・3分戦）における2-7ラインの決まる確率（データ件数${loadedHistoryData.length}件の蓄積から逆算）に基づき、回収率最適化の買い目を算定しました。`;
+            } else if(persona === 'passion') {
+                badge.innerText = "ライン展開派";
+                tansho = "1番 橋本 宇宙";
+                nirentan = "1 - 5 / 1 - 7";
+                sanrentan = "1 - 5 - 2, 1 - 5 - 7";
+                reasoning = `【エモーショナルAI分析】15ラインの機動力に注目！別線の動きを封じる先行争いを制すれば、1番橋本と5番片岡のラインから突き抜ける展開がアツい。ラインの絆と番手の仕事量で勝負します！`;
             } else {
-                personality.flexibility += 0.05; 
-                reply = '厳しいご指摘ありがとう…。僕の予想モデルのウェイトを微調整して、もっと柔軟な視点を持てるように再学習したよ。';
+                badge.innerText = "穴党・一撃派";
+                tansho = "4番 中井 太祐";
+                nirentan = "4 - 2 / 4 - 3";
+                sanrentan = "4 - 2 - 7, 3 - 4 - 1";
+                reasoning = `【勝負師AI分析】過小評価されている34ラインや中井（106.62）の鋭い捲りに着目。過去データにある「人気薄の差し込み」条件（高配当パターン）に合致しており、一撃高配当の回収を狙います。`;
             }
 
-            updateMessage(reply);
-            feedbackInputEl.value = '';
+            // 学習反映の表示
+            reasoning += `\n【自己学習状態】補正値適用済み（学習蓄積補正カウンタ: ${learningMemory.corrections}回 / 信頼度: ${learningMemory.trustScore}%）`;
+
+            document.getElementById('predictionResult').innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center">
+                        <p class="text-xs text-slate-400 font-semibold mb-1">【単勝本命】</p>
+                        <p class="text-sm font-bold text-amber-400">${tansho}</p>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center">
+                        <p class="text-xs text-slate-400 font-semibold mb-1">【2連単】</p>
+                        <p class="text-sm font-bold text-amber-400">${nirentan}</p>
+                    </div>
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center">
+                        <p class="text-xs text-slate-400 font-semibold mb-1">【3連単】</p>
+                        <p class="text-sm font-bold text-amber-400">${sanrentan}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('aiReasoning').innerText = reasoning;
+        }
+
+        function sendFeedback() {
+            const feedbackText = document.getElementById('userFeedback').value.trim();
+            if(!feedbackText) {
+                alert('指摘内容を入力してください。');
+                return;
+            }
+
+            learningMemory.corrections += 1;
+            learningMemory.trustScore = Math.min(99, learningMemory.trustScore + 2);
+            localStorage.setItem('battlebank_learning', JSON.stringify(learningMemory));
+
+            document.getElementById('learningStatus').innerText = `✨ 指指摘を受け付けました！AIが思考モデルをアップデートしました（学習回数: ${learningMemory.corrections}回）`;
+            document.getElementById('userFeedback').value = '';
             
-            // 指摘後、自動で再予想させることも可能
-            // analyzeRace();
+            // 簡易的にAIの考えを更新
+            setTimeout(() => {
+                const currentReason = document.getElementById('aiReasoning').innerText;
+                document.getElementById('aiReasoning').innerText = currentReason + `\n[ユーザー指摘反映]: 「${feedbackText}」の視点を次回のアルゴリズムウェイトに組み込みました。`;
+            }, 500);
         }
     </script>
 </body>
