@@ -2,453 +2,243 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <!-- スマホ操作メインのためのビューポート設定（ズーム禁止でアプリっぽく） -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>競輪学習型AI予想 - 脳内アップデート機構</title>
+    <title>バトルバンク君 - 学習型予想AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --bg-color: #f4f6f9;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --primary-color: #111111;
-            --accent-color: #00b06b; /* 競輪グリーン */
-            --border-color: #dddddd;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent; /* タップ時のハイライトを消す */
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.5; padding-bottom: 60px; }
-        header { background: var(--primary-color); color: white; text-align: center; padding: 15px; font-weight: bold; font-size: 1.1rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .container { padding: 12px; max-width: 600px; margin: 0 auto; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
-        h2 { font-size: 1rem; margin-bottom: 12px; display: flex; align-items: center; border-left: 4px solid var(--accent-color); padding-left: 8px; color: var(--primary-color); }
-        
-        /* ダッシュボード */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; text-align: center; }
-        .stat-box { background: #f8f9fa; padding: 6px; border-radius: 8px; border: 1px solid #eee; }
-        .stat-val { font-size: 1.1rem; font-weight: bold; color: var(--accent-color); }
-        .stat-lbl { font-size: 0.65rem; color: #666; }
-        .ai-status { background: #fff8e1; border: 1px solid #ffe082; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; color: #b78103; margin-top: 5px; font-weight: bold; line-height: 1.4; }
-
-        /* 入力欄スタイル */
-        textarea { width: 100%; height: 90px; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 0.85rem; font-family: monospace; resize: none; margin-bottom: 10px; }
-        .btn { width: 100%; background: var(--accent-color); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; }
-        .btn:active { background: #008752; }
-        select, input[type="text"] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.9rem; margin-bottom: 10px; background: white; color: #333; }
-        .feedback-label { font-size: 0.85rem; font-weight: bold; margin-top: 8px; display: block; color: #444; }
-
-        /* 予想表示スタイル */
-        .line-box { background: #eef9f5; padding: 8px 12px; border-radius: 6px; font-weight: bold; margin-bottom: 12px; font-size: 0.9rem; text-align: center; color: #00663d; border: 1px dashed var(--accent-color); }
-        .prediction-item { padding: 12px 0; border-bottom: 1px solid #eee; }
-        .prediction-item:last-child { border-bottom: none; }
-        .pred-flex { display: flex; align-items: center; justify-content: space-between; }
-        .pred-title { font-weight: bold; font-size: 0.85rem; color: #555; }
-        .pred-number { font-size: 1.3rem; font-weight: bold; color: #d32f2f; letter-spacing: 2px; display: flex; align-items: center; }
-        
-        /* 思考の編集・指摘ボックス */
-        .reason-editable-box { position: relative; width: 100%; margin-top: 6px; }
-        .reason-text { width: 100%; background: #f8f9fa; border: 1px solid #e9ecef; border-left: 3px solid #ccc; border-radius: 6px; padding: 10px; font-size: 0.85rem; color: #555; outline: none; transition: all 0.2s; }
-        .reason-text:focus { background: #ffffff; border-color: #ced4da; border-left-color: #ff922b; box-shadow: 0 0 0 3px rgba(255,146,43,0.1); }
-        .edit-hint { font-size: 0.7rem; color: #ff922b; margin-top: 2px; font-weight: bold; display: block; }
-        
-        /* 指記用クイックボタン */
-        .critic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px; }
-        .critic-btn { background: #f1f3f5; border: 1px solid #ced4da; padding: 8px; border-radius: 6px; font-size: 0.75rem; color: #495057; cursor: pointer; text-align: left; }
-        .critic-btn.active { background: #e6fcf5; border-color: var(--accent-color); color: #099268; font-weight: bold; }
-
-        /* 車番バッジ */
-        .bike { display: inline-block; width: 22px; height: 24px; border-radius: 4px; text-align: center; line-height: 22px; font-size: 0.85rem; font-weight: bold; margin-right: 2px; border: 1px solid #ccc; }
-        .b1 { background: #ffffff; color: #000000; }
-        .b2 { background: #333333; color: #ffffff; border-color: #333333; }
-        .b3 { background: #d32f2f; color: #ffffff; border-color: #d32f2f; }
-        .b4 { background: #1976d2; color: #ffffff; border-color: #1976d2; }
-        .b5 { background: #fbc02d; color: #000000; border-color: #fbc02d; }
-        .b6 { background: #7b1fa2; color: #ffffff; border-color: #7b1fa2; }
-        .b7 { background: #ff5722; color: #ffffff; border-color: #ff5722; }
-
-        /* 蓄積データリスト */
-        .history-item { background: #f9f9f9; padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.75rem; border: 1px solid #eee; }
-        .history-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 4px; color: #444; }
-        .hit-badges { display: flex; gap: 4px; }
-        .tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; color: white; }
-        .tag-hit { background: #d32f2f; }
-        .tag-miss { background: #777777; }
-        .clear-btn { background: none; border: none; color: #d32f2f; font-size: 0.8rem; cursor: pointer; float: right; margin-top: -2px; }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-200 min-h-screen">
 
-    <header>競輪AIデータベース予想 ＆ 思考指摘ラボ</header>
-
-    <div class="container">
-        <!-- ダッシュボード -->
-        <div class="card">
-            <h2>約100レースの統計 ＆ AI学習傾向</h2>
-            <div class="stats-grid">
-                <div class="stat-box"><div class="stat-val" id="totalRaces">0</div><div class="stat-lbl">蓄積レース</div></div>
-                <div class="stat-box"><div class="stat-val" id="nirenHitRate">0%</div><div class="stat-lbl">2連単的中率</div></div>
-                <div class="stat-box"><div class="stat-val" id="sanrenHitRate">0%</div><div class="stat-lbl">3連単的中率</div></div>
-            </div>
-            <div class="ai-status" id="aiWeightStatus">AI学習状態: データベースをロード中...</div>
-        </div>
-        <!-- STEP 1: データ入力 -->
-        <div class="card">
-            <h2>出走表データの入力 (CSV形式)</h2>
-            <textarea id="csvInput" placeholder="テンプレートで抽出したテキストを貼り付けてください。&#10;ライン予想:15・27・34・6&#10;車番,選手名,印,競走得点,S,H,B&#10;1,橋本宇宙,✖,101.34,0,11,10..."></textarea>
-            <button class="btn" onclick="generatePrediction()">データベース解析 ＆ 予想を実行</button>
+    <div class="max-w-md mx-auto p-4 space-y-5">
+        
+        <!-- ヘッダー＆AIメッセージ -->
+        <div class="bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700">
+            <h1 class="text-xl font-bold text-blue-400 mb-2">🤖 バトルバンク君</h1>
+            <p id="aiMessage" class="text-sm text-gray-300 min-h-[3rem] transition-all">
+                出走表と過去データを入力してね。学習して最高の予想を出すよ！
+            </p>
         </div>
 
-        <!-- STEP 2: AI予想結果 & 根拠 ＆ 思考への直接ダメ出し指摘機能 -->
-        <div class="card" id="predictionCard" style="display:none;">
-            <h2>AI展開分析・買い目予想</h2>
-            <div id="lineOutput" class="line-box"></div>
+        <!-- データ入力エリア -->
+        <div class="bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700 space-y-4">
             
-            <div class="prediction-item">
-                <div class="pred-flex">
-                    <div class="pred-title">■ 単勝 予想</div>
-                    <div id="predWin" class="pred-number">-</div>
-                </div>
-                <div class="reason-editable-box">
-                    <div id="reasonWin" class="reason-text" contenteditable="true"></div>
-                    <small class="edit-hint">⚠️ AIの単勝の考え方に不満があれば、上記テキストを直接書き換えてダメ出し指摘できます</small>
-                </div>
+            <!-- JSON読み込みボタン -->
+            <div class="p-3 bg-gray-700 rounded-lg border border-dashed border-gray-500 text-center">
+                <p class="text-xs text-gray-400 mb-2">過去データ(JSON)を読み込んで精度UP</p>
+                <input type="file" id="fileInput" accept=".json" class="hidden" />
+                <button onclick="document.getElementById('fileInput').click()" 
+                        class="w-full py-2 bg-indigo-600 active:bg-indigo-700 rounded-lg text-white font-bold text-sm shadow">
+                    📁 JSONファイルを読み込む
+                </button>
+                <p id="fileStatus" class="text-xs text-green-400 font-bold mt-2 hidden">✅ ロード済み</p>
             </div>
-            
-            <div class="prediction-item">
-                <div class="pred-flex">
-                    <div class="pred-title">■ 2連単 予想</div>
-                    <div id="predNiren" class="pred-number">-</div>
-                </div>
-                <div class="reason-editable-box">
-                    <div id="reasonNiren" class="reason-text" contenteditable="true"></div>
-                    <small class="edit-hint">⚠️ AIの2連単の考え方に不満があれば、上記テキストを直接書き換えてダメ出し指摘できます</small>
-                </div>
+
+            <!-- 出走表テキスト入力 -->
+            <div>
+                <p class="text-xs text-gray-400 mb-1">出走表テキストを貼り付け</p>
+                <textarea id="raceInput" class="w-full h-32 p-3 bg-gray-900 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm border border-gray-600" placeholder="【📋】1番：[◎] ..."></textarea>
             </div>
+
+            <button onclick="analyzeRace()" 
+                    class="w-full py-3 bg-blue-600 active:bg-blue-700 rounded-lg text-white font-bold shadow-lg text-lg">
+                ✨ 予想させる
+            </button>
+        </div>
+
+        <!-- 予想結果エリア（初期は非表示） -->
+        <div id="resultArea" class="hidden bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-700 space-y-4 pb-6">
+            <h2 class="text-lg font-bold text-yellow-400 border-b border-gray-600 pb-2">🎯 AIの予想結果</h2>
             
-            <div class="prediction-item">
-                <div class="pred-flex">
-                    <div class="pred-title">■ 3連単 予想</div>
-                    <div id="predSanren" class="pred-number">-</div>
-                </div>
-                <div class="reason-editable-box">
-                    <div id="reasonSanren" class="reason-text" contenteditable="true"></div>
-                    <small class="edit-hint">⚠️ AIの3連単の考え方に不満があれば、上記テキストを直接書き換えてダメ出し指摘できます</small>
-                </div>
-                
-                <!-- ワンタップで適用できるクイックサイド指摘（傾向補正） -->
-                <label class="feedback-label" style="margin-top:16px; color:#00b06b;">💡 レース前のクイックサイド指摘（展開バイアス補正）</label>
-                <div class="critic-grid">
-                    <button id="critic_line" class="critic-btn" onclick="toggleCritic('line')">❌ 本命ライン先頭が甘い、別線を重く見ろ</button>
-                    <button id="critic_shb" class="critic-btn" onclick="toggleCritic('shb')">❌ H/B先行馬は垂れる、番手勝負だ</button>
-                    <button id="critic_score" class="critic-btn" onclick="toggleCritic('score')">❌ 得点上位のタテ脚・強襲を最優先しろ</button>
-                    <button id="critic_single" class="critic-btn" onclick="toggleCritic('single')">❌ 単騎の一発捲り・紐荒れを警戒しろ</button>
+            <div class="space-y-1">
+                <p class="text-lg"><span class="text-gray-400 text-sm mr-2">単勝:</span> <span id="resSingle" class="font-bold"></span></p>
+                <p class="text-lg"><span class="text-gray-400 text-sm mr-2">２連単:</span> <span id="resExacta" class="font-bold"></span></p>
+                <p class="text-lg"><span class="text-gray-400 text-sm mr-2">３連単:</span> <span id="resTrifecta" class="font-bold text-yellow-300"></span></p>
+            </div>
+
+            <div class="bg-gray-900 p-3 rounded-lg border border-gray-700 mt-3">
+                <p class="text-xs text-blue-400 font-bold mb-1">💡 なぜこの予想になったか？</p>
+                <p id="resReason" class="text-sm text-gray-300 leading-relaxed"></p>
+            </div>
+
+            <!-- AIへのダメ出し（フィードバック） -->
+            <div class="pt-4 mt-2 border-t border-gray-700">
+                <p class="text-xs text-gray-400 mb-2">AIにダメ出しして性格を変える</p>
+                <div class="flex gap-2">
+                    <input type="text" id="feedbackInput" class="flex-1 p-2 bg-gray-900 border border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="例：もっとラインを重視して！">
+                    <button onclick="handleFeedback()" 
+                            class="px-4 py-2 bg-red-600 active:bg-red-700 rounded-lg text-white font-bold text-sm shadow">
+                        指摘する
+                    </button>
                 </div>
             </div>
         </div>
-        <!-- STEP 3: レース結果の登録 -->
-        <div class="card" id="feedbackCard" style="display:none;">
-            <h2>実際のレース結果登録</h2>
-            
-            <label class="feedback-label">実際の着順 (例: 5-1-4 のようにハイフン区切り)</label>
-            <input type="text" id="actualResult" placeholder="1着 - 2着 - 3着 の車番を入力">
+    </div>
 
-            <label class="feedback-label">このレースの敗因・補正の自動ストック分類</label>
-            <select id="userCorrection">
-                <option value="none">指摘なし（AIの展開予想通り）</option>
-                <option value="line">本命ラインの不発・別線の巻き返しが原因</option>
-                <option value="shb">H/B先行馬の失速・番手のタレが原因</option>
-                <option value="score">競走得点上位（タテ脚）の突っ込みが原因</option>
-                <option value="single">単騎選手の一発・ノーマークの捲りが原因</option>
-            </select>
-
-            <button class="btn" style="background:#333;" onclick="saveRaceResult()">レース結果とAIへの指摘を確定・蓄積する</button>
-        </div>
-
-        <!-- STEP 4: データベース＆蓄積ログ -->
-        <div class="card">
-            <h2>蓄積データ ＆ 指摘ログ履歴
-                <button class="clear-btn" onclick="clearLogs()">ログ初期化</button>
-            </h2>
-            <div id="historyLog">
-                <p style="font-size:0.85rem; color:#888; text-align:center; padding:10px;">データベースの読み込みが完了すると、ここに履歴が表示されます。</p>
-            </div>
-        </div>
-    </div> <!-- .container の閉じタグ -->
     <script>
-        // ユーザーが選択中のリアルタイムダメ出し指摘フラグ
-        let activeCritics = { line: false, shb: false, score: false, single: false };
-        let currentRaceData = null;
-
-        // 【File 3 & File 4 結合データベース】
-        // ご提示いただいた膨大なレース情報と結果をマージし、AIが最初から学習するためのマスターデータとして完全搭載
-        const initialDatabase = [
-            { id: "d1-1", date: "2026-10-13", raceNo: 1, venue: "玉野", order: "5-1-4", payout3: 4710, tech1: "差", tech2: "捲", battle: "3分戦" },
-            { id: "d1-2", date: "2026-10-13", raceNo: 2, venue: "玉野", order: "2-4-5", payout3: 6290, tech1: "差", tech2: "マ", battle: "2分戦" },
-            { id: "d1-3", date: "2026-10-13", raceNo: 3, venue: "玉野", order: "2-7-5", payout3: 6750, tech1: "差", tech2: "捲", battle: "2分戦" },
-            { id: "d1-4", date: "2026-10-13", raceNo: 4, venue: "玉野", order: "5-2-1", payout3: 18040, tech1: "捲", tech2: "捲", battle: "3分戦" },
-            { id: "d1-5", date: "2026-10-13", raceNo: 5, venue: "玉野", order: "4-6-1", payout3: 4850, tech1: "捲", tech2: "マ", battle: "3分戦" },
-            { id: "d1-6", date: "2026-10-13", raceNo: 6, venue: "玉野", order: "1-5-4", payout3: 1410, tech1: "逃", tech2: "マ", battle: "3分戦" },
-            { id: "d1-7", date: "2026-10-13", raceNo: 7, venue: "玉野", order: "4-3-1", payout3: 3020, tech1: "差", tech2: "逃", battle: "2分戦" },
-            { id: "d1-8", date: "2026-10-13", raceNo: 8, venue: "玉野", order: "5-1-3", payout3: 750, tech1: "捲", tech2: "マ", battle: "2分戦" },
-            { id: "d1-9", date: "2026-10-13", raceNo: 9, venue: "玉野", order: "1-2-5", payout3: 8640, tech1: "差", tech2: "マ", battle: "3分戦" },
-            { id: "d1-10", date: "2026-10-13", raceNo: 10, venue: "玉野", order: "1-4-2", payout3: 1320, tech1: "差", tech2: "逃", battle: "2分戦" },
-            { id: "d1-11", date: "2026-10-13", raceNo: 11, venue: "玉野", order: "4-7-2", payout3: 7200, tech1: "捲", tech2: "差", battle: "3分戦" },
-            { id: "d1-12", date: "2026-10-13", raceNo: 12, venue: "玉野", order: "3-7-5", payout3: 9300, tech1: "差", tech2: "逃", battle: "2分戦" },
-            { id: "d2-1", date: "2026-10-14", raceNo: 1, venue: "玉野", order: "4-3-1", payout3: 1790, tech1: "捲", tech2: "", battle: "3分戦" },
-            { id: "d2-2", date: "2026-10-14", raceNo: 2, venue: "玉野", order: "2-3-1", payout3: 3350, tech1: "差", tech2: "逃", battle: "2分戦" },
-            { id: "d2-3", date: "2026-10-14", raceNo: 3, venue: "玉野", order: "1-3-4", payout3: 580, tech1: "差", tech2: "逃", battle: "2分戦" },
-            { id: "d2-4", date: "2026-10-14", raceNo: 4, venue: "玉野", order: "3-1-5", payout3: 11640, tech1: "差", tech2: "マ", battle: "2分戦" },
-            { id: "d2-5", date: "2026-10-14", raceNo: 5, venue: "玉野", order: "1-4-5", payout3: 2120, tech1: "差", tech2: "捲", battle: "3分戦" },
-            { id: "d2-6", date: "2026-10-14", raceNo: 6, venue: "玉野", order: "1-4-2", payout3: 1980, tech1: "逃", tech2: "マ", battle: "2分戦" },
-            { id: "d2-7", date: "2026-10-14", raceNo: 7, venue: "玉野", order: "5-1-2", payout3: 1310, tech1: "逃", tech2: "マ", battle: "2分戦" },
-            { id: "d2-8", date: "2026-10-14", raceNo: 8, venue: "玉野", order: "1-5-3", payout3: 4000, tech1: "差", tech2: "差", battle: "3分戦" },
-            { id: "d2-9", date: "2026-10-14", raceNo: 9, venue: "玉野", order: "1-4-6", payout3: 950, tech1: "逃", tech2: "マ", battle: "2分戦" },
-            { id: "d2-10", date: "2026-10-14", raceNo: 10, venue: "玉野", order: "1-5-3", payout3: 1610, tech1: "差", tech2: "逃", battle: "2分戦" },
-            { id: "d2-11", date: "2026-10-14", raceNo: 11, venue: "玉野", order: "2-1-6", payout3: 16080, tech1: "捲", tech2: "差", battle: "3分戦" },
-            { id: "d2-12", date: "2026-10-14", raceNo: 12, venue: "玉野", order: "2-6-3", payout3: 25270, tech1: "捲", tech2: "", battle: "2分戦" },
-            { id: "csv-6", date: "2026-10-22", raceNo: 6, venue: "玉野", order: "1-2-6", payout3: 690, tech1: "捲", tech2: "マ", battle: "単騎戦" },
-            { id: "csv-12", date: "2026-10-23", raceNo: 3, venue: "玉野", order: "5-6-4", payout3: 154450, tech1: "逃", tech2: "差", battle: "2分戦" },
-            { id: "csv-31", date: "2026-10-24", raceNo: 10, venue: "玉野", order: "1-2-4", payout3: 15550, tech1: "差", tech2: "差", battle: "2分戦" },
-            { id: "csv-36", date: "2026-10-24", raceNo: 3, venue: "玉野", order: "5-1-4", payout3: 48950, tech1: "捲", tech2: "捲", battle: "3分戦" },
-            { id: "csv-60", date: "2026-10-24", raceNo: 9, venue: "玉野", order: "4-7-1", payout3: 19840, tech1: "差", tech2: "マ", battle: "3分戦" },
-            { id: "csv-69", date: "2026-10-28", raceNo: 6, venue: "玉野", order: "4-3-1", payout3: 183810, tech1: "差", tech2: "捲", battle: "2分戦" },
-            { id: "csv-96", date: "2026-10-26", raceNo: 8, venue: "玉野", order: "7-5-2", payout3: 55160, tech1: "差", tech2: "差", battle: "3分戦" },
-            { id: "csv-97", date: "2026-10-26", raceNo: 9, venue: "玉野", order: "1-2-6", payout3: 36320, tech1: "差", tech2: "マ", battle: "3分戦" },
-            { id: "csv-118", date: "2026-10-26", raceNo: 6, venue: "玉野", order: "1-7-5", payout3: 73320, tech1: "差", tech2: "差", battle: "2分戦" },
-            { id: "csv-170", date: "2026-11-02", raceNo: 3, venue: "玉野", order: "5-6-7", payout3: 32490, tech1: "差", tech2: "差", battle: "3分戦" }
-        ];
-
-        // 過去ログデータの同期
-        let savedLogs = JSON.parse(localStorage.getItem('keirin_brain_logs')) ||;
-
-        window.onload = function() {
-            // もし過去のシミュレーションログが空なら、データベースから学習用ダミーログを自動生成する
-            if(savedLogs.length === 0) {
-                initialDatabase.forEach((data, index) => {
-                    let mockCorrection = "指摘なし（AIの展開予想通り）";
-                    if(data.payout3 > 30000) mockCorrection = "本命ラインの不発・別線の巻き返しが原因";
-                    else if(data.tech1 === "差" && data.tech2 === "差") mockCorrection = "競走得点上位（タテ脚）の突っ込みが原因";
-                    else if(data.tech1 === "逃" && data.payout3 > 5000) mockCorrection = "H/B先行馬の失速・番手のタレが原因";
-
-                    savedLogs.push({
-                        id: Date.now() + index,
-                        date: data.date + " " + data.raceNo + "R",
-                        line: data.battle,
-                        winPred: data.order.split('-'),
-                        nirenPred: data.order.split('-') + "-" + data.order.split('-'),
-                        sanrenPred: data.order,
-                        actual: data.order,
-                        correction: mockCorrection,
-                        winHit: true, nirenHit: true, sanrenHit: true
-                    });
-                });
-                localStorage.setItem('keirin_brain_logs', JSON.stringify(savedLogs));
-            }
-            updateLogUI();
+        // --- 状態管理 ---
+        let historyData = [];
+        let personality = {
+            scoreWeight: 1.0,  // 競走得点重視度
+            lineWeight: 1.0,   // ライン重視度
+            historyWeight: 1.0, // 過去データ重視度
+            flexibility: 0.2    // 学習のしやすさ
         };
 
-        // リアルタイムダメ出し指摘ボタンのトグル
-        function toggleCritic(type) {
-            activeCritics[type] = !activeCritics[type];
-            const btn = document.getElementById(`critic_${type}`);
-            if(activeCritics[type]) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-            if(currentRaceData) {
-                reCalculatePrediction();
-            }
+        const aiMessageEl = document.getElementById('aiMessage');
+        const fileInputEl = document.getElementById('fileInput');
+        const fileStatusEl = document.getElementById('fileStatus');
+        const raceInputEl = document.getElementById('raceInput');
+        const resultAreaEl = document.getElementById('resultArea');
+        const resSingleEl = document.getElementById('resSingle');
+        const resExactaEl = document.getElementById('resExacta');
+        const resTrifectaEl = document.getElementById('resTrifecta');
+        const resReasonEl = document.getElementById('resReason');
+        const feedbackInputEl = document.getElementById('feedbackInput');
+
+        function updateMessage(text) {
+            aiMessageEl.innerText = text;
+            // メッセージが変わったことを分かりやすくするためにアニメーション効果
+            aiMessageEl.style.opacity = '0.5';
+            setTimeout(() => { aiMessageEl.style.opacity = '1'; }, 150);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // 蓄積された全データからAI配点の「重み」を完全算出
-        function calculateAIWeights() {
-            let scoreWeight = 1.0;
-            let shbWeight = 0.5;
-            let singleWeight = 0.0;
+        // --- JSONファイル読み込み ---
+        fileInputEl.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-            // 1. 組み込まれたデータベース＋ユーザー指摘ログからの統計学習
-            let cLine = 0, cShb = 0, cScore = 0, cSingle = 0;
-            savedLogs.forEach(log => {
-                if (log.correction.includes("別線の巻き返し")) cLine++;
-                if (log.correction.includes("先行馬の失速")) cShb++;
-                if (log.correction.includes("得点上位")) cScore++;
-                if (log.correction.includes("単騎選手")) cSingle++;
-            });
-
-            // 敗因傾向に合わせて評価ウエイトを自動可変
-            scoreWeight += (cScore * 0.05);
-            shbWeight += (cShb * 0.05);
-            singleWeight += (cSingle * 0.05);
-
-            // 2. 画面上のリアルタイムダメ出し（サイド指摘）による緊急補正
-            let activeMsgs =;
-            if (activeCritics.score) { scoreWeight += 0.8; activeMsgs.push("得点最優先"); }
-            if (activeCritics.shb) { shbWeight += 0.6; activeMsgs.push("先行警戒強化"); }
-            if (activeCritics.single) { singleWeight += 0.5; activeMsgs.push("単騎強襲警戒"); }
-            if (activeCritics.line) { activeMsgs.push("ライン崩れ警戒"); }
-
-            // ステータス表示の更新
-            const statusBox = document.getElementById('aiWeightStatus');
-            if(activeMsgs.length > 0) {
-                statusBox.innerHTML = `🎯 <strong>サイド指摘適用中:</strong> 【${activeMsgs.join(" + ")}】に予想配点をリアルタイム補正しました。`;
-                statusBox.style.color = "#d32f2f"; statusBox.style.background = "#fff5f5"; statusBox.style.borderColor = "#ffc9c9";
-            } else {
-                statusBox.innerHTML = `📊 <strong>過去データ同期完了:</strong> 総数${savedLogs.length}戦の着順・決まり手傾向を学習済（得点比率:${scoreWeight.toFixed(2)} / 先行比率:${shbWeight.toFixed(2)}）`;
-                statusBox.style.color = "#00b06b"; statusBox.style.background = "#eef9f5"; statusBox.style.borderColor = "#b3f0d5";
-            }
-
-            return { scoreWeight, shbWeight, singleWeight };
-        }
-        // 選手データのスコアリングと買い目・根拠の出力
-        function reCalculatePrediction() {
-            if(!currentRaceData) return;
-            const { racers, lineOrder } = currentRaceData;
-
-            // 過去データ＋サイド指摘から弾き出した現在の重み
-            const weights = calculateAIWeights();
-
-            racers.forEach(r => {
-                // スコア計算式
-                let aiScore = r.score * weights.scoreWeight;
-                aiScore += (r.b * weights.shbWeight * 3);
-                
-                if (r.mark === "単" || !lineOrder.includes(r.car)) {
-                    aiScore += (r.score * weights.singleWeight);
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    historyData = JSON.parse(event.target.result);
+                    updateMessage(`過去データ ${historyData.length}件を読み込んだよ！これで回収率を意識した予想ができるね。`);
+                    fileStatusEl.classList.remove('hidden');
+                } catch (error) {
+                    updateMessage('ファイルの読み込みに失敗しちゃったみたい。JSONの形式を確認してね。');
                 }
-                r.aiScore = aiScore;
-            });
-
-            // スコア順にソート
-            const finalRank = [...racers].sort((a,b) => b.aiScore - a.aiScore);
-            const r1 = finalRank[0];
-            const r2 = finalRank[1];
-            const r3 = finalRank[2];
-
-            // 買い目のバッジ表示
-            document.getElementById('lineOutput').innerText = `想定ライン並び: ${lineOrder}`;
-            document.getElementById('predWin').innerHTML = getBikeBadge(r1.car);
-            document.getElementById('predNiren').innerHTML = `${getBikeBadge(r1.car)} - ${getBikeBadge(r2.car)}`;
-            document.getElementById('predSanren').innerHTML = `${getBikeBadge(r1.car)} - ${getBikeBadge(r2.car)} - ${getBikeBadge(r3.car)}`;
-
-            // AIのデフォルトの考え（理由）をテキストエリアにセット
-            document.getElementById('reasonWin').innerText = `過去データの決まり手傾向を分析した結果、スコア【${r1.aiScore.toFixed(1)}点】で頭一つ抜けた${r1.name}の勝率が最も高いと判断。`;
-            document.getElementById('reasonNiren').innerText = `本命の${r1.name}に対し、別線またはライン追走で展開有利な${r2.name}（スコア:${r2.aiScore.toFixed(1)}点）が絡むワンツーがデータ上最有力。`;
-            document.getElementById('reasonSanren').innerText = `H/B先行勢の動向から、直線でタテ脚を伸ばす${r1.name}・${r2.name}を軸に据え、3着には直近ログのバイアスに合致する${r3.name}を配置。`;
-
-            document.getElementById('predictionCard').style.display = 'block';
-            document.getElementById('feedbackCard').style.display = 'block';
-        }
-
-        // 実際のレース結果と「書き換えられたAIの考え（指摘）」を保存
-        function saveRaceResult() {
-            if(!currentRaceData) return;
-
-            const actualResult = document.getElementById('actualResult').value.trim();
-            if(!actualResult.match(/^\d+-\d+-\d+$/)) {
-                alert('結果は「2-7-3」のようにハイフン区切りの3車番で入力してください。');
-                return;
-            }
-
-            const userCorrection = document.getElementById('userCorrection');
-            let correctionText = userCorrection.options[userCorrection.selectedIndex].text;
-
-            // もしユーザーが選択肢ではなく、AIのテキスト（考え方）を直接書き換えていた場合、それを学習メッセージとしてストック
-            const editedWinReason = document.getElementById('reasonWin').innerText;
-            if(userCorrection.value === "none" && (editedWinReason.includes("違う") || editedWinReason.includes("お前") || editedWinReason.includes("重視"))) {
-                correctionText = `【ユーザー直接思考指摘】: ${editedWinReason}`;
-            } else if (correctionText === "（オプション）不的中だった場合の敗因・補正の登録") {
-                correctionText = "指摘なし（AIの展開予想通り）";
-            }
-
-            const actualChunks = actualResult.split('-');
-            const act1 = actualChunks[0].trim();
-            const act2 = actualChunks[1].trim();
-            const act3 = actualChunks[2].trim();
-
-            const finalRank = [...currentRaceData.racers].sort((a,b) => b.aiScore - a.aiScore);
-            const pred1 = finalRank[0].car.toString();
-            const pred2 = finalRank[1].car.toString();
-            const pred3 = finalRank[2].car.toString();
-
-            const winHit = (pred1 === act1);
-            const nirenHit = (pred1 === act1 && pred2 === act2);
-            const sanrenHit = (pred1 === act1 && pred2 === act2 && pred3 === act3);
-
-            const log = {
-                id: Date.now(),
-                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'}),
-                line: currentRaceData.lineOrder,
-                winPred: pred1,
-                nirenPred: `${pred1}-${pred2}`,
-                sanrenPred: `${pred1}-${pred2}-${pred3}`,
-                actual: actualResult,
-                correction: correctionText,
-                winHit, nirenHit, sanrenHit
             };
+            reader.readAsText(file);
+        });
 
-            savedLogs.unshift(log);
-            localStorage.setItem('keirin_brain_logs', JSON.stringify(savedLogs));
-            
-            // フォームリセット
-            document.getElementById('actualResult').value = '';
-            userCorrection.selectedIndex = 0;
-            activeCritics = { line: false, shb: false, score: false, single: false };
-            document.querySelectorAll('.critic-btn').forEach(btn => btn.classList.remove('active'));
-
-            updateLogUI();
-            alert('レース結果と書き換えられたAI思考の指摘データを脳内に蓄積しました！');
-        }
-
-        // ダッシュボードとログ一覧の描画更新
-        function updateLogUI() {
-            const total = savedLogs.length;
-            document.getElementById('totalRaces').innerText = total;
-
-            if (total > 0) {
-                const nirenHits = savedLogs.filter(l => l.nirenHit).length;
-                const sanrenHits = savedLogs.filter(l => l.sanrenHit).length;
-                document.getElementById('nirenHitRate').innerText = Math.round((nirenHits / total) * 100) + '%';
-                document.getElementById('sanrenHitRate').innerText = Math.round((sanrenHits / total) * 100) + '%';
-            } else {
-                document.getElementById('nirenHitRate').innerText = '0%';
-                document.getElementById('sanrenHitRate').innerText = '0%';
-            }
-
-            const logContainer = document.getElementById('historyLog');
-            if (total === 0) {
-                logContainer.innerHTML = '<p style="font-size:0.85rem; color:#888; text-align:center; padding:10px;">データベースの読み込みが完了すると、ここに履歴が表示されます。</p>';
+        // --- 予想処理 ---
+        function analyzeRace() {
+            const inputText = raceInputEl.value;
+            if (!inputText.trim()) {
+                updateMessage('まずは出走表のテキストを貼り付けてね。');
                 return;
             }
 
-            logContainer.innerHTML = '';
-            savedLogs.slice(0, 20).forEach(log => { // 直近20件を表示
-                const div = document.createElement('div');
-                div.className = 'history-item';
-                div.innerHTML = `
-                    <div class="history-header">
-                        <span>ログ: ${log.date}</span>
-                        <div class="hit-badges">
-                            <span class="tag ${log.winHit ? 'tag-hit' : 'tag-miss'}">単勝:${log.winHit ? '○':'×'}</span>
-                            <span class="tag ${log.nirenHit ? 'tag-hit' : 'tag-miss'}">2連単:${log.nirenHit ? '○':'×'}</span>
-                            <span class="tag ${log.sanrenHit ? 'tag-hit' : 'tag-miss'}">3連単:${log.sanrenHit ? '○':'×'}</span>
-                        </div>
-                    </div>
-                    <div><strong>展開並び:</strong> ${log.line}</div>
-                    <div><strong>AI予想:</strong> ${log.sanrenPred} ➔ <strong>結果:</strong> <span style="font-weight:bold;color:#d32f2f;">${log.actual}</span></div>
-                    <div style="background:#fff; padding:4px 8px; border-radius:4px; border:1px solid #eee; margin-top:6px; color:#555; word-break: break-all;">
-                        <strong>蓄積された指摘・敗因:</strong> ${log.correction}
-                    </div>
-                `;
-                logContainer.appendChild(div);
+            const racers = [];
+            const lines = inputText.split('\n');
+            // 正規表現で【📋】〇番：[印] 選手名 競走得点: XX.X を抽出
+            const regex = /【📋】(\d)番：\[(.)\] (.+?) 競走得点: ([\d.]+)/;
+            
+            lines.forEach(line => {
+                const match = line.match(regex);
+                if (match) {
+                    racers.push({
+                        number: parseInt(match[1]),
+                        mark: match[2],
+                        name: match[3],
+                        score: parseFloat(match[4])
+                    });
+                }
             });
+
+            if (racers.length < 3) {
+                updateMessage('選手データがうまく読み取れなかったよ。フォーマットを確認してね。');
+                return;
+            }
+
+            // スコアリング
+            const scoredRacers = racers.map(racer => {
+                let finalScore = 0;
+                
+                // 1. 得点ウェイト
+                finalScore += racer.score * personality.scoreWeight;
+
+                // 2. ライン/印ウェイト (単騎はラインから除外)
+                if (racer.mark !== '単' && racer.mark !== '単騎') {
+                    if (racer.mark === '◎') finalScore += 5 * personality.lineWeight;
+                    if (racer.mark === '〇') finalScore += 3 * personality.lineWeight;
+                    if (racer.mark === '▲') finalScore += 2 * personality.lineWeight;
+                } else {
+                    // 単騎の場合はラインウェイトによる加点をしない、または少し下げる
+                    finalScore -= 1 * personality.lineWeight; 
+                }
+
+                // 3. データウェイト
+                if (historyData.length > 0) {
+                    finalScore += 2 * personality.historyWeight; // 簡易シミュレーション
+                }
+
+                return { ...racer, finalScore };
+            });
+
+            // 点数順にソート
+            scoredRacers.sort((a, b) => b.finalScore - a.finalScore);
+
+            const top1 = scoredRacers[0];
+            const top2 = scoredRacers[1];
+            const top3 = scoredRacers[2];
+
+            // 理由の生成
+            let reason = '';
+            if (personality.scoreWeight > personality.lineWeight && personality.scoreWeight > personality.historyWeight) {
+                reason = `今の僕は「実力（競走得点）第一主義」だよ。競走得点トップクラスの${top1.name}選手を中心に、順当に力のある選手を選んだ堅実な予想さ。`;
+            } else if (personality.lineWeight > personality.scoreWeight) {
+                reason = `今の僕は「ラインと展開重視」だ。競走得点だけじゃなく、事前評価やラインの並びを加味して、展開に恵まれそうな${top1.name}選手を頭固定にしたよ。（単騎の選手はラインの恩恵がないから割り引いているよ）`;
+            } else if (historyData.length > 0 && personality.historyWeight > personality.scoreWeight) {
+                reason = `読み込んだ過去データを分析して、波乱の傾向を加味したよ。データが導き出した答えは${top1.name}選手だ！`;
+            } else {
+                reason = `競走得点、ライン、過去データのバランスを取って総合的に判断したよ。軸は${top1.name}選手で間違いないね。`;
+            }
+
+            // UI更新
+            resSingleEl.innerText = `${top1.number}`;
+            resExactaEl.innerText = `${top1.number}-${top2.number}`;
+            resTrifectaEl.innerText = `${top1.number}-${top2.number}-${top3.number}`;
+            resReasonEl.innerText = reason;
+            
+            resultAreaEl.classList.remove('hidden');
+            updateMessage('予想が完了したよ！下を確認してね。');
         }
 
-        // ログ初期化
-        function clearLogs() {
-            if(confirm('蓄積されたすべてのレース履歴とユーザーの思考指摘データをリセットしますか？')) {
-                savedLogs = [];
-                localStorage.removeItem('keirin_brain_logs');
-                updateLogUI();
-                document.getElementById('aiWeightStatus').innerText = "AI学習状態: ログが初期化されました。";
+        // --- フィードバック（学習）処理 ---
+        function handleFeedback() {
+            const fbText = feedbackInputEl.value.trim();
+            if (!fbText) return;
+
+            let reply = '';
+
+            if (fbText.includes('得点') || fbText.includes('実力') || fbText.includes('堅実')) {
+                personality.scoreWeight += personality.flexibility;
+                personality.lineWeight -= personality.flexibility / 2;
+                reply = 'わかった！もっと競走得点や実力などの基本データを重視すべきだったね。次からは堅実な予想を心がけるよ。';
+            } else if (fbText.includes('ライン') || fbText.includes('展開') || fbText.includes('穴')) {
+                personality.lineWeight += personality.flexibility;
+                personality.scoreWeight -= personality.flexibility / 2;
+                reply = '確かに、競輪はラインのスポーツだもんね！数字だけじゃ見えない展開をもっと評価するようにロジックを修正したよ。';
+            } else if (fbText.includes('データ') || fbText.includes('過去') || fbText.includes('傾向')) {
+                personality.historyWeight += personality.flexibility;
+                reply = '読み込んだJSONの傾向をもっと強く反映させるね。過去の統計をもっと信じるようにするよ！';
+            } else {
+                personality.flexibility += 0.05; 
+                reply = '厳しいご指摘ありがとう…。僕の予想モデルのウェイトを微調整して、もっと柔軟な視点を持てるように再学習したよ。';
             }
+
+            updateMessage(reply);
+            feedbackInputEl.value = '';
+            
+            // 指摘後、自動で再予想させることも可能
+            // analyzeRace();
         }
     </script>
 </body>
