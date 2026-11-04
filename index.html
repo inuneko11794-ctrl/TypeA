@@ -85,6 +85,7 @@
         }
         .btn-orange { background: var(--accent-orange); color: black; }
         .btn-red { background: var(--accent-red); }
+        .btn-gray { background: #555555; color: white; }
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         
         .ai-output {
@@ -113,14 +114,17 @@
 
 <div class="container">
     
-    <!-- 1. 画像アップロード＆解析モック -->
+    <!-- 1. 画像アップロード＆解析 -->
     <div class="section-box" style="border-color: var(--accent-green);">
         <div class="section-title">📸 出走表画像の読み込み</div>
         <p style="font-size: 11px; color: var(--text-sub); margin-top: 0;">スクショ画像をアップロードするか、ペースト（Ctrl+V）してください。</p>
         <input type="file" id="imageUpload" accept="image/*" style="width: 95%; margin-bottom: 10px;">
         <div id="imagePreviewArea" style="display: none; text-align: center; background: #111; padding: 10px; border-radius: 6px; border: 1px dashed #555;">
-            <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: 4px;">
-            <button class="btn btn-orange" onclick="simulateImageParsing()" style="margin-top: 10px;">画像を解析して印を抽出</button>
+            <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: 4px; margin-bottom: 10px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-orange" onclick="simulateImageParsing()">画像を解析して印を抽出</button>
+                <button class="btn btn-gray" style="width: auto; padding: 10px 20px;" onclick="clearImage()">✖ 取消</button>
+            </div>
         </div>
     </div>
 
@@ -220,7 +224,6 @@
 </div>
 
 <script>
-    // --- 初期設定とデータ ---
     const MARK_OPTIONS = ["◎", "◯", "△", "✕", "☆", "▲", "✖", "単", "無"];
     let studyDatabase = JSON.parse(localStorage.getItem('keirin_study_db')) || [];
 
@@ -276,6 +279,13 @@
             };
             reader.readAsDataURL(e.target.files[0]);
         }
+    }
+    
+    // ★追加: 画像プレビューのクリア機能
+    function clearImage() {
+        document.getElementById('imageUpload').value = '';
+        document.getElementById('previewImg').src = '';
+        document.getElementById('imagePreviewArea').style.display = 'none';
     }
 
     function simulateImageParsing() {
