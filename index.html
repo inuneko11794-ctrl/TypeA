@@ -50,18 +50,16 @@
         th, td { padding: 4px 2px; text-align: center; border-bottom: 1px solid var(--border-color); font-size: 13px; vertical-align: middle; }
         th { color: var(--text-sub); font-size: 11px; font-weight: normal; }
         
-        /* 列幅の調整 */
-        th:nth-child(1) { width: 12%; } /* 車 */
-        th:nth-child(2) { width: 18%; } /* 印 */
-        th:nth-child(3) { width: 35%; } /* 選手名 */
-        th:nth-child(4) { width: 20%; } /* 得点 */
-        th:nth-child(5) { width: 15%; } /* B */
+        th:nth-child(1) { width: 12%; }
+        th:nth-child(2) { width: 18%; }
+        th:nth-child(3) { width: 35%; }
+        th:nth-child(4) { width: 20%; }
+        th:nth-child(5) { width: 15%; }
 
         .car-num {
             width: 24px; height: 24px; border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center; font-weight: bold;
         }
-        /* 競輪公式カラーに準拠 */
         .c1 { background: #ffffff; color: #000000; }
         .c2 { background: #111111; color: #ffffff; border: 1px solid #555; }
         .c3 { background: #ff3333; color: #ffffff; }
@@ -69,10 +67,9 @@
         .c5 { background: #ffcc00; color: #000000; }
         .c6 { background: #2de370; color: #000000; }
         .c7 { background: #ff9f43; color: #000000; }
-        .c8 { background: #ff66b2; color: #000000; } /* 桃 */
-        .c9 { background: #9932cc; color: #ffffff; } /* 紫 */
+        .c8 { background: #ff66b2; color: #000000; }
+        .c9 { background: #9932cc; color: #ffffff; }
         
-        /* 表の中の入力フォーム */
         .input-cell {
             width: 100%; box-sizing: border-box; background: transparent;
             border: 1px solid transparent; color: #fff; text-align: center;
@@ -143,7 +140,7 @@
         </div>
     </div>
 
-    <!-- 2. 選手データと印のテーブル（直接編集可能） -->
+    <!-- 2. 選手データと印のテーブル -->
     <div class="section-box">
         <div class="section-title">📝 選手評価と印（直接タップして編集可能）</div>
         <table id="playerTable">
@@ -234,7 +231,6 @@
     const MARK_OPTIONS = ["◎", "◯", "△", "✕", "☆", "▲", "✖", "単", "無"];
     let studyDatabase = JSON.parse(localStorage.getItem('keirin_study_db')) || [];
 
-    // ★ 初期データを9車（9行）に拡張
     let currentPlayers = Array.from({length: 9}, (_, i) => ({
         car: i + 1, name: "", pt: "", B: "", mark: "無"
     }));
@@ -264,7 +260,6 @@
         });
     }
 
-    // --- Geminiからのデータ一括反映 ---
     function applyBatchData() {
         const text = document.getElementById('batchInput').value.trim();
         if (!text) {
@@ -276,7 +271,6 @@
             const parts = line.split(',');
             if (parts.length >= 5) {
                 const carIndex = parseInt(parts[0]) - 1;
-                // ★ 9車まで対応
                 if (carIndex >= 0 && carIndex < 9) {
                     currentPlayers[carIndex].mark = parts[1].trim();
                     currentPlayers[carIndex].name = parts[2].trim();
@@ -299,7 +293,6 @@
         }
     }
 
-    // --- 画像プレビュー関連 ---
     document.getElementById('imageUpload').addEventListener('change', handleImageLoad);
     document.addEventListener('paste', function(e) {
         const items = (e.clipboardData || e.originalEvent.clipboardData).items;
@@ -325,7 +318,6 @@
         document.getElementById('imagePreviewArea').style.display = 'none';
     }
 
-    // --- 学習AI ＆ 買い目予想生成 ---
     function generatePredictionAndLearning() {
         currentPlayers.forEach((p, index) => {
             p.mark = document.getElementById(`mark_${index}`).value;
@@ -382,13 +374,13 @@
         let secondTier = [];
         if (taikou) secondTier.push(taikou);
         if (sankaku) secondTier.push(sankaku);
-        
+
         let thirdTier = [...secondTier];
         if (batsu) thirdTier.push(batsu);
         if (hoshi) thirdTier.push(hoshi);
         if (sub1) thirdTier.push(sub1);
         if (sub2) thirdTier.push(sub2);
-        thirdTier = [...new Set(thirdTier)];
+        thirdTier = [...new Set(thirdTier)]; // 重複削除
 
         const bet3 = `${honmei} - ${secondTier.join(',')} - ${thirdTier.join(',')}`;
 
@@ -406,9 +398,10 @@
         `;
     }
 
+    // --- レース結果の保存（学習） ---
     function saveRaceResult() {
         const resultRecord = {
-            venue: "記録", raceNum: "-",
+            venue: "豊橋", raceNum: 9,
             firstCar: document.getElementById('resFirstCar').value,
             firstTech: document.getElementById('resFirstTech').value,
             secondCar: document.getElementById('resSecondCar').value,
@@ -425,15 +418,10 @@
         studyDatabase.push(resultRecord);
         localStorage.setItem('keirin_study_db', JSON.stringify(studyDatabase));
         loadHistoryList();
-        
-        document.getElementById('resFirstCar').value = '';
-        document.getElementById('resSecondCar').value = '';
-        document.getElementById('payout2').value = '';
-        document.getElementById('payout3').value = '';
-        
         alert("結果を保存しました！次回からのAI学習予想に反映されます。");
     }
 
+    // --- データのインポート/エクスポート/表示 ---
     function loadHistoryList() {
         const list = document.getElementById('historyList');
         list.innerHTML = '';
@@ -442,13 +430,12 @@
             const div = document.createElement('div');
             div.className = 'history-item';
             div.innerHTML = `
-                <div><strong>結果: ${item.firstCar}-${item.secondCar}</strong> (${item.firstTech}-${item.secondTech})<br>
+                <div><strong>${item.venue} ${item.raceNum}R</strong> 結果: ${item.firstCar}-${item.secondCar} (${item.firstTech}-${item.secondTech})<br>
                 <span style="color:var(--accent-orange);">3連単: ${parseInt(item.payout3 || 0).toLocaleString()}円</span></div>
             `;
             list.appendChild(div);
         });
     }
-
 
     function exportData() {
         if(studyDatabase.length === 0) return alert("保存するデータがありません。");
@@ -499,4 +486,3 @@
 </script>
 </body>
 </html>
-    
