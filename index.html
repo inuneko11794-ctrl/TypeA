@@ -31,15 +31,6 @@
             padding: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-        .header-title h1 { margin: 0; font-size: 22px; color: var(--text-main); }
         
         .section-box {
             background: var(--card-dark);
@@ -55,26 +46,46 @@
             font-size: 14px;
         }
         
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th, td { padding: 8px 4px; text-align: center; border-bottom: 1px solid var(--border-color); font-size: 13px; }
-        th { color: var(--text-sub); font-size: 11px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }
+        th, td { padding: 4px 2px; text-align: center; border-bottom: 1px solid var(--border-color); font-size: 13px; vertical-align: middle; }
+        th { color: var(--text-sub); font-size: 11px; font-weight: normal; }
+        
+        /* 列幅の調整 */
+        th:nth-child(1) { width: 12%; } /* 車 */
+        th:nth-child(2) { width: 18%; } /* 印 */
+        th:nth-child(3) { width: 35%; } /* 選手名 */
+        th:nth-child(4) { width: 20%; } /* 得点 */
+        th:nth-child(5) { width: 15%; } /* B */
+
         .car-num {
             width: 24px; height: 24px; border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center; font-weight: bold;
         }
+        /* 競輪公式カラーに準拠 */
         .c1 { background: #ffffff; color: #000000; }
-        .c2 { background: #111111; color: #ffffff; border: 1px solid #fff; }
+        .c2 { background: #111111; color: #ffffff; border: 1px solid #555; }
         .c3 { background: #ff3333; color: #ffffff; }
         .c4 { background: #3333ff; color: #ffffff; }
-        .c5 { background: #ff9f43; color: #ffffff; }
+        .c5 { background: #ffcc00; color: #000000; }
         .c6 { background: #2de370; color: #000000; }
-        .c7 { background: #b833ff; color: #ffffff; }
+        .c7 { background: #ff9f43; color: #000000; }
+        .c8 { background: #ff66b2; color: #000000; } /* 桃 */
+        .c9 { background: #9932cc; color: #ffffff; } /* 紫 */
+        
+        /* 表の中の入力フォーム */
+        .input-cell {
+            width: 100%; box-sizing: border-box; background: transparent;
+            border: 1px solid transparent; color: #fff; text-align: center;
+            padding: 6px 2px; font-size: 13px; font-family: inherit; border-radius: 4px;
+        }
+        .input-cell:focus { border: 1px solid var(--accent-orange); outline: none; background: #222; }
+        .input-cell-name { text-align: left; }
         
         select, input {
             background: #2a2a2a; color: #fff; border: 1px solid var(--border-color);
-            padding: 8px; border-radius: 4px;
+            padding: 8px; border-radius: 4px; box-sizing: border-box;
         }
-        select.mark-select { padding: 4px; font-weight: bold; font-size: 14px; }
+        select.mark-select { padding: 4px; font-weight: bold; font-size: 14px; width: 100%; text-align: center; }
         
         .input-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
         
@@ -114,31 +125,27 @@
 
 <div class="container">
     
-    <!-- 1. 画像アップロード＆解析 -->
+    <!-- 1. データ一括入力 ＆ プレビュー -->
     <div class="section-box" style="border-color: var(--accent-green);">
-        <div class="section-title">📸 出走表画像の読み込み</div>
-        <p style="font-size: 11px; color: var(--text-sub); margin-top: 0;">スクショ画像をアップロードするか、ペースト（Ctrl+V）してください。</p>
-        <input type="file" id="imageUpload" accept="image/*" style="width: 95%; margin-bottom: 10px;">
+        <div class="section-title">📥 データ一括入力 ＆ 画像プレビュー</div>
+        
+        <p style="font-size: 11px; color: var(--text-sub); margin: 0 0 5px 0;">Geminiが解析したテキストを貼り付けてください</p>
+        <textarea id="batchInput" style="width: 100%; height: 60px; background: #2a2a2a; color: #fff; border: 1px solid var(--border-color); border-radius: 4px; padding: 8px; box-sizing: border-box;" placeholder="1,✖,橋本宇宙,101.34,10&#10;2,◎,小堀敢太,108.15,8"></textarea>
+        <button class="btn btn-orange" style="margin-bottom: 15px;" onclick="applyBatchData()">表にデータを反映</button>
+
+        <hr style="border-color: var(--border-color); margin-bottom: 10px;">
+
+        <p style="font-size: 11px; color: var(--text-sub); margin: 0 0 5px 0;">手入力用にスクショを表示する場合はこちら</p>
+        <input type="file" id="imageUpload" accept="image/*" style="width: 100%; margin-bottom: 10px;">
         <div id="imagePreviewArea" style="display: none; text-align: center; background: #111; padding: 10px; border-radius: 6px; border: 1px dashed #555;">
-            <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: 4px; margin-bottom: 10px;">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-orange" onclick="simulateImageParsing()">画像を解析して印を抽出</button>
-                <button class="btn btn-gray" style="width: auto; padding: 10px 20px;" onclick="clearImage()">✖ 取消</button>
-            </div>
+            <img id="previewImg" style="max-width: 100%; max-height: 250px; border-radius: 4px; margin-bottom: 10px;">
+            <button class="btn btn-gray" style="width: auto; padding: 8px 20px;" onclick="clearImage()">✖ 画像を消す</button>
         </div>
     </div>
 
-    <!-- レース情報 -->
-    <div class="header">
-        <div class="header-title">
-            <h1 id="raceVenue">豊橋 9R</h1>
-            <span style="font-size: 12px; color: var(--accent-orange); background: rgba(255,159,67,0.1); padding: 2px 6px; border-radius: 4px;">S級特選</span>
-        </div>
-    </div>
-
-    <!-- 2. 選手データと印のテーブル -->
+    <!-- 2. 選手データと印のテーブル（直接編集可能） -->
     <div class="section-box">
-        <div class="section-title">📝 選手評価と印（手動修正可能）</div>
+        <div class="section-title">📝 選手評価と印（直接タップして編集可能）</div>
         <table id="playerTable">
             <thead>
                 <tr>
@@ -150,9 +157,10 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- JSで描画 -->
+                <!-- JSで9車枠を描画 -->
             </tbody>
         </table>
+        <button class="btn btn-gray" style="font-size: 12px; padding: 6px;" onclick="clearTable()">表をリセット</button>
     </div>
 
     <!-- 3. AI学習・買い目予想機能 -->
@@ -160,8 +168,7 @@
         <div class="section-title">🤖 学習データ解析 ＆ 印ベース買い目構築</div>
         <button class="btn" onclick="generatePredictionAndLearning()">蓄積データ学習 ＋ 買い目を出力</button>
         <div class="ai-output" id="aiOutput">
-            画像を解析するか、手動で印を設定して予想ボタンを押してください。<br>
-            <span style="font-size:11px; color:#aaa;">※過去データ（JSON）を読み込むことで学習精度が上がります。</span>
+            表にデータを入力し、予想ボタンを押してください。<br>
         </div>
     </div>
 
@@ -171,7 +178,7 @@
         <div class="input-row">
             <div>
                 <label style="font-size:11px; color:var(--text-sub);">1着の車番</label>
-                <input type="number" id="resFirstCar" min="1" max="9" style="width:90%;">
+                <input type="number" id="resFirstCar" min="1" max="9" style="width:100%;">
             </div>
             <div>
                 <label style="font-size:11px; color:var(--text-sub);">1着の決まり手</label>
@@ -183,7 +190,7 @@
         <div class="input-row">
             <div>
                 <label style="font-size:11px; color:var(--text-sub);">2着の車番</label>
-                <input type="number" id="resSecondCar" min="1" max="9" style="width:90%;">
+                <input type="number" id="resSecondCar" min="1" max="9" style="width:100%;">
             </div>
             <div>
                 <label style="font-size:11px; color:var(--text-sub);">2着の決まり手</label>
@@ -195,11 +202,11 @@
         <div class="input-row">
             <div>
                 <label style="font-size:11px; color:var(--text-sub);">2連単 配当 (円)</label>
-                <input type="number" id="payout2" style="width:90%;">
+                <input type="number" id="payout2" style="width:100%;">
             </div>
             <div>
                 <label style="font-size:11px; color:var(--text-sub);">3連単 配当 (円)</label>
-                <input type="number" id="payout3" style="width:90%;">
+                <input type="number" id="payout3" style="width:100%;">
             </div>
         </div>
         <button class="btn btn-orange" onclick="saveRaceResult()">このレースの結果を保存して学習</button>
@@ -227,15 +234,10 @@
     const MARK_OPTIONS = ["◎", "◯", "△", "✕", "☆", "▲", "✖", "単", "無"];
     let studyDatabase = JSON.parse(localStorage.getItem('keirin_study_db')) || [];
 
-    let currentPlayers = [
-        { car: 1, name: "橋本宇宙", pt: 101.34, B: 10, mark: "無" },
-        { car: 2, name: "小堀敢太", pt: 108.15, B: 8,  mark: "無" },
-        { car: 3, name: "徳田匠",   pt: 99.65,  B: 12, mark: "無" },
-        { car: 4, name: "中井太祐", pt: 106.62, B: 0,  mark: "無" },
-        { car: 5, name: "片岡迪之", pt: 106.65, B: 0,  mark: "無" },
-        { car: 6, name: "柿本大貴", pt: 94.81,  B: 5,  mark: "無" },
-        { car: 7, name: "小原丈一郎", pt:102.95, B: 0,  mark: "無" }
-    ];
+    // ★ 初期データを9車（9行）に拡張
+    let currentPlayers = Array.from({length: 9}, (_, i) => ({
+        car: i + 1, name: "", pt: "", B: "", mark: "無"
+    }));
 
     function initSystem() {
         renderTable();
@@ -249,19 +251,55 @@
             const markSelect = MARK_OPTIONS.map(m => 
                 `<option value="${m}" ${p.mark === m ? 'selected' : ''}>${m}</option>`
             ).join('');
+            
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><span class="car-num c${p.car}">${p.car}</span></td>
                 <td><select class="mark-select" id="mark_${index}">${markSelect}</select></td>
-                <td style="text-align: left;"><strong>${p.name}</strong></td>
-                <td>${p.pt.toFixed(2)}</td>
-                <td>${p.B}</td>
+                <td><input type="text" class="input-cell input-cell-name" id="name_${index}" value="${p.name}" placeholder="名前"></td>
+                <td><input type="number" step="0.01" class="input-cell" id="pt_${index}" value="${p.pt}" placeholder="得点"></td>
+                <td><input type="number" class="input-cell" id="b_${index}" value="${p.B}" placeholder="B"></td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    // --- 画像処理関連 ---
+    // --- Geminiからのデータ一括反映 ---
+    function applyBatchData() {
+        const text = document.getElementById('batchInput').value.trim();
+        if (!text) {
+            alert("データが入力されていません。"); return;
+        }
+        
+        const lines = text.split('\n');
+        lines.forEach(line => {
+            const parts = line.split(',');
+            if (parts.length >= 5) {
+                const carIndex = parseInt(parts[0]) - 1;
+                // ★ 9車まで対応
+                if (carIndex >= 0 && carIndex < 9) {
+                    currentPlayers[carIndex].mark = parts[1].trim();
+                    currentPlayers[carIndex].name = parts[2].trim();
+                    currentPlayers[carIndex].pt = parts[3].trim();
+                    currentPlayers[carIndex].B = parts[4].trim();
+                }
+            }
+        });
+        renderTable();
+        document.getElementById('batchInput').value = '';
+    }
+
+    function clearTable() {
+        if(confirm("表の入力内容をすべて消去しますか？")) {
+            currentPlayers = Array.from({length: 9}, (_, i) => ({
+                car: i + 1, name: "", pt: "", B: "", mark: "無"
+            }));
+            renderTable();
+            document.getElementById('aiOutput').innerHTML = "表にデータを入力し、予想ボタンを押してください。<br>";
+        }
+    }
+
+    // --- 画像プレビュー関連 ---
     document.getElementById('imageUpload').addEventListener('change', handleImageLoad);
     document.addEventListener('paste', function(e) {
         const items = (e.clipboardData || e.originalEvent.clipboardData).items;
@@ -281,31 +319,21 @@
         }
     }
     
-    // ★追加: 画像プレビューのクリア機能
     function clearImage() {
         document.getElementById('imageUpload').value = '';
         document.getElementById('previewImg').src = '';
         document.getElementById('imagePreviewArea').style.display = 'none';
     }
 
-    function simulateImageParsing() {
-        currentPlayers[0].mark = "✖"; // 1番 (画像太バツ)
-        currentPlayers[1].mark = "◎"; // 2番
-        currentPlayers[2].mark = "▲"; // 3番 (画像黒三角)
-        currentPlayers[3].mark = "△"; // 4番
-        currentPlayers[4].mark = "✕"; // 5番 (画像細バツ)
-        currentPlayers[5].mark = "単"; // 6番
-        currentPlayers[6].mark = "◯"; // 7番
-        renderTable();
-    }
-
     // --- 学習AI ＆ 買い目予想生成 ---
     function generatePredictionAndLearning() {
         currentPlayers.forEach((p, index) => {
             p.mark = document.getElementById(`mark_${index}`).value;
+            p.name = document.getElementById(`name_${index}`).value;
+            p.pt = document.getElementById(`pt_${index}`).value;
+            p.B = document.getElementById(`b_${index}`).value;
         });
 
-        // 1. 蓄積データの解析
         let stats = { "逃げ": 0, "捲り": 0, "差し": 0, "マーク": 0 };
         let totalPayout3 = 0, highPayoutCount = 0;
 
@@ -329,7 +357,6 @@
             strategy += " <span style='color:var(--accent-green);'>🛡️順当傾向データあり</span>";
         }
 
-        // 2. 印ベースの買い目生成（ご指定の序列 ◎＞◯＞△＞✕＞☆ に準拠）
         const getCarByMark = (mark) => currentPlayers.filter(p => p.mark === mark).map(p => p.car);
         
         const honmei = getCarByMark("◎")[0] || null;
@@ -341,7 +368,7 @@
         const sub2 = getCarByMark("✖")[0] || null;
 
         if (!honmei) {
-            document.getElementById('aiOutput').innerHTML = "<span style='color:red;'>※◎（本命）の印がありません。最低限◎を設定してください。</span>";
+            document.getElementById('aiOutput').innerHTML = "<span style='color:red;'>※◎（本命）の印がありません。表のプルダウンから◎を設定してください。</span>";
             return;
         }
 
@@ -361,7 +388,7 @@
         if (hoshi) thirdTier.push(hoshi);
         if (sub1) thirdTier.push(sub1);
         if (sub2) thirdTier.push(sub2);
-        thirdTier = [...new Set(thirdTier)]; // 重複削除
+        thirdTier = [...new Set(thirdTier)];
 
         const bet3 = `${honmei} - ${secondTier.join(',')} - ${thirdTier.join(',')}`;
 
@@ -379,10 +406,9 @@
         `;
     }
 
-    // --- レース結果の保存（学習） ---
     function saveRaceResult() {
         const resultRecord = {
-            venue: "豊橋", raceNum: 9,
+            venue: "記録", raceNum: "-",
             firstCar: document.getElementById('resFirstCar').value,
             firstTech: document.getElementById('resFirstTech').value,
             secondCar: document.getElementById('resSecondCar').value,
@@ -399,10 +425,15 @@
         studyDatabase.push(resultRecord);
         localStorage.setItem('keirin_study_db', JSON.stringify(studyDatabase));
         loadHistoryList();
+        
+        document.getElementById('resFirstCar').value = '';
+        document.getElementById('resSecondCar').value = '';
+        document.getElementById('payout2').value = '';
+        document.getElementById('payout3').value = '';
+        
         alert("結果を保存しました！次回からのAI学習予想に反映されます。");
     }
 
-    // --- データのインポート/エクスポート/表示 ---
     function loadHistoryList() {
         const list = document.getElementById('historyList');
         list.innerHTML = '';
@@ -411,12 +442,13 @@
             const div = document.createElement('div');
             div.className = 'history-item';
             div.innerHTML = `
-                <div><strong>${item.venue} ${item.raceNum}R</strong> 結果: ${item.firstCar}-${item.secondCar} (${item.firstTech}-${item.secondTech})<br>
+                <div><strong>結果: ${item.firstCar}-${item.secondCar}</strong> (${item.firstTech}-${item.secondTech})<br>
                 <span style="color:var(--accent-orange);">3連単: ${parseInt(item.payout3 || 0).toLocaleString()}円</span></div>
             `;
             list.appendChild(div);
         });
     }
+
 
     function exportData() {
         if(studyDatabase.length === 0) return alert("保存するデータがありません。");
@@ -467,3 +499,4 @@
 </script>
 </body>
 </html>
+    
