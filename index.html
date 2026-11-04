@@ -9,9 +9,15 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4">
     <div class="max-w-xl mx-auto space-y-6">
         <!-- ヘッダー -->
-        <header class="text-center py-2">
-            <h1 class="text-2xl font-black text-amber-400">⚡ バトルバンク君 ⚡</h1>
-            <p class="text-xs text-slate-400">独自評価スコア＆自動学習分析システム</p>
+        <header class="text-center py-2 flex justify-between items-center px-2">
+            <div></div>
+            <div>
+                <h1 class="text-2xl font-black text-amber-400">⚡ バトルバンク君 ⚡</h1>
+                <p class="text-xs text-slate-400">独自評価スコア＆自動学習分析システム</p>
+            </div>
+            <button onclick="clearAllData()" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-amber-300 px-2.5 py-1.5 rounded transition font-bold border border-slate-600" title="入力内容と結果をすべてクリアします">
+                入力クリア
+            </button>
         </header>
 
         <!-- 入力エリア -->
@@ -67,12 +73,10 @@
                 return;
             }
 
-            // ライン構造の解析（先頭、番手、単騎などの判定）
             const lineGroups = linesText.split('/').map(g => g.trim()).filter(Boolean);
-            const positionMap = {}; // 車番 -> ポジション役割 (先頭, 番手, 3番手, 単騎)
+            const positionMap = {}; 
 
             lineGroups.forEach(group => {
-                // groupの文字を1文字ずつ車番とみなす（例: "152" -> 1:先頭, 5:番手, 2:3番手）
                 const cars = group.split('');
                 if (cars.length === 1) {
                     positionMap[cars[0]] = '単騎';
@@ -85,12 +89,10 @@
                 }
             });
 
-            // 1行ずつパース
             const rows = rawText.split('\n');
             currentParsedData = [];
 
             rows.forEach(row => {
-                // 例: 【📋】1番：[〇] 深瀬泰我 競走得点: 82.61
                 const match = row.match(/【📋】(\d+)番：\[(.*?)\]\s*(.+?)\s*競走得点:\s*([\d\.]+)/);
                 if (match) {
                     const carNum = match[1];
@@ -99,7 +101,6 @@
                     const score = parseFloat(match[4]);
                     const pos = positionMap[carNum] || '不明';
 
-                    // 独自スコア計算ロジック（競走得点ベース ＋ 印ボーナス ＋ ポジション補正 + 学習ウェイト）
                     let markBonus = 0;
                     if (mark.includes('◎')) markBonus = 5.0;
                     else if (mark.includes('〇') || mark.includes('〇')) markBonus = 3.5;
@@ -108,13 +109,11 @@
                     else if (mark.includes('✕') || mark.includes('✖')) markBonus = 0.5;
 
                     let posBonus = 0;
-                    if (pos === '番手') posBonus = 3.0; // 番手は有利
+                    if (pos === '番手') posBonus = 3.0;
                     else if (pos === '先頭') posBonus = 1.5;
                     else if (pos === '単騎') posBonus = -1.0;
 
-                    // ローカルストレージから過去の学習補正を読み込み
                     let learnedWeight = parseFloat(localStorage.getItem(`weight_${carNum}`) || '0');
-
                     const totalScore = (score + markBonus + posBonus + learnedWeight).toFixed(2);
 
                     currentParsedData.push({
@@ -123,10 +122,7 @@
                 }
             });
 
-            // スコア順にソート
             currentParsedData.sort((a, b) => parseFloat(b.totalScore) - parseFloat(a.totalScore));
-
-            // 画面描画
             renderResults(rawText);
         }
 
@@ -165,7 +161,6 @@
                 return;
             }
 
-            // 的中車番を抽出 (1着を重視、2着3着も加点)
             const places = resultStr.replace(/[-／\s]/g, '').split('');
             if (places.length < 3) {
                 alert('正しい着順形式で入力してください（例: 1-5-2）');
@@ -176,22 +171,30 @@
             const second = places[1];
             const third = places[2];
 
-            // 学習パラメータの更新（的中した車の評価ウェイトを上げる）
             currentParsedData.forEach(item => {
                 let currentWeight = parseFloat(localStorage.getItem(`weight_${item.carNum}`) || '0');
                 if (item.carNum === first) {
-                    currentWeight += 1.5; // 1着的中は大きく学習
+                    currentWeight += 1.5;
                 } else if (item.carNum === second) {
                     currentWeight += 0.8;
                 } else if (item.carNum === third) {
                     currentWeight += 0.4;
                 } else {
-                    currentWeight -= 0.2; // 外れた車は少し下げる
+                    currentWeight -= 0.2;
                 }
                 localStorage.setItem(`weight_${item.carNum}`, currentWeight);
             });
 
             document.getElementById('learningStatus').innerText = '✅ 結果をAIモデルに学習させました！次回の予測スコアに反映されます。';
+        }
+
+        // 入力内容と分析結果をすべてきれいにクリアするボタン
+        function clearAllData() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('inputLines').value = '';
+            document.getElementById('raceResult').value = '';
+            document.getElementById('resultArea').classList.add('hidden');
+            currentParsedData = [];
         }
     </script>
 </body>
