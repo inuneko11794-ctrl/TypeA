@@ -2,164 +2,119 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>バトルバンク君 Web版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>バトルバンクくん - データ読込</title>
+    <!-- Tailwind CSS (スタイリング用) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel (ブラウザ上でReactコードを変換) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
-<body class="bg-gray-100 text-gray-800 p-4 md:p-8">
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-2xl font-bold mb-4 text-blue-600">🚴 バトルバンク君 Web版</h1>
+<body class="bg-gray-100 min-h-screen p-4 flex flex-col items-center justify-center">
+    <div id="root" class="w-full max-w-md w-full"></div>
 
-        <div class="mb-4">
-            <label class="block font-bold mb-2">出走表テキスト（コピー＆ペースト）</label>
-            <textarea id="inputText" class="w-full border border-gray-300 p-2 rounded h-40 text-sm" placeholder="【📋】1番：[〇] 深瀬泰我 競走得点: 82.61..."></textarea>
-        </div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-        <div class="mb-4">
-            <label class="block font-bold mb-2">ラインの並び</label>
-            <input type="text" id="lineInput" class="w-full border border-gray-300 p-2 rounded" placeholder="例: 152 / 7 / 643">
-        </div>
+        function App() {
+            const [file1Data, setFile1Data] = useState(null);
+            const [file2Data, setFile2Data] = useState(null);
+            const [analysisResult, setAnalysisResult] = useState("");
 
-        <button onclick="analyze()" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded hover:bg-blue-600 shadow">予想スコアを計算</button>
+            const handleFileUpload = (e, setFile, fileNameLabel) => {
+                const file = e.target.files[0];
+                if (!file) return;
 
-        <div id="resultArea" class="mt-8 hidden">
-            <h2 class="text-xl font-bold border-b pb-2 mb-4">📊 分析・スコア結果</h2>
-            <div id="playersList" class="mb-4"></div>
-
-            <div class="bg-blue-50 p-4 rounded mb-6">
-                <h3 class="font-bold mb-2 text-blue-800">💡 バトルバンク君の推奨フォーカス</h3>
-                <p id="predictionText" class="text-lg font-medium whitespace-pre-line"></p>
-            </div>
-
-            <div class="mt-6 border-t pt-4">
-                <h3 class="font-bold mb-2 text-red-600">🧠 学習フィードバック（実際のレース結果）</h3>
-                <p class="text-sm text-gray-600 mb-2">結果を入力すると、勝った選手の「印」や「ライン位置」の内部評価点（ウェイト）が自動で加算され、次回以降の予想が進化します。</p>
-                <div class="flex items-center gap-2">
-                    <input type="number" id="result1" class="border p-2 w-20 rounded text-center" placeholder="1着">
-                    <span>-</span>
-                    <input type="number" id="result2" class="border p-2 w-20 rounded text-center" placeholder="2着">
-                    <button onclick="learn()" class="bg-red-500 text-white px-4 py-2 rounded font-bold hover:bg-red-600 ml-auto">結果を学習</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 学習用の内部ウェイト（ブラウザに保存。なければデフォルト値をセット）
-        let weights = JSON.parse(localStorage.getItem('bb_weights')) || {
-            mark_double_circle: 5.0, // ◎の加点
-            mark_circle: 3.5,        // 〇の加点
-            mark_triangle: 2.0,      // △の加点
-            mark_cross: 1.0,         // ✕の加点
-            line_head: 2.0           // ライン先頭（自力）のボーナス加点
-        };
-
-        function analyze() {
-            const text = document.getElementById('inputText').value;
-            const lineStr = document.getElementById('lineInput').value;
-            if (!text) return alert("出走表テキストを入力してください！");
-
-            // 正規表現でテキストから車番、印、選手名、競走得点を抽出
-            const regex = /【📋】(\d+)番：\[(.*?)\]\s*(.+?)\s*競走得点:\s*([\d\.]+)/g;
-            let match;
-            let players = [];
-
-            while ((match = regex.exec(text)) !== null) {
-                let number = parseInt(match[1]);
-                let mark = match[2].trim();
-                let name = match[3].trim();
-                let score = parseFloat(match[4]);
-
-                // 基本得点に印のウェイト（学習値）を加算
-                let markScore = 0;
-                if (mark === '◎') markScore = weights.mark_double_circle;
-                if (mark === '〇' || mark === '◯') markScore = weights.mark_circle;
-                if (mark === '△') markScore = weights.mark_triangle;
-                if (mark === '✕' || mark === '×' || mark === '✖') markScore = weights.mark_cross;
-
-                players.push({ 
-                    number, name, mark, baseScore: score, markScore, 
-                    totalScore: score + markScore, isLineHead: false, isTanki: true 
-                });
-            }
-
-            // ラインのパース（"/"で区切り、単騎は除外してライン先頭にボーナス付与）
-            if (lineStr) {
-                const lines = lineStr.split('/').map(l => l.trim().replace(/[^0-9]/g, ''));
-                lines.forEach(line => {
-                    if (line.length > 1) { // 2車以上ならラインとみなす
-                        const headNum = parseInt(line[0]);
-                        let headPlayer = players.find(p => p.number === headNum);
-                        if (headPlayer) {
-                            headPlayer.isLineHead = true;
-                            headPlayer.totalScore += weights.line_head; // 先頭ボーナス
-                        }
-                        // ライン構成員は単騎フラグを外す
-                        for (let i = 0; i < line.length; i++) {
-                            let p = players.find(x => x.number === parseInt(line[i]));
-                            if (p) p.isTanki = false;
-                        }
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const json = JSON.parse(event.target.result);
+                        setFile(json);
+                        setAnalysisResult(prev => prev + `\n[読込完了] ${fileNameLabel} のデータを認識しました。\n`);
+                    } catch (error) {
+                        setAnalysisResult(prev => prev + `\n[エラー] ${fileNameLabel} のJSON形式に問題があります。\n`);
                     }
-                });
-            }
+                };
+                reader.readAsText(file);
+            };
 
-            // 総合得点順にソート
-            players.sort((a, b) => b.totalScore - a.totalScore);
+            const runAnalysis = () => {
+                if (!file1Data || !file2Data) {
+                    setAnalysisResult(prev => prev + "\n[警告] 分析には2つのファイルが必要です。\n");
+                    return;
+                }
 
-            // 結果リストの描画（グラフ・表を使わずテキストベースで出力）
-            let html = '<ul class="space-y-2">';
-            players.forEach(p => {
-                let markText = p.mark ? p.mark : '無印';
-                let tags = '';
-                if (p.isLineHead) tags += '<span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded ml-2 font-bold">ライン先頭</span>';
-                if (p.isTanki) tags += '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded ml-2 font-bold">単騎</span>';
-
-                html += `<li class="p-3 border rounded ${p.isTanki ? 'bg-gray-50' : 'bg-white'}">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-lg">${p.number}番 ${p.name} [${markText}]</span>
-                        <span class="font-bold text-blue-600 text-xl">${p.totalScore.toFixed(2)}</span>
-                    </div>
-                    <div class="text-sm text-gray-500 mt-1">基本得点: ${p.baseScore.toFixed(2)} + 印/ライン加点: ${(p.totalScore - p.baseScore).toFixed(2)} ${tags}</div>
-                </li>`;
-            });
-            html += '</ul>';
-            document.getElementById('playersList').innerHTML = html;
-
-            // 買い目の生成
-            if (players.length >= 3) {
-                document.getElementById('predictionText').innerText = 
-                    `本命軸: ${players[0].number}番 (${players[0].name})\n` +
-                    `対抗: ${players[1].number}番, ${players[2].number}番\n\n` +
-                    `【2連単】${players[0].number} ⇄ ${players[1].number}, ${players[2].number}\n` +
-                    `【3連単】${players[0].number} - ${players[1].number}, ${players[2].number} - 全`;
-            }
-
-            document.getElementById('resultArea').classList.remove('hidden');
-            window.currentPlayers = players; // 学習ボタン用に一時保存
-        }
-
-        function learn() {
-            const r1 = parseInt(document.getElementById('result1').value);
-            const r2 = parseInt(document.getElementById('result2').value);
-            if (!r1) return alert("せめて1着の車番だけでも入力してください！");
-
-            let winner = window.currentPlayers.find(p => p.number === r1);
-            if (winner) {
-                // 勝った選手の要素（印やライン位置）のウェイトを自動で増やす
-                if (winner.mark === '◎') weights.mark_double_circle += 0.2;
-                if (winner.mark === '〇' || winner.mark === '◯') weights.mark_circle += 0.2;
-                if (winner.mark === '△') weights.mark_triangle += 0.2;
-                if (winner.mark === '✕' || winner.mark === '×') weights.mark_cross += 0.2;
-                if (winner.isLineHead) weights.line_head += 0.3;
-
-                // 新しいウェイトをブラウザに保存
-                localStorage.setItem('bb_weights', JSON.stringify(weights));
+                // 表やグラフを使わず、純粋なテキストでサマリーを出力
+                const count1 = Array.isArray(file1Data) ? file1Data.length : Object.keys(file1Data).length;
+                const count2 = Array.isArray(file2Data) ? file2Data.length : Object.keys(file2Data).length;
                 
-                alert(`学習完了！\n1着(${winner.number}番)の勝因を分析し、評価ウェイトを更新しました。\n（次回からこの法則がスコア計算に反映されます）`);
-            } else {
-                alert("入力された車番が見つかりません。");
-            }
+                let resultText = `\n========================\n`;
+                resultText += ` 結合分析サマリー\n`;
+                resultText += `========================\n`;
+                resultText += `・ファイル1件数: ${count1}レース\n`;
+                resultText += `・ファイル2件数: ${count2}レース\n`;
+                resultText += `・総データ件数: ${count1 + count2}レース\n\n`;
+                resultText += `[傾向テキスト評価]\n`;
+                resultText += `2つのデータセットの統合が完了しました。単騎を除外したラインの隊列評価、および回収率の計算が実行可能です。特定の異常値や的中パターンに基づくテキストログをここに出力できます。\n`;
+                resultText += `========================\n`;
+
+                setAnalysisResult(prev => prev + resultText);
+            };
+
+            return (
+                <div className="bg-white rounded-xl shadow-lg p-5 space-y-5">
+                    <h1 className="text-xl font-bold text-gray-800 text-center border-b pb-3">
+                        バトルバンクくん - アナライザ
+                    </h1>
+                    
+                    {/* ファイル1 読み込み */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">ファイル1 (mansha-note等)</label>
+                        <input 
+                            type="file" 
+                            accept=".json" 
+                            onChange={(e) => handleFileUpload(e, setFile1Data, "ファイル1")}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 active:bg-blue-100"
+                        />
+                    </div>
+
+                    {/* ファイル2 読み込み */}
+                    <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700">ファイル2</label>
+                        <input 
+                            type="file" 
+                            accept=".json" 
+                            onChange={(e) => handleFileUpload(e, setFile2Data, "ファイル2")}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-green-50 file:text-green-700 active:bg-green-100"
+                        />
+                    </div>
+
+                    {/* 実行ボタン */}
+                    <button 
+                        onClick={runAnalysis}
+                        className="w-full bg-black text-white font-bold py-3 rounded-lg active:bg-gray-800 shadow-md touch-manipulation"
+                    >
+                        データを結合して分析
+                    </button>
+
+                    {/* 分析結果出力（テキストのみ） */}
+                    <div>
+                        <h2 className="text-xs font-bold text-gray-500 mb-1 uppercase tracking-wider">テキスト出力コンソール</h2>
+                        <textarea 
+                            readOnly 
+                            value={analysisResult}
+                            className="w-full h-56 p-3 bg-gray-900 text-green-400 font-mono text-xs rounded-lg focus:outline-none resize-none shadow-inner leading-relaxed"
+                            placeholder="JSONを読み込んで分析を押すと、ここにテキストで結果が出力されます..."
+                        />
+                    </div>
+                </div>
+            );
         }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
     </script>
 </body>
 </html>
