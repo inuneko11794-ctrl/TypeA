@@ -3,165 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>競輪レースデータ・ノート解析ツール</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-color: #f8fafc;
-            --accent-color: #38bdf8;
-            --border-color: #334155;
-            --success-color: #22c55e;
-            --error-color: #ef4444;
-        }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 16px;
-            line-height: 1.5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--accent-color);
-            text-align: center;
-        }
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            background-color: #090d16;
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 8px;
-            box-sizing: border-box;
-            font-family: monospace;
-            font-size: 0.85rem;
-            resize: vertical;
-        }
-        button {
-            background-color: var(--accent-color);
-            color: #0f172a;
-            border: none;
-            padding: 10px 16px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 8px;
-            font-size: 1rem;
-        }
-        button:active {
-            opacity: 0.8;
-        }
-        .result-box {
-            margin-top: 12px;
-            background: #090d16;
-            padding: 12px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            max-height: 300px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 0.85rem;
-        }
-        .status {
-            margin-top: 8px;
-            font-size: 0.9rem;
-        }
-        .success { color: var(--success-color); }
-        .error { color: var(--error-color); }
-    </style>
+    <title>Keirin Race Data Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <h1>競輪ノート・データ一括解析ツール</h1>
-        
-        <div class="card">
-            <label for="jsonInput"><strong>レースデータ（JSONまたはテキスト）を貼り付け:</strong></label>
-            <textarea id="jsonInput" placeholder="ここにデータを貼り付けてください（途切れていたデータもここで一括処理できます）"></textarea>
-            <button id="parseBtn">データを解析する</button>
-            <div id="statusMessage" class="status"></div>
-        </div>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 sm:p-6">
+    <div class="max-w-4xl mx-auto space-y-6">
+        <!-- ヘッダー -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wider text-amber-400">競輪データマネージャー</h1>
+                <p class="text-sm text-slate-400 mt-1">JSONファイルのインポート・管理システム</p>
+            </div>
+            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                <!-- ファイル読み込み（全体 / 初期データ追加） -->
+                <label class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition shadow flex items-center justify-center flex-1 sm:flex-initial">
+                    <span>ファイル読み込み</span>
+                    <input type="file" id="fileInput" accept=".json" class="hidden">
+                </label>
+                <!-- 削除ボタン -->
+                <button id="clearBtn" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition shadow flex items-center justify-center flex-1 sm:flex-initial">
+                    全データ削除
+                </button>
+            </div>
+        </header>
 
-        <div class="card">
-            <h3>解析結果サマリー</h3>
-            <div id="summaryResult" class="result-box">まだデータが読み込まれていません。</div>
-        </div>
+        <!-- ステータス・情報表示 -->
+        <section class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center text-sm">
+            <div>
+                <span class="text-slate-400">登録データ件数:</span>
+                <span id="dataCount" class="font-bold text-amber-400 ml-2 text-lg">0</span> 件
+            </div>
+            <div id="statusMessage" class="text-xs text-slate-400"></div>
+        </section>
+
+        <!-- データ一覧表示エリア -->
+        <section class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg">
+            <div class="p-4 bg-slate-750 border-b border-slate-700 font-semibold text-sm text-slate-300">
+                データプレビュー（直近・先頭のデータ）
+            </div>
+            <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-slate-700/50 text-slate-400 border-b border-slate-700 text-xs uppercase tracking-wider">
+                            <th class="p-3">ID / RaceNo</th>
+                            <th class="p-3">出目 (Order)</th>
+                            <th class="p-3">払戻 (2枠/3連)</th>
+                            <th class="p-3">車数</th>
+                            <th class="p-3">戦法</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTable" class="divide-y divide-slate-700">
+                        <tr>
+                            <td colspan="5" class="p-6 text-center text-slate-500">データがありません。JSONファイルを読み込んでください。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
     <script>
-        document.getElementById('parseBtn').addEventListener('click', () => {
-            const inputVal = document.getElementById('jsonInput').value.trim();
-            const statusEl = document.getElementById('statusMessage');
-            const resultEl = document.getElementById('summaryResult');
+        let raceData = [];
 
-            if (!inputVal) {
-                statusEl.className = 'status error';
-                statusEl.textContent = 'データが入力されていません。';
+        // ローカルストレージからの読み込み
+        function loadStorage() {
+            const saved = localStorage.getItem('keirin_race_data');
+            if (saved) {
+                try {
+                    raceData = JSON.parse(saved);
+                    updateView();
+                } catch (e) {
+                    console.error('Failed to parse storage data', e);
+                }
+            }
+        }
+
+        // ローカルストレージへの保存
+        function saveStorage() {
+            localStorage.setItem('keirin_race_data', JSON.stringify(raceData));
+        }
+
+        // 画面の更新
+        function updateView() {
+            const countEl = document.getElementById('dataCount');
+            const tableBody = document.getElementById('dataTable');
+            
+            countEl.textContent = raceData.length;
+
+            if (raceData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">データがありません。JSONファイルを読み込んでください。</td></tr>`;
                 return;
             }
 
-            try {
-                let parsedData;
-                // JSONとしてパースを試みる
-                if (inputVal.startsWith('{') || inputVal.startsWith('[')) {
-                    try {
-                        parsedData = JSON.parse(inputVal);
-                    } catch (e) {
-                        // 途中で切れているJSONの簡易補正（閉じ括弧の補完など）またはテキストとして処理
-                        console.warn('JSON parse error, fallback to text parsing', e);
-                    }
-                }
+            tableBody.innerHTML = raceData.slice(0, 100).map(item => `
+                <tr class="hover:bg-slate-750 transition">
+                    <td class="p-3 font-mono text-xs text-slate-400">
+                        <span class="text-amber-400 font-bold">R${item.raceNo || '-'}</span><br>
+                        <span class="text-[10px] text-slate-500">${item.id || ''}</span>
+                    </td>
+                    <td class="p-3 font-bold text-slate-200">${item.order || '-'}</td>
+                    <td class="p-3 font-mono text-xs">
+                        <span class="text-emerald-400">2連: ¥${item.payout2 || 0}</span><br>
+                        <span class="text-cyan-400">3連: ¥${item.payout3 || 0}</span>
+                    </td>
+                    <td class="p-3">${item.racers || '-'}車</td>
+                    <td class="p-3">
+                        <span class="bg-slate-700 px-2 py-1 rounded text-xs text-slate-300">${item.battle || '-'}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
-                // データが配列でない場合、オブジェクトやテキストからレース要素を抽出
-                let races = [];
-                if (Array.isArray(parsedData)) {
-                    races = parsedData;
-                } else if (parsedData && typeof parsedData === 'object') {
-                    races = [parsedData];
-                } else {
-                    // テキスト形式の場合の行単位・ブロック単位の安全な抽出ループ
-                    const blocks = inputVal.split(/[\r\n]{2,}/); // 空行で分割
-                    races = blocks.map((b, idx) => ({ id: idx + 1, raw: b.trim() })).filter(r => r.raw.length > 0);
-                }
+        // ファイルアップロード処理（全体読み込み ＆ 先頭への単体追加切り替えなど柔軟に対応）
+        document.getElementById('fileInput').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
 
-                statusEl.className = 'status success';
-                statusEl.textContent = `成功: ${races.length} 件のデータを検出・解析しました。`;
-                
-                let outputText = '';
-                races.forEach((race, index) => {
-                    outputText += `[レース #${index + 1}]\n`;
-                    if (typeof race === 'object') {
-                        outputText += JSON.stringify(race, null, 2) + '\n\n';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    if (Array.isArray(json)) {
+                        // 確認ダイアログなどで「全部」か「先頭に一個だけ」か選べるようにするか、
+                        // またはボタンを分ける仕様に合わせ、今回はファイル全体を読み込む仕様にしています。
+                        // もし「最初の情報として一個だけ追加」したい場合の処理も考慮し、
+                        // 配列の場合はそのまま結合、オブジェクト単体の場合はunshiftで先頭に追加します。
+                        if (confirm(`JSONファイルから ${json.length} 件のデータを読み込みました。\n既存のデータに追加（先頭に挿入する場合はキャンセル）しますか？\n[OK] 全部置き換え / [キャンセル] 既存データに結合`)) {
+                            raceData = json; // 全置き換え
+                        } else {
+                            // 先頭、あるいは追加
+                            raceData = [...json, ...raceData];
+                        }
+                        saveStorage();
+                        updateView();
+                        document.getElementById('statusMessage').textContent = `読み込み成功: ${file.name}`;
+                    } else if (typeof json === 'object' && json !== null) {
+                        // 1件のオブジェクトの場合、最初の情報（先頭）として追加
+                        raceData.unshift(json);
+                        saveStorage();
+                        updateView();
+                        document.getElementById('statusMessage').textContent = `最初の情報として追加しました: ${file.name}`;
                     } else {
-                        outputText += race + '\n\n';
+                        alert('有効なJSONデータではありません。');
                     }
-                });
+                } catch (err) {
+                    alert('JSONファイルの解析に失敗しました。');
+                    console.error(err);
+                }
+                event.target.value = ''; // リセット
+            };
+            reader.readAsText(file);
+        });
 
-                resultEl.textContent = outputText;
-
-            } catch (err) {
-                statusEl.className = 'status error';
-                statusEl.textContent = `解析エラー: ${err.message}`;
-                resultEl.textContent = 'データの構造に誤りがあるか、途中で切断されています。';
+        // 削除ボタン
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (confirm('本当にすべてのデータを削除しますか？')) {
+                raceData = [];
+                localStorage.removeItem('keirin_race_data');
+                updateView();
+                document.getElementById('statusMessage').textContent = 'データをすべて削除しました。';
             }
         });
+
+        // 初期化実行
+        loadStorage();
     </script>
 </body>
 </html>
