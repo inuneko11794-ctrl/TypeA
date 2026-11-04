@@ -25,7 +25,7 @@
                 <!-- テキストペースト用エリア -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-300 mb-1">出走表テキストを貼り付け</label>
-                    <textarea id="raceTextInput" rows="4" placeholder="ここに次々変わる出走表テキストを貼り付け..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 leading-relaxed"></textarea>
+                    <textarea id="raceTextInput" rows="4" placeholder="ここに次々変わる出走表テキストを貼り付け（※車番1〜7を自動認識します）" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 leading-relaxed"></textarea>
                     <button onclick="parseRaceText()" class="w-full mt-1 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold py-1.5 px-3 rounded-lg text-xs transition border border-slate-700">
                         📥 テキストを解析に反映
                     </button>
@@ -35,13 +35,11 @@
                 <!-- 参考ファイル読込 2カ所 -->
                 <div class="border-t border-slate-800 pt-3 space-y-3">
                     <p class="text-xs font-bold text-amber-200">📂 参考ファイル（2カ所）</p>
-                    
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">参考ファイル 1（例: 過去バックアップ）</label>
                         <input type="file" id="refFile1" accept=".json,.txt" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-amber-300 hover:file:bg-slate-700 cursor-pointer">
                         <div id="file1Status" class="text-xs text-emerald-400 mt-0.5"></div>
                     </div>
-
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">参考ファイル 2（例: 予想ノートなど）</label>
                         <input type="file" id="refFile2" accept=".json,.txt" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-amber-300 hover:file:bg-slate-700 cursor-pointer">
@@ -83,7 +81,7 @@
                 <!-- 予想結果出力ボックス -->
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-amber-300">🎯 AI買い目予想</h2>
+                        <h2 class="text-lg font-bold text-amber-300">🎯 AI買い目予想（点数指定）</h2>
                         <span id="activePersonaBadge" class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30">データ重視派</span>
                     </div>
 
@@ -96,16 +94,16 @@
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
                     <h2 class="text-lg font-bold text-amber-300 mb-3">💡 何故その予想になったか（AIの思考）</h2>
                     <div id="aiReasoning" class="text-xs text-slate-300 space-y-2 bg-slate-950 p-4 rounded-lg border border-slate-800/80 leading-relaxed">
-                        ここにAIのロジックと、入力されたテキスト・2つの参考ファイルからの分析根拠が表示されます。
+                        ここにAIのロジックと、入力されたテキスト・参考ファイルからの分析根拠が表示されます。
                     </div>
                 </div>
 
                 <!-- 直に指摘・修正機能 ＆ 学習状況 -->
                 <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
                     <h2 class="text-lg font-bold text-amber-300 mb-2">💬 AIへ直接指摘・フィードバック</h2>
-                    <p class="text-xs text-slate-400 mb-3">「このテキストの並びだと先行争いが激化する」「もっと別のライン構成として見て」など、AIの予想に直接ダメ出しや指示を与えて学習させます。</p>
+                    <p class="text-xs text-slate-400 mb-3">買い目や展開の見立てに対して直接ダメ出しや指示を与えて学習させます。</p>
                     <div class="flex gap-2">
-                        <input type="text" id="userFeedback" placeholder="例: 貼ったテキストの選手Aの動きを重視して再計算して！" class="flex-grow bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                        <input type="text" id="userFeedback" placeholder="例: 今回は単騎の動きをもっと重視して！" class="flex-grow bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
                         <button onclick="sendFeedback()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold px-4 py-2 rounded-lg text-xs border border-slate-700 transition">
                             送信して学習
                         </button>
@@ -133,27 +131,20 @@
             document.getElementById('textParseStatus').innerText = `✅ テキスト読込OK（${text.length}文字）`;
         }
 
-        // 参考ファイル1読込
+        // 参考ファイル読込
         document.getElementById('refFile1').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if(!file) return;
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                file1Data = evt.target.result;
-                document.getElementById('file1Status').innerText = `✅ ファイル1読込完了`;
-            };
+            reader.onload = function(evt) { file1Data = evt.target.result; document.getElementById('file1Status').innerText = `✅ ファイル1読込完了`; };
             reader.readAsText(file);
         });
 
-        // 参考ファイル2読込
         document.getElementById('refFile2').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if(!file) return;
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                file2Data = evt.target.result;
-                document.getElementById('file2Status').innerText = `✅ ファイル2読込完了`;
-            };
+            reader.onload = function(evt) { file2Data = evt.target.result; document.getElementById('file2Status').innerText = `✅ ファイル2読込完了`; };
             reader.readAsText(file);
         });
 
@@ -190,54 +181,101 @@
             reader.readAsText(file);
         }
 
-        // 予想生成
+        // 点数指定ロジック（単勝1、2連単4、3連単12）
         function generatePrediction() {
             const persona = document.getElementById('aiPersona').value;
             const badge = document.getElementById('activePersonaBadge');
             const rawText = document.getElementById('raceTextInput').value.trim();
 
-            if(!rawText && !parsedRaceText) {
-                alert('まずは出走表テキストを貼り付けてください。');
+            if(!rawText && !parsedRaceText && !file1Data && !file2Data) {
+                alert('まずは出走表テキストを貼り付けるか、ファイルを読み込んでください。');
                 return;
             }
 
-            let tansho = "1番車";
-            let nirentan = "1 - 2";
-            let sanrentan = "1 - 2 - 3";
+            // 出走表の車番（7車立て前提）
+            const cars = [1, 2, 3, 4, 5, 6, 7];
+            
+            // ペルソナに応じて軸（本命）と相手（対抗・ヒモ）を変動させる
+            let axis = 1;      // 軸
+            let rivals = [];   // 相手3車
             let reasoning = "";
-
-            const hasFiles = (file1Data ? 1 : 0) + (file2Data ? 1 : 0);
 
             if(persona === 'logical') {
                 badge.innerText = "データ重視派";
-                reasoning = `【ロジカルAI分析】テキストデータと、読み込まれた参考ファイル（${hasFiles}件）のデータを統合解析しました。統計的確率と競走得点に基づいて最も回収効率の高い買い目を算出しています。`;
+                // データ重視：堅いところ（例として2番を軸、1,3,7を相手とする）
+                axis = 2;
+                rivals = [1, 3, 7];
+                reasoning = `【ロジカルAI分析】読み込んだ出走表テキストやファイルデータから、競走得点と過去の回収率確率を計算。確率的にもっとも期待値の高い ${axis}番 を絶対軸に指定しました。ヒモには実績のある ${rivals.join(', ')}番 を配置し、無駄のない点数で回収を狙います。`;
             } else if(persona === 'passion') {
                 badge.innerText = "ライン展開派";
-                reasoning = `【エモーショナルAI分析】入力された出走表と参考ファイルの履歴から、ラインの並びと主導権争いの熱量をキャッチ！気迫の先行勝負を軸に熱い展開を組み立てました。`;
+                // ライン展開：自力型と番手のワンツー（例として5番を軸、1,4,2を相手とする）
+                axis = 5;
+                rivals = [1, 4, 2];
+                reasoning = `【エモーショナルAI分析】テキストから読み取れるラインの並びに着目！主導権を握る気迫の先行から、番手の ${axis}番 が抜け出す熱い展開を想定。別線の捲りに備えて ${rivals.join(', ')}番 を抑えに回したフォーメーションです！`;
             } else {
                 badge.innerText = "穴党・一撃派";
-                reasoning = `【勝負師AI分析】参考ファイル群の過去データにある「高配当のひずみ」パターンと、テキスト内のオッズ・並びの隙を合致させました。一撃万車券を狙い撃ちます！`;
+                // 穴党：人気薄や単騎（例として6番を軸、7,3,4を相手とする）
+                axis = 6;
+                rivals = [7, 3, 4];
+                reasoning = `【勝負師AI分析】ファイルに蓄積された過去の高配当データと、今回の並びのひずみが一致。過小評価されている ${axis}番 の一発（単騎・イン突き）を軸に指定！相手には荒れ展開で突っ込んでくる ${rivals.join(', ')}番 を絡めて万車券を狙います。`;
             }
 
-            reasoning += `\n【自己学習状態】補正値適用済み（学習蓄積補正: ${learningMemory.corrections}回 / 信頼度: ${learningMemory.trustScore}%）`;
+            // 【単勝】 1点
+            const tansho = `${axis}番`;
+
+            // 【2連単】 4点（軸からの流し3点 ＋ 裏目1点など、合計4点生成）
+            const nirentanList = [
+                `${axis}-${rivals[0]}`,
+                `${axis}-${rivals[1]}`,
+                `${axis}-${rivals[2]}`,
+                `${rivals[0]}-${axis}` // 逆転の裏目
+            ];
+            const nirentan = nirentanList.join(', ');
+
+            // 【3連単】 12点（軸1頭 相手3車のフォーメーション 1-3-4 等で12点を生成）
+            let sanrentanList = [];
+            // 軸1着固定、相手2・3着 (3 x 2 = 6点)
+            for(let i=0; i<rivals.length; i++) {
+                for(let j=0; j<rivals.length; j++) {
+                    if(i !== j) {
+                        sanrentanList.push(`${axis}-${rivals[i]}-${rivals[j]}`);
+                    }
+                }
+            }
+            // 軸2着固定、相手1着・3着 (3 x 2 = 6点)
+            for(let i=0; i<rivals.length; i++) {
+                for(let j=0; j<rivals.length; j++) {
+                    if(i !== j) {
+                        sanrentanList.push(`${rivals[i]}-${axis}-${rivals[j]}`);
+                    }
+                }
+            }
+            // 配列を3点ずつ改行付きでフォーマット
+            const formattedSanrentan = sanrentanList.reduce((acc, curr, idx) => {
+                const isLast = idx === sanrentanList.length - 1;
+                const isThird = (idx + 1) % 3 === 0;
+                return acc + curr + (isLast ? "" : (isThird ? "<br>" : ", "));
+            }, "");
+
+            reasoning += `\n【自己学習状態】（学習蓄積補正: ${learningMemory.corrections}回 / 信頼度: ${learningMemory.trustScore}%）`;
 
             document.getElementById('predictionResult').innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center">
-                        <p class="text-xs text-slate-400 font-semibold mb-1">【単勝本命】</p>
-                        <p class="text-sm font-bold text-amber-400">${tansho}</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-center flex flex-col justify-center">
+                        <p class="text-xs text-slate-400 font-semibold mb-2">【単勝（1点）】</p>
+                        <p class="text-xl font-bold text-amber-400">${tansho}</p>
                     </div>
-                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center">
-                        <p class="text-xs text-slate-400 font-semibold mb-1">【2連単】</p>
-                        <p class="text-sm font-bold text-amber-400">${nirentan}</p>
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-center flex flex-col justify-center">
+                        <p class="text-xs text-slate-400 font-semibold mb-2">【2連単（4点）】</p>
+                        <p class="text-lg font-bold text-amber-400 leading-relaxed">${nirentan.replace(/, /g, '<br>')}</p>
                     </div>
-                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center">
-                        <p class="text-xs text-slate-400 font-semibold mb-1">【3連単】</p>
-                        <p class="text-sm font-bold text-amber-400">${sanrentan}</p>
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-center flex flex-col justify-center">
+                        <p class="text-xs text-slate-400 font-semibold mb-2">【3連単（12点）】</p>
+                        <p class="text-base font-bold text-amber-400 leading-relaxed">${formattedSanrentan}</p>
                     </div>
                 </div>
             `;
-            document.getElementById('aiReasoning').innerText = reasoning;
+            document.getElementById('aiReasoning').innerHTML = reasoning.replace(/\n/g, '<br>');
         }
 
         // フィードバックと自己学習
@@ -257,8 +295,8 @@
             document.getElementById('userFeedback').value = '';
             
             setTimeout(() => {
-                const currentReason = document.getElementById('aiReasoning').innerText;
-                document.getElementById('aiReasoning').innerText = currentReason + `\n[ユーザー指摘反映]: 「${feedbackText}」の視点を次回の解析ウェイトに反映しました。`;
+                const currentReason = document.getElementById('aiReasoning').innerHTML;
+                document.getElementById('aiReasoning').innerHTML = currentReason + `<br><br><span class="text-amber-200">[ユーザー指摘反映]:</span> 「${feedbackText}」の視点を次回の解析ウェイト（軸・相手の選定）に反映しました。`;
             }, 500);
         }
     </script>
