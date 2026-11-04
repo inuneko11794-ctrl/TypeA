@@ -3,301 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>バトルバンク君 - 個性派AI競輪予想＆学習システム</title>
+    <title>バトルバンク君 Web版</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
-    <div class="container mx-auto px-4 py-8 max-w-5xl">
-        <!-- ヘッダー -->
-        <header class="text-center mb-8 border-b border-slate-800 pb-6">
-            <h1 class="text-3xl font-extrabold text-amber-400 tracking-wider mb-2">⚡ バトルバンク君 Pro</h1>
-            <p class="text-sm text-slate-400">テキスト＆マルチファイル読込・自己学習AI競輪予想システム</p>
-        </header>
+<body class="bg-gray-100 text-gray-800 p-4 md:p-8">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-blue-600">🚴 バトルバンク君 Web版</h1>
 
-        <!-- メインパネル -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <!-- 左カラム：入力・ファイル群 -->
-            <div class="md:col-span-1 bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
-                <h2 class="text-lg font-bold text-amber-300 flex items-center">
-                    <span>📋 データ入力 ＆ 設定</span>
-                </h2>
-                
-                <!-- テキストペースト用エリア -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">出走表テキストを貼り付け</label>
-                    <textarea id="raceTextInput" rows="4" placeholder="ここに次々変わる出走表テキストを貼り付け（※車番1〜7を自動認識します）" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 leading-relaxed"></textarea>
-                    <button onclick="parseRaceText()" class="w-full mt-1 bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold py-1.5 px-3 rounded-lg text-xs transition border border-slate-700">
-                        📥 テキストを解析に反映
-                    </button>
-                    <div id="textParseStatus" class="text-xs text-emerald-400 mt-1 text-center"></div>
-                </div>
+        <div class="mb-4">
+            <label class="block font-bold mb-2">出走表テキスト（コピー＆ペースト）</label>
+            <textarea id="inputText" class="w-full border border-gray-300 p-2 rounded h-40 text-sm" placeholder="【📋】1番：[〇] 深瀬泰我 競走得点: 82.61..."></textarea>
+        </div>
 
-                <!-- 参考ファイル読込 2カ所 -->
-                <div class="border-t border-slate-800 pt-3 space-y-3">
-                    <p class="text-xs font-bold text-amber-200">📂 参考ファイル（2カ所）</p>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">参考ファイル 1（例: 過去バックアップ）</label>
-                        <input type="file" id="refFile1" accept=".json,.txt" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-amber-300 hover:file:bg-slate-700 cursor-pointer">
-                        <div id="file1Status" class="text-xs text-emerald-400 mt-0.5"></div>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">参考ファイル 2（例: 予想ノートなど）</label>
-                        <input type="file" id="refFile2" accept=".json,.txt" class="block w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-amber-300 hover:file:bg-slate-700 cursor-pointer">
-                        <div id="file2Status" class="text-xs text-emerald-400 mt-0.5"></div>
-                    </div>
-                </div>
+        <div class="mb-4">
+            <label class="block font-bold mb-2">ラインの並び</label>
+            <input type="text" id="lineInput" class="w-full border border-gray-300 p-2 rounded" placeholder="例: 152 / 7 / 643">
+        </div>
 
-                <!-- 蓄積データの保存・読込ボタン -->
-                <div class="border-t border-slate-800 pt-3 space-y-2">
-                    <p class="text-xs font-bold text-amber-200">💾 AI学習データのバックアップ</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="exportLearningData()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-1.5 px-2 rounded text-xs transition text-center">
-                            保存（Export）
-                        </button>
-                        <label class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold py-1.5 px-2 rounded text-xs transition text-center cursor-pointer">
-                            読込（Import）
-                            <input type="file" id="importLearningFile" accept=".json" class="hidden" onchange="importLearningData(event)">
-                        </label>
-                    </div>
-                </div>
+        <button onclick="analyze()" class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded hover:bg-blue-600 shadow">予想スコアを計算</button>
 
-                <!-- AI性格選択 -->
-                <div class="border-t border-slate-800 pt-3">
-                    <label class="block text-xs font-semibold text-slate-300 mb-2">🤖 AIの性格（ペルソナ）</label>
-                    <select id="aiPersona" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-                        <option value="logical">【データ重視派】回収率と競走得点・確率を極めるロジカルAI</option>
-                        <option value="passion">【ライン展開派】主導権とイン粘りを熱く語るエモーショナルAI</option>
-                        <option value="sniper">【穴党・一撃派】高配当のひずみと万車券を狙う勝負師AI</option>
-                    </select>
-                </div>
+        <div id="resultArea" class="mt-8 hidden">
+            <h2 class="text-xl font-bold border-b pb-2 mb-4">📊 分析・スコア結果</h2>
+            <div id="playersList" class="mb-4"></div>
 
-                <button onclick="generatePrediction()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95 text-sm">
-                    🚀 AIに予想させる
-                </button>
+            <div class="bg-blue-50 p-4 rounded mb-6">
+                <h3 class="font-bold mb-2 text-blue-800">💡 バトルバンク君の推奨フォーカス</h3>
+                <p id="predictionText" class="text-lg font-medium whitespace-pre-line"></p>
             </div>
 
-            <!-- 右カラム：結果出力 ＆ 思考 ＆ 指摘 -->
-            <div class="md:col-span-2 space-y-6">
-                <!-- 予想結果出力ボックス -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-amber-300">🎯 AI買い目予想（点数指定）</h2>
-                        <span id="activePersonaBadge" class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full border border-amber-500/30">データ重視派</span>
-                    </div>
-
-                    <div id="predictionResult" class="space-y-4 text-sm text-slate-200">
-                        <p class="text-slate-400 italic text-center py-8">左側のテキストや参考ファイルをセットし、「AIに予想させる」ボタンを押してください。</p>
-                    </div>
-                </div>
-
-                <!-- AIの考え・根拠 -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
-                    <h2 class="text-lg font-bold text-amber-300 mb-3">💡 何故その予想になったか（AIの思考）</h2>
-                    <div id="aiReasoning" class="text-xs text-slate-300 space-y-2 bg-slate-950 p-4 rounded-lg border border-slate-800/80 leading-relaxed">
-                        ここにAIのロジックと、入力されたテキスト・参考ファイルからの分析根拠が表示されます。
-                    </div>
-                </div>
-
-                <!-- 直に指摘・修正機能 ＆ 学習状況 -->
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-lg">
-                    <h2 class="text-lg font-bold text-amber-300 mb-2">💬 AIへ直接指摘・フィードバック</h2>
-                    <p class="text-xs text-slate-400 mb-3">買い目や展開の見立てに対して直接ダメ出しや指示を与えて学習させます。</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="userFeedback" placeholder="例: 今回は単騎の動きをもっと重視して！" class="flex-grow bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-                        <button onclick="sendFeedback()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold px-4 py-2 rounded-lg text-xs border border-slate-700 transition">
-                            送信して学習
-                        </button>
-                    </div>
-                    <div id="learningStatus" class="mt-3 text-xs text-emerald-400 font-medium"></div>
+            <div class="mt-6 border-t pt-4">
+                <h3 class="font-bold mb-2 text-red-600">🧠 学習フィードバック（実際のレース結果）</h3>
+                <p class="text-sm text-gray-600 mb-2">結果を入力すると、勝った選手の「印」や「ライン位置」の内部評価点（ウェイト）が自動で加算され、次回以降の予想が進化します。</p>
+                <div class="flex items-center gap-2">
+                    <input type="number" id="result1" class="border p-2 w-20 rounded text-center" placeholder="1着">
+                    <span>-</span>
+                    <input type="number" id="result2" class="border p-2 w-20 rounded text-center" placeholder="2着">
+                    <button onclick="learn()" class="bg-red-500 text-white px-4 py-2 rounded font-bold hover:bg-red-600 ml-auto">結果を学習</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let file1Data = null;
-        let file2Data = null;
-        let parsedRaceText = "";
-        let learningMemory = JSON.parse(localStorage.getItem('battlebank_learning')) || { corrections: 0, trustScore: 85, history: [] };
+        // 学習用の内部ウェイト（ブラウザに保存。なければデフォルト値をセット）
+        let weights = JSON.parse(localStorage.getItem('bb_weights')) || {
+            mark_double_circle: 5.0, // ◎の加点
+            mark_circle: 3.5,        // 〇の加点
+            mark_triangle: 2.0,      // △の加点
+            mark_cross: 1.0,         // ✕の加点
+            line_head: 2.0           // ライン先頭（自力）のボーナス加点
+        };
 
-        // テキスト解析
-        function parseRaceText() {
-            const text = document.getElementById('raceTextInput').value.trim();
-            if(!text) {
-                alert('出走表のテキストを入力してください。');
-                return;
+        function analyze() {
+            const text = document.getElementById('inputText').value;
+            const lineStr = document.getElementById('lineInput').value;
+            if (!text) return alert("出走表テキストを入力してください！");
+
+            // 正規表現でテキストから車番、印、選手名、競走得点を抽出
+            const regex = /【📋】(\d+)番：\[(.*?)\]\s*(.+?)\s*競走得点:\s*([\d\.]+)/g;
+            let match;
+            let players = [];
+
+            while ((match = regex.exec(text)) !== null) {
+                let number = parseInt(match[1]);
+                let mark = match[2].trim();
+                let name = match[3].trim();
+                let score = parseFloat(match[4]);
+
+                // 基本得点に印のウェイト（学習値）を加算
+                let markScore = 0;
+                if (mark === '◎') markScore = weights.mark_double_circle;
+                if (mark === '〇' || mark === '◯') markScore = weights.mark_circle;
+                if (mark === '△') markScore = weights.mark_triangle;
+                if (mark === '✕' || mark === '×' || mark === '✖') markScore = weights.mark_cross;
+
+                players.push({ 
+                    number, name, mark, baseScore: score, markScore, 
+                    totalScore: score + markScore, isLineHead: false, isTanki: true 
+                });
             }
-            parsedRaceText = text;
-            document.getElementById('textParseStatus').innerText = `✅ テキスト読込OK（${text.length}文字）`;
-        }
 
-        // 参考ファイル読込
-        document.getElementById('refFile1').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) { file1Data = evt.target.result; document.getElementById('file1Status').innerText = `✅ ファイル1読込完了`; };
-            reader.readAsText(file);
-        });
-
-        document.getElementById('refFile2').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) { file2Data = evt.target.result; document.getElementById('file2Status').innerText = `✅ ファイル2読込完了`; };
-            reader.readAsText(file);
-        });
-
-        // 学習データの保存（エクスポート）
-        function exportLearningData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(learningMemory, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "battlebank_learning_data.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        // 学習データの読込（インポート）
-        function importLearningData(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const imported = JSON.parse(evt.target.result);
-                    if(imported && typeof imported.corrections !== 'undefined') {
-                        learningMemory = imported;
-                        localStorage.setItem('battlebank_learning', JSON.stringify(learningMemory));
-                        alert(`✅ 学習データを正常にインポートしました！（補正カウンタ: ${learningMemory.corrections}回）`);
-                    } else {
-                        alert('無効な学習データフォーマットです。');
+            // ラインのパース（"/"で区切り、単騎は除外してライン先頭にボーナス付与）
+            if (lineStr) {
+                const lines = lineStr.split('/').map(l => l.trim().replace(/[^0-9]/g, ''));
+                lines.forEach(line => {
+                    if (line.length > 1) { // 2車以上ならラインとみなす
+                        const headNum = parseInt(line[0]);
+                        let headPlayer = players.find(p => p.number === headNum);
+                        if (headPlayer) {
+                            headPlayer.isLineHead = true;
+                            headPlayer.totalScore += weights.line_head; // 先頭ボーナス
+                        }
+                        // ライン構成員は単騎フラグを外す
+                        for (let i = 0; i < line.length; i++) {
+                            let p = players.find(x => x.number === parseInt(line[i]));
+                            if (p) p.isTanki = false;
+                        }
                     }
-                } catch(err) {
-                    alert('JSONのパースに失敗しました。');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // 点数指定ロジック（単勝1、2連単4、3連単12）
-        function generatePrediction() {
-            const persona = document.getElementById('aiPersona').value;
-            const badge = document.getElementById('activePersonaBadge');
-            const rawText = document.getElementById('raceTextInput').value.trim();
-
-            if(!rawText && !parsedRaceText && !file1Data && !file2Data) {
-                alert('まずは出走表テキストを貼り付けるか、ファイルを読み込んでください。');
-                return;
+                });
             }
 
-            // 出走表の車番（7車立て前提）
-            const cars = [1, 2, 3, 4, 5, 6, 7];
-            
-            // ペルソナに応じて軸（本命）と相手（対抗・ヒモ）を変動させる
-            let axis = 1;      // 軸
-            let rivals = [];   // 相手3車
-            let reasoning = "";
+            // 総合得点順にソート
+            players.sort((a, b) => b.totalScore - a.totalScore);
 
-            if(persona === 'logical') {
-                badge.innerText = "データ重視派";
-                // データ重視：堅いところ（例として2番を軸、1,3,7を相手とする）
-                axis = 2;
-                rivals = [1, 3, 7];
-                reasoning = `【ロジカルAI分析】読み込んだ出走表テキストやファイルデータから、競走得点と過去の回収率確率を計算。確率的にもっとも期待値の高い ${axis}番 を絶対軸に指定しました。ヒモには実績のある ${rivals.join(', ')}番 を配置し、無駄のない点数で回収を狙います。`;
-            } else if(persona === 'passion') {
-                badge.innerText = "ライン展開派";
-                // ライン展開：自力型と番手のワンツー（例として5番を軸、1,4,2を相手とする）
-                axis = 5;
-                rivals = [1, 4, 2];
-                reasoning = `【エモーショナルAI分析】テキストから読み取れるラインの並びに着目！主導権を握る気迫の先行から、番手の ${axis}番 が抜け出す熱い展開を想定。別線の捲りに備えて ${rivals.join(', ')}番 を抑えに回したフォーメーションです！`;
+            // 結果リストの描画（グラフ・表を使わずテキストベースで出力）
+            let html = '<ul class="space-y-2">';
+            players.forEach(p => {
+                let markText = p.mark ? p.mark : '無印';
+                let tags = '';
+                if (p.isLineHead) tags += '<span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded ml-2 font-bold">ライン先頭</span>';
+                if (p.isTanki) tags += '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded ml-2 font-bold">単騎</span>';
+
+                html += `<li class="p-3 border rounded ${p.isTanki ? 'bg-gray-50' : 'bg-white'}">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-lg">${p.number}番 ${p.name} [${markText}]</span>
+                        <span class="font-bold text-blue-600 text-xl">${p.totalScore.toFixed(2)}</span>
+                    </div>
+                    <div class="text-sm text-gray-500 mt-1">基本得点: ${p.baseScore.toFixed(2)} + 印/ライン加点: ${(p.totalScore - p.baseScore).toFixed(2)} ${tags}</div>
+                </li>`;
+            });
+            html += '</ul>';
+            document.getElementById('playersList').innerHTML = html;
+
+            // 買い目の生成
+            if (players.length >= 3) {
+                document.getElementById('predictionText').innerText = 
+                    `本命軸: ${players[0].number}番 (${players[0].name})\n` +
+                    `対抗: ${players[1].number}番, ${players[2].number}番\n\n` +
+                    `【2連単】${players[0].number} ⇄ ${players[1].number}, ${players[2].number}\n` +
+                    `【3連単】${players[0].number} - ${players[1].number}, ${players[2].number} - 全`;
+            }
+
+            document.getElementById('resultArea').classList.remove('hidden');
+            window.currentPlayers = players; // 学習ボタン用に一時保存
+        }
+
+        function learn() {
+            const r1 = parseInt(document.getElementById('result1').value);
+            const r2 = parseInt(document.getElementById('result2').value);
+            if (!r1) return alert("せめて1着の車番だけでも入力してください！");
+
+            let winner = window.currentPlayers.find(p => p.number === r1);
+            if (winner) {
+                // 勝った選手の要素（印やライン位置）のウェイトを自動で増やす
+                if (winner.mark === '◎') weights.mark_double_circle += 0.2;
+                if (winner.mark === '〇' || winner.mark === '◯') weights.mark_circle += 0.2;
+                if (winner.mark === '△') weights.mark_triangle += 0.2;
+                if (winner.mark === '✕' || winner.mark === '×') weights.mark_cross += 0.2;
+                if (winner.isLineHead) weights.line_head += 0.3;
+
+                // 新しいウェイトをブラウザに保存
+                localStorage.setItem('bb_weights', JSON.stringify(weights));
+                
+                alert(`学習完了！\n1着(${winner.number}番)の勝因を分析し、評価ウェイトを更新しました。\n（次回からこの法則がスコア計算に反映されます）`);
             } else {
-                badge.innerText = "穴党・一撃派";
-                // 穴党：人気薄や単騎（例として6番を軸、7,3,4を相手とする）
-                axis = 6;
-                rivals = [7, 3, 4];
-                reasoning = `【勝負師AI分析】ファイルに蓄積された過去の高配当データと、今回の並びのひずみが一致。過小評価されている ${axis}番 の一発（単騎・イン突き）を軸に指定！相手には荒れ展開で突っ込んでくる ${rivals.join(', ')}番 を絡めて万車券を狙います。`;
+                alert("入力された車番が見つかりません。");
             }
-
-            // 【単勝】 1点
-            const tansho = `${axis}番`;
-
-            // 【2連単】 4点（軸からの流し3点 ＋ 裏目1点など、合計4点生成）
-            const nirentanList = [
-                `${axis}-${rivals[0]}`,
-                `${axis}-${rivals[1]}`,
-                `${axis}-${rivals[2]}`,
-                `${rivals[0]}-${axis}` // 逆転の裏目
-            ];
-            const nirentan = nirentanList.join(', ');
-
-            // 【3連単】 12点（軸1頭 相手3車のフォーメーション 1-3-4 等で12点を生成）
-            let sanrentanList = [];
-            // 軸1着固定、相手2・3着 (3 x 2 = 6点)
-            for(let i=0; i<rivals.length; i++) {
-                for(let j=0; j<rivals.length; j++) {
-                    if(i !== j) {
-                        sanrentanList.push(`${axis}-${rivals[i]}-${rivals[j]}`);
-                    }
-                }
-            }
-            // 軸2着固定、相手1着・3着 (3 x 2 = 6点)
-            for(let i=0; i<rivals.length; i++) {
-                for(let j=0; j<rivals.length; j++) {
-                    if(i !== j) {
-                        sanrentanList.push(`${rivals[i]}-${axis}-${rivals[j]}`);
-                    }
-                }
-            }
-            // 配列を3点ずつ改行付きでフォーマット
-            const formattedSanrentan = sanrentanList.reduce((acc, curr, idx) => {
-                const isLast = idx === sanrentanList.length - 1;
-                const isThird = (idx + 1) % 3 === 0;
-                return acc + curr + (isLast ? "" : (isThird ? "<br>" : ", "));
-            }, "");
-
-            reasoning += `\n【自己学習状態】（学習蓄積補正: ${learningMemory.corrections}回 / 信頼度: ${learningMemory.trustScore}%）`;
-
-            document.getElementById('predictionResult').innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-center flex flex-col justify-center">
-                        <p class="text-xs text-slate-400 font-semibold mb-2">【単勝（1点）】</p>
-                        <p class="text-xl font-bold text-amber-400">${tansho}</p>
-                    </div>
-                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-center flex flex-col justify-center">
-                        <p class="text-xs text-slate-400 font-semibold mb-2">【2連単（4点）】</p>
-                        <p class="text-lg font-bold text-amber-400 leading-relaxed">${nirentan.replace(/, /g, '<br>')}</p>
-                    </div>
-                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-center flex flex-col justify-center">
-                        <p class="text-xs text-slate-400 font-semibold mb-2">【3連単（12点）】</p>
-                        <p class="text-base font-bold text-amber-400 leading-relaxed">${formattedSanrentan}</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('aiReasoning').innerHTML = reasoning.replace(/\n/g, '<br>');
-        }
-
-        // フィードバックと自己学習
-        function sendFeedback() {
-            const feedbackText = document.getElementById('userFeedback').value.trim();
-            if(!feedbackText) {
-                alert('指摘内容を入力してください。');
-                return;
-            }
-
-            learningMemory.corrections += 1;
-            learningMemory.trustScore = Math.min(99, learningMemory.trustScore + 2);
-            learningMemory.history.push({ text: feedbackText, date: new Date().toISOString() });
-            localStorage.setItem('battlebank_learning', JSON.stringify(learningMemory));
-
-            document.getElementById('learningStatus').innerText = `✨ 指摘を受け付けました！AIが思考モデルをアップデートしました（学習回数: ${learningMemory.corrections}回）`;
-            document.getElementById('userFeedback').value = '';
-            
-            setTimeout(() => {
-                const currentReason = document.getElementById('aiReasoning').innerHTML;
-                document.getElementById('aiReasoning').innerHTML = currentReason + `<br><br><span class="text-amber-200">[ユーザー指摘反映]:</span> 「${feedbackText}」の視点を次回の解析ウェイト（軸・相手の選定）に反映しました。`;
-            }, 500);
         }
     </script>
 </body>
