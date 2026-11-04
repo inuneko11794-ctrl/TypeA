@@ -3,240 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keirin Race AI Analyzer & Learning System</title>
+    <title>バトルバンク君 - 競輪独自評価＆学習ツール</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 sm:p-6">
-    <div class="max-w-5xl mx-auto space-y-6">
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4">
+    <div class="max-w-xl mx-auto space-y-6">
         <!-- ヘッダー -->
-        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg">
-            <div>
-                <h1 class="text-2xl font-bold tracking-wider text-amber-400">競輪データ学習マネージャー</h1>
-                <p class="text-sm text-slate-400 mt-1">予想・出走表入力 ⇒ 結果判定 ⇒ AI総評・振り返り学習ループシステム</p>
-            </div>
-            <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                <label class="cursor-pointer bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg text-sm transition shadow flex items-center justify-center flex-1 sm:flex-initial">
-                    <span>JSON読込</span>
-                    <input type="file" id="fileInput" accept=".json" class="hidden">
-                </label>
-                <button id="clearBtn" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2 rounded-lg text-sm transition shadow flex items-center justify-center flex-1 sm:flex-initial">
-                    全データ削除
-                </button>
-            </div>
+        <header class="text-center py-2">
+            <h1 class="text-2xl font-black text-amber-400">⚡ バトルバンク君 ⚡</h1>
+            <p class="text-xs text-slate-400">独自評価スコア＆自動学習分析システム</p>
         </header>
 
-        <!-- 新規レース＆予想・結果入力セクション -->
-        <section class="bg-slate-800 p-5 rounded-xl border border-slate-700 space-y-4 shadow-lg">
-            <h2 class="text-lg font-bold text-amber-400 border-b border-slate-700 pb-2">レース＆予想・結果の登録</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">レース識別名 / 会場・R</label>
-                    <input type="text" id="inputRaceId" placeholder="例: 平塚 10R" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">出走表テキスト（シンプル一覧・ライン）</label>
-                    <textarea id="inputTextData" rows="3" placeholder="1番：[〇] 深瀬泰我... 152 / 7 / 643" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500 font-mono"></textarea>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">AI算出した買い目（自動 or 手動）</label>
-                    <input type="text" id="inputPredictions" placeholder="単勝: 5, 1 / 3連単: 5-1-2 他" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">レース結果（着順・出目）</label>
-                    <input type="text" id="inputResultOrder" placeholder="例: 5 - 1 - 2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">払戻金 (3連単など)</label>
-                    <input type="number" id="inputPayout" placeholder="例: 12800" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
-                </div>
+        <!-- 入力エリア -->
+        <section class="bg-slate-800 p-4 rounded-xl shadow-lg space-y-4 border border-slate-700">
+            <h2 class="text-sm font-bold text-amber-300">📋 データ入力</h2>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">シンプル一覧テキスト（コピー用）</label>
+                <textarea id="inputText" rows="7" class="w-full bg-slate-900 text-xs p-2 rounded border border-slate-700 focus:outline-none focus:border-amber-400 font-mono" placeholder="【📋】1番：[〇] 深瀬泰我 競走得点: 82.61
+..."></textarea>
             </div>
             <div>
-                <label class="block text-xs text-slate-400 mb-1">総評・振り返りコメント（学習用）</label>
-                <textarea id="inputReview" rows="2" placeholder="例: 本命ラインが綺麗に決まった。2着の粘りこみに対する評価を次回に活かす。" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500"></textarea>
+                <label class="block text-xs text-slate-400 mb-1">ラインの並び（例: 152 / 7 / 643 ※単騎も含む）</label>
+                <input type="text" id="inputLines" class="w-full bg-slate-900 text-xs p-2 rounded border border-slate-700 focus:outline-none focus:border-amber-400 font-mono" placeholder="152 / 7 / 643">
             </div>
-            <div class="flex justify-end">
-                <button id="addRaceBtn" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-6 py-2 rounded-lg text-sm transition shadow">
-                    データを登録・学習させる
-                </button>
-            </div>
+            <button onclick="analyzeData()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded text-sm transition">
+                分析＆AI独自スコア算出
+            </button>
         </section>
 
-        <!-- ステータス・情報表示 -->
-        <section class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center text-sm">
+        <!-- 分析結果表示エリア -->
+        <section id="resultArea" class="bg-slate-800 p-4 rounded-xl shadow-lg space-y-4 border border-slate-700 hidden">
+            <h2 class="text-sm font-bold text-amber-300">📊 AI独自評価＆ラインポジション</h2>
+            
+            <div id="outputSimple" class="space-y-1 font-mono text-xs bg-slate-900 p-3 rounded border border-slate-700 select-all"></div>
+            
             <div>
-                <span class="text-slate-400">学習済み蓄積データ件数:</span>
-                <span id="dataCount" class="font-bold text-amber-400 ml-2 text-lg">0</span> 件
+                <h3 class="text-xs font-bold text-slate-400 mb-1">■ 独自スコアランキング（ポジション補正込）</h3>
+                <div id="outputScoreList" class="space-y-2 text-xs"></div>
             </div>
-            <div id="statusMessage" class="text-xs text-slate-400"></div>
-        </section>
 
-        <!-- 履歴・総評一覧エリア -->
-        <section class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg">
-            <div class="p-4 bg-slate-750 border-b border-slate-700 font-semibold text-sm text-slate-300">
-                過去レースと学習総評一覧（自動ループ用）
-            </div>
-            <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-700/50 text-slate-400 border-b border-slate-700 text-xs uppercase tracking-wider">
-                            <th class="p-3">レース / 日時</th>
-                            <th class="p-3">出走テキスト・予想</th>
-                            <th class="p-3">結果・払戻</th>
-                            <th class="p-3">AI総評・振り返り（学習データ）</th>
-                            <th class="p-3 text-center">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dataTable" class="divide-y divide-slate-700">
-                        <tr>
-                            <td colspan="5" class="p-6 text-center text-slate-500">データがありません。</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- 結果フィードバック（学習用） -->
+            <div class="pt-3 border-t border-slate-700 space-y-2">
+                <label class="block text-xs text-amber-400 font-bold">🎯 レース結果を入力してAIを成長させる</label>
+                <div class="flex gap-2">
+                    <input type="text" id="raceResult" placeholder="例: 1-5-2 (1着-2着-3着)" class="flex-1 bg-slate-900 text-xs p-2 rounded border border-slate-700 font-mono">
+                    <button onclick="saveFeedback()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded text-xs transition">
+                        結果を学習
+                    </button>
+                </div>
+                <p id="learningStatus" class="text-[10px] text-slate-400"></p>
             </div>
         </section>
     </div>
 
     <script>
-        let raceData = [];
+        let currentParsedData = [];
 
-        function loadStorage() {
-            const saved = localStorage.getItem('keirin_learning_data');
-            if (saved) {
-                try {
-                    raceData = JSON.parse(saved);
-                    updateView();
-                } catch (e) {
-                    console.error('Failed to parse storage data', e);
-                }
+        function analyzeData() {
+            const rawText = document.getElementById('inputText').value.trim();
+            const linesText = document.getElementById('inputLines').value.trim();
+            if (!rawText) {
+                alert('シンプル一覧のテキストを入力してください。');
+                return;
             }
+
+            // ライン構造の解析（先頭、番手、単騎などの判定）
+            const lineGroups = linesText.split('/').map(g => g.trim()).filter(Boolean);
+            const positionMap = {}; // 車番 -> ポジション役割 (先頭, 番手, 3番手, 単騎)
+
+            lineGroups.forEach(group => {
+                // groupの文字を1文字ずつ車番とみなす（例: "152" -> 1:先頭, 5:番手, 2:3番手）
+                const cars = group.split('');
+                if (cars.length === 1) {
+                    positionMap[cars[0]] = '単騎';
+                } else {
+                    cars.forEach((car, idx) => {
+                        if (idx === 0) positionMap[car] = '先頭';
+                        else if (idx === 1) positionMap[car] = '番手';
+                        else positionMap[car] = `${idx + 1}番手`;
+                    });
+                }
+            });
+
+            // 1行ずつパース
+            const rows = rawText.split('\n');
+            currentParsedData = [];
+
+            rows.forEach(row => {
+                // 例: 【📋】1番：[〇] 深瀬泰我 競走得点: 82.61
+                const match = row.match(/【📋】(\d+)番：\[(.*?)\]\s*(.+?)\s*競走得点:\s*([\d\.]+)/);
+                if (match) {
+                    const carNum = match[1];
+                    const mark = match[2];
+                    const name = match[3].trim();
+                    const score = parseFloat(match[4]);
+                    const pos = positionMap[carNum] || '不明';
+
+                    // 独自スコア計算ロジック（競走得点ベース ＋ 印ボーナス ＋ ポジション補正 + 学習ウェイト）
+                    let markBonus = 0;
+                    if (mark.includes('◎')) markBonus = 5.0;
+                    else if (mark.includes('〇') || mark.includes('〇')) markBonus = 3.5;
+                    else if (mark.includes('▲')) markBonus = 2.5;
+                    else if (mark.includes('△')) markBonus = 1.5;
+                    else if (mark.includes('✕') || mark.includes('✖')) markBonus = 0.5;
+
+                    let posBonus = 0;
+                    if (pos === '番手') posBonus = 3.0; // 番手は有利
+                    else if (pos === '先頭') posBonus = 1.5;
+                    else if (pos === '単騎') posBonus = -1.0;
+
+                    // ローカルストレージから過去の学習補正を読み込み
+                    let learnedWeight = parseFloat(localStorage.getItem(`weight_${carNum}`) || '0');
+
+                    const totalScore = (score + markBonus + posBonus + learnedWeight).toFixed(2);
+
+                    currentParsedData.push({
+                        carNum, mark, name, score, pos, totalScore
+                    });
+                }
+            });
+
+            // スコア順にソート
+            currentParsedData.sort((a, b) => parseFloat(b.totalScore) - parseFloat(a.totalScore));
+
+            // 画面描画
+            renderResults(rawText);
         }
 
-        function saveStorage() {
-            localStorage.setItem('keirin_learning_data', JSON.stringify(raceData));
-        }
-
-        function updateView() {
-            const countEl = document.getElementById('dataCount');
-            const tableBody = document.getElementById('dataTable');
+        function renderResults(rawText) {
+            document.getElementById('outputSimple').innerText = rawText;
             
-            countEl.textContent = raceData.length;
+            const scoreListEl = document.getElementById('outputScoreList');
+            scoreListEl.innerHTML = '';
 
-            if (raceData.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">データがありません。情報を入力するかJSONを読み込んでください。</td></tr>`;
-                return;
-            }
+            currentParsedData.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-slate-900 p-2 rounded border border-slate-700';
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-amber-400">${index + 1}位</span> 
+                        <span class="bg-slate-800 px-1.5 py-0.5 rounded text-white font-bold">${item.carNum}番</span> 
+                        <span class="text-white">${item.name}</span> 
+                        <span class="text-slate-400 text-[10px]">(${item.pos})</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-amber-300 font-bold">評価: ${item.totalScore}</span>
+                        <span class="text-[10px] text-slate-500 block">得点:${item.score}</span>
+                    </div>
+                `;
+                scoreListEl.appendChild(div);
+            });
 
-            tableBody.innerHTML = raceData.map((item, index) => `
-                <tr class="hover:bg-slate-750 transition align-top">
-                    <td class="p-3 font-mono text-xs text-slate-300">
-                        <span class="text-amber-400 font-bold text-sm">${item.raceId || '未設定'}</span><br>
-                        <span class="text-[10px] text-slate-500">${item.timestamp || ''}</span>
-                    </td>
-                    <td class="p-3 text-xs text-slate-300 max-w-xs">
-                        <div class="font-bold text-slate-200 mb-1">予想: ${item.predictions || '-'}</div>
-                        <div class="text-[11px] text-slate-400 whitespace-pre-wrap bg-slate-900 p-1.5 rounded">${item.textData || '-'}</div>
-                    </td>
-                    <td class="p-3 font-mono text-xs">
-                        <div class="text-emerald-400 font-bold">着順: ${item.resultOrder || '-'}</div>
-                        <div class="text-cyan-400">払戻: ¥${item.payout || 0}</div>
-                    </td>
-                    <td class="p-3 text-xs text-slate-200 max-w-sm">
-                        <p class="bg-slate-900/80 border border-slate-700 p-2 rounded text-amber-200/90 whitespace-pre-wrap">${item.review || '総評未入力'}</p>
-                    </td>
-                    <td class="p-3 text-center">
-                        <button onclick="deleteItem(${index})" class="bg-rose-600/80 hover:bg-rose-700 text-white px-2.5 py-1 rounded text-xs transition">削除</button>
-                    </td>
-                </tr>
-            `).join('');
+            document.getElementById('resultArea').classList.remove('hidden');
+            document.getElementById('learningStatus').innerText = '';
         }
 
-        // 新規登録ボタン
-        document.getElementById('addRaceBtn').addEventListener('click', () => {
-            const raceId = document.getElementById('inputRaceId').value.trim();
-            const textData = document.getElementById('inputTextData').value.trim();
-            const predictions = document.getElementById('inputPredictions').value.trim();
-            const resultOrder = document.getElementById('inputResultOrder').value.trim();
-            const payout = document.getElementById('inputPayout').value.trim();
-            const review = document.getElementById('inputReview').value.trim();
-
-            if (!raceId && !textData) {
-                alert('レース名または出走表テキストを入力してください。');
+        function saveFeedback() {
+            const resultStr = document.getElementById('raceResult').value.trim();
+            if (!resultStr) {
+                alert('レース結果（例: 1-5-2）を入力してください。');
                 return;
             }
 
-            const newItem = {
-                id: 'R_' + Date.now(),
-                raceId: raceId || '無題レース',
-                textData,
-                predictions,
-                resultOrder,
-                payout: payout ? Number(payout) : 0,
-                review,
-                timestamp: new Date().toLocaleString()
-            };
-
-            raceData.unshift(newItem); // 先頭に追加して最新の学習データにする
-            saveStorage();
-            updateView();
-
-            // フォームクリア
-            document.getElementById('inputRaceId').value = '';
-            document.getElementById('inputTextData').value = '';
-            document.getElementById('inputPredictions').value = '';
-            document.getElementById('inputResultOrder').value = '';
-            document.getElementById('inputPayout').value = '';
-            document.getElementById('inputReview').value = '';
-            document.getElementById('statusMessage').textContent = '新しいレースデータと総評を学習・保存しました。';
-        });
-
-        // 1件削除
-        window.deleteItem = function(index) {
-            if (confirm('このレースデータを削除しますか？')) {
-                raceData.splice(index, 1);
-                saveStorage();
-                updateView();
-                document.getElementById('statusMessage').textContent = 'データを削除しました。';
+            // 的中車番を抽出 (1着を重視、2着3着も加点)
+            const places = resultStr.replace(/[-／\s]/g, '').split('');
+            if (places.length < 3) {
+                alert('正しい着順形式で入力してください（例: 1-5-2）');
+                return;
             }
-        };
 
-        // ファイルアップロード処理
-        document.getElementById('fileInput').addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
+            const first = places[0];
+            const second = places[1];
+            const third = places[2];
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const json = JSON.parse(e.target.result);
-                    if (Array.isArray(json)) {
-                        raceData = [...json, ...raceData];
-                        saveStorage();
-                        updateView();
-                        document.getElementById('statusMessage').textContent = `JSONファイルから ${json.length} 件をインポートしました。`;
-                    } else {
-                        alert('有効な配列形式のJSONではありません。');
-                    }
-                } catch (err) {
-                    alert('JSONファイルの読み込みに失敗しました。');
+            // 学習パラメータの更新（的中した車の評価ウェイトを上げる）
+            currentParsedData.forEach(item => {
+                let currentWeight = parseFloat(localStorage.getItem(`weight_${item.carNum}`) || '0');
+                if (item.carNum === first) {
+                    currentWeight += 1.5; // 1着的中は大きく学習
+                } else if (item.carNum === second) {
+                    currentWeight += 0.8;
+                } else if (item.carNum === third) {
+                    currentWeight += 0.4;
+                } else {
+                    currentWeight -= 0.2; // 外れた車は少し下げる
                 }
-                event.target.value = '';
-            };
-            reader.readAsText(file);
-        });
+                localStorage.setItem(`weight_${item.carNum}`, currentWeight);
+            });
 
-        // 全削除
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            if (confirm('本当にすべての蓄積データを削除しますか？')) {
-                raceData = [];
-                localStorage.removeItem('keirin_learning_data');
-                updateView();
-                document.getElementById('statusMessage').textContent = 'すべての蓄積データを削除しました。';
-            }
-        });
-
-        loadStorage();
+            document.getElementById('learningStatus').innerText = '✅ 結果をAIモデルに学習させました！次回の予測スコアに反映されます。';
+        }
     </script>
 </body>
 </html>
