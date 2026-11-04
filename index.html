@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>プロ競輪 予想＆データ学習シミュレーター</title>
+    <title>プロ競輪 画像解析＆予想学習シミュレーター</title>
     <style>
         :root {
             --bg-dark: #121212;
@@ -39,79 +39,7 @@
             padding-bottom: 10px;
             margin-bottom: 15px;
         }
-        .header-title h1 {
-            margin: 0;
-            font-size: 22px;
-            color: var(--text-main);
-        }
-        .header-title span {
-            font-size: 12px;
-            color: var(--accent-orange);
-            background: rgba(255,159,67,0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-        .race-select-box {
-            width: 100%;
-            padding: 8px;
-            background: #2a2a2a;
-            color: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .lineup-section {
-            background: var(--card-dark);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid var(--border-color);
-        }
-        .line-display {
-            display: flex;
-            gap: 15px;
-            font-weight: bold;
-            font-size: 16px;
-            margin-top: 5px;
-        }
-        .line-group {
-            background: #2d2d2d;
-            padding: 4px 10px;
-            border-radius: 4px;
-            border-bottom: 3px solid var(--accent-orange);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-        th, td {
-            padding: 8px 4px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 13px;
-        }
-        th { color: var(--text-sub); font-size: 11px; }
-        .car-num {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-        .c1 { background: #ffffff; color: #000000; }
-        .c2 { background: #111111; color: #ffffff; border: 1px solid #fff; }
-        .c3 { background: #ff3333; color: #ffffff; }
-        .c4 { background: #3333ff; color: #ffffff; }
-        .c5 { background: #ff9f43; color: #ffffff; }
-        .c6 { background: #2de370; color: #000000; }
-        .c7 { background: #b833ff; color: #ffffff; }
-        .c8 { background: #ff66b2; color: #000000; }
-        .c9 { background: #990000; color: #ffffff; }
+        .header-title h1 { margin: 0; font-size: 22px; color: var(--text-main); }
         
         .section-box {
             background: var(--card-dark);
@@ -125,132 +53,115 @@
             color: var(--accent-orange);
             margin-bottom: 10px;
             font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
-        .input-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th, td { padding: 8px 4px; text-align: center; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        th { color: var(--text-sub); font-size: 11px; }
+        .car-num {
+            width: 24px; height: 24px; border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center; font-weight: bold;
         }
-        input, select {
-            padding: 8px;
-            background: #2a2a2a;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            border-radius: 4px;
+        .c1 { background: #ffffff; color: #000000; }
+        .c2 { background: #111111; color: #ffffff; border: 1px solid #fff; }
+        .c3 { background: #ff3333; color: #ffffff; }
+        .c4 { background: #3333ff; color: #ffffff; }
+        .c5 { background: #ff9f43; color: #ffffff; }
+        .c6 { background: #2de370; color: #000000; }
+        .c7 { background: #b833ff; color: #ffffff; }
+        
+        select, input {
+            background: #2a2a2a; color: #fff; border: 1px solid var(--border-color);
+            padding: 8px; border-radius: 4px;
         }
+        select.mark-select { padding: 4px; font-weight: bold; font-size: 14px; }
+        
+        .input-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px; }
+        
         .btn {
-            background: var(--accent-green);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 5px;
+            background: var(--accent-green); color: white; border: none;
+            padding: 10px 16px; border-radius: 4px; font-weight: bold;
+            cursor: pointer; width: 100%; margin-top: 5px;
         }
         .btn-orange { background: var(--accent-orange); color: black; }
         .btn-red { background: var(--accent-red); }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        
         .ai-output {
-            background: rgba(39, 174, 96, 0.1);
-            border-left: 4px solid var(--accent-green);
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 0 4px 4px 0;
-            line-height: 1.6;
+            background: rgba(39, 174, 96, 0.1); border-left: 4px solid var(--accent-green);
+            padding: 10px; margin-top: 10px; border-radius: 0 4px 4px 0; line-height: 1.6;
         }
-        /* 買い目表示用のスタイル追加 */
         .prediction-box {
-            background: #111111;
-            border: 1px solid #444;
-            border-radius: 6px;
-            padding: 12px;
-            margin-top: 12px;
+            background: #111111; border: 1px solid #444; border-radius: 6px;
+            padding: 12px; margin-top: 12px;
         }
         .bet-type {
-            display: inline-block;
-            background: var(--accent-orange);
-            color: #000;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-right: 8px;
-            width: 45px;
-            text-align: center;
+            display: inline-block; background: var(--accent-orange); color: #000;
+            padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;
+            margin-right: 8px; width: 45px; text-align: center;
         }
-        .bet-row {
-            margin-bottom: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        .mark {
-            font-weight: bold;
-            font-size: 16px;
-            margin-right: 4px;
-        }
-        .history-list {
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 12px;
-        }
+        .bet-row { margin-bottom: 8px; font-size: 16px; font-weight: bold; letter-spacing: 1px; }
+        
+        .history-list { max-height: 200px; overflow-y: auto; font-size: 12px; }
         .history-item {
-            padding: 8px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 8px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <select class="race-select-box" id="raceSelect" onchange="loadRaceData()"></select>
+    
+    <!-- 1. 画像アップロード＆解析モック -->
+    <div class="section-box" style="border-color: var(--accent-green);">
+        <div class="section-title">📸 出走表画像の読み込み</div>
+        <p style="font-size: 11px; color: var(--text-sub); margin-top: 0;">スクショ画像をアップロードするか、ペースト（Ctrl+V）してください。</p>
+        <input type="file" id="imageUpload" accept="image/*" style="width: 95%; margin-bottom: 10px;">
+        <div id="imagePreviewArea" style="display: none; text-align: center; background: #111; padding: 10px; border-radius: 6px; border: 1px dashed #555;">
+            <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: 4px;">
+            <button class="btn btn-orange" onclick="simulateImageParsing()" style="margin-top: 10px;">画像を解析して印を抽出</button>
+        </div>
+    </div>
 
+    <!-- レース情報 -->
     <div class="header">
         <div class="header-title">
-            <h1 id="raceVenue">--</h1>
-            <span id="raceKlass">--</span>
-        </div>
-        <div style="text-align: right;">
-            <div id="raceDeadline" style="font-size: 18px; font-weight: bold; color: var(--accent-red);">締切 --:--</div>
-            <div id="raceTime" style="font-size: 11px; color: var(--text-sub);">発走 --:--</div>
+            <h1 id="raceVenue">豊橋 9R</h1>
+            <span style="font-size: 12px; color: var(--accent-orange); background: rgba(255,159,67,0.1); padding: 2px 6px; border-radius: 4px;">S級特選</span>
         </div>
     </div>
 
-    <div class="meta-info" id="raceMeta">--</div>
-
-    <div class="lineup-section">
-        <div style="font-size: 11px; color: var(--text-sub);">並び予想（ライン）※単騎はラインに含めない</div>
-        <div class="line-display" id="lineupDisplay"></div>
+    <!-- 2. 選手データと印のテーブル -->
+    <div class="section-box">
+        <div class="section-title">📝 選手評価と印（手動修正可能）</div>
+        <table id="playerTable">
+            <thead>
+                <tr>
+                    <th>車</th>
+                    <th>印</th>
+                    <th style="text-align: left;">選手名</th>
+                    <th>競走得点</th>
+                    <th>B</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- JSで描画 -->
+            </tbody>
+        </table>
     </div>
 
-    <table id="playerTable">
-        <thead>
-            <tr>
-                <th>車</th>
-                <th style="text-align: left;">選手名 / クラス / 脚質</th>
-                <th>競走得点</th>
-                <th>3連対率</th>
-                <th>勝率</th>
-                <th>B</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <!-- 3. AI学習・買い目予想機能 -->
+    <div class="section-box">
+        <div class="section-title">🤖 学習データ解析 ＆ 印ベース買い目構築</div>
+        <button class="btn" onclick="generatePredictionAndLearning()">蓄積データ学習 ＋ 買い目を出力</button>
+        <div class="ai-output" id="aiOutput">
+            画像を解析するか、手動で印を設定して予想ボタンを押してください。<br>
+            <span style="font-size:11px; color:#aaa;">※過去データ（JSON）を読み込むことで学習精度が上がります。</span>
+        </div>
+    </div>
 
-    <!-- 1. 結果・脚質・配当の入力フォーム -->
+    <!-- 4. 結果・配当の入力フォーム -->
     <div class="section-box">
         <div class="section-title">🏁 レース結果・配当の手動入力</div>
         <div class="input-row">
@@ -259,12 +170,9 @@
                 <input type="number" id="resFirstCar" min="1" max="9" style="width:90%;">
             </div>
             <div>
-                <label style="font-size:11px; color:var(--text-sub);">1着の決まり手（脚質）</label>
+                <label style="font-size:11px; color:var(--text-sub);">1着の決まり手</label>
                 <select id="resFirstTech" style="width:100%;">
-                    <option value="逃げ">逃げ</option>
-                    <option value="捲り">捲り</option>
-                    <option value="差し">差し</option>
-                    <option value="マーク">マーク</option>
+                    <option value="逃げ">逃げ</option><option value="捲り">捲り</option><option value="差し">差し</option><option value="マーク">マーク</option>
                 </select>
             </div>
         </div>
@@ -274,39 +182,26 @@
                 <input type="number" id="resSecondCar" min="1" max="9" style="width:90%;">
             </div>
             <div>
-                <label style="font-size:11px; color:var(--text-sub);">2着の決まり手（脚質）</label>
+                <label style="font-size:11px; color:var(--text-sub);">2着の決まり手</label>
                 <select id="resSecondTech" style="width:100%;">
-                    <option value="逃げ">逃げ</option>
-                    <option value="捲り">捲り</option>
-                    <option value="差し">差し</option>
-                    <option value="マーク">マーク</option>
+                    <option value="逃げ">逃げ</option><option value="捲り">捲り</option><option value="差し">差し</option><option value="マーク">マーク</option>
                 </select>
             </div>
         </div>
         <div class="input-row">
             <div>
                 <label style="font-size:11px; color:var(--text-sub);">2連単 配当 (円)</label>
-                <input type="number" id="payout2" style="width:90%;" placeholder="例: 1200">
+                <input type="number" id="payout2" style="width:90%;">
             </div>
             <div>
                 <label style="font-size:11px; color:var(--text-sub);">3連単 配当 (円)</label>
-                <input type="number" id="payout3" style="width:90%;" placeholder="例: 5400">
+                <input type="number" id="payout3" style="width:90%;">
             </div>
         </div>
-        <button class="btn btn-orange" onclick="saveRaceResult()">このレースの結果を保存する</button>
+        <button class="btn btn-orange" onclick="saveRaceResult()">このレースの結果を保存して学習</button>
     </div>
 
-    <!-- 2. AI学習・展開予想機能 -->
-    <div class="section-box">
-        <div class="section-title">🤖 蓄積データからのAI学習＆買い目予想</div>
-        <button class="btn" onclick="learnAndPredict()">現在のデータから学習して予想を出力</button>
-        <div class="ai-output" id="aiOutput">
-            データを学習させるか、予想ボタンを押してください。<br>
-            <span style="font-size:11px; color:#aaa;">※ご提示のJSONファイルを下のボタンから読み込ませることで、初期学習が完了します。</span>
-        </div>
-    </div>
-
-    <!-- 3. バックアップ・データ管理ボタン -->
+    <!-- 5. バックアップ・データ管理 -->
     <div class="section-box">
         <div class="section-title">💾 データの保存・読み込み管理</div>
         <div class="btn-group">
@@ -317,7 +212,7 @@
         <button class="btn btn-red" onclick="clearData()" style="margin-top:10px;">全履歴をリセット</button>
     </div>
 
-    <!-- 4. 保存履歴リスト -->
+    <!-- 6. 保存履歴リスト -->
     <div class="section-box">
         <div class="section-title">📋 蓄積された学習用レースデータ</div>
         <div class="history-list" id="historyList">保存された結果はありません</div>
@@ -325,111 +220,159 @@
 </div>
 
 <script>
-    // サンプルレースデータ
-    const fullRaceData = [
-        {
-            "key": "豊橋|2026-09-14|9",
-            "race": {
-                "venue": "豊橋",
-                "raceNum": 9,
-                "date": "2026-09-14",
-                "cls": "S級特選",
-                "deadline": "19:03",
-                "time": "19:08",
-                "arePct": 76.7
-            },
-            "lineup": [["1", "5"], ["2", "7"], ["3", "4"], ["6"]], // 単騎の6はラインに含まない形
-            "players": [
-                {"car": 1, "name": "橋本宇宙", "pt": 101.34, "style": "逃", "klass": "佐賀・27歳 123期", "B": 10},
-                {"car": 2, "name": "小堀敢太", "pt": 108.15, "style": "逃", "klass": "北海道・27歳 125期", "B": 8},
-                {"car": 3, "name": "徳田匠", "pt": 99.65, "style": "逃", "klass": "京都・29歳 119期", "B": 12},
-                {"car": 4, "name": "中井太祐", "pt": 106.62, "style": "両", "klass": "奈良・37歳 97期", "B": 0},
-                {"car": 5, "name": "片岡迪之", "pt": 106.65, "style": "両", "klass": "岡山・40歳 93期", "B": 0},
-                {"car": 6, "name": "柿本大貴", "pt": 94.81, "style": "逃", "klass": "東京・31歳 113期", "B": 5},
-                {"car": 7, "name": "小原丈一郎", "pt": 102.95, "style": "両", "klass": "青森・28歳 115期", "B": 0}
-            ]
-        },
-        {
-            "key": "松阪|2026-09-07|6",
-            "race": {"venue":"松阪","raceNum":6,"date":"2026-09-07","cls":"A級特選","deadline":"22:15","time":"22:20","arePct":81.5},
-            "lineup":[["2", "3", "7"], ["1", "4"], ["5", "6"]],
-            "players":[
-                {"car":1,"name":"白上翔","pt":92.16,"style":"両","klass":"A1","B":1},
-                {"car":2,"name":"坪内恒","pt":91.28,"style":"逃","klass":"A1","B":5},
-                {"car":3,"name":"成田直喜","pt":89.29,"style":"追","klass":"A1","B":0},
-                {"car":4,"name":"阿久津修","pt":88.38,"style":"追","klass":"A1","B":0},
-                {"car":5,"name":"山本修平","pt":87.00,"style":"逃","klass":"A2","B":4},
-                {"car":6,"name":"渡邉高志","pt":86.37,"style":"追","klass":"A1","B":0},
-                {"car":7,"name":"疋田敏","pt":84.75,"style":"追","klass":"A2","B":0}
-            ]
-        }
-    ];
-
+    // --- 初期設定とデータ ---
+    const MARK_OPTIONS = ["◎", "◯", "△", "✕", "☆", "▲", "✖", "単", "無"];
     let studyDatabase = JSON.parse(localStorage.getItem('keirin_study_db')) || [];
 
+    let currentPlayers = [
+        { car: 1, name: "橋本宇宙", pt: 101.34, B: 10, mark: "無" },
+        { car: 2, name: "小堀敢太", pt: 108.15, B: 8,  mark: "無" },
+        { car: 3, name: "徳田匠",   pt: 99.65,  B: 12, mark: "無" },
+        { car: 4, name: "中井太祐", pt: 106.62, B: 0,  mark: "無" },
+        { car: 5, name: "片岡迪之", pt: 106.65, B: 0,  mark: "無" },
+        { car: 6, name: "柿本大貴", pt: 94.81,  B: 5,  mark: "無" },
+        { car: 7, name: "小原丈一郎", pt:102.95, B: 0,  mark: "無" }
+    ];
+
     function initSystem() {
-        const select = document.getElementById('raceSelect');
-        select.innerHTML = '';
-        fullRaceData.forEach((r, i) => {
-            const opt = document.createElement('option');
-            opt.value = i;
-            opt.textContent = `${r.race.venue} ${r.race.raceNum}R (${r.race.cls})`;
-            select.appendChild(opt);
-        });
-        loadRaceData();
+        renderTable();
         loadHistoryList();
     }
 
-    function loadRaceData() {
-        const idx = document.getElementById('raceSelect').value;
-        const data = fullRaceData[idx];
-
-        document.getElementById('raceVenue').textContent = `${data.race.venue} ${data.race.raceNum}R`;
-        document.getElementById('raceKlass').textContent = data.race.cls;
-        document.getElementById('raceDeadline').textContent = `締切 ${data.race.deadline}`;
-        document.getElementById('raceTime').textContent = `発走 ${data.race.time}`;
-        document.getElementById('raceMeta').innerHTML = `2,025m (5周) | 周長400m | 曇 15.0℃ | 北東1.0m/s <br><span style="color: var(--accent-orange);">⚡ 荒れ予測: ${data.race.arePct}%</span>`;
-
-        const lineupDisp = document.getElementById('lineupDisplay');
-        lineupDisp.innerHTML = '';
-        data.lineup.forEach(group => {
-            if(group.length > 1) {
-                const div = document.createElement('div');
-                div.className = 'line-group';
-                div.textContent = group.join(' - ');
-                lineupDisp.appendChild(div);
-            } else {
-                // 単騎の表示分け
-                const span = document.createElement('span');
-                span.style.cssText = "background:#222; padding:4px 8px; border-radius:4px; font-size:12px; color:#aaa; margin-top:2px;";
-                span.textContent = `単騎: ${group[0]}`;
-                lineupDisp.appendChild(span);
-            }
-        });
-
+    function renderTable() {
         const tbody = document.querySelector('#playerTable tbody');
         tbody.innerHTML = '';
-        data.players.forEach(p => {
+        currentPlayers.forEach((p, index) => {
+            const markSelect = MARK_OPTIONS.map(m => 
+                `<option value="${m}" ${p.mark === m ? 'selected' : ''}>${m}</option>`
+            ).join('');
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><span class="car-num c${p.car}">${p.car}</span></td>
-                <td style="text-align: left;"><strong>${p.name}</strong><br><span style="font-size:11px;color:var(--text-sub);">${p.klass}</span></td>
-                <td style="font-weight:bold; color:var(--accent-green);">${p.pt.toFixed(2)}</td>
-                <td>-</td>
-                <td>-</td>
+                <td><select class="mark-select" id="mark_${index}">${markSelect}</select></td>
+                <td style="text-align: left;"><strong>${p.name}</strong></td>
+                <td>${p.pt.toFixed(2)}</td>
                 <td>${p.B}</td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    function saveRaceResult() {
-        const idx = document.getElementById('raceSelect').value;
-        const baseRace = fullRaceData[idx];
+    // --- 画像処理関連 ---
+    document.getElementById('imageUpload').addEventListener('change', handleImageLoad);
+    document.addEventListener('paste', function(e) {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            if (items[index].kind === 'file') handleImageLoad({target: {files: [items[index].getAsFile()]}});
+        }
+    });
 
+    function handleImageLoad(e) {
+        if (e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById('previewImg').src = event.target.result;
+                document.getElementById('imagePreviewArea').style.display = 'block';
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    }
+
+    function simulateImageParsing() {
+        currentPlayers[0].mark = "✖"; // 1番 (画像太バツ)
+        currentPlayers[1].mark = "◎"; // 2番
+        currentPlayers[2].mark = "▲"; // 3番 (画像黒三角)
+        currentPlayers[3].mark = "△"; // 4番
+        currentPlayers[4].mark = "✕"; // 5番 (画像細バツ)
+        currentPlayers[5].mark = "単"; // 6番
+        currentPlayers[6].mark = "◯"; // 7番
+        renderTable();
+    }
+
+    // --- 学習AI ＆ 買い目予想生成 ---
+    function generatePredictionAndLearning() {
+        currentPlayers.forEach((p, index) => {
+            p.mark = document.getElementById(`mark_${index}`).value;
+        });
+
+        // 1. 蓄積データの解析
+        let stats = { "逃げ": 0, "捲り": 0, "差し": 0, "マーク": 0 };
+        let totalPayout3 = 0, highPayoutCount = 0;
+
+        studyDatabase.forEach(res => {
+            if(stats[res.firstTech] !== undefined) stats[res.firstTech]++;
+            const p3 = parseInt(res.payout3 || 0);
+            totalPayout3 += p3;
+            if (p3 >= 10000) highPayoutCount++;
+        });
+
+        const totalRaces = studyDatabase.length || 1;
+        const avgPayout = Math.round(totalPayout3 / totalRaces);
+        const waveRate = Math.round((highPayoutCount / totalRaces) * 100);
+        const sashiAdvantage = (stats["差し"] + stats["マーク"]) / totalRaces;
+        const nigeAdvantage = (stats["逃げ"] + stats["捲り"]) / totalRaces;
+
+        let strategy = sashiAdvantage > nigeAdvantage ? "【差し・マーク有利傾向】" : "【自力・先行有利傾向】";
+        if (waveRate > 30 || avgPayout > 20000) {
+            strategy += " <span style='color:var(--accent-red);'>⚡荒れ傾向データあり</span>";
+        } else {
+            strategy += " <span style='color:var(--accent-green);'>🛡️順当傾向データあり</span>";
+        }
+
+        // 2. 印ベースの買い目生成（ご指定の序列 ◎＞◯＞△＞✕＞☆ に準拠）
+        const getCarByMark = (mark) => currentPlayers.filter(p => p.mark === mark).map(p => p.car);
+        
+        const honmei = getCarByMark("◎")[0] || null;
+        const taikou = getCarByMark("◯")[0] || null;
+        const sankaku = getCarByMark("△")[0] || null;
+        const batsu = getCarByMark("✕")[0] || null;
+        const hoshi = getCarByMark("☆")[0] || null;
+        const sub1 = getCarByMark("▲")[0] || null;
+        const sub2 = getCarByMark("✖")[0] || null;
+
+        if (!honmei) {
+            document.getElementById('aiOutput').innerHTML = "<span style='color:red;'>※◎（本命）の印がありません。最低限◎を設定してください。</span>";
+            return;
+        }
+
+        const bet1 = honmei;
+        
+        let bet2Arr = [];
+        if (taikou) bet2Arr.push(`${honmei}-${taikou}`);
+        if (sankaku) bet2Arr.push(`${honmei}-${sankaku}`);
+        const bet2 = bet2Arr.length > 0 ? bet2Arr.join(', ') : "展開待ち";
+
+        let secondTier = [];
+        if (taikou) secondTier.push(taikou);
+        if (sankaku) secondTier.push(sankaku);
+        
+        let thirdTier = [...secondTier];
+        if (batsu) thirdTier.push(batsu);
+        if (hoshi) thirdTier.push(hoshi);
+        if (sub1) thirdTier.push(sub1);
+        if (sub2) thirdTier.push(sub2);
+        thirdTier = [...new Set(thirdTier)]; // 重複削除
+
+        const bet3 = `${honmei} - ${secondTier.join(',')} - ${thirdTier.join(',')}`;
+
+        document.getElementById('aiOutput').innerHTML = `
+            <strong>📊 蓄積データ学習 (データ数: ${studyDatabase.length}件)</strong><br>
+            📝 傾向分析: ${strategy}<br>
+            💰 平均3連単配当: ${avgPayout.toLocaleString()}円 (万車券率: ${waveRate}%)<br>
+            <hr style="border-color:var(--border-color); margin:10px 0;">
+            <strong>🎯 指定序列（◎＞◯＞△＞✕＞☆）に基づく買い目</strong>
+            <div class="prediction-box">
+                <div class="bet-row"><span class="bet-type">単 勝</span> ${bet1}</div>
+                <div class="bet-row"><span class="bet-type">2連単</span> ${bet2}</div>
+                <div class="bet-row"><span class="bet-type" style="background:var(--accent-red);color:#fff;">3連単</span> ${bet3}</div>
+            </div>
+        `;
+    }
+
+    // --- レース結果の保存（学習） ---
+    function saveRaceResult() {
         const resultRecord = {
-            venue: baseRace.race.venue,
-            raceNum: baseRace.race.raceNum,
+            venue: "豊橋", raceNum: 9,
             firstCar: document.getElementById('resFirstCar').value,
             firstTech: document.getElementById('resFirstTech').value,
             secondCar: document.getElementById('resSecondCar').value,
@@ -440,141 +383,40 @@
         };
 
         if(!resultRecord.firstCar || !resultRecord.secondCar || !resultRecord.payout3) {
-            alert("車番と3連単配当は必須です。");
-            return;
+            alert("車番と3連単配当は必須です。"); return;
         }
 
         studyDatabase.push(resultRecord);
         localStorage.setItem('keirin_study_db', JSON.stringify(studyDatabase));
         loadHistoryList();
-        alert("レース結果を保存しました！学習データに反映されます。");
+        alert("結果を保存しました！次回からのAI学習予想に反映されます。");
     }
 
+    // --- データのインポート/エクスポート/表示 ---
     function loadHistoryList() {
         const list = document.getElementById('historyList');
         list.innerHTML = '';
-        if(studyDatabase.length === 0) {
-            list.innerHTML = '保存された結果はありません';
-            return;
-        }
-        // 新しい順に表示
+        if(studyDatabase.length === 0) { list.innerHTML = '保存された結果はありません'; return; }
         [...studyDatabase].reverse().forEach(item => {
             const div = document.createElement('div');
             div.className = 'history-item';
             div.innerHTML = `
-                <div><strong>${item.venue || "不明"} ${item.raceNum || "-"}R</strong> 結果: ${item.firstCar}-${item.secondCar} (${item.firstTech} - ${item.secondTech})<br>
-                <span style="color:var(--accent-orange);">2連単: ${parseInt(item.payout2 || 0).toLocaleString()}円 / 3連単: ${parseInt(item.payout3 || 0).toLocaleString()}円</span></div>
-                <div style="font-size:10px; color:var(--text-sub);">${item.timestamp || "過去データ"}</div>
+                <div><strong>${item.venue} ${item.raceNum}R</strong> 結果: ${item.firstCar}-${item.secondCar} (${item.firstTech}-${item.secondTech})<br>
+                <span style="color:var(--accent-orange);">3連単: ${parseInt(item.payout3 || 0).toLocaleString()}円</span></div>
             `;
             list.appendChild(div);
         });
     }
 
-    // ★ 買い目予想 ＆ 学習AIのメインロジック
-    function learnAndPredict() {
-        const aiOutput = document.getElementById('aiOutput');
-        if (studyDatabase.length === 0) {
-            aiOutput.innerHTML = "⚠️ まだデータが蓄積されていません。手動入力するか、JSONファイルを読み込ませてください。";
-            return;
-        }
-
-        // 1. 蓄積データからの統計解析
-        let stats = { "逃げ": 0, "捲り": 0, "差し": 0, "マーク": 0 };
-        let totalPayout3 = 0;
-        let highPayoutCount = 0; // 万車券の回数
-
-        studyDatabase.forEach(res => {
-            if(stats[res.firstTech] !== undefined) stats[res.firstTech]++;
-            const p3 = parseInt(res.payout3 || 0);
-            totalPayout3 += p3;
-            if (p3 >= 10000) highPayoutCount++;
-        });
-
-        const avgPayout = Math.round(totalPayout3 / studyDatabase.length);
-        const waveRate = Math.round((highPayoutCount / studyDatabase.length) * 100);
-
-        const totalRaces = studyDatabase.length;
-        const sashiAdvantage = (stats["差し"] + stats["マーク"]) / totalRaces;
-        const nigeAdvantage = (stats["逃げ"] + stats["捲り"]) / totalRaces;
-
-        const idx = document.getElementById('raceSelect').value;
-        const currentRace = fullRaceData[idx];
-
-        // 2. 選手のAIスコアリング（得点 + B回数 + 蓄積データの脚質有利不利）
-        let evaluatedPlayers = currentRace.players.map(p => {
-            let score = p.pt;
-            
-            // 先行意欲ボーナス
-            if (p.B > 5) score += 1.5;
-            
-            // 現在の学習データに基づいた脚質ボーナス
-            if ((p.style === "追" || p.style === "両") && sashiAdvantage > nigeAdvantage) {
-                score += 2.0; // 差し・マークが決まりやすいデータ傾向なら追込有利
-            } else if ((p.style === "逃" || p.style === "両") && nigeAdvantage >= sashiAdvantage) {
-                score += 2.0; // 逃げ・捲りが決まりやすいデータ傾向なら自力有利
-            }
-            return { ...p, aiScore: score };
-        });
-
-        // スコア順にソートして印を決定
-        evaluatedPlayers.sort((a, b) => b.aiScore - a.aiScore);
-        
-        const honmei = evaluatedPlayers[0]; // ◎ 本命
-        const taikou = evaluatedPlayers[1]; // ◯ 対抗
-        const tanana = evaluatedPlayers[2]; // △ 単穴
-        const renka1 = evaluatedPlayers[3]; // ☓ 連下1
-        const renka2 = evaluatedPlayers[4]; // ☆ 連下2
-
-        // 戦略テキスト生成
-        let strategy = sashiAdvantage > nigeAdvantage ? "【差し・マーク有利傾向】番手選手の逆転を警戒" : "【自力・先行有利傾向】ライン先頭の自力選手を信頼";
-        if (waveRate > 30 || avgPayout > 20000) {
-            strategy += "<br><span style='color:var(--accent-red);'>⚡荒れ傾向データあり：ヒモ荒れ・中穴狙いを推奨</span>";
-        } else {
-            strategy += "<br><span style='color:var(--accent-green);'>🛡️順当傾向データあり：本命サイドの決着が濃厚</span>";
-        }
-
-        // 3. 買い目の構築
-        const bet1 = `${honmei.car}`; // 単勝
-        const bet2 = `${honmei.car}-${taikou.car}, ${honmei.car}-${tanana.car}, ${taikou.car}-${honmei.car}`; // 2連単
-        const bet3 = `${honmei.car} - ${taikou.car},${tanana.car} - ${taikou.car},${tanana.car},${renka1.car},${renka2.car}`; // 3連単(フォーメーション)
-
-        // 4. 結果の出力
-        aiOutput.innerHTML = `
-            <strong>📊 蓄積データ学習結果 (データ数: ${studyDatabase.length}件)</strong><br>
-            📝 展開予測: ${strategy}<br>
-            💰 データ平均3連単配当: ${avgPayout.toLocaleString()}円 (万車券発生率: ${waveRate}%)<br>
-            <hr style="border-color:var(--border-color); margin:10px 0;">
-            
-            <strong>🎯 AI評価印</strong><br>
-            <span class="mark" style="color:#ff5252;">◎</span> ${honmei.car}番 ${honmei.name} <span style="font-size:11px;color:#aaa;">(AIスコア: ${honmei.aiScore.toFixed(1)})</span><br>
-            <span class="mark" style="color:#ff9f43;">◯</span> ${taikou.car}番 ${taikou.name} <span style="font-size:11px;color:#aaa;">(AIスコア: ${taikou.aiScore.toFixed(1)})</span><br>
-            <span class="mark" style="color:#2de370;">▲</span> ${tanana.car}番 ${tanana.name} <span style="font-size:11px;color:#aaa;">(AIスコア: ${tanana.aiScore.toFixed(1)})</span><br>
-            <span class="mark" style="color:#aaaaaa;">△</span> ${renka1.car}番, ${renka2.car}番
-            
-            <div class="prediction-box">
-                <div class="bet-row"><span class="bet-type">単 勝</span> ${bet1}</div>
-                <div class="bet-row"><span class="bet-type">2連単</span> ${bet2}</div>
-                <div class="bet-row"><span class="bet-type" style="background:var(--accent-red);color:#fff;">3連単</span> ${bet3} 
-                <div style="font-size:11px;font-weight:normal;color:var(--text-sub);margin-top:4px;">※フォーメーション推奨 (計6点)</div>
-                </div>
-            </div>
-        `;
-    }
-
     function exportData() {
-        if(studyDatabase.length === 0) {
-            alert("保存するデータがありません。");
-            return;
-        }
+        if(studyDatabase.length === 0) return alert("保存するデータがありません。");
         const blob = new Blob([JSON.stringify(studyDatabase, null, 2)], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
+        a.href = URL.createObjectURL(blob);
         a.download = `keirin_study_data.json`;
         a.click();
     }
 
-    // ★ インポート機能の拡張（ご提示の新しいJSONデータの形式を自動解析して統合）
     function importData(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -582,59 +424,32 @@
         reader.onload = function(e) {
             try {
                 const rawData = JSON.parse(e.target.result);
-                let importedCount = 0;
-                
+                let count = 0;
                 rawData.forEach(item => {
-                    // ご提示いただいたJSONファイル(byn3_backup...)のフォーマット判定
                     if (item.order && item.tech1) {
                         const cars = item.order.split('-');
                         if (cars.length >= 2) {
                             studyDatabase.push({
-                                venue: "バックアップ", 
-                                raceNum: item.raceNo || 0,
-                                firstCar: cars[0],
-                                firstTech: convertTech(item.tech1),
-                                secondCar: cars[1],
-                                secondTech: convertTech(item.tech2),
-                                payout2: item.payout2 || 0,
-                                payout3: item.payout3 || 0,
-                                timestamp: "一括インポート"
+                                venue: "過去データ", raceNum: item.raceNo || 0,
+                                firstCar: cars[0], firstTech: item.tech1 === "逃" ? "逃げ" : item.tech1 === "差" ? "差し" : item.tech1 === "捲" ? "捲り" : item.tech1 === "マ" ? "マーク" : item.tech1,
+                                secondCar: cars[1], secondTech: item.tech2 || "",
+                                payout2: item.payout2 || 0, payout3: item.payout3 || 0
                             });
-                            importedCount++;
+                            count++;
                         }
-                    } 
-                    // 以前からの既存フォーマット判定
-                    else if (item.firstCar) {
-                        studyDatabase.push(item);
-                        importedCount++;
-                    }
+                    } else if (item.firstCar) { studyDatabase.push(item); count++; }
                 });
-
                 localStorage.setItem('keirin_study_db', JSON.stringify(studyDatabase));
                 loadHistoryList();
-                alert(`📂 ${importedCount}件のデータを正常に解析し、学習データベースに統合しました。`);
-            } catch(err) {
-                alert("ファイルの読み込みに失敗しました。データ形式を確認してください。");
-            }
+                alert(`📂 ${count}件のデータを統合しました。`);
+            } catch(err) { alert("ファイルの読み込みに失敗しました。"); }
         };
         reader.readAsText(file);
     }
 
-    // 決まり手の略称をシステム用文字列に変換
-    function convertTech(techShort) {
-        if(techShort === "逃") return "逃げ";
-        if(techShort === "捲") return "捲り";
-        if(techShort === "差") return "差し";
-        if(techShort === "マ") return "マーク";
-        return techShort; // 該当しない場合はそのまま
-    }
-
     function clearData() {
-        if(confirm("すべての結果履歴（学習データ）をリセットしますか？")) {
-            studyDatabase = [];
-            localStorage.removeItem('keirin_study_db');
-            initSystem();
-            document.getElementById('aiOutput').innerHTML = "データを学習させるか、予想ボタンを押してください。";
+        if(confirm("すべての結果履歴をリセットしますか？")) {
+            studyDatabase = []; localStorage.removeItem('keirin_study_db'); initSystem();
         }
     }
 
@@ -642,5 +457,3 @@
 </script>
 </body>
 </html>
-
- 
