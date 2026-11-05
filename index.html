@@ -1,201 +1,99 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>バトルバンク君 - 競輪独自評価＆学習ツール</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>バトルバンクくん - 車番並び×配当分析ツール</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4">
-    <div class="max-w-xl mx-auto space-y-6">
-        <!-- ヘッダー -->
-        <header class="text-center py-2 flex justify-between items-center px-2">
-            <div></div>
-            <div>
-                <h1 class="text-2xl font-black text-amber-400">⚡ バトルバンク君 ⚡</h1>
-                <p class="text-xs text-slate-400">独自評価スコア＆自動学習分析システム</p>
-            </div>
-            <button onclick="clearAllData()" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-amber-300 px-2.5 py-1.5 rounded transition font-bold border border-slate-600" title="入力内容と結果をすべてクリアします">
-                入力クリア
-            </button>
-        </header>
+<body class="bg-gray-100 text-gray-800 p-4 font-sans leading-relaxed">
+  <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h1 class="text-xl font-bold text-blue-600 mb-2">ライン① 車番並び × 配当分析</h1>
+    <p class="text-sm text-gray-600 mb-4">
+      先頭ライン（単騎除く）の「具体的な車番の並び」ごとに配当傾向を抽出します。
+    </p>
 
-        <!-- 入力エリア -->
-        <section class="bg-slate-800 p-4 rounded-xl shadow-lg space-y-4 border border-slate-700">
-            <h2 class="text-sm font-bold text-amber-300">📋 データ入力</h2>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">シンプル一覧テキスト（コピー用）</label>
-                <textarea id="inputText" rows="7" class="w-full bg-slate-900 text-xs p-2 rounded border border-slate-700 focus:outline-none focus:border-amber-400 font-mono" placeholder="【📋】1番：[〇] 深瀬泰我 競走得点: 82.61
-..."></textarea>
-            </div>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">ラインの並び（例: 152 / 7 / 643 ※単騎も含む）</label>
-                <input type="text" id="inputLines" class="w-full bg-slate-900 text-xs p-2 rounded border border-slate-700 focus:outline-none focus:border-amber-400 font-mono" placeholder="152 / 7 / 643">
-            </div>
-            <button onclick="analyzeData()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded text-sm transition">
-                分析＆AI独自スコア算出
-            </button>
-        </section>
+    <textarea id="dataInput" rows="8" class="w-full p-3 border rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm mb-4" placeholder="入力例：
+福井3R: [2 5 1 3] [4] 配当: 15400
+福井4R: [4 5 1] [6] [2] [3] 配当: 3200
+福井5R: [7 1] [2 5] [3 4 6] 配当: 11000
+福井6R: [1 5 4] [6 2] [7 3] 配当: 980
+福井7R: [1 5 4] [2 6] [3 7] 配当: 1250"></textarea>
 
-        <!-- 分析結果表示エリア -->
-        <section id="resultArea" class="bg-slate-800 p-4 rounded-xl shadow-lg space-y-4 border border-slate-700 hidden">
-            <h2 class="text-sm font-bold text-amber-300">📊 AI独自評価＆ラインポジション</h2>
-            
-            <div id="outputSimple" class="space-y-1 font-mono text-xs bg-slate-900 p-3 rounded border border-slate-700 select-all"></div>
-            
-            <div>
-                <h3 class="text-xs font-bold text-slate-400 mb-1">■ 独自スコアランキング（ポジション補正込）</h3>
-                <div id="outputScoreList" class="space-y-2 text-xs"></div>
-            </div>
+    <button onclick="analyzeData()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-md transition duration-200">
+      車番の並びで配当を分析する
+    </button>
 
-            <!-- 結果フィードバック（学習用） -->
-            <div class="pt-3 border-t border-slate-700 space-y-2">
-                <label class="block text-xs text-amber-400 font-bold">🎯 レース結果を入力してAIを成長させる</label>
-                <div class="flex gap-2">
-                    <input type="text" id="raceResult" placeholder="例: 1-5-2 (1着-2着-3着)" class="flex-1 bg-slate-900 text-xs p-2 rounded border border-slate-700 font-mono">
-                    <button onclick="saveFeedback()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded text-xs transition">
-                        結果を学習
-                    </button>
-                </div>
-                <p id="learningStatus" class="text-[10px] text-slate-400"></p>
-            </div>
-        </section>
+    <div class="mt-6">
+      <h2 class="font-bold text-gray-700 mb-2 border-b pb-1">分析結果サマリー</h2>
+      <pre id="outputArea" class="bg-gray-800 text-green-400 p-4 rounded-md text-sm whitespace-pre-wrap font-mono min-h-[100px]">ここにテキスト結果が出力されます...</pre>
     </div>
+  </div>
 
-    <script>
-        let currentParsedData = [];
+  <script>
+    function analyzeData() {
+      const inputData = document.getElementById('dataInput').value;
+      const lines = inputData.split('\n');
+      const analysisMap = {}; 
 
-        function analyzeData() {
-            const rawText = document.getElementById('inputText').value.trim();
-            const linesText = document.getElementById('inputLines').value.trim();
-            if (!rawText) {
-                alert('シンプル一覧のテキストを入力してください。');
-                return;
-            }
+      lines.forEach(line => {
+        const text = line.trim();
+        if (!text) return;
 
-            const lineGroups = linesText.split('/').map(g => g.trim()).filter(Boolean);
-            const positionMap = {}; 
+        // 1. 最初に出現するブラケット [...] を先頭ライン(ライン①)として抽出
+        const lineMatch = text.match(/\[([\d\s]+)\]/);
+        if (!lineMatch) return;
 
-            lineGroups.forEach(group => {
-                const cars = group.split('');
-                if (cars.length === 1) {
-                    positionMap[cars[0]] = '単騎';
-                } else {
-                    cars.forEach((car, idx) => {
-                        if (idx === 0) positionMap[car] = '先頭';
-                        else if (idx === 1) positionMap[car] = '番手';
-                        else positionMap[car] = `${idx + 1}番手`;
-                    });
-                }
-            });
+        // 車番の配列を取得
+        const carsStr = lineMatch[1].trim();
+        const carsArr = carsStr.split(/\s+/);
 
-            const rows = rawText.split('\n');
-            currentParsedData = [];
+        // 単騎（1車）はラインとみなさずスキップ
+        if (carsArr.length <= 1) return;
 
-            rows.forEach(row => {
-                const match = row.match(/【📋】(\d+)番：\[(.*?)\]\s*(.+?)\s*競走得点:\s*([\d\.]+)/);
-                if (match) {
-                    const carNum = match[1];
-                    const mark = match[2];
-                    const name = match[3].trim();
-                    const score = parseFloat(match[4]);
-                    const pos = positionMap[carNum] || '不明';
+        // 車番の並びをハイフン繋ぎのキーにする (例: "1-5-4")
+        const patternKey = carsArr.join('-');
 
-                    let markBonus = 0;
-                    if (mark.includes('◎')) markBonus = 5.0;
-                    else if (mark.includes('〇') || mark.includes('〇')) markBonus = 3.5;
-                    else if (mark.includes('▲')) markBonus = 2.5;
-                    else if (mark.includes('△')) markBonus = 1.5;
-                    else if (mark.includes('✕') || mark.includes('✖')) markBonus = 0.5;
+        // 2. 行の末尾付近にある数字を「配当金額」として抽出
+        const payoutMatch = text.match(/(\d+)[円]?$/);
+        if (!payoutMatch) return;
+        
+        const payout = parseInt(payoutMatch[1], 10);
 
-                    let posBonus = 0;
-                    if (pos === '番手') posBonus = 3.0;
-                    else if (pos === '先頭') posBonus = 1.5;
-                    else if (pos === '単騎') posBonus = -1.0;
-
-                    let learnedWeight = parseFloat(localStorage.getItem(`weight_${carNum}`) || '0');
-                    const totalScore = (score + markBonus + posBonus + learnedWeight).toFixed(2);
-
-                    currentParsedData.push({
-                        carNum, mark, name, score, pos, totalScore
-                    });
-                }
-            });
-
-            currentParsedData.sort((a, b) => parseFloat(b.totalScore) - parseFloat(a.totalScore));
-            renderResults(rawText);
+        // データを記録
+        if (!analysisMap[patternKey]) {
+          analysisMap[patternKey] = [];
         }
+        analysisMap[patternKey].push(payout);
+      });
 
-        function renderResults(rawText) {
-            document.getElementById('outputSimple').innerText = rawText;
-            
-            const scoreListEl = document.getElementById('outputScoreList');
-            scoreListEl.innerHTML = '';
+      // 3. 結果をテキスト形式で組み立てる
+      let resultText = "【先頭ライン車番並び別の配当データ】\n\n";
+      const keys = Object.keys(analysisMap).sort();
 
-            currentParsedData.forEach((item, index) => {
-                const div = document.createElement('div');
-                div.className = 'flex justify-between items-center bg-slate-900 p-2 rounded border border-slate-700';
-                div.innerHTML = `
-                    <div>
-                        <span class="font-bold text-amber-400">${index + 1}位</span> 
-                        <span class="bg-slate-800 px-1.5 py-0.5 rounded text-white font-bold">${item.carNum}番</span> 
-                        <span class="text-white">${item.name}</span> 
-                        <span class="text-slate-400 text-[10px]">(${item.pos})</span>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-amber-300 font-bold">評価: ${item.totalScore}</span>
-                        <span class="text-[10px] text-slate-500 block">得点:${item.score}</span>
-                    </div>
-                `;
-                scoreListEl.appendChild(div);
-            });
+      if (keys.length === 0) {
+        resultText += "有効なデータ（2車以上の先頭ライン＋配当額）が見つかりませんでした。";
+      } else {
+        keys.forEach(key => {
+          const payouts = analysisMap[key];
+          const totalRaces = payouts.length;
+          const avgPayout = Math.round(payouts.reduce((sum, val) => sum + val, 0) / totalRaces);
+          const maxPayout = Math.max(...payouts);
+          const minPayout = Math.min(...payouts);
 
-            document.getElementById('resultArea').classList.remove('hidden');
-            document.getElementById('learningStatus').innerText = '';
-        }
+          resultText += `■ 並び [${key}]\n`;
+          resultText += `・出現回数 : ${totalRaces} レース\n`;
+          resultText += `・平均配当 : ${avgPayout.toLocaleString()} 円\n`;
+          if (totalRaces > 1) {
+            resultText += `・最高配当 : ${maxPayout.toLocaleString()} 円\n`;
+            resultText += `・最低配当 : ${minPayout.toLocaleString()} 円\n`;
+          }
+          resultText += `\n`;
+        });
+      }
 
-        function saveFeedback() {
-            const resultStr = document.getElementById('raceResult').value.trim();
-            if (!resultStr) {
-                alert('レース結果（例: 1-5-2）を入力してください。');
-                return;
-            }
-
-            const places = resultStr.replace(/[-／\s]/g, '').split('');
-            if (places.length < 3) {
-                alert('正しい着順形式で入力してください（例: 1-5-2）');
-                return;
-            }
-
-            const first = places[0];
-            const second = places[1];
-            const third = places[2];
-
-            currentParsedData.forEach(item => {
-                let currentWeight = parseFloat(localStorage.getItem(`weight_${item.carNum}`) || '0');
-                if (item.carNum === first) {
-                    currentWeight += 1.5;
-                } else if (item.carNum === second) {
-                    currentWeight += 0.8;
-                } else if (item.carNum === third) {
-                    currentWeight += 0.4;
-                } else {
-                    currentWeight -= 0.2;
-                }
-                localStorage.setItem(`weight_${item.carNum}`, currentWeight);
-            });
-
-            document.getElementById('learningStatus').innerText = '✅ 結果をAIモデルに学習させました！次回の予測スコアに反映されます。';
-        }
-
-        // 入力内容と分析結果をすべてきれいにクリアするボタン
-        function clearAllData() {
-            document.getElementById('inputText').value = '';
-            document.getElementById('inputLines').value = '';
-            document.getElementById('raceResult').value = '';
-            document.getElementById('resultArea').classList.add('hidden');
-            currentParsedData = [];
-        }
-    </script>
+      document.getElementById('outputArea').innerText = resultText;
+    }
+  </script>
 </body>
 </html>
