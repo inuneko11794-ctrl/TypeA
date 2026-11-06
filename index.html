@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BATTLE BANK-KUN | HYPER LIGHT CYBER MATRIX</title>
+  <title>BATTLE BANK-KUN | PATTERN MATRIX ANALYZER</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -12,7 +12,6 @@
       --color-cyan: 0, 150, 255;
       --color-magenta: 255, 0, 110;
       --color-light-bg: 240, 244, 250;
-      --color-alert: 239, 68, 68;
     }
     body {
       background-color: #f0f4fa;
@@ -88,7 +87,6 @@
     .blink-fast { animation: blink-fast 0.15s infinite; }
     @keyframes blink-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     
-    /* Touch-safe buttons */
     .btn-cyber {
       background: linear-gradient(135deg, rgba(0,150,255,0.15), rgba(0,150,255,0.3)); 
       border: 1px solid rgba(0,150,255,0.8);
@@ -150,7 +148,7 @@
           BATTLE BANK-KUN
         </h1>
         <div class="flex items-center gap-3 mt-2">
-          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm animate-pulse">HYPER LIGHT MATRIX v5.3</span>
+          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm animate-pulse">PATTERN MATRIX v5.4</span>
           <!-- Audio Toggle Button -->
           <button id="audioToggleBtn" type="button" onclick="toggleAudioSystem()" class="text-[10px] text-slate-700 hover:text-sky-600 border border-slate-300 bg-white/95 hover:border-sky-400 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-md transition cursor-pointer hover-snd click-snd z-40 relative">
             <div id="audioStatus" class="w-2 h-2 rounded-full bg-red-500"></div>
@@ -219,7 +217,7 @@
         <!-- Graph Area -->
         <div class="glass-panel p-5 rounded-2xl flex-grow flex flex-col">
           <h2 class="font-bold text-xs tracking-widest text-slate-900 border-l-4 border-pink-500 pl-2 mb-3 flex justify-between items-center">
-            <span class="neon-text-magenta">▶ KINETIC VISUALIZER // 動的解析グラフ</span>
+            <span class="neon-text-magenta">▶ PATTERN DYNAMICS // 差分パターン別 平均配当グラフ</span>
             <div class="flex items-center gap-2 bg-white/80 px-2.5 py-1 rounded-full border border-slate-200 shadow-sm">
               <span class="w-2 h-2 rounded-full bg-red-500 blink-fast"></span>
               <span class="text-[10px] text-red-600 tracking-widest font-mono-tech font-bold">REC</span>
@@ -241,7 +239,7 @@ AWAITING COMMAND EXECUTION...</div>
     </div>
 
     <!-- Stats Cards Grid -->
-    <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2 mb-4">▶ CATEGORY METRICS & ROI (回収率)</h2>
+    <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2 mb-4">▶ CATEGORY & PATTERN METRICS (車番クラス別 集計)</h2>
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4" id="categoryCards">
       <!-- Generated via JS -->
     </div>
@@ -320,7 +318,7 @@ AWAITING COMMAND EXECUTION...</div>
         } catch(e) { savedRecords = []; }
         updateCountDisplay();
         runAnalysis();
-        logToTerminal("> DBリカバリ完了. ハイパーライトシステム v5.3 稼働中.");
+        logToTerminal("> DBリカバリ完了. パターンマトリクス解析システム稼働中.");
       } else {
         runAnalysis(); 
       }
@@ -341,7 +339,6 @@ AWAITING COMMAND EXECUTION...</div>
         out.innerHTML = htmlStr + out.innerHTML;
     }
 
-    /* --- FIXED FILE UPLOAD FUNCTIONALITY --- */
     function loadMarkdown(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -520,30 +517,27 @@ AWAITING COMMAND EXECUTION...</div>
         }
         
         const synced = data7.filter(r => r.payout > 0);
-        const pts = 10;
-        const costPerRace = pts * 100;
-        const totalInv = synced.length * costPerRace;
-        const totalRet = synced.reduce((sum, r) => sum + r.payout, 0);
-        const roi = totalInv > 0 ? ((totalRet / totalInv) * 100).toFixed(1) : 0;
         const max = synced.length > 0 ? Math.max(...synced.map(r=>r.payout)) : 0;
 
-        const patterns = {};
+        const diffMap = {};
         synced.forEach(r => {
-            if(r.diffPattern) patterns[r.diffPattern] = (patterns[r.diffPattern] || 0) + 1;
+            const dp = r.diffPattern || 'N/A';
+            if(!diffMap[dp]) diffMap[dp] = { count: 0, payouts: [] };
+            diffMap[dp].count++;
+            diffMap[dp].payouts.push(r.payout);
         });
-        const topPatterns = Object.entries(patterns).sort((a,b)=>b[1]-a[1]).slice(0,3);
 
-        let log = `<br><span class="text-pink-600 font-bold tracking-widest">--- [ 7-CAR DEEP SCAN RESULTS ] ---</span><br>`;
-        log += `<span class="text-sky-700">対象レース数:</span> ${data7.length}件 (同期済: ${synced.length}件)<br>`;
-        log += `<span class="text-sky-700">想定投資額　:</span> ¥${totalInv.toLocaleString()} <span class="text-slate-500">(1R ${pts}点換算)</span><br>`;
-        log += `<span class="text-sky-700">回収総額　　:</span> ¥${totalRet.toLocaleString()}<br>`;
-        log += `<span class="text-sky-700">回収率(ROI) :</span> <span class="${roi>=100 ? 'text-emerald-600':'text-red-600'} font-bold">${roi}%</span><br>`;
+        let log = `<br><span class="text-pink-600 font-bold tracking-widest">--- [ 7-CAR DIFF PATTERN DEEP SCAN ] ---</span><br>`;
+        log += `<span class="text-sky-700">対象7車レース:</span> 総数 ${data7.length}件 (配当同期済: ${synced.length}件)<br>`;
         log += `<span class="text-sky-700">最高配当額　:</span> ¥${max.toLocaleString()}<br>`;
-        log += `<span class="text-sky-700">頻出ライン構成 (diffPattern TOP 3):</span><br>`;
-        if(topPatterns.length > 0) {
-            topPatterns.forEach((p, i) => { log += `  0${i+1}. [ ${p[0]} ] : ${p[1]} 回発生<br>`; });
-        } else { log += `  データ不足<br>`; }
-        log += `<span class="text-pink-600 tracking-widest">-----------------------------------</span><br>`;
+        log += `<span class="text-sky-700">【差分パターン別の配当傾向】:</span><br>`;
+        
+        Object.entries(diffMap).sort((a,b)=>b[1].count - a[1].count).forEach(([dp, dat]) => {
+            const avgP = Math.round(dat.payouts.reduce((a,b)=>a+b,0) / dat.payouts.length);
+            const maxP = Math.max(...dat.payouts);
+            log += `  ▪ 差分 [ ${dp} ] : 発生 ${dat.count}回 | 平均配当: ¥${avgP.toLocaleString()} (最高: ¥${maxP.toLocaleString()})<br>`;
+        });
+        log += `<span class="text-pink-600 tracking-widest">-----------------------------------------</span><br>`;
         
         logToTerminalRaw(log);
     }
@@ -553,28 +547,29 @@ AWAITING COMMAND EXECUTION...</div>
       const catStats = {};
       categories.forEach(c => { catStats[c] = { count: 0, payouts: [] }; });
 
+      // diffPatternごとの集計用
+      const diffPatternStats = {};
+
       if (savedRecords.length > 0) {
           savedRecords.forEach(record => {
             let cat = record.category || "9車";
             if (!catStats[cat]) catStats[cat] = { count: 0, payouts: [] };
             catStats[cat].count++;
             if (record.payout > 0) catStats[cat].payouts.push(record.payout);
+
+            // 差分パターンの集計
+            const dp = record.diffPattern || 'パターンなし';
+            if (!diffPatternStats[dp]) diffPatternStats[dp] = { count: 0, payouts: [] };
+            diffPatternStats[dp].count++;
+            if (record.payout > 0) diffPatternStats[dp].payouts.push(record.payout);
           });
       }
 
-      let cardsHtml = ''; let chartLabels = categories; let chartCounts = []; let chartAvgs = [];
-
+      let cardsHtml = '';
       categories.forEach(c => {
         const data = catStats[c];
         const avg = data.payouts.length > 0 ? Math.round(data.payouts.reduce((a,b)=>a+b,0)/data.payouts.length) : 0;
         const max = data.payouts.length > 0 ? Math.max(...data.payouts) : 0;
-        
-        const totalInv = data.payouts.length * 1000;
-        const totalRet = data.payouts.reduce((a,b)=>a+b,0);
-        const roi = totalInv > 0 ? ((totalRet / totalInv) * 100).toFixed(1) : 0;
-        const roiColor = roi >= 100 ? "text-emerald-600 font-bold" : "text-red-600 font-bold";
-        
-        chartCounts.push(data.count); chartAvgs.push(avg);
 
         cardsHtml += `
           <div class="card-matrix bg-white/95 backdrop-blur-md p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden group shadow-md">
@@ -582,12 +577,12 @@ AWAITING COMMAND EXECUTION...</div>
             
             <div class="mb-3 flex justify-between items-start">
               <div>
-                <div class="font-mono-tech text-[9px] text-sky-600 tracking-widest mb-0.5 uppercase border-b border-sky-100 pb-0.5">TARGET CLASS</div>
+                <div class="font-mono-tech text-[9px] text-sky-600 tracking-widest mb-0.5 uppercase border-b border-sky-100 pb-0.5">CLASS</div>
                 <div class="font-bold text-lg text-slate-800 group-hover:text-sky-600 transition tracking-wider">${c}</div>
               </div>
               <div class="text-right">
-                <div class="text-[8px] text-slate-400 tracking-widest uppercase">ROI</div>
-                <div class="font-mono-tech text-xs ${roiColor}">${roi}%</div>
+                <div class="text-[8px] text-slate-400 tracking-widest uppercase">Synced</div>
+                <div class="font-mono-tech text-xs text-pink-600 font-bold">${data.payouts.length}件</div>
               </div>
             </div>
             
@@ -597,25 +592,25 @@ AWAITING COMMAND EXECUTION...</div>
                 <div class="font-mono-tech text-sky-700 text-xs font-bold">${data.count}</div>
               </div>
               <div class="bg-pink-50/70 border border-pink-100 rounded-xl p-1.5 text-center">
-                <div class="text-[7px] text-slate-400 uppercase tracking-widest">Synced</div>
-                <div class="font-mono-tech text-pink-600 text-xs font-bold">${data.payouts.length}</div>
+                <div class="text-[7px] text-slate-400 uppercase tracking-widest">Max Payout</div>
+                <div class="font-mono-tech text-pink-600 text-xs font-bold">${max > 0 ? '¥' + max.toLocaleString() : '-'}</div>
               </div>
             </div>
             
             <div class="mt-1 pt-2 border-t border-slate-100">
-              <div class="text-[8px] text-slate-400 uppercase tracking-widest mb-1 flex justify-between">
-                <span>Avg Return</span>
-                <span>Max</span>
-              </div>
-              <div class="flex justify-between items-end">
-                <div class="font-mono-tech font-bold text-sm text-slate-800">${avg > 0 ? '¥' + avg.toLocaleString() : '---'}</div>
-                <div class="font-mono-tech text-[9px] text-slate-500">${max > 0 ? '¥' + max.toLocaleString() : '-'}</div>
-              </div>
+              <div class="text-[8px] text-slate-400 uppercase tracking-widest mb-1">Average Payout (平均配当)</div>
+              <div class="font-mono-tech font-bold text-sm text-slate-800">${avg > 0 ? '¥' + avg.toLocaleString() : '---'}</div>
             </div>
           </div>
         `;
       });
       document.getElementById('categoryCards').innerHTML = cardsHtml;
+
+      // グラフデータ：差分パターンごとの平均配当と発生件数
+      const sortedDiffs = Object.entries(diffPatternStats).sort((a,b) => b[1].count - a[1].count).slice(0, 8); // TOP8パターン表示
+      const chartLabels = sortedDiffs.map(item => '差分: ' + item[0]);
+      const chartCounts = sortedDiffs.map(item => item[1].count);
+      const chartAvgs = sortedDiffs.map(item => item[1].payouts.length > 0 ? Math.round(item[1].payouts.reduce((a,b)=>a+b,0)/item[1].payouts.length) : 0);
 
       const canvas = document.getElementById('matrixChart'); const ctx = canvas.getContext('2d');
       const barGrad = ctx.createLinearGradient(0, 0, 0, 300); barGrad.addColorStop(0, 'rgba(14, 165, 233, 0.85)'); barGrad.addColorStop(1, 'rgba(14, 165, 233, 0.2)');
@@ -626,14 +621,14 @@ AWAITING COMMAND EXECUTION...</div>
         data: {
           labels: chartLabels,
           datasets: [
-            { label: ' LOGGED RACES (件数)', data: chartCounts, backgroundColor: barGrad, borderColor: '#0ea5e9', borderWidth: 1.5, yAxisID: 'y', borderRadius: 4, barPercentage: 0.6, order: 2 },
-            { label: ' AVG PAYOUT (平均払戻)', data: chartAvgs, type: 'line', borderColor: '#ec4899', backgroundColor: lineGrad, borderWidth: 2.5, fill: true, pointBackgroundColor: '#fff', pointBorderColor: '#ec4899', pointBorderWidth: 2, pointRadius: 4.5, pointHoverRadius: 7, pointHoverBackgroundColor: '#0ea5e9', pointHoverBorderColor: '#fff', yAxisID: 'y1', tension: 0.2, order: 1 }
+            { label: ' 発生件数', data: chartCounts, backgroundColor: barGrad, borderColor: '#0ea5e9', borderWidth: 1.5, yAxisID: 'y', borderRadius: 4, barPercentage: 0.6, order: 2 },
+            { label: ' 平均配当 (円)', data: chartAvgs, type: 'line', borderColor: '#ec4899', backgroundColor: lineGrad, borderWidth: 2.5, fill: true, pointBackgroundColor: '#fff', pointBorderColor: '#ec4899', pointBorderWidth: 2, pointRadius: 4.5, pointHoverRadius: 7, pointHoverBackgroundColor: '#0ea5e9', pointHoverBorderColor: '#fff', yAxisID: 'y1', tension: 0.2, order: 1 }
           ]
         },
         options: {
           responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
           scales: {
-            x: { grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false }, ticks: { color: '#475569', font: { family: "'Noto Sans JP', sans-serif", size: 10, weight: 'bold' } } },
+            x: { grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false }, ticks: { color: '#475569', font: { family: "'Share Tech Mono', sans-serif", size: 10, weight: 'bold' } } },
             y: { type: 'linear', position: 'left', grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false }, ticks: { color: '#0ea5e9', font: { family: "'Share Tech Mono', monospace", size: 11 } } },
             y1: { type: 'linear', position: 'right', grid: { display: false }, ticks: { color: '#ec4899', font: { family: "'Share Tech Mono', monospace", size: 11 } } }
           },
@@ -672,7 +667,7 @@ AWAITING COMMAND EXECUTION...</div>
       html += '<button type="button" onclick="savePayouts()" class="mt-3 w-full bg-sky-600 hover:bg-sky-500 text-white border border-sky-400 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition hover-snd click-snd shadow-md cursor-pointer">Overwrite DB [上書き保存]</button>';
       const out = document.getElementById('outputArea');
       out.innerHTML = html + out.innerHTML;
-      logToTerminal("> 手動エディタを桁数拡大仕様で起動しました.");
+      logToTerminal("> 手動エディタを起動しました.");
     }
 
     function savePayouts() {
