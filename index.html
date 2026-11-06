@@ -47,7 +47,6 @@
     .blink-fast { animation: blink-fast 0.15s infinite; }
     @keyframes blink-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     
-    /* 真っ白チカチカ用のアニメーション追加 */
     @keyframes flash-border {
       0%, 100% { border-color: #000; box-shadow: 0 0 10px #000; }
       50% { border-color: #fff; box-shadow: 0 0 30px #fff; }
@@ -133,7 +132,6 @@
       <div class="xl:col-span-4 flex flex-col gap-5">
         <div class="glass-panel p-5 rounded-2xl">
           
-          <!-- 手動入力モード起動ボタン -->
           <button type="button" id="openManualBtn" class="touch-btn chika-border border-4 border-black bg-white text-black font-black py-3 px-4 mb-6 w-full flex justify-between items-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-slate-100 transition-colors">
             <span class="tracking-widest uppercase chika-text">⚡ 手動入力モード (ULTRA WHITE)</span>
             <span>▶</span>
@@ -201,11 +199,9 @@ AWAITING COMMAND EXECUTION...</div>
     <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2 mb-4">▶ CATEGORY & PATTERN METRICS (車番クラス別 集計)</h2>
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4" id="categoryCards"></div>
   </div>
-
-  <!-- 純白＆チカチカ 手動入力モーダル（別タブ相当） -->
+  <!-- 純白＆チカチカ 手動入力モーダル -->
   <div id="manualInputModal" class="hidden fixed inset-0 z-[1000] bg-white/90 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white border-8 border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-xl p-6 chika-border relative overflow-y-auto max-h-[90vh]">
-      <!-- 閉じるボタン -->
       <button type="button" id="closeManualBtn" class="touch-btn absolute top-3 right-3 text-3xl font-black bg-black text-white w-10 h-10 flex items-center justify-center hover:bg-red-600 transition-colors">×</button>
       
       <header class="text-center mb-6 border-b-4 border-black pb-4 mt-2">
@@ -217,17 +213,17 @@ AWAITING COMMAND EXECUTION...</div>
         <div class="flex gap-4">
           <div class="w-1/2">
             <label class="block text-sm uppercase mb-1">競輪場</label>
-            <select id="manVenue" class="w-full border-4 border-black p-3 text-lg bg-white focus:outline-none focus:bg-black focus:text-white transition-colors cursor-pointer appearance-none"></select>
+            <select id="manVenue" class="w-full border-4 border-black p-3 text-lg bg-white focus:outline-none focus:ring-4 focus:ring-black cursor-pointer"></select>
           </div>
           <div class="w-1/2">
             <label class="block text-sm uppercase mb-1">レース</label>
-            <select id="manRace" class="w-full border-4 border-black p-3 text-lg bg-white focus:outline-none focus:bg-black focus:text-white transition-colors cursor-pointer appearance-none"></select>
+            <select id="manRace" class="w-full border-4 border-black p-3 text-lg bg-white focus:outline-none focus:ring-4 focus:ring-black cursor-pointer"></select>
           </div>
         </div>
         
         <div>
           <label class="block text-sm uppercase mb-1">クラス（車立て）</label>
-          <select id="manClass" class="w-full border-4 border-black p-3 text-lg bg-white focus:outline-none focus:bg-black focus:text-white transition-colors cursor-pointer appearance-none">
+          <select id="manClass" class="w-full border-4 border-black p-3 text-lg bg-white focus:outline-none focus:ring-4 focus:ring-black cursor-pointer">
             <option value="7車">7車</option>
             <option value="9車">9車</option>
             <option value="ガールズ">ガールズ</option>
@@ -270,7 +266,6 @@ AWAITING COMMAND EXECUTION...</div>
     let audioCtx = null;
     let audioUnlocked = false;
 
-    // 43場のリアルデータ
     const REAL_VENUES = [
       "函館", "青森", "いわき平", "弥彦", "前橋", "取手", "宇都宮", "大宮", "西武園", "京王閣",
       "立川", "松戸", "川崎", "平塚", "小田原", "伊東", "静岡", "豊橋", "名古屋", "岐阜",
@@ -326,7 +321,6 @@ AWAITING COMMAND EXECUTION...</div>
         el.addEventListener('click', handler);
         el.addEventListener('touchend', handler);
     }
-
     document.addEventListener('DOMContentLoaded', () => {
         bindTouchAction('extractBtn', triggerExtract);
         bindTouchAction('syncBtn', triggerSync);
@@ -340,7 +334,6 @@ AWAITING COMMAND EXECUTION...</div>
         bindTouchAction('clearBtn', clearData);
         bindTouchAction('clearLogBtn', () => document.getElementById('outputArea').innerHTML = '');
         
-        // モーダル用バインド
         bindTouchAction('openManualBtn', openManualModal);
         bindTouchAction('closeManualBtn', closeManualModal);
         bindTouchAction('manSaveBtn', saveManualData);
@@ -361,7 +354,6 @@ AWAITING COMMAND EXECUTION...</div>
         }
     });
 
-    // --- モーダル制御ロジック ---
     function initManualSelects() {
       const venueSelect = document.getElementById('manVenue');
       REAL_VENUES.forEach(v => {
@@ -400,7 +392,6 @@ AWAITING COMMAND EXECUTION...</div>
         return;
       }
 
-      // 差分計算ロジック
       const diff1 = Math.abs(c1 - c2);
       const diff2 = Math.abs(c2 - c3);
       let diffPatternKey = `${diff1}-${diff2}`;
@@ -430,7 +421,6 @@ AWAITING COMMAND EXECUTION...</div>
       logToTerminal(`> ⚡ [手動入力] ${venue} ${race} ${patternKey} (配当: ¥${payout}) を追加しました。`, "success");
       playBeep(880, 'sine', 0.2);
       
-      // 入力欄リセット
       document.getElementById('manCar1').value = '';
       document.getElementById('manCar2').value = '';
       document.getElementById('manCar3').value = '';
@@ -438,7 +428,6 @@ AWAITING COMMAND EXECUTION...</div>
       
       closeManualModal();
     }
-    // -------------------------
 
     function logToTerminal(msg, type="info") {
         const out = document.getElementById('outputArea');
@@ -487,10 +476,8 @@ AWAITING COMMAND EXECUTION...</div>
     function extractAndSaveData() {
       const inputData = document.getElementById('dataInput').value;
       let extractedCount = 0;
-      
       let globalVenue = "不明";
       
-      // 全文検索をやめ、「〇〇1R」の形から会場名を正確に抽出
       const titleMatch = inputData.match(/([一-龠]{2,3})\s?(\d+)R/);
       if (titleMatch) {
           for (let v of REAL_VENUES) {
@@ -508,7 +495,6 @@ AWAITING COMMAND EXECUTION...</div>
           let venue = globalVenue; 
           let raceName = "UNKNOWN";
           
-          // 各ブロック内でも「〇〇nR」から会場・レースを特定
           const headerMatch = block.match(/([一-龠]{2,3})\s?(\d+)R/);
           if (headerMatch) {
               raceName = headerMatch[2] + "R";
@@ -571,15 +557,6 @@ AWAITING COMMAND EXECUTION...</div>
               }
           }
       });
-
-      if (extractedCount === 0 && inputData.length > 20) {
-          const fallbackRace = inputData.match(/\d+R/)?.[0] || "1R";
-          const exists = savedRecords.find(r => r.raceName === fallbackRace && r.venue === globalVenue);
-          if (!exists) {
-              savedRecords.push({ venue: globalVenue, raceName: fallbackRace, category: "9車", pattern: "1-2-3", diffPattern: "1-1", diffDisplay: "1-1", payout: 0, timestamp: new Date().getTime() });
-              extractedCount = 1;
-          }
-      }
 
       if (extractedCount > 0) {
         localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
@@ -831,3 +808,5 @@ AWAITING COMMAND EXECUTION...</div>
 </body>
 </html>
 
+
+    
