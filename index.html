@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#09051b">
+<meta name="theme-color" content="#007cff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BANK-KUN">
 <title>BATTLE BANK-KUN | CYBER WHITE ULTRA v8.1</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -57,12 +62,14 @@ body:after{content:"";position:fixed;inset:-30%;pointer-events:none;z-index:0;ba
  .modal-card{padding:16px!important;border-width:2px;max-height:92dvh;overflow-y:auto}
  .modal-card header h2{font-size:25px}
 }
+
 .discovery-card{background:linear-gradient(145deg,#fff,#eaf7ff);border:1px solid #75c9f5;border-radius:15px;padding:13px;color:#123653;box-shadow:0 7px 18px rgba(20,110,170,.10)}
 .discovery-chip{display:inline-block;border:1px solid #80c9ee;background:#e8f7ff;color:#075b91;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:900}
 .discovery-meter{height:7px;border-radius:99px;background:#d9edf9;overflow:hidden}.discovery-meter>i{display:block;height:100%;background:linear-gradient(90deg,#00aaff,#168cff);border-radius:99px}
 .discovery-result{border:1px solid #a8d7f2;background:rgba(255,255,255,.92);border-radius:12px;padding:12px;margin-top:9px}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 
+/* ===== CYBER WHITE ULTRA : VISUAL UPGRADE v8.1 ===== */
 :root{--cyan:#007cff;--pink:#00b8ff;--violet:#536dff;--gold:#e2f5ff;--ink:#092744;--panel:rgba(255,255,255,.97);--deep:#071a33;--electric:#00a8ff;--ice:#eaf7ff}
 body{color:#102b46;background:radial-gradient(ellipse at 8% 4%,rgba(0,153,255,.18),transparent 30%),radial-gradient(ellipse at 92% 14%,rgba(72,105,255,.13),transparent 29%),radial-gradient(ellipse at 50% 100%,rgba(0,190,255,.12),transparent 38%),linear-gradient(135deg,#f8fcff 0%,#eaf5ff 48%,#f9fcff 100%)}
 body:before{opacity:.18;background-image:linear-gradient(rgba(0,105,210,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(0,105,210,.13) 1px,transparent 1px);background-size:28px 28px}
@@ -99,6 +106,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 ::selection{background:#bdeaff;color:#07345b}::-webkit-scrollbar-thumb{background:linear-gradient(#008cff,#536dff);border-radius:8px}
 @media(max-width:640px){.app-shell>header{border-radius:20px;padding:18px 15px}.neon-title{font-size:clamp(2rem,10vw,3rem);line-height:1.08}.glass-panel{border-radius:17px}.btn-cyber,.btn-alert,.btn-ghost{min-height:42px}}
 @media(prefers-reduced-motion:reduce){.app-shell>header:after{display:none}}
+
 </style>
 </head>
 <body>
@@ -128,8 +136,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     </div>
    </div>
   </div>
-
-     <div class="glass-panel p-4 sm:p-5">
+  <div class="glass-panel p-4 sm:p-5">
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-sky-500 pl-2 mb-4">SYS.COMMANDS // 制御</h2>
     <div class="grid grid-cols-3 gap-2 mb-4 control-grid">
@@ -180,6 +187,7 @@ AWAITING COMMAND EXECUTION...</div>
   <p class="text-[10px] text-slate-500 mt-3">※配当未入力レースは配当率の計算対象外。検証側の件数が少ないパターンは「検証データ不足」と表示します。相関は予測の保証ではありません。</p>
  </div>
 </section>
+
 <section class="glass-panel p-4 sm:p-5 mb-8" id="line1AnalysisSection">
  <div class="panel-content">
   <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -231,12 +239,13 @@ AWAITING COMMAND EXECUTION...</div>
   </div>
  </div>
 </div>
+
 <script>
 let savedRecords=[],myChart=null,audioCtx=null,audioUnlocked=false;
 const REAL_VENUES=["函館","青森","いわき平","弥彦","前橋","取手","宇都宮","大宮","西武園","京王閣","立川","松戸","川崎","平塚","小田原","伊東","静岡","豊橋","名古屋","岐阜","大垣","富山","松阪","四日市","福井","奈良","向日町","和歌山","岸和田","玉野","広島","防府","高松","小松島","高知","松山","小倉","久留米","武雄","佐世保","別府","熊本","千葉"];
 const $=id=>document.getElementById(id);
 function bind(id,fn){const el=$(id);if(!el)return;el.addEventListener('click',e=>{e.preventDefault();fn()})}
-function toggleAudioSystem(){try{if(!audioUnlocked){audioCtx=new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume().then(()=>{audioUnlocked=true;$('audioToggleBtn').innerHTML='<span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>AUDIO_SYS [ON]</span>';playBeep(880,'sine',.1,.03);logToTerminal("> オーディオ有効化。","success")}else{audioUnlocked=false;$('audioStatus').classList.replace('bg-cyan-300','bg-pink-500');$('audioToggleBtn').lastElementChild.textContent='AUDIO_SYS [OFF]';logToTerminal("> オーディオミュート。","info")}}catch(e){console.log(e)}}
+function toggleAudioSystem(){try{if(!audioUnlocked){audioCtx=new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume().then(()=>{audioUnlocked=true;$('audioToggleBtn').innerHTML='<span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>AUDIO_SYS [ON]</span>';playBeep(880,'sine',.1,.03);logToTerminal("> オーディオ有効化。","success")})}else{audioUnlocked=false;$('audioStatus').classList.replace('bg-cyan-300','bg-pink-500');$('audioToggleBtn').lastElementChild.textContent='AUDIO_SYS [OFF]';logToTerminal("> オーディオミュート。","info")}}catch(e){console.log(e)}}
 function playBeep(freq,type,duration,vol=.03){if(!audioUnlocked||!audioCtx)return;try{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,audioCtx.currentTime);gain.gain.setValueAtTime(vol,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+duration)}catch(e){console.log(e)}}
 function initManualSelects(){REAL_VENUES.forEach(v=>$('manVenue').add(new Option(v,v)));for(let i=1;i<=12;i++)$('manRace').add(new Option(i+'R',i+'R'))}
 function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');playBeep(600,'square',.1)}
@@ -258,6 +267,7 @@ function triggerExtract(){if(!$('dataInput').value.trim()){logToTerminal("> エ�
 function triggerSync(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: バッファに配当データがありません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);applyResults()}
 function extractAndSaveData(){
   const inputData=$('dataInput').value;let extractedCount=0,globalVenue="不明";
+  // Markdownのレース見出しごとに分割。10Rなどの複数桁番号を保持する。
   const headingPattern=/^#\s*競輪レースデータ：.*$/gm;
   const headingMatches=[...inputData.matchAll(headingPattern)];
   let blocks=[];
@@ -281,6 +291,7 @@ function extractAndSaveData(){
   }
   const girls=block.includes("ガールズ")||block.includes("L級");let category="9車";
  if(girls)category="ガールズ";else{
+  // 出走表セクション内の車番行だけを数える（全Markdown行の「| 数字 |」を数えない）。
   const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
   const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
   let carCount=rosterRows?rosterRows.length:0;
@@ -370,7 +381,7 @@ function discoverPatterns(){
  const groups=new Map();
  specs.forEach(([kind,keyFn])=>data.forEach(r=>{const key=keyFn(r);if(key.includes('?')||key.includes('不明'))return;const id=kind+'::'+key;if(!groups.has(id))groups.set(id,{kind,key,rows:[]});groups.get(id).rows.push(r)}));
  const candidates=[];
- groups.forEach(g=>{if(g.rows.length<minCount)return;
+ groups.forEach(g=>{if(g.rows.length<minCount)return;// データ全体を時系列で80:20に分割し、同じ行オブジェクトで発見側と検証側を分ける。
   const trainSet=new Set(train.map(r=>r));const tr=g.rows.filter(r=>trainSet.has(r));const va=g.rows.filter(r=>!trainSet.has(r));
   const high=arr=>arr.filter(r=>r._payout>=threshold).length;const avg=arr=>arr.length?arr.reduce((s,r)=>s+r._payout,0)/arr.length:0;
   const trainRate=tr.length?high(tr)/tr.length*100:null,validRate=va.length?high(va)/va.length*100:null;
@@ -399,6 +410,15 @@ document.addEventListener('DOMContentLoaded',()=>{
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed))savedRecords=parsed}}catch(e){savedRecords=[]}
  updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v8.1 稼働中.":"> SYSTEM READY // v8.1 稼働中.","success");
 });
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then((reg) => console.log("SW registered:", reg.scope))
+      .catch((err) => console.log("SW registration failed:", err));
+  });
+}
 </script>
 </body>
 </html>
