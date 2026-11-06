@@ -45,8 +45,7 @@ body:after{content:"";position:fixed;inset:-30%;pointer-events:none;z-index:0;ba
 .metric-number{color:#102d49;text-shadow:0 0 10px #00f5ff99}
 .scanline{height:2px;background:linear-gradient(90deg,transparent,var(--cyan),var(--pink),transparent);box-shadow:0 0 12px var(--cyan)}
 #outputArea{background:#f8fcff;color:#075b91;border:1px solid #a8d7f2;border-radius:14px;overflow:auto}
-#manualInputModal{background:rgba(225,243,255,.88);backdrop-filter:blur
-(14px)}
+#manualInputModal{background:rgba(225,243,255,.88);backdrop-filter:blur(14px)}
 .modal-card{background:linear-gradient(145deg,#ffffff,#edf8ff);color:#102b45;border:3px solid #168cff;box-shadow:0 0 0 2px #ffffff,0 0 35px #00aaff66,0 0 90px #168cff33}
 .modal-field{background:#fff;color:#120c2a;border:2px solid #211747;border-radius:10px;padding:12px;width:100%;font-weight:900}
 .modal-field:focus{outline:3px solid #00d9e8}
@@ -90,8 +89,7 @@ body:after{background:conic-gradient(from 0deg,transparent 0 68%,rgba(0,132,255,
 .btn-cyber{color:#fff;font-weight:900;background:linear-gradient(105deg,#006fe8,#009fff 48%,#00b9df);border:1px solid #008be9;box-shadow:0 7px 18px rgba(0,126,230,.23),inset 0 1px 0 #ffffff66;animation:none}
 .btn-alert{color:#fff;font-weight:900;background:linear-gradient(110deg,#0754c8,#007fe9 48%,#00a9d8);border:1px solid #006bd2;box-shadow:0 8px 22px rgba(0,105,220,.27),0 0 24px rgba(0,160,255,.16);animation:pulseGlow 3.2s infinite}
 .btn-ghost{background:linear-gradient(145deg,#fff,#edf7ff);border:1px solid #a8d3f1;color:#16466b;box-shadow:0 3px 10px rgba(20,90,150,.07)}
-.field{background:#fff;color:#102d49;border:1px solid #b5d5ed;border-radi
-us:13px;box-shadow:inset 0 1px 3px rgba(10,65,110,.035)}
+.field{background:#fff;color:#102d49;border:1px solid #b5d5ed;border-radius:13px;box-shadow:inset 0 1px 3px rgba(10,65,110,.035)}
 .field:focus{border-color:#008cf0;box-shadow:0 0 0 3px #008cff1c,0 0 18px #008cff22}
 .card-matrix{background:linear-gradient(145deg,#fff 0%,#f1f9ff 100%);border:1px solid #c0def2;border-radius:18px;box-shadow:0 9px 24px rgba(17,83,137,.085),inset 0 1px 0 #fff;color:#123653}
 .metric-number{color:#006fc8;text-shadow:0 0 12px #00aaff33}
@@ -108,7 +106,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 ::selection{background:#bdeaff;color:#07345b}::-webkit-scrollbar-thumb{background:linear-gradient(#008cff,#536dff);border-radius:8px}
 @media(max-width:640px){.app-shell>header{border-radius:20px;padding:18px 15px}.neon-title{font-size:clamp(2rem,10vw,3rem);line-height:1.08}.glass-panel{border-radius:17px}.btn-cyber,.btn-alert,.btn-ghost{min-height:42px}}
 @media(prefers-reduced-motion:reduce){.app-shell>header:after{display:none}}
-
 </style>
 </head>
 <body>
@@ -144,8 +141,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <div class="grid grid-cols-3 gap-2 mb-4 control-grid">
      <button id="editPayoutBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">簡易修正</button>
      <button id="analysisBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">UI再構築</button>
-     <button id="deepScanBtn" type=
-"button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">7車 DEEP SCAN</button>
+     <button id="deepScanBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">7車 DEEP SCAN</button>
     </div>
     <div class="scanline mb-4"></div>
     <div class="grid grid-cols-3 gap-2">
@@ -174,7 +170,6 @@ AWAITING COMMAND EXECUTION...</div>
   </div>
  </section>
 </div>
-
 <section class="glass-panel p-4 sm:p-5 mb-8" id="discoverySection">
  <div class="panel-content">
   <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-sky-500 pl-2">AUTO PATTERN DISCOVERY // 自動パターン発見</h2><span class="discovery-chip">V8.1 ENGINE</span></div>
@@ -210,8 +205,7 @@ AWAITING COMMAND EXECUTION...</div>
   <div id="line1Summary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
   <div class="overflow-x-auto rounded-xl border border-sky-200 bg-white">
    <table class="w-full min-w-[820px] text-xs text-left">
-    <thead class="bg
--sky-100 text-sky-900"><tr>
+    <thead class="bg-sky-100 text-sky-900"><tr>
      <th class="p-2">クラス</th><th class="p-2">ライン①の並び</th><th class="p-2 text-right">出現数</th><th class="p-2 text-right">配当入力済</th><th class="p-2 text-right">平均配当</th><th class="p-2 text-right">中央値</th><th class="p-2 text-right">最高配当</th><th class="p-2 text-right">高配当率</th>
     </tr></thead>
     <tbody id="line1Results" class="divide-y divide-sky-100"><tr><td colspan="8" class="p-4 text-center text-sky-700">比較を実行すると結果が表示されます。</td></tr></tbody>
@@ -226,7 +220,6 @@ AWAITING COMMAND EXECUTION...</div>
  <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3" id="categoryCards"></div>
 </section>
 </div>
-
 <div id="manualInputModal" class="hidden fixed inset-0 z-[1000] items-center justify-center p-3">
  <div class="modal-card rounded-2xl w-full max-w-xl p-6 relative">
   <button id="closeManualBtn" type="button" class="touch-btn absolute top-2 right-3 text-3xl font-black text-slate-900 w-10 h-10">×</button>
@@ -251,8 +244,7 @@ const REAL_VENUES=["函館","青森","いわき平","弥彦","前橋","取手","
 const $=id=>document.getElementById(id);
 function bind(id,fn){const el=$(id);if(!el)return;el.addEventListener('click',e=>{e.preventDefault();fn()})}
 function toggleAudioSystem(){try{if(!audioUnlocked){audioCtx=new(window.AudioContext||window.webkitAudioContext)();audioCtx.resume().then(()=>{audioUnlocked=true;$('audioToggleBtn').innerHTML='<span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>AUDIO_SYS [ON]</span>';playBeep(880,'sine',.1,.03);logToTerminal("> オーディオ有効化。","success")})}else{audioUnlocked=false;$('audioStatus').classList.replace('bg-cyan-300','bg-pink-500');$('audioToggleBtn').lastElementChild.textContent='AUDIO_SYS [OFF]';logToTerminal("> オーディオミュート。","info")}}catch(e){console.log(e)}}
-function playBeep(freq,type,duration,vol=.03){if(!audioUnlocked||!audioCtx)return;try{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,audioCtx.currentTime);gain.gain.setValueAtTime(vol,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+duration)}catch(e){cons
-ole.log(e)}}
+function playBeep(freq,type,duration,vol=.03){if(!audioUnlocked||!audioCtx)return;try{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type=type;osc.frequency.setValueAtTime(freq,audioCtx.currentTime);gain.gain.setValueAtTime(vol,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+duration)}catch(e){console.log(e)}}
 function initManualSelects(){REAL_VENUES.forEach(v=>$('manVenue').add(new Option(v,v)));for(let i=1;i<=12;i++)$('manRace').add(new Option(i+'R',i+'R'))}
 function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');playBeep(600,'square',.1)}
 function closeManualModal(){$('manualInputModal').classList.add('hidden');$('manualInputModal').classList.remove('flex')}
@@ -281,20 +273,20 @@ function saveManualData(){
  ['manCar1','manCar2','manCar3','manExa1','manExa2','manPayout'].forEach(id=>$(id).value='');
  closeManualModal();
 }
+<script>
 function logToTerminal(msg,type="info"){const out=$('outputArea'),time=new Date().toLocaleTimeString('ja-JP',{hour12:false});const color=type==="error"?"#ff6b9d":type==="success"?"#087ac0":"#8dfaff";out.insertAdjacentHTML('afterbegin',`<div><span style="color:#6b8da7">[${time}]</span> <span style="color:${color}">${escapeHTML(msg)}</span></div>`)}
 function logToTerminalRaw(html){$('outputArea').insertAdjacentHTML('afterbegin',html)}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function persist(){localStorage.setItem('battleBankProData',JSON.stringify(savedRecords))}
-function loadMarkdown(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{$('dataInput').value=e.target.result;$('mdFileInput').value='';logToTerminal(`> ファイル読込成功: ${file.name}`,"success")};reader.readAsText(file,'UTF-8')}
+function loadMarkdown(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{$('dataInput').value=e.target.result;$('mdFileInput').value='';logToTerminal(`> ファイル読込成功: ${file.name}`,"success")};reader.readAsText(file,'_UTF-8')}
 function triggerExtract(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: データが入力されていません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);extractAndSaveData()}
 function triggerSync(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: バッファに配当データがありません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);applyResults()}
 
 function checkHighPayoutRisk(category, line1, diffPattern){
   const threshold = 10000;
   const minSamples = 5;
-  const highRateThreshold = 25; // %
+  const highRateThreshold = 25;
   const results = [];
-  // Check line1 pattern
   if(line1){
     const same = savedRecords.filter(r => (r.category||'9車') === category && String(r.line1||'').replace(/\s+/g,'') === line1.replace(/\s+/g,'') && Number(r.payout) > 0);
     if(same.length >= minSamples){
@@ -305,7 +297,6 @@ function checkHighPayoutRisk(category, line1, diffPattern){
       }
     }
   }
-  // Check diff pattern
   if(diffPattern && diffPattern !== '1-1'){
     const same = savedRecords.filter(r => (r.category||'9車') === category && r.diffPattern === diffPattern && Number(r.payout) > 0);
     if(same.length >= minSamples){
@@ -321,7 +312,6 @@ function checkHighPayoutRisk(category, line1, diffPattern){
 
 function extractAndSaveData(){
   const inputData=$('dataInput').value;let extractedCount=0,globalVenue="不明";
-  // Markdownのレース見出しごとに分割。10Rなどの複数桁番号を保持する。
   const headingPattern=/^#\s*競輪レースデータ：.*$/gm;
   const headingMatches=[...inputData.matchAll(headingPattern)];
   let blocks=[];
@@ -332,8 +322,7 @@ function extractAndSaveData(){
    if(!blocks.length)blocks=[inputData];
   }
   const firstHeading=inputData.match(/^#\s*競輪レースデータ：(.+)$/m);
-  if(firstHeading){for(const v of REAL
-_VENUES)if(firstHeading[1].includes(v)){globalVenue=v;break}}
+  if(firstHeading){for(const v of REAL_VENUES)if(firstHeading[1].includes(v)){globalVenue=v;break}}
   blocks.forEach(block=>{if(!block.trim())return;let venue=globalVenue,raceName="UNKNOWN";
   const heading=block.match(/^#\s*競輪レースデータ：(.+)$/m);
   if(heading){
@@ -346,7 +335,6 @@ _VENUES)if(firstHeading[1].includes(v)){globalVenue=v;break}}
   }
   const girls=block.includes("ガールズ")||block.includes("L級");let category="9車";
  if(girls)category="ガールズ";else{
-  // 出走表セクション内の車番行だけを数える（全Markdown行の「| 数字 |」を数えない）。
   const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
   const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
   let carCount=rosterRows?rosterRows.length:0;
@@ -356,7 +344,6 @@ _VENUES)if(firstHeading[1].includes(v)){globalVenue=v;break}}
  let patternKey=null,line1Key=null,diffPatternKey=null,diffDisplay=null;const lines=block.match(/\[([\d\s]+)\]/g);let allDiffs=[],diffLogs=[];
  const lineupRow=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);
  if(lineupRow){
-  // 単騎（1人だけ）はラインに含めない。2人以上の最初のグループをライン①とする
   const groups=lineupRow[1].match(/\[([\d\s]+)\]/g)||[];
   for(const g of groups){
    const nums=g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>n>=1&&n<=9);
@@ -371,7 +358,6 @@ _VENUES)if(firstHeading[1].includes(v)){globalVenue=v;break}}
  if(extractedCount){
   persist();$('dataInput').value='';updateCountDisplay();runAnalysis();
   logToTerminal(`> 成功: [${globalVenue}] 新規 ${extractedCount} レースをDBに格納しました。`,"success");
-  // 要注意チェック
   const warnings = [];
   savedRecords.slice(-extractedCount).forEach(r => {
     const risks = checkHighPayoutRisk(r.category, r.line1, r.diffPattern);
@@ -386,13 +372,13 @@ _VENUES)if(firstHeading[1].includes(v)){globalVenue=v;break}}
   playBeep(880,'sine',.15);
 }else{logToTerminal("> 警告: 解析可能なデータが検知されませんでした。","error");playBeep(220,'sawtooth',.15)}
 }
+<script>
 function applyResults(){const text=$('dataInput').value;let updated=0;savedRecords.forEach(r=>{if(r.raceName&&r.payout===0){const idx=text.indexOf(r.raceName);if(idx!==-1){const area=text.substring(idx,idx+300);const m=area.match(/3連単.*?(\d{1,3}(?:,\d{3})*|\d+)\s*円/)||area.match(/配当.*?(\d{1,3}(?:,\d{3})*|\d+)円/);if(m){const money=parseInt(m[1].replace(/,/g,''),10);if(money>0){r.payout=money;updated++}}}}});
  if(updated){persist();$('dataInput').value='';updateCountDisplay();runAnalysis();logToTerminal(`> 配当同期成功: ${updated} 件更新。`,"success");playBeep(880,'sine',.15)}else{logToTerminal("> 警告: 一致する未入力の配当データが見つかりませんでした。","error");playBeep(220,'sawtooth',.15)}
 }
 function deepScan7Car(){const data=savedRecords.filter(r=>r.category==="7車");if(!data.length){logToTerminal("> エラー: 7車立てのデータがありません。","error");return}const synced=data.filter(r=>r.payout>0),max=synced.length?Math.max(...synced.map(r=>r.payout)):0,map={};synced.forEach(r=>{const dp=r.diffPattern||'N/A';if(!map[dp])map[dp]={count:0,payouts:[]};map[dp].count++;map[dp].payouts.push(r.payout)});let html=`<div style="color:#087ac0;font-weight:bold">--- [ 7-CAR DIFF PATTERN SCAN ] ---</div><div>対象7車: ${data.length}件 (同期済: ${synced.length}件) | 最高: ¥${max.toLocaleString()}</div>`;Object.entries(map).sort((a,b)=>b[1].count-a[1].count).forEach(([dp,d])=>{const avg=Math.round(d.payouts.reduce((a,b)=>a+b,0)/d.payouts.length);html+=`<div>▪ 差分 [ ${escapeHTML(dp)} ] : ${d.count}回 | 平均: ¥${avg.toLocaleString()}</div>`});logToTerminalRaw(html)}
 function runAnalysis(){
- const categories=["5車
-","6車","7車","8車","9車","ガールズ"],stats={},diffStats={};categories.forEach(c=>stats[c]={count:0,payouts:[]});
+ const categories=["5車","6車","7車","8車","9車","ガールズ"],stats={},diffStats={};categories.forEach(c=>stats[c]={count:0,payouts:[]});
  savedRecords.forEach(r=>{const cat=r.category||"9車";if(!stats[cat])stats[cat]={count:0,payouts:[]};stats[cat].count++;if(r.payout>0)stats[cat].payouts.push(r.payout);const dp=r.diffPattern||"標準";if(!diffStats[dp])diffStats[dp]={count:0,payouts:[]};diffStats[dp].count++;if(r.payout>0)diffStats[dp].payouts.push(r.payout)});
  $('categoryCards').innerHTML=categories.map(c=>{const d=stats[c],avg=d.payouts.length?Math.round(d.payouts.reduce((a,b)=>a+b,0)/d.payouts.length):0,max=d.payouts.length?Math.max(...d.payouts):0;return `<div class="card-matrix p-3 sm:p-4"><div class="flex justify-between items-start mb-3"><div><div class="kicker text-[9px]">CLASS</div><div class="font-black text-lg">${c}</div></div><div class="text-right"><div class="text-[8px] text-sky-800">SYNCED</div><div class="font-mono-tech text-sm neon-cyan">${d.payouts.length}件</div></div></div><div class="grid grid-cols-2 gap-2 mb-3"><div class="bg-cyan-300/10 border border-cyan-300/20 rounded-lg p-2 text-center"><div class="text-[8px] text-cyan-200">LOGGED</div><div class="font-mono-tech metric-number">${d.count}</div></div><div class="bg-sky-100 border border-sky-200 rounded-lg p-2 text-center"><div class="text-[8px] text-sky-700">MAX</div><div class="font-mono-tech text-xs neon-cyan">${max?'¥'+max.toLocaleString():'-'}</div></div></div><div class="border-t border-white/10 pt-2"><div class="text-[8px] text-sky-800">AVERAGE PAYOUT</div><div class="font-mono-tech font-bold">${avg?'¥'+avg.toLocaleString():'---'}</div></div></div>`}).join("");
  const sorted=Object.entries(diffStats).sort((a,b)=>b[1].count-a[1].count).slice(0,8),labels=sorted.map(x=>'差分: '+x[0]),counts=sorted.map(x=>x[1].count),avgs=sorted.map(x=>x[1].payouts.length?Math.round(x[1].payouts.reduce((a,b)=>a+b,0)/x[1].payouts.length):0);
@@ -435,10 +421,10 @@ function analyzeLine1Payouts(){
   const paid=g.payouts.length,high=paid?g.payouts.filter(n=>n>=threshold).length:0,rate=paid?(high/paid*100).toFixed(1)+'%':'—';
   const highRate = paid && (high/paid*100) >= 25;
   const mark = highRate ? ' <span class="text-red-500 font-black">⚠️</span>' : '';
-  return `<tr class="hover:bg-sky-50 ${highRate?'bg-red-50':''}"><td class="p-2 font-bold whitespace-
-nowrap">${escapeHTML(g.category)}</td><td class="p-2 font-mono-tech font-bold text-sky-900 whitespace-nowrap">${escapeHTML(g.line)}${mark}</td><td class="p-2 text-right">${g.total}</td><td class="p-2 text-right">${paid}</td><td class="p-2 text-right font-bold">${paid?'¥'+avg(g.payouts).toLocaleString():'—'}</td><td class="p-2 text-right">${paid?'¥'+median(g.payouts).toLocaleString():'—'}</td><td class="p-2 text-right">${paid?'¥'+Math.max(...g.payouts).toLocaleString():'—'}</td><td class="p-2 text-right font-bold text-sky-800">${rate}</td></tr>`;
+  return `<tr class="hover:bg-sky-50 ${highRate?'bg-red-50':''}"><td class="p-2 font-bold whitespace-nowrap">${escapeHTML(g.category)}</td><td class="p-2 font-mono-tech font-bold text-sky-900 whitespace-nowrap">${escapeHTML(g.line)}${mark}</td><td class="p-2 text-right">${g.total}</td><td class="p-2 text-right">${paid}</td><td class="p-2 text-right font-bold">${paid?'¥'+avg(g.payouts).toLocaleString():'—'}</td><td class="p-2 text-right">${paid?'¥'+median(g.payouts).toLocaleString():'—'}</td><td class="p-2 text-right">${paid?'¥'+Math.max(...g.payouts).toLocaleString():'—'}</td><td class="p-2 text-right font-bold text-sky-800">${rate}</td></tr>`;
  }).join('');
 }
+<script>
 function discoverPatterns(){
  const cls=$('discoveryClass').value,threshold=Math.max(1,parseInt($('discoveryThreshold').value,10)||10000),minCount=Math.max(2,parseInt($('discoveryMin').value,10)||10);
  let data=savedRecords.filter(r=>(cls==='ALL'||(r.category||'9車')===cls)&&Number(r.payout)>0);
@@ -463,7 +449,7 @@ function discoverPatterns(){
  const groups=new Map();
  specs.forEach(([kind,keyFn])=>data.forEach(r=>{const key=keyFn(r);if(key.includes('?')||key.includes('不明'))return;const id=kind+'::'+key;if(!groups.has(id))groups.set(id,{kind,key,rows:[]});groups.get(id).rows.push(r)}));
  const candidates=[];
- groups.forEach(g=>{if(g.rows.length<minCount)return;// データ全体を時系列で80:20に分割し、同じ行オブジェクトで発見側と検証側を分ける。
+ groups.forEach(g=>{if(g.rows.length<minCount)return;
   const trainSet=new Set(train.map(r=>r));const tr=g.rows.filter(r=>trainSet.has(r));const va=g.rows.filter(r=>!trainSet.has(r));
   const high=arr=>arr.filter(r=>r._payout>=threshold).length;const avg=arr=>arr.length?arr.reduce((s,r)=>s+r._payout,0)/arr.length:0;
   const trainRate=tr.length?high(tr)/tr.length*100:null,validRate=va.length?high(va)/va.length*100:null;
@@ -476,11 +462,11 @@ function discoverPatterns(){
   const rate=g.rate.toFixed(1),valid=g.validRate===null?'—':g.validRate.toFixed(1)+'%',train=g.trainRate===null?'—':g.trainRate.toFixed(1)+'%';
   const quality=g.validCount>=2?(g.validRate>=validationBaseline?'検証側でも全体基準以上':'検証側は全体基準未満'):'検証データ不足';
   const lift=g.lift?g.lift.toFixed(2)+'倍':'—';
-  return `<div class="discovery-result"><div class="flex flex-wrap justify-between gap-2 items-start"><div><span class="discovery-chip">#${i+1} ${escapeHTML(g.kind)}</span><div class="font-black text-sm mt-2 text-slate-900">${escapeHTML(g.key)}</div></div><div class="text-right"><div class="text-[9px] text-sky-700">高配当率</div><div class="font-mono-tech text-2xl font-black text-sky-800">${rate}%</div></div></div><div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-3 text-center"><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">出現数</div><b>${g.count}件</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">高配
-当数</b><b>${g.highCount}件</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">平均配当</div><b>¥${Math.round(g.avg).toLocaleString()}</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">発見用 / 80%</div><b>${train}</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">検証用 / 20%</div><b>${valid}</b></div></div><div class="flex flex-wrap justify-between gap-2 mt-2 text-[10px]"><span class="text-sky-800">全体基準比：${lift}</span><b class="${g.validCount>=2&&g.validRate>=validationBaseline?'text-sky-700':'text-slate-500'}">${quality}</b></div><div class="discovery-meter mt-2"><i style="width:${Math.max(0,Math.min(100,g.rate))}%"></i></div></div>`;
+  return `<div class="discovery-result"><div class="flex flex-wrap justify-between gap-2 items-start"><div><span class="discovery-chip">#${i+1} ${escapeHTML(g.kind)}</span><div class="font-black text-sm mt-2 text-slate-900">${escapeHTML(g.key)}</div></div><div class="text-right"><div class="text-[9px] text-sky-700">高配当率</div><div class="font-mono-tech text-2xl font-black text-sky-800">${rate}%</div></div></div><div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-3 text-center"><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">出現数</div><b>${g.count}件</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">高配当数</div><b>${g.highCount}件</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">平均配当</div><b>¥${Math.round(g.avg).toLocaleString()}</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">発見用 / 80%</div><b>${train}</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">検証用 / 20%</div><b>${valid}</b></div></div><div class="flex flex-wrap justify-between gap-2 mt-2 text-[10px]"><span class="text-sky-800">全体基準比：${lift}</span><b class="${g.validCount>=2&&g.validRate>=validationBaseline?'text-sky-700':'text-slate-500'}">${quality}</b></div><div class="discovery-meter mt-2"><i style="width:${Math.max(0,Math.min(100,g.rate))}%"></i></div></div>`;
  }).join('');
  logToTerminal(`> 自動探索完了: ${candidates.length}パターン検出。高配当基準 ¥${threshold.toLocaleString()}。`,'success');
 }
+<script>
 function showPayoutEditor(){if(!savedRecords.length){logToTerminal("> エラー: レコードがありません。","error");return}let html='<div class="space-y-2 max-h-56 overflow-y-auto pr-1">';[...savedRecords].reverse().forEach((r,rev)=>{const i=savedRecords.length-1-rev;html+=`<div class="rounded-lg border border-violet-400/40 bg-white/5 p-3 text-xs"><div class="flex justify-between gap-2 mb-2"><b>[${escapeHTML(r.category||'9車')}] ${escapeHTML(r.raceName||'')}</b><span class="neon-cyan">DIFF: ${escapeHTML(r.diffPattern||'N/A')}</span></div><div class="flex gap-2 items-center"><label class="text-[10px]">会場</label><input id="edit_venue_${i}" value="${escapeHTML(r.venue||'不明')}" class="field !p-2 text-xs"><label class="text-[10px] whitespace-nowrap">配当¥</label><input type="number" id="edit_payout_${i}" value="${r.payout>0?r.payout:''}" placeholder="0" class="field !p-2 text-xs text-right"></div></div>`});html+='</div><button id="savePayoutsBtn" type="button" class="touch-btn btn-cyber mt-3 w-full py-3 rounded-xl text-xs">上書き保存 [OVERWRITE]</button>';$('outputArea').insertAdjacentHTML('afterbegin',html);bind('savePayoutsBtn',savePayouts);logToTerminal("> 簡易エディタ起動。会場名と配当を修正できます。")}
 function savePayouts(){savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
 function exportData(){if(!savedRecords.length){logToTerminal("> 書き出すデータがありません。","error");return}const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='battleBank_pro_db.json';a.click();URL.revokeObjectURL(url);logToTerminal("> エクスポート完了。","success")}
