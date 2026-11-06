@@ -242,7 +242,7 @@ AWAITING COMMAND EXECUTION...</div>
 </div>
 
 <script>
-let savedRecords=[],myChart=null,audioCtx=null,audioUnlocked=false;
+let savedRecords=[],myChart=null,audioCtx=null,audioUnlocked=false,editingIndex=-1;
 const REAL_VENUES=["函館","青森","いわき平","弥彦","前橋","取手","宇都宮","大宮","西武園","京王閣","立川","松戸","川崎","平塚","小田原","伊東","静岡","豊橋","名古屋","岐阜","大垣","富山","松阪","四日市","福井","奈良","向日町","和歌山","岸和田","玉野","広島","防府","高松","小松島","高知","松山","小倉","久留米","武雄","佐世保","別府","熊本","千葉"];
 const $=id=>document.getElementById(id);
 function bind(id,fn){const el=$(id);if(!el)return;el.addEventListener('click',e=>{e.preventDefault();fn()})}
@@ -268,10 +268,17 @@ function saveManualData(){
  }
  if(has2ren){exacta=`${e1}-${e2}`}
  const rec={venue,raceName:race,category,pattern:patternKey||exacta||'1-2',diffPattern:diffPatternKey||'1-1',diffDisplay,exacta,payout,timestamp:Date.now(),sourceType:'manual'};
- savedRecords.push(rec);
+ if(editingIndex>=0 && editingIndex<savedRecords.length){
+  // Update existing
+  Object.assign(savedRecords[editingIndex], rec);
+  logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,"success");
+  editingIndex=-1;
+  $('manSaveBtn').textContent='SAVE RECORD';
+ }else{
+  savedRecords.push(rec);
+  logToTerminal(`> [手動入力] ${venue} ${race} を追加しました。`,"success");
+ }
  persist();updateCountDisplay();runAnalysis();
- const msg = has3ren && has2ren ? `3連単 ${patternKey} / 2連単 ${exacta}` : has3ren ? `3連単 ${patternKey}` : `2連単 ${exacta}`;
- logToTerminal(`> [手動入力] ${venue} ${race} ${msg} (配当: ¥${payout.toLocaleString()}) を追加しました。`,"success");
  playBeep(880,'sine',.2);
  ['manCar1','manCar2','manCar3','manExa1','manExa2','manPayout'].forEach(id=>$(id).value='');
  closeManualModal();
@@ -472,7 +479,39 @@ function discoverPatterns(){
  }).join('');
  logToTerminal(`> 自動探索完了: ${candidates.length}パターン検出。高配当基準 ¥${threshold.toLocaleString()}。`,'success');
 }
-function showPayoutEditor(){if(!savedRecords.length){logToTerminal("> エラー: レコードがありません。","error");return}let html='<div class="space-y-2 max-h-56 overflow-y-auto pr-1">';[...savedRecords].reverse().forEach((r,rev)=>{const i=savedRecords.length-1-rev;html+=`<div class="rounded-lg border border-violet-400/40 bg-white/5 p-3 text-xs"><div class="flex justify-between gap-2 mb-2"><b>[${escapeHTML(r.category||'9車')}] ${escapeHTML(r.raceName||'')}</b><span class="neon-cyan">DIFF: ${escapeHTML(r.diffPattern||'N/A')}</span></div><div class="flex gap-2 items-center"><label class="text-[10px]">会場</label><input id="edit_venue_${i}" value="${escapeHTML(r.venue||'不明')}" class="field !p-2 text-xs"><label class="text-[10px] whitespace-nowrap">配当¥</label><input type="number" id="edit_payout_${i}" value="${r.payout>0?r.payout:''}" placeholder="0" class="field !p-2 text-xs text-right"></div></div>`});html+='</div><button id="savePayoutsBtn" type="button" class="touch-btn btn-cyber mt-3 w-full py-3 rounded-xl text-xs">上書き保存 [OVERWRITE]</button>';$('outputArea').insertAdjacentHTML('afterbegin',html);bind('savePayoutsBtn',savePayouts);logToTerminal("> 簡易エディタ起動。会場名と配当を修正できます。")}
+function showPayoutEditor(){
+ if(!savedRecords.length){logToTerminal("> エラー: レコードがありません。","error");return}
+ let html='<div class="space-y-2 max-h-64 overflow-y-auto pr-1">';
+ [...savedRecords].reverse().forEach((r,rev)=>{
+  const i=savedRecords.length-1-rev;
+  const label = `[${escapeHTML(r.category||'9車')}] ${escapeHTML(r.venue||'')} ${escapeHTML(r.raceName||'')} ${escapeHTML(r.pattern||r.exacta||'')}`;
+  html+=`<div class="rounded-lg border border-sky-300 bg-white p-2 text-xs flex justify-between items-center gap-2">
+   <div class="truncate">${label}</div>
+   <button type="button" class="touch-btn btn-ghost text-[10px] px-2 py-1" onclick="openEditModal(${i})">編集</button>
+  </div>`;
+ });
+ html+='</div>';
+ $('outputArea').insertAdjacentHTML('afterbegin',html);
+ logToTerminal("> レコード一覧を表示。編集ボタンで手動入力モードが開きます。");
+}
+function openEditModal(idx){
+ if(idx<0||idx>=savedRecords.length)return;
+ editingIndex=idx;
+ const r=savedRecords[idx];
+ // Fill modal
+ $('manVenue').value=r.venue||REAL_VENUES[0];
+ $('manRace').value=r.raceName||'1R';
+ $('manClass').value=r.category||'7車';
+ const parts=(r.pattern||'').split('-');
+ if(parts.length>=3){$('manCar1').value=parts[0];$('manCar2').value=parts[1];$('manCar3').value=parts[2];}
+ else{$('manCar1').value='';$('manCar2').value='';$('manCar3').value='';}
+ const ex=(r.exacta||'').split('-');
+ if(ex.length>=2){$('manExa1').value=ex[0];$('manExa2').value=ex[1];}
+ else{$('manExa1').value='';$('manExa2').value='';}
+ $('manPayout').value=r.payout>0?r.payout:'';
+ $('manSaveBtn').textContent='UPDATE RECORD';
+ openManualModal();
+}
 function savePayouts(){savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
 function exportData(){if(!savedRecords.length){logToTerminal("> 書き出すデータがありません。","error");return}const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='battleBank_pro_db.json';a.click();URL.revokeObjectURL(url);logToTerminal("> エクスポート完了。","success")}
 function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();savedRecords=data;persist();updateCountDisplay();runAnalysis();logToTerminal("> インポート成功。","success")}catch(err){logToTerminal("> エラー: 不正なJSON。","error")} $('fileInput').value=''};reader.readAsText(file)}
