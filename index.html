@@ -36,13 +36,12 @@
     }
 
     .glass-panel {
-      background: rgba(255, 255, 255, 0.88);
+      background: rgba(255, 255, 255, 0.9);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(0, 150, 255, 0.3);
       box-shadow: 0 10px 30px -5px rgba(0, 100, 255, 0.15), inset 0 0 15px rgba(255, 255, 255, 0.8);
       position: relative;
-      overflow: hidden;
     }
 
     .glass-panel::before {
@@ -89,12 +88,12 @@
     .blink-fast { animation: blink-fast 0.15s infinite; }
     @keyframes blink-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     
-    /* Clickable touch-safe buttons */
+    /* Touch-safe buttons */
     .btn-cyber {
       background: linear-gradient(135deg, rgba(0,150,255,0.15), rgba(0,150,255,0.3)); 
       border: 1px solid rgba(0,150,255,0.8);
       color: #0284c7; transition: all 0.2s; position: relative; letter-spacing: 1px;
-      font-weight: bold; cursor: pointer; z-index: 20;
+      font-weight: bold; cursor: pointer; z-index: 30;
     }
     .btn-cyber:hover, .btn-cyber:active {
       background: linear-gradient(135deg, rgba(0,150,255,0.9), rgba(0,100,220,1)); 
@@ -103,7 +102,7 @@
     .btn-alert {
       background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(255,0,110,0.3)); 
       border: 1px solid rgba(239,68,68,0.8);
-      color: #dc2626; font-weight: bold; cursor: pointer; z-index: 20;
+      color: #dc2626; font-weight: bold; cursor: pointer; z-index: 30;
       animation: alert-light-pulse 1s infinite alternate;
     }
     .btn-alert:hover, .btn-alert:active {
@@ -151,9 +150,9 @@
           BATTLE BANK-KUN
         </h1>
         <div class="flex items-center gap-3 mt-2">
-          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm animate-pulse">HYPER LIGHT MATRIX v5.2</span>
-          <!-- Audio Toggle Button directly clickable -->
-          <button id="audioToggleBtn" onclick="toggleAudioSystem()" class="text-[10px] text-slate-700 hover:text-sky-600 border border-slate-300 bg-white/90 hover:border-sky-400 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm transition cursor-pointer hover-snd click-snd z-30">
+          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm animate-pulse">HYPER LIGHT MATRIX v5.3</span>
+          <!-- Audio Toggle Button -->
+          <button id="audioToggleBtn" type="button" onclick="toggleAudioSystem()" class="text-[10px] text-slate-700 hover:text-sky-600 border border-slate-300 bg-white/95 hover:border-sky-400 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-md transition cursor-pointer hover-snd click-snd z-40 relative">
             <div id="audioStatus" class="w-2 h-2 rounded-full bg-red-500"></div>
             <span>AUDIO_SYS [OFF]</span>
           </button>
@@ -170,18 +169,18 @@
       
       <!-- Control Terminal (Left Column) -->
       <div class="xl:col-span-4 flex flex-col gap-5">
-        <div class="glass-panel p-5 rounded-2xl relative z-10">
+        <div class="glass-panel p-5 rounded-2xl relative z-20">
           <div class="flex justify-between items-center mb-3">
             <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2">▶ DATA UPLINK // データ受信</h2>
-            <button onclick="document.getElementById('mdFileInput').click()" class="text-[10px] font-bold text-slate-700 hover:text-sky-600 transition flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-lg border border-slate-300 hover:border-sky-400 hover:shadow-[0_0_10px_rgba(14,165,233,0.3)] hover-snd click-snd cursor-pointer z-20">
+            <button type="button" onclick="document.getElementById('mdFileInput').click()" class="text-[10px] font-bold text-slate-700 hover:text-sky-600 transition flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-lg border border-slate-300 hover:border-sky-400 hover:shadow-[0_0_10px_rgba(14,165,233,0.3)] hover-snd click-snd cursor-pointer z-30">
               📄 FILE UPLOAD
             </button>
             <input type="file" id="mdFileInput" class="hidden" accept=".md,.txt" onchange="loadMarkdown(event)">
           </div>
           
-          <textarea id="dataInput" rows="7" class="w-full p-3.5 bg-white/90 border border-sky-200 text-slate-800 rounded-xl focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-400/30 font-mono-tech text-xs placeholder-slate-400 resize-y transition shadow-inner hover-snd relative z-10 mb-4" placeholder="> Awaiting raw data sequence...&#10;> 出走表・結果テキストをここにペーストして解析を開始してください。"></textarea>
+          <textarea id="dataInput" rows="7" class="w-full p-3.5 bg-white/95 border border-sky-200 text-slate-800 rounded-xl focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-400/30 font-mono-tech text-xs placeholder-slate-400 resize-y transition shadow-inner hover-snd relative z-20 mb-4" placeholder="> Awaiting raw data sequence...&#10;> 出走表・結果テキストをここにペーストして解析を開始してください。"></textarea>
           
-          <!-- Explicitly spaced and touch-friendly container for action buttons -->
+          <!-- Touch-safe action buttons -->
           <div class="flex flex-col gap-3 relative z-30">
             <button type="button" onclick="triggerExtract()" class="btn-cyber font-bold py-4 rounded-xl text-xs flex justify-center items-center gap-2 shadow-lg click-snd">
               📥 EXTRACT & ARCHIVE [データ抽出保存]
@@ -192,24 +191,24 @@
           </div>
         </div>
 
-        <div class="glass-panel p-5 rounded-2xl">
+        <div class="glass-panel p-5 rounded-2xl relative z-20">
           <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2 mb-4">▶ SYS.COMMANDS // 制御</h2>
-          <div class="grid grid-cols-3 gap-2 mb-4">
-            <button onclick="showPayoutEditor()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 hover:border-sky-500 font-bold py-2.5 rounded-xl text-[9px] transition uppercase tracking-widest hover-snd click-snd shadow-sm cursor-pointer">
+          <div class="grid grid-cols-3 gap-2 mb-4 relative z-30">
+            <button type="button" onclick="showPayoutEditor()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 hover:border-sky-500 font-bold py-2.5 rounded-xl text-[9px] transition uppercase tracking-widest hover-snd click-snd shadow-sm cursor-pointer">
               手動修正
             </button>
-            <button onclick="runAnalysis()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-300 hover:border-sky-500 font-bold py-2.5 rounded-xl text-[9px] transition uppercase tracking-widest shadow-[0_0_10px_rgba(14,165,233,0.15)] hover-snd click-snd cursor-pointer">
+            <button type="button" onclick="runAnalysis()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-300 hover:border-sky-500 font-bold py-2.5 rounded-xl text-[9px] transition uppercase tracking-widest shadow-[0_0_10px_rgba(14,165,233,0.15)] hover-snd click-snd cursor-pointer">
               UI再構築
             </button>
-            <button onclick="deepScan7Car()" class="bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-300 hover:border-pink-500 font-bold py-2.5 rounded-xl text-[9px] transition uppercase tracking-widest shadow-[0_0_10px_rgba(236,72,153,0.2)] hover-snd click-snd cursor-pointer">
+            <button type="button" onclick="deepScan7Car()" class="bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-300 hover:border-pink-500 font-bold py-2.5 rounded-xl text-[9px] transition uppercase tracking-widest shadow-[0_0_10px_rgba(236,72,153,0.2)] hover-snd click-snd cursor-pointer">
               7車 DEEP SCAN
             </button>
           </div>
-          <div class="grid grid-cols-3 gap-2 border-t border-slate-200 pt-4">
-            <button onclick="exportData()" class="bg-white border border-slate-200 hover:border-sky-400 hover:text-sky-600 text-slate-500 py-2 rounded-lg text-[9px] uppercase tracking-wider transition hover-snd click-snd shadow-sm cursor-pointer">データ書出</button>
-            <button onclick="document.getElementById('fileInput').click()" class="bg-white border border-slate-200 hover:border-sky-400 hover:text-sky-600 text-slate-500 py-2 rounded-lg text-[9px] uppercase tracking-wider transition hover-snd click-snd shadow-sm cursor-pointer">データ読込</button>
+          <div class="grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 relative z-30">
+            <button type="button" onclick="exportData()" class="bg-white border border-slate-200 hover:border-sky-400 hover:text-sky-600 text-slate-500 py-2 rounded-lg text-[9px] uppercase tracking-wider transition hover-snd click-snd shadow-sm cursor-pointer">データ書出</button>
+            <button type="button" onclick="document.getElementById('fileInput').click()" class="bg-white border border-slate-200 hover:border-sky-400 hover:text-sky-600 text-slate-500 py-2 rounded-lg text-[9px] uppercase tracking-wider transition hover-snd click-snd shadow-sm cursor-pointer">データ読込</button>
             <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
-            <button onclick="clearData()" class="bg-white border border-red-200 hover:border-red-500 hover:text-red-600 text-red-500 py-2 rounded-lg text-[9px] uppercase tracking-wider transition hover-snd click-snd shadow-sm cursor-pointer">完全消去</button>
+            <button type="button" onclick="clearData()" class="bg-white border border-red-200 hover:border-red-500 hover:text-red-600 text-red-500 py-2 rounded-lg text-[9px] uppercase tracking-wider transition hover-snd click-snd shadow-sm cursor-pointer">完全消去</button>
           </div>
         </div>
       </div>
@@ -232,10 +231,10 @@
         </div>
 
         <!-- Terminal Output -->
-        <div class="glass-panel p-5 rounded-2xl h-48 flex flex-col relative">
+        <div class="glass-panel p-5 rounded-2xl h-48 flex flex-col relative z-20">
           <h2 class="font-bold text-[10px] tracking-widest text-sky-700 border-l-4 border-sky-800 pl-2 mb-2">▶ TERMINAL LOG // 実行履歴</h2>
-          <button onclick="document.getElementById('outputArea').innerHTML=''" class="absolute top-4 right-4 text-[9px] text-slate-500 hover:text-sky-600 border border-slate-200 hover:border-sky-400 bg-white px-2.5 py-1 rounded-lg transition hover-snd click-snd shadow-sm cursor-pointer z-20">CLEAR</button>
-          <div id="outputArea" class="flex-grow bg-slate-900 text-sky-400 rounded-xl border border-sky-900/40 p-3.5 overflow-y-auto font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner custom-scrollbar">SYSTEM BOOT SEQUENCE INITIATED...
+          <button type="button" onclick="document.getElementById('outputArea').innerHTML=''" class="absolute top-4 right-4 text-[9px] text-slate-500 hover:text-sky-600 border border-slate-200 hover:border-sky-400 bg-white px-2.5 py-1 rounded-lg transition hover-snd click-snd shadow-sm cursor-pointer z-30">CLEAR</button>
+          <div id="outputArea" class="flex-grow bg-slate-900 text-sky-400 rounded-xl border border-sky-900/40 p-3.5 overflow-y-auto font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner custom-scrollbar relative z-10">SYSTEM BOOT SEQUENCE INITIATED...
 AWAITING COMMAND EXECUTION...</div>
         </div>
       </div>
@@ -253,27 +252,32 @@ AWAITING COMMAND EXECUTION...</div>
     let savedRecords = [];
     let myChart = null;
 
-    /* --- AUDIO FX SYSTEM (FIXED & CLICKABLE) --- */
+    /* --- AUDIO FX SYSTEM (FIXED & TOUCH-SAFE) --- */
     let audioCtx = null;
     let audioUnlocked = false;
 
     function toggleAudioSystem() {
-        if (!audioUnlocked) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            audioCtx.resume().then(() => {
-                audioUnlocked = true;
-                document.getElementById('audioStatus').classList.replace('bg-red-500', 'bg-sky-500');
-                document.getElementById('audioStatus').classList.add('shadow-[0_0_10px_#0ea5e9]');
-                document.getElementById('audioToggleBtn').innerHTML = '<div id="audioStatus" class="w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_10px_#0ea5e9]"></div><span>AUDIO_SYS [ON]</span>';
-                playBeep(880, 'sine', 0.1, 0.03);
-                logToTerminal("> オーディオシステムが手動有効化されました。", "success");
-            });
-        } else {
-            audioUnlocked = false;
-            document.getElementById('audioStatus').classList.replace('bg-sky-500', 'bg-red-500');
-            document.getElementById('audioStatus').classList.remove('shadow-[0_0_10px_#0ea5e9]');
-            document.getElementById('audioToggleBtn').innerHTML = '<div id="audioStatus" class="w-2 h-2 rounded-full bg-red-500"></div><span>AUDIO_SYS [OFF]</span>';
-            logToTerminal("> オーディオシステムがミュートされました。", "info");
+        try {
+            if (!audioUnlocked) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                audioCtx.resume().then(() => {
+                    audioUnlocked = true;
+                    document.getElementById('audioStatus').classList.replace('bg-red-500', 'bg-sky-500');
+                    document.getElementById('audioStatus').classList.add('shadow-[0_0_10px_#0ea5e9]');
+                    document.getElementById('audioToggleBtn').innerHTML = '<div id="audioStatus" class="w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_10px_#0ea5e9]"></div><span>AUDIO_SYS [ON]</span>';
+                    playBeep(880, 'sine', 0.1, 0.03);
+                    logToTerminal("> オーディオシステムが有効化されました。", "success");
+                });
+            } else {
+                audioUnlocked = false;
+                document.getElementById('audioStatus').classList.replace('bg-sky-500', 'bg-red-500');
+                document.getElementById('audioStatus').classList.remove('shadow-[0_0_10px_#0ea5e9]');
+                document.getElementById('audioToggleBtn').innerHTML = '<div id="audioStatus" class="w-2 h-2 rounded-full bg-red-500"></div><span>AUDIO_SYS [OFF]</span>';
+                logToTerminal("> オーディオシステムがミュートされました。", "info");
+            }
+        } catch(e) {
+            console.log(e);
+            logToTerminal("> エラー: オーディオコンテキストの初期化に失敗しました。", "error");
         }
     }
 
@@ -311,10 +315,12 @@ AWAITING COMMAND EXECUTION...</div>
     window.onload = () => {
       const stored = localStorage.getItem('battleBankProData');
       if (stored) {
-        savedRecords = JSON.parse(stored);
+        try {
+            savedRecords = JSON.parse(stored);
+        } catch(e) { savedRecords = []; }
         updateCountDisplay();
         runAnalysis();
-        logToTerminal("> DBリカバリ完了. ハイパーライトシステム稼働中.");
+        logToTerminal("> DBリカバリ完了. ハイパーライトシステム v5.3 稼働中.");
       } else {
         runAnalysis(); 
       }
@@ -335,6 +341,7 @@ AWAITING COMMAND EXECUTION...</div>
         out.innerHTML = htmlStr + out.innerHTML;
     }
 
+    /* --- FIXED FILE UPLOAD FUNCTIONALITY --- */
     function loadMarkdown(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -342,9 +349,13 @@ AWAITING COMMAND EXECUTION...</div>
       reader.onload = function(e) {
         document.getElementById('dataInput').value = e.target.result;
         document.getElementById('mdFileInput').value = ''; 
-        logToTerminal("> ファイルをメモリに展開. 抽出プロセス待機中...");
+        logToTerminal(`> ファイル読込成功: ${file.name} (${file.size} bytes). 抽出ボタンを押してください。`, "success");
       };
-      reader.readAsText(file);
+      reader.onerror = function() {
+        logToTerminal("> エラー: ファイルの読み込みに失敗しました。", "error");
+        sndError();
+      };
+      reader.readAsText(file, "UTF-8");
     }
 
     function triggerExtract() {
@@ -360,6 +371,7 @@ AWAITING COMMAND EXECUTION...</div>
         }
         runWithProgress("SYNCING PAYOUT DATABASES...", applyResults);
     }
+
 
     function runWithProgress(taskName, callback) {
         sndProcess();
@@ -634,6 +646,7 @@ AWAITING COMMAND EXECUTION...</div>
           }
         }
       });
+    }
 
     function showPayoutEditor() {
       if (savedRecords.length === 0) { logToTerminal("> エラー: 編集するレコードが存在しません.", "error"); sndError(); return; }
@@ -656,7 +669,7 @@ AWAITING COMMAND EXECUTION...</div>
         `;
       });
       html += '</div>';
-      html += '<button onclick="savePayouts()" class="mt-3 w-full bg-sky-600 hover:bg-sky-500 text-white border border-sky-400 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition hover-snd click-snd shadow-md cursor-pointer">Overwrite DB [上書き保存]</button>';
+      html += '<button type="button" onclick="savePayouts()" class="mt-3 w-full bg-sky-600 hover:bg-sky-500 text-white border border-sky-400 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition hover-snd click-snd shadow-md cursor-pointer">Overwrite DB [上書き保存]</button>';
       const out = document.getElementById('outputArea');
       out.innerHTML = html + out.innerHTML;
       logToTerminal("> 手動エディタを桁数拡大仕様で起動しました.");
@@ -716,4 +729,4 @@ AWAITING COMMAND EXECUTION...</div>
   </script>
 </body>
 </html>
-
+    
