@@ -135,7 +135,7 @@
           BATTLE BANK-KUN
         </h1>
         <div class="flex items-center gap-3 mt-2">
-          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm animate-pulse">PATTERN MATRIX v5.6</span>
+          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm animate-pulse">PATTERN MATRIX v5.7</span>
           <button id="audioToggleBtn" type="button" onclick="toggleAudioSystem()" class="text-[10px] text-slate-700 border border-slate-300 bg-white/95 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-md cursor-pointer z-50 relative touch-manipulation">
             <div id="audioStatus" class="w-2 h-2 rounded-full bg-red-500"></div>
             <span>AUDIO_SYS [OFF]</span>
@@ -166,7 +166,7 @@
               📥 EXTRACT & ARCHIVE [データ抽出保存]
             </button>
             <button type="button" id="syncBtn" class="btn-alert font-bold py-4 rounded-xl text-xs flex justify-center items-center gap-2 shadow-lg">
-              <span class="blink-fast">⚠️</span> SYNC PAYOUT [配当金同期プロセス]
+              <span class="blink-fast">⚠️</span> SYNC PAYOUT [配当金自動同期]
             </button>
           </div>
         </div>
@@ -174,7 +174,7 @@
         <div class="glass-panel p-5 rounded-2xl relative z-20">
           <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2 mb-4">▶ SYS.COMMANDS // 制御</h2>
           <div class="grid grid-cols-3 gap-2 mb-4 relative z-40">
-            <button type="button" onclick="showPayoutEditor()" class="bg-white text-slate-700 border border-slate-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm cursor-pointer touch-manipulation">手動修正</button>
+            <button type="button" onclick="showPayoutEditor()" class="bg-white text-slate-700 border border-slate-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm cursor-pointer touch-manipulation">手動修正(配当)</button>
             <button type="button" onclick="runAnalysis()" class="bg-sky-50 text-sky-700 border border-sky-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm cursor-pointer touch-manipulation">UI再構築</button>
             <button type="button" onclick="deepScan7Car()" class="bg-pink-50 text-pink-700 border border-pink-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm cursor-pointer touch-manipulation">7車 DEEP SCAN</button>
           </div>
@@ -204,7 +204,7 @@
         <div class="glass-panel p-5 rounded-2xl h-48 flex flex-col relative z-20">
           <h2 class="font-bold text-[10px] tracking-widest text-sky-700 border-l-4 border-sky-800 pl-2 mb-2">▶ TERMINAL LOG // 実行履歴</h2>
           <button type="button" onclick="document.getElementById('outputArea').innerHTML=''" class="absolute top-4 right-4 text-[9px] text-slate-500 border border-slate-200 bg-white px-2.5 py-1 rounded-lg cursor-pointer z-40 touch-manipulation shadow-sm">CLEAR</button>
-          <div id="outputArea" class="flex-grow bg-slate-900 text-sky-400 rounded-xl border border-sky-900/40 p-3.5 overflow-y-auto font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner custom-scrollbar relative z-10">SYSTEM BOOT SEQUENCE v5.6...
+          <div id="outputArea" class="flex-grow bg-slate-900 text-sky-400 rounded-xl border border-sky-900/40 p-3.5 overflow-y-auto font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner custom-scrollbar relative z-10">SYSTEM BOOT SEQUENCE v5.7...
 AWAITING COMMAND EXECUTION...</div>
         </div>
       </div>
@@ -277,7 +277,7 @@ AWAITING COMMAND EXECUTION...</div>
         try { savedRecords = JSON.parse(stored); } catch(e) { savedRecords = []; }
         updateCountDisplay();
         runAnalysis();
-        logToTerminal("> DBリカバリ完了. v5.6 稼働中.");
+        logToTerminal("> DBリカバリ完了. v5.7 稼働中.");
       } else {
         runAnalysis(); 
       }
@@ -331,7 +331,6 @@ AWAITING COMMAND EXECUTION...</div>
       const inputData = document.getElementById('dataInput').value;
       let extractedCount = 0;
       
-      // 超柔軟な抽出ロジック（Rが含まれる箇所、あるいはテキスト全体を柔軟にスキャン）
       const blocks = inputData.split(/(?=\d+R|レース名|競輪レースデータ|小倉|京王閣|平塚|大宮|福井)/);
       
       blocks.forEach(block => {
@@ -366,7 +365,7 @@ AWAITING COMMAND EXECUTION...</div>
               }
           }
 
-        let patternKey = null; let diffPatternKey = null; let diffDisplay = null;
+          let patternKey = null; let diffPatternKey = null; let diffDisplay = null;
           const allLineMatches = block.match(/\[([\d\s]+)\]/g);
           let allDiffs = []; let diffLogArr = [];
           if (allLineMatches) {
@@ -382,12 +381,9 @@ AWAITING COMMAND EXECUTION...</div>
                       }
                   }
               });
-              if (allDiffs.length > 0) { diffPatternKey = allDiffs.join('-'); diffDisplay = diffLogArr.join(' / '); }
-          }
-          
-          // データ内に数値やライン、あるいはレース名らしきものがあれば強制的に拾う
-          if (raceName !== "UNKNOWN" || patternKey || diffPatternKey || block.includes("大中拓磨") || block.includes("選手")) {
-              if (raceName === "UNKNOWN") raceName = "1R"; // フォールバック
+
+        if (raceName !== "UNKNOWN" || patternKey || diffPatternKey || block.includes("大中拓磨") || block.includes("選手")) {
+              if (raceName === "UNKNOWN") raceName = "1R";
               const exists = savedRecords.find(r => r.venue === venue && r.raceName === raceName && r.pattern === patternKey);
               if (!exists) {
                   savedRecords.push({ venue, raceName, category, pattern: patternKey || '1-2-3', diffPattern: diffPatternKey || '1-1', diffDisplay, payout: 0, timestamp: new Date().getTime() });
@@ -396,7 +392,6 @@ AWAITING COMMAND EXECUTION...</div>
           }
       });
 
-      // 万が一ブロック分割で1件も取れなかった場合の最終安全策（テキスト全体を1レースとして強制格納）
       if (extractedCount === 0 && inputData.length > 20) {
           const fallbackRace = inputData.match(/\d+R/)?.[0] || "1R";
           const fallbackVenue = inputData.includes("小倉") ? "小倉" : "UNKNOWN";
@@ -565,7 +560,7 @@ AWAITING COMMAND EXECUTION...</div>
 
     function showPayoutEditor() {
       if (savedRecords.length === 0) { logToTerminal("> エラー: レコードがありません.", "error"); return; }
-      let html = '<div class="space-y-1.5 max-h-32 overflow-y-auto pr-2 custom-scrollbar">';
+      let html = '<div class="space-y-1.5 max-h-40 overflow-y-auto pr-2 custom-scrollbar">';
       [...savedRecords].reverse().forEach((record, revIndex) => {
         const originalIndex = savedRecords.length - 1 - revIndex;
         const color = record.payout > 0 ? 'border-l-pink-500 bg-pink-50/50' : 'border-l-sky-500 bg-sky-50/50';
@@ -584,9 +579,9 @@ AWAITING COMMAND EXECUTION...</div>
         `;
       });
       html += '</div>';
-      html += '<button type="button" onclick="savePayouts()" class="mt-3 w-full bg-sky-600 text-white py-2.5 rounded-xl text-xs font-bold uppercase cursor-pointer">上書き保存</button>';
+      html += '<button type="button" onclick="savePayouts()" class="mt-3 w-full bg-sky-600 hover:bg-sky-500 text-white py-2.5 rounded-xl text-xs font-bold uppercase cursor-pointer shadow-md">上書き保存 [OVERWRITE]</button>';
       document.getElementById('outputArea').innerHTML = html + document.getElementById('outputArea').innerHTML;
-      logToTerminal("> 手動エディタ起動。");
+      logToTerminal("> 手動エディタ起動。リストから配当を直接入力・修正できます。");
     }
 
     function savePayouts() {
@@ -596,7 +591,8 @@ AWAITING COMMAND EXECUTION...</div>
       });
       localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
       updateCountDisplay(); runAnalysis();
-      logToTerminal("> DB更新完了。", "success");
+      logToTerminal("> DB更新完了。配当データが反映されました。", "success");
+      playBeep(880, 'sine', 0.15);
     }
 
     function exportData() {
