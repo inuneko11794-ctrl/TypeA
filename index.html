@@ -114,9 +114,10 @@
           const raceMatch = block.match(/([^\s#]*?\d+R)/);
           if (raceMatch) {
               raceName = raceMatch[1];
-              const venueMatch = raceName.match(/^([^\dＲＲ]+)/);
-              if (venueMatch) {
-                  venue = venueMatch[1].replace('競輪レースデータ：', '').trim();
+              // 会場名の抽出（例: 「大宮1R」から「大宮」を綺麗に切り出す）
+              const venueClean = raceName.replace(/競輪レースデータ：/g, '').replace(/\d+R/g, '').trim();
+              if (venueClean) {
+                  venue = venueClean;
               }
           }
 
@@ -251,7 +252,7 @@
         html += `
           <div class="flex items-center justify-between bg-gray-700 p-2 rounded border-l-4 ${record.payout > 0 ? 'border-green-500' : 'border-yellow-500'}">
             <div class="flex flex-col">
-              <span class="text-white font-bold text-base">[${record.raceName || '不明'}] 差分[${record.diffPattern || '-'}]</span>
+              <span class="text-white font-bold text-base">[${record.venue || '不明'} / ${record.raceName || '不明'}] 差分[${record.diffPattern || '-'}]</span>
             </div>
             <div class="flex items-center">
               <input type="number" id="edit_payout_${originalIndex}" 
