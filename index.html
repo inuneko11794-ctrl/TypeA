@@ -1,85 +1,228 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>バトルバンクくん - 分析ツール</title>
+  <title>BATTLE BANK-KUN | PRO MATRIX EXECUTION</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-cyan: 0, 240, 255;
+      --color-magenta: 255, 0, 128;
+      --color-dark: 10, 15, 30;
+    }
+    body {
+      background-color: #05050a;
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(var(--color-cyan), 0.08), transparent 30%),
+        radial-gradient(circle at 85% 30%, rgba(var(--color-magenta), 0.08), transparent 30%),
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+      font-family: 'Rajdhani', sans-serif;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    .font-orbitron { font-family: 'Orbitron', sans-serif; }
+    .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
+    
+    .glass-panel {
+      background: rgba(var(--color-dark), 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(var(--color-cyan), 0.2);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(var(--color-cyan), 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    .glass-panel::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(var(--color-cyan), 0.6), transparent);
+    }
+    
+    .neon-text-cyan { text-shadow: 0 0 10px rgba(var(--color-cyan), 0.7); }
+    .neon-text-magenta { text-shadow: 0 0 10px rgba(var(--color-magenta), 0.7); }
+    
+    .btn-cyber {
+      background: rgba(var(--color-cyan), 0.1);
+      border: 1px solid rgba(var(--color-cyan), 0.5);
+      color: rgb(var(--color-cyan));
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn-cyber:hover {
+      background: rgba(var(--color-cyan), 0.25);
+      box-shadow: 0 0 15px rgba(var(--color-cyan), 0.4);
+      transform: translateY(-1px);
+    }
+    .btn-cyber::after {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+      transform: rotate(45deg) translate(-100%, -100%);
+      transition: all 0.5s ease;
+    }
+    .btn-cyber:hover::after { transform: rotate(45deg) translate(100%, 100%); }
+
+    .btn-magenta {
+      background: rgba(var(--color-magenta), 0.1);
+      border: 1px solid rgba(var(--color-magenta), 0.5);
+      color: #ff66a3;
+    }
+    .btn-magenta:hover {
+      background: rgba(var(--color-magenta), 0.25);
+      box-shadow: 0 0 15px rgba(var(--color-magenta), 0.4);
+    }
+
+    .card-matrix {
+      transition: all 0.4s ease;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .card-matrix:hover {
+      border-color: rgba(var(--color-cyan), 0.5);
+      box-shadow: 0 10px 30px -10px rgba(var(--color-cyan), 0.4);
+      transform: translateY(-4px);
+    }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+    ::-webkit-scrollbar-thumb { background: rgba(var(--color-cyan), 0.4); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(var(--color-cyan), 0.8); }
+    
+    .scanline {
+      width: 100%; height: 100px;
+      background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(var(--color-cyan), 0.1) 50%, rgba(0,0,0,0) 100%);
+      opacity: 0.1;
+      position: absolute; bottom: 100%;
+      animation: scanline 8s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes scanline {
+      0% { bottom: 100%; }
+      100% { bottom: -100px; }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800 p-4 font-sans leading-relaxed">
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md mb-6">
-    <h1 class="text-xl font-bold text-blue-600 mb-2">バトルバンクくん - 分析ツール</h1>
-    <p class="text-sm text-gray-600 mb-4">
-      出走表や結果のテキストを読み込み、自動で分析を行います。
-    </p>
+<body class="min-h-screen flex flex-col items-center justify-start p-4 md:p-8">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+  <!-- Main Container -->
+  <div class="w-full max-w-7xl relative z-10">
+    <div class="scanline"></div>
+    
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-end border-b border-[rgba(0,240,255,0.3)] pb-4 mb-8">
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-1 flex justify-between items-center">
-          <span>1. テキスト入力（出走表 or 結果）</span>
-          <button onclick="document.getElementById('mdFileInput').click()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded text-xs shadow transition">
-            📄 ファイル読込
-          </button>
-          <input type="file" id="mdFileInput" class="hidden" accept=".md,.txt" onchange="loadMarkdown(event)">
-        </label>
-        <textarea id="dataInput" rows="11" class="w-full p-3 border rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs" placeholder="【使い方】
-① レース前：出走表テキストを貼り付けて「📥 データを抽出して保存」
-② レース後：レース結果テキストを貼り付けて「🏁 結果から配当を自動反映」"></textarea>
+        <h1 class="font-orbitron text-3xl md:text-4xl font-black tracking-widest text-white neon-text-cyan flex items-center gap-3">
+          BATTLE BANK-KUN
+          <span class="text-xs tracking-normal bg-cyan-900/50 border border-cyan-500 text-cyan-300 px-2 py-1 rounded">PRO MATRIX EXECUTION</span>
+        </h1>
+        <p class="text-gray-400 text-sm tracking-widest uppercase mt-2">v3.0.0 // Kinetic Visualization & Deep Data Parser</p>
       </div>
-      <div class="flex flex-col gap-2">
-        <label class="block text-sm font-bold text-gray-700 mb-1">操作パネル</label>
-        <button onclick="extractAndSaveData()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-md transition duration-200 text-sm shadow">
-          📥 データを抽出して保存
-        </button>
-        <button onclick="applyResults()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded-md transition duration-200 text-sm shadow">
-          🏁 結果から配当を自動反映
-        </button>
+      <div id="dataCount" class="font-mono-tech text-lg text-cyan-400 border border-cyan-500/30 bg-cyan-950/30 px-4 py-1.5 rounded mt-4 md:mt-0 shadow-[0_0_10px_rgba(0,240,255,0.1)]">
+        SYS.DB.COUNT: [ 0 ]
+      </div>
+    </header>
+
+    <!-- Dashboard Grid -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-8">
+      
+      <!-- Control Terminal (Left Column) -->
+      <div class="xl:col-span-4 flex flex-col gap-6">
+        <div class="glass-panel p-5 rounded-xl">
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="font-orbitron text-sm tracking-widest text-cyan-400 border-l-2 border-cyan-400 pl-2">DATA UPLINK</h2>
+            <button onclick="document.getElementById('mdFileInput').click()" class="text-xs font-bold text-gray-300 hover:text-white transition flex items-center gap-1 bg-gray-800/50 px-2 py-1 rounded border border-gray-600 hover:border-cyan-400">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+              FILE LOAD
+            </button>
+            <input type="file" id="mdFileInput" class="hidden" accept=".md,.txt" onchange="loadMarkdown(event)">
+          </div>
+          
+          <textarea id="dataInput" rows="7" class="w-full p-3 bg-black/50 border border-gray-700 rounded-lg text-gray-300 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono-tech text-xs placeholder-gray-600 resize-none transition" placeholder="> Awaiting raw race data or result text...&#10;> Paste content here to initiate parse sequence."></textarea>
+          
+          <div class="flex flex-col gap-3 mt-4">
+            <button onclick="extractAndSaveData()" class="btn-cyber font-bold py-3 rounded-lg text-sm flex justify-center items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+              EXTRACT & ARCHIVE
+            </button>
+            <button onclick="applyResults()" class="btn-cyber btn-magenta font-bold py-3 rounded-lg text-sm flex justify-center items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              SYNC PAYOUT RESULTS
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-panel p-5 rounded-xl">
+          <h2 class="font-orbitron text-sm tracking-widest text-cyan-400 border-l-2 border-cyan-400 pl-2 mb-4">SYSTEM COMMANDS</h2>
+          <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="showPayoutEditor()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-600 font-bold py-2 rounded text-xs transition uppercase tracking-wider">Manual Edit</button>
+            <button onclick="runAnalysis()" class="bg-gray-800 hover:bg-cyan-900 text-cyan-300 border border-cyan-800 font-bold py-2 rounded text-xs transition uppercase tracking-wider">Run Matrix</button>
+          </div>
+          <div class="grid grid-cols-3 gap-2 border-t border-gray-800 pt-4">
+            <button onclick="exportData()" class="bg-black border border-gray-700 hover:border-gray-500 text-gray-400 py-1.5 rounded text-[10px] uppercase">Export</button>
+            <button onclick="document.getElementById('fileInput').click()" class="bg-black border border-gray-700 hover:border-gray-500 text-gray-400 py-1.5 rounded text-[10px] uppercase">Import</button>
+            <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
+            <button onclick="clearData()" class="bg-black border border-red-900/50 hover:border-red-600 text-red-500 py-1.5 rounded text-[10px] uppercase">Purge</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Visual Analytics (Right Column) -->
+      <div class="xl:col-span-8 flex flex-col gap-6">
         
-        <div class="flex gap-2">
-          <button onclick="showPayoutEditor()" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 rounded-md transition duration-200 text-xs shadow">
-            💰 手動で配当入力
-          </button>
-          <button onclick="analyzeData()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-md transition duration-200 text-xs shadow">
-            📊 蓄積データで分析
-          </button>
+        <!-- Graph Area -->
+        <div class="glass-panel p-5 rounded-xl flex-grow flex flex-col">
+          <h2 class="font-orbitron text-sm tracking-widest text-white border-l-2 border-magenta-500 pl-2 mb-4 flex justify-between">
+            <span class="neon-text-magenta">KINETIC VISUALIZER</span>
+            <span class="text-xs text-gray-500 tracking-normal font-mono-tech">STATUS: ONLINE</span>
+          </h2>
+          <div class="flex-grow w-full bg-black/40 rounded-lg border border-gray-800/50 p-4 relative" style="min-height: 280px;">
+            <canvas id="matrixChart"></canvas>
+          </div>
         </div>
 
-        <div class="flex gap-2 mt-auto">
-          <button onclick="exportData()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 rounded-md transition duration-200 text-xs">
-            バックアップ保存
-          </button>
-          <button onclick="document.getElementById('fileInput').click()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 rounded-md transition duration-200 text-xs">
-            データ復元
-          </button>
-          <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
-          <button onclick="clearData()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-md transition duration-200 text-xs">
-            全削除
-          </button>
+        <!-- Terminal Output -->
+        <div class="glass-panel p-5 rounded-xl h-48 flex flex-col">
+          <h2 class="font-orbitron text-xs tracking-widest text-gray-400 border-l-2 border-gray-600 pl-2 mb-2">TERMINAL LOG</h2>
+          <div id="outputArea" class="flex-grow bg-black/60 rounded border border-gray-800 p-3 overflow-y-auto font-mono-tech text-xs text-cyan-500 leading-relaxed whitespace-pre-wrap">SYSTEM BOOT SEQUENCE INITIATED...
+AWAITING COMMAND EXECUTION...</div>
         </div>
       </div>
     </div>
 
-    <div class="mt-6">
-      <h2 class="font-bold text-gray-700 mb-2 border-b pb-1 flex justify-between">
-        <span>抽出・分析結果</span>
-        <span id="dataCount" class="text-sm font-normal text-gray-500">(蓄積: 0レース)</span>
-      </h2>
-      <div id="outputArea" class="bg-gray-800 text-green-400 p-4 rounded-md text-sm whitespace-pre-wrap font-mono h-96 overflow-y-auto">
-        テキストを貼り付けて、操作パネルのボタンを押してください。
-      </div>
+    <!-- Stats Cards Grid -->
+    <h2 class="font-orbitron text-sm tracking-widest text-cyan-400 border-l-2 border-cyan-400 pl-2 mb-4">CATEGORY METRICS</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4" id="categoryCards">
+      <!-- Generated via JS -->
     </div>
+
   </div>
 
   <script>
     let savedRecords = [];
+    let myChart = null;
 
     window.onload = () => {
-      const stored = localStorage.getItem('battleBankAutoData');
+      const stored = localStorage.getItem('battleBankProData');
       if (stored) {
         savedRecords = JSON.parse(stored);
         updateCountDisplay();
+        runAnalysis();
+        logToTerminal("System restored from local database.\nReady.");
+      } else {
+        runAnalysis(); 
       }
     };
+    
+    function logToTerminal(msg) {
+        const out = document.getElementById('outputArea');
+        const time = new Date().toLocaleTimeString('ja-JP', { hour12: false });
+        out.innerText = `[${time}] ${msg}`;
+    }
 
     function loadMarkdown(event) {
       const file = event.target.files[0];
@@ -88,7 +231,7 @@
       reader.onload = function(e) {
         document.getElementById('dataInput').value = e.target.result;
         document.getElementById('mdFileInput').value = ''; 
-        document.getElementById('outputArea').innerText = "ファイルを読み込みました。ボタンを押して処理してください。";
+        logToTerminal("File injected into memory cache. Ready for extraction.");
       };
       reader.readAsText(file);
     }
@@ -96,28 +239,66 @@
     function extractAndSaveData() {
       const inputData = document.getElementById('dataInput').value;
       if (!inputData.trim()) {
-        alert("テキストを入力してください。");
+        alert("NO DATA DETECTED IN BUFFER.");
         return;
       }
 
       let extractedCount = 0;
-      let logText = "【抽出ログ】\n";
-      
+      let logText = "INITIATING PARSE SEQUENCE...\n";
       const blocks = inputData.split(/(?=競輪レースデータ|レース名|第?\d+R)/);
       
       blocks.forEach(block => {
           if(!block.trim()) return;
           
-          let venue = "不明";
-          let raceName = "不明";
+          let venue = "UNKNOWN";
+          let raceName = "UNKNOWN";
           
           const raceMatch = block.match(/([^\s#]*?\d+R)/);
           if (raceMatch) {
               raceName = raceMatch[1];
-              // 会場名の抽出（例: 「大宮1R」から「大宮」を綺麗に切り出す）
               const venueClean = raceName.replace(/競輪レースデータ：/g, '').replace(/\d+R/g, '').trim();
-              if (venueClean) {
-                  venue = venueClean;
+              if (venueClean) venue = venueClean;
+          }
+
+          // Girls precision logic
+          const hasGirlsKeyword = block.includes("ガールズ") || block.includes("L級");
+          const comments = block.match(/- \*\*\[\d+\]\s*.*?\*\*：(.*?)(?=\n|$)/g);
+          let tankiCount = 0;
+          let totalCommentCount = 0;
+          if (comments) {
+              totalCommentCount = comments.length;
+              comments.forEach(c => {
+                  if (c.includes("単騎") || c.includes("自力") || c.includes("自在")) { 
+                      if(c.includes("単騎")) tankiCount++; 
+                  }
+              });
+          }
+
+          let isGirls = false;
+          if (hasGirlsKeyword && (totalCommentCount > 0 && tankiCount === totalCommentCount)) {
+              isGirls = true;
+          } else if (hasGirlsKeyword && totalCommentCount === 0) {
+              isGirls = true;
+          }
+
+          let category = "9車";
+          if (isGirls) {
+              category = "ガールズ";
+          } else {
+              const allCarRows = block.match(/\| \d+ \|/g);
+              if (allCarRows) {
+                  const carCount = allCarRows.length;
+                  if (carCount >= 5 && carCount <= 9) category = carCount + "車";
+              } else {
+                  const matchCars = block.match(/\[([\d\s]+)\]/g);
+                  if (matchCars) {
+                      let maxCarNum = 0;
+                      matchCars.forEach(m => {
+                          const nums = m.replace(/[\[\]]/g, '').trim().split(/\s+/).map(Number);
+                          nums.forEach(n => { if(n > maxCarNum) maxCarNum = n; });
+                      });
+                      if (maxCarNum >= 5 && maxCarNum <= 9) category = maxCarNum + "車";
+                  }
               }
           }
 
@@ -132,18 +313,15 @@
           if (allLineMatches) {
               allLineMatches.forEach((lm, index) => {
                   const carsArr = lm.replace(/[\[\]]/g, '').trim().split(/\s+/).map(Number);
-                  
                   if (index === 0 && carsArr.length > 1) {
                       patternKey = carsArr.join('-');
                   }
-                  
                   if (carsArr.length > 1) {
                       let localDiffs = [];
                       for (let i = 0; i < carsArr.length - 1; i++) {
                           localDiffs.push(Math.abs(carsArr[i] - carsArr[i+1]));
                       }
                       let sum = localDiffs.reduce((a, b) => a + b, 0);
-                      
                       if (sum === 4) {
                           allDiffs.push(4);
                           diffLogArr.push("4(合算)");
@@ -166,6 +344,7 @@
                   const record = { 
                       venue: venue,
                       raceName: raceName,
+                      category: category,
                       pattern: patternKey, 
                       diffPattern: diffPatternKey, 
                       diffDisplay: diffDisplay,
@@ -174,56 +353,51 @@
                   };
                   savedRecords.push(record);
                   extractedCount++;
-                  logText += `・[${venue} / ${raceName}] 抽出完了\n`;
-              } else {
-                  logText += `・[${raceName}] スキップ (登録済み)\n`;
+                  logText += `> [${category}] ${venue} / ${raceName} >> LOGGED\n`;
               }
           }
       });
 
       if (extractedCount > 0) {
-        localStorage.setItem('battleBankAutoData', JSON.stringify(savedRecords));
+        localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
         document.getElementById('dataInput').value = '';
         updateCountDisplay();
-        document.getElementById('outputArea').innerText = logText + "\n合計 " + extractedCount + " レースのデータを保存しました。";
+        runAnalysis();
+        logToTerminal(logText + `\n>> SUCCESS: ${extractedCount} races archived into Matrix.`);
       } else {
-        alert("有効な並びデータが見つかりませんでした。");
-        document.getElementById('outputArea').innerText = logText;
+        logToTerminal(">> WARNING: No valid format data found in buffer.");
       }
     }
 
     function applyResults() {
         const text = document.getElementById('dataInput').value;
         if (!text.trim()) {
-            alert("結果のテキストを入力・貼り付けてください。");
+            alert("NO PAYOUT DATA DETECTED IN BUFFER.");
             return;
         }
 
         let updatedCount = 0;
-        let logText = "【結果反映ログ】\n";
+        let logText = "INITIATING PAYOUT SYNC...\n";
 
         savedRecords.forEach(record => {
-            if (record.raceName && record.raceName !== "不明" && record.payout === 0) {
+            if (record.raceName && record.payout === 0) {
                 const raceIdx = text.indexOf(record.raceName);
                 if (raceIdx !== -1) {
                     const searchArea = text.substring(raceIdx, raceIdx + 300);
                     const payoutMatch = searchArea.match(/3連単.*?(\d{1,3}(?:,\d{3})*|\d+)\s*円/);
-                    
                     if (payoutMatch) {
-                        const moneyStr = payoutMatch[1].replace(/,/g, '');
-                        const money = parseInt(moneyStr, 10);
+                        const money = parseInt(payoutMatch[1].replace(/,/g, ''), 10);
                         if (money > 0) {
                             record.payout = money;
                             updatedCount++;
-                            logText += `・[${record.raceName}] 配当反映: ${money.toLocaleString()}円\n`;
+                            logText += `> ${record.raceName} >> JPY ${money.toLocaleString()}\n`;
                         }
                     } else {
                         const genericMatch = searchArea.match(/配当.*?(\d{1,3}(?:,\d{3})*|\d+)円/);
                         if (genericMatch) {
-                            const moneyStr = genericMatch[1].replace(/,/g, '');
-                            record.payout = parseInt(genericMatch, 10);
+                            record.payout = parseInt(genericMatch[1].replace(/,/g, ''), 10);
                             updatedCount++;
-                            logText += `・[${record.raceName}] 配当反映(汎用): ${record.payout.toLocaleString()}円\n`;
+                            logText += `> ${record.raceName} >> JPY ${record.payout.toLocaleString()} (GENERIC)\n`;
                         }
                     }
                 }
@@ -231,41 +405,372 @@
         });
 
         if (updatedCount > 0) {
-            localStorage.setItem('battleBankAutoData', JSON.stringify(savedRecords));
+            localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
             document.getElementById('dataInput').value = '';
             updateCountDisplay();
-            document.getElementById('outputArea').innerText = logText + `\n${updatedCount} レースの配当を自動反映しました！`;
+            runAnalysis();
+            logToTerminal(logText + `\n>> SYNC COMPLETE: ${updatedCount} records updated.`);
         } else {
-            alert("反映できる未入力レース、または配当データが見つかりませんでした。");
+            logToTerminal(">> WARNING: No matching empty records found for sync.");
         }
     }
 
+    function runAnalysis() {
+      const categories = ["5車", "6車", "7車", "8車", "9車", "ガールズ"];
+      const catStats = {};
+      categories.forEach(c => { catStats[c] = { count: 0, payouts: [] }; });
+
+      if (savedRecords.length > 0) {
+          savedRecords.forEach(record => {
+            let cat = record.category || "9車";
+            if (!catStats[cat]) catStats[cat] = { count: 0, payouts: [] };
+            catStats[cat].count++;
+            if (record.payout > 0) catStats[cat].payouts.push(record.payout);
+          });
+      }
+let cardsHtml = '';
+      let chartLabels = categories;
+      let chartCounts = [];
+      let chartAvgs = [];
+
+      categories.forEach(c => {
+        const data = catStats[c];
+        const avg = data.payouts.length > 0 ? Math.round(data.payouts.reduce((a,b)=>a+b,0)/data.payouts.length) : 0;
+        const max = data.payouts.length > 0 ? Math.max(...data.payouts) : 0;
+        
+        chartCounts.push(data.count);
+        chartAvgs.push(avg);
+
+        // Pro Card Design
+        cardsHtml += `
+          <div class="card-matrix bg-black/60 backdrop-blur-sm p-4 rounded-xl flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[rgba(0,240,255,0.05)] to-transparent rounded-bl-full pointer-events-none group-hover:from-[rgba(0,240,255,0.15)] transition"></div>
+            
+            <div class="mb-4">
+              <div class="font-orbitron text-[11px] text-gray-500 tracking-widest mb-1 uppercase">Target Group</div>
+              <div class="font-bold text-lg text-white group-hover:neon-text-cyan transition">${c}</div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <div class="bg-gray-900/80 border border-gray-800 rounded p-2 text-center">
+                <div class="text-[9px] text-gray-500 uppercase tracking-widest">Logged</div>
+                <div class="font-mono-tech text-cyan-400 text-sm">${data.count}</div>
+              </div>
+              <div class="bg-gray-900/80 border border-gray-800 rounded p-2 text-center">
+                <div class="text-[9px] text-gray-500 uppercase tracking-widest">Synced</div>
+                <div class="font-mono-tech text-magenta-400 text-sm">${data.payouts.length}</div>
+              </div>
+            </div>
+            
+            <div class="mt-2 pt-2 border-t border-gray-800">
+              <div class="text-[9px] text-gray-500 uppercase tracking-widest mb-1 flex justify-between">
+                <span>Avg Return</span>
+                <span>Max</span>
+              </div>
+              <div class="flex justify-between items-end">
+                <div class="font-mono-tech font-bold text-lg text-white">${avg > 0 ? '¥' + avg.toLocaleString() : '---'}</div>
+                <div class="font-mono-tech text-[10px] text-gray-400">${max > 0 ? '¥' + max.toLocaleString() : '-'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('categoryCards').innerHTML = cardsHtml;
+
+      // Draw Advanced Chart
+      const canvas = document.getElementById('matrixChart');
+      const ctx = canvas.getContext('2d');
+      
+      // Gradients
+      const barGrad = ctx.createLinearGradient(0, 0, 0, 300);
+      barGrad.addColorStop(0, 'rgba(0, 240, 255, 0.6)');
+      barGrad.addColorStop(1, 'rgba(0, 240, 255, 0.05)');
+      
+      const lineGrad = ctx.createLinearGradient(0, 0, 0, 300);
+      lineGrad.addColorStop(0, 'rgba(255, 0, 128, 0.3)');
+      lineGrad.addColorStop(1, 'rgba(255, 0, 128, 0.0)');
+
+      if (myChart) myChart.destroy();
+
+      myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [
+            {
+              label: ' LOGGED RACES',
+              data: chartCounts,
+              backgroundColor: barGrad,
+              borderColor: 'rgba(0, 240, 255, 1)',
+              borderWidth: 1.5,
+              yAxisID: 'y',
+              borderRadius: 2,
+              barPercentage: 0.5,
+              order: 2
+            },
+            {
+              label: ' AVG RETURN (JPY)',
+              data: chartAvgs,
+              type: 'line',
+              borderColor: 'rgba(255, 0, 128, 1)',
+              backgroundColor: lineGrad,
+              borderWidth: 2.5,
+              fill: true,
+              pointBackgroundColor: '#05050a',
+              pointBorderColor: 'rgba(255, 0, 128, 1)',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: 'rgba(255, 0, 128, 1)',
+              pointHoverBorderColor: '#fff',
+              yAxisID: 'y1',
+              tension: 0.4,
+              order: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+              ticks: { color: '#64748b', font: { family: "'Share Tech Mono', monospace", size: 11 } }
+            },
+            y: {
+              type: 'linear', position: 'left',
+              grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+              ticks: { color: 'rgba(0, 240, 255, 0.8)', font: { family: "'Share Tech Mono', monospace", size: 11 } }
+            },
+            y1: {
+              type: 'linear', position: 'right',
+              grid: { display: false },
+              ticks: { color: 'rgba(255, 0, 128, 0.8)', font: { family: "'Share Tech Mono', monospace", size: 11 } }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              align: 'end',
+              labels: {
+                color: '#94a3b8',
+                font: { family: "'Rajdhani', sans-serif", size: 12, weight: '600' },
+                boxWidth: 12, boxHeight: 12, usePointStyle: true
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(10, 15, 30, 0.9)',
+              titleColor: '#fff',
+              titleFont: { family: "'Orbitron', sans-serif" },
+              bodyColor: '#e2e8f0',
+              bodyFont: { family: "'Share Tech Mono', monospace" },
+              borderColor: 'rgba(0, 240, 255, 0.3)',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: true,
+              callbacks: {
+                  label: function(context) {
+                      let label = context.dataset.label || '';
+                      if (label) { label += ': '; }
+                      if (context.datasetIndex === 1) {
+                          label += '¥' + context.parsed.y.toLocaleString();
+                      } else {
+                          label += context.parsed.y;
+                      }
+                      return label;
+                  }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    let cardsHtml = '';
+      let chartLabels = categories;
+      let chartCounts = [];
+      let chartAvgs = [];
+
+      categories.forEach(c => {
+        const data = catStats[c];
+        const avg = data.payouts.length > 0 ? Math.round(data.payouts.reduce((a,b)=>a+b,0)/data.payouts.length) : 0;
+        const max = data.payouts.length > 0 ? Math.max(...data.payouts) : 0;
+        
+        chartCounts.push(data.count);
+        chartAvgs.push(avg);
+
+        // Pro Card Design
+        cardsHtml += `
+          <div class="card-matrix bg-black/60 backdrop-blur-sm p-4 rounded-xl flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[rgba(0,240,255,0.05)] to-transparent rounded-bl-full pointer-events-none group-hover:from-[rgba(0,240,255,0.15)] transition"></div>
+            
+            <div class="mb-4">
+              <div class="font-orbitron text-[11px] text-gray-500 tracking-widest mb-1 uppercase">Target Group</div>
+              <div class="font-bold text-lg text-white group-hover:neon-text-cyan transition">${c}</div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <div class="bg-gray-900/80 border border-gray-800 rounded p-2 text-center">
+                <div class="text-[9px] text-gray-500 uppercase tracking-widest">Logged</div>
+                <div class="font-mono-tech text-cyan-400 text-sm">${data.count}</div>
+              </div>
+              <div class="bg-gray-900/80 border border-gray-800 rounded p-2 text-center">
+                <div class="text-[9px] text-gray-500 uppercase tracking-widest">Synced</div>
+                <div class="font-mono-tech text-magenta-400 text-sm">${data.payouts.length}</div>
+              </div>
+            </div>
+            
+            <div class="mt-2 pt-2 border-t border-gray-800">
+              <div class="text-[9px] text-gray-500 uppercase tracking-widest mb-1 flex justify-between">
+                <span>Avg Return</span>
+                <span>Max</span>
+              </div>
+              <div class="flex justify-between items-end">
+                <div class="font-mono-tech font-bold text-lg text-white">${avg > 0 ? '¥' + avg.toLocaleString() : '---'}</div>
+                <div class="font-mono-tech text-[10px] text-gray-400">${max > 0 ? '¥' + max.toLocaleString() : '-'}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('categoryCards').innerHTML = cardsHtml;
+
+      // Draw Advanced Chart
+      const canvas = document.getElementById('matrixChart');
+      const ctx = canvas.getContext('2d');
+      
+      // Gradients
+      const barGrad = ctx.createLinearGradient(0, 0, 0, 300);
+      barGrad.addColorStop(0, 'rgba(0, 240, 255, 0.6)');
+      barGrad.addColorStop(1, 'rgba(0, 240, 255, 0.05)');
+      
+      const lineGrad = ctx.createLinearGradient(0, 0, 0, 300);
+      lineGrad.addColorStop(0, 'rgba(255, 0, 128, 0.3)');
+      lineGrad.addColorStop(1, 'rgba(255, 0, 128, 0.0)');
+
+      if (myChart) myChart.destroy();
+
+      myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [
+            {
+              label: ' LOGGED RACES',
+              data: chartCounts,
+              backgroundColor: barGrad,
+              borderColor: 'rgba(0, 240, 255, 1)',
+              borderWidth: 1.5,
+              yAxisID: 'y',
+              borderRadius: 2,
+              barPercentage: 0.5,
+              order: 2
+            },
+            {
+              label: ' AVG RETURN (JPY)',
+              data: chartAvgs,
+              type: 'line',
+              borderColor: 'rgba(255, 0, 128, 1)',
+              backgroundColor: lineGrad,
+              borderWidth: 2.5,
+              fill: true,
+              pointBackgroundColor: '#05050a',
+              pointBorderColor: 'rgba(255, 0, 128, 1)',
+              pointBorderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: 'rgba(255, 0, 128, 1)',
+              pointHoverBorderColor: '#fff',
+              yAxisID: 'y1',
+              tension: 0.4,
+              order: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+              ticks: { color: '#64748b', font: { family: "'Share Tech Mono', monospace", size: 11 } }
+            },
+            y: {
+              type: 'linear', position: 'left',
+              grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+              ticks: { color: 'rgba(0, 240, 255, 0.8)', font: { family: "'Share Tech Mono', monospace", size: 11 } }
+            },
+            y1: {
+              type: 'linear', position: 'right',
+              grid: { display: false },
+              ticks: { color: 'rgba(255, 0, 128, 0.8)', font: { family: "'Share Tech Mono', monospace", size: 11 } }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              align: 'end',
+              labels: {
+                color: '#94a3b8',
+                font: { family: "'Rajdhani', sans-serif", size: 12, weight: '600' },
+                boxWidth: 12, boxHeight: 12, usePointStyle: true
+              }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(10, 15, 30, 0.9)',
+              titleColor: '#fff',
+              titleFont: { family: "'Orbitron', sans-serif" },
+              bodyColor: '#e2e8f0',
+              bodyFont: { family: "'Share Tech Mono', monospace" },
+              borderColor: 'rgba(0, 240, 255, 0.3)',
+              borderWidth: 1,
+              padding: 10,
+              displayColors: true,
+              callbacks: {
+                  label: function(context) {
+                      let label = context.dataset.label || '';
+                      if (label) { label += ': '; }
+                      if (context.datasetIndex === 1) {
+                          label += '¥' + context.parsed.y.toLocaleString();
+                      } else {
+                          label += context.parsed.y;
+                      }
+                      return label;
+                  }
+              }
+            }
+          }
+        }
+      });
+    }
     function showPayoutEditor() {
       if (savedRecords.length === 0) {
-        document.getElementById('outputArea').innerText = "蓄積データがありません。";
+        logToTerminal(">> ERROR: No records in DB to edit.");
         return;
       }
-      let html = '<h3 class="text-white mb-3 font-bold">💰 【配当の入力・編集】 (新しい順)</h3>';
-      html += '<div class="space-y-2 max-h-72 overflow-y-auto pr-2">';
+      let html = '<div class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">';
       [...savedRecords].reverse().forEach((record, revIndex) => {
         const originalIndex = savedRecords.length - 1 - revIndex;
+        const color = record.payout > 0 ? 'border-l-magenta-500 bg-gray-900/50' : 'border-l-cyan-500 bg-black/50';
         html += `
-          <div class="flex items-center justify-between bg-gray-700 p-2 rounded border-l-4 ${record.payout > 0 ? 'border-green-500' : 'border-yellow-500'}">
+          <div class="flex items-center justify-between p-2 rounded border-l-2 ${color} border-y border-r border-gray-800 text-xs transition hover:border-gray-600">
             <div class="flex flex-col">
-              <span class="text-white font-bold text-base">[${record.venue || '不明'} / ${record.raceName || '不明'}] 差分[${record.diffPattern || '-'}]</span>
+              <span class="text-white font-mono-tech tracking-wide">[${record.category || '9車'}] ${record.venue || ''} ${record.raceName || ''}</span>
+              <span class="text-gray-500 text-[9px] font-mono-tech uppercase">Diff: ${record.diffPattern || 'N/A'}</span>
             </div>
-            <div class="flex items-center">
-              <input type="number" id="edit_payout_${originalIndex}" 
-                     value="${record.payout > 0 ? record.payout : ''}" 
-                     placeholder="未入力" 
-                     class="w-24 p-1.5 text-right text-gray-900 rounded text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500">
-              <span class="ml-2 text-xs text-gray-300 w-4">円</span>
+            <div class="flex items-center gap-1">
+              <span class="text-[9px] text-gray-500 uppercase">JPY</span>
+              <input type="number" id="edit_payout_${originalIndex}" value="${record.payout > 0 ? record.payout : ''}" placeholder="0" class="w-20 p-1 text-right bg-black text-cyan-400 rounded text-xs border border-gray-700 font-mono-tech focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500">
             </div>
           </div>
         `;
       });
       html += '</div>';
-      html += '<button onclick="savePayouts()" class="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-md text-sm transition duration-200 shadow-md">手動入力を保存して更新</button>';
+      html += '<button onclick="savePayouts()" class="mt-3 w-full btn-cyber py-2 rounded text-xs">Commit Changes</button>';
       document.getElementById('outputArea').innerHTML = html;
     }
 
@@ -277,111 +782,10 @@
           record.payout = (!isNaN(val) && val >= 0) ? val : 0;
         }
       });
-      localStorage.setItem('battleBankAutoData', JSON.stringify(savedRecords));
+      localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
       updateCountDisplay();
-      alert("配当データを更新しました！");
-      analyzeData();
-    }
-
-    function analyzeData() {
-      if (savedRecords.length === 0) {
-        document.getElementById('outputArea').innerText = "蓄積データがありません。";
-        return;
-      }
-
-      const venueAnalysisMap = {}; 
-      const diffAnalysisMap = {}; 
-      const analysisMap = {}; 
-      let totalRaces = 0;
-      let racesWithPayout = 0;
-
-      savedRecords.forEach(record => {
-        totalRaces++;
-        if (record.payout > 0) racesWithPayout++;
-
-        const venue = record.venue || "不明";
-        if (!venueAnalysisMap[venue]) venueAnalysisMap[venue] = { count: 0, payouts: [] };
-        venueAnalysisMap[venue].count++;
-        if (record.payout > 0) venueAnalysisMap[venue].payouts.push(record.payout);
-
-        if (record.diffPattern) {
-            if (!diffAnalysisMap[record.diffPattern]) diffAnalysisMap[record.diffPattern] = { count: 0, payouts: [] };
-            diffAnalysisMap[record.diffPattern].count++;
-            if (record.payout > 0) diffAnalysisMap[record.diffPattern].payouts.push(record.payout);
-        }
-        if (record.pattern) {
-            if (!analysisMap[record.pattern]) analysisMap[record.pattern] = { count: 0, payouts: [] };
-            analysisMap[record.pattern].count++;
-            if (record.payout > 0) analysisMap[record.pattern].payouts.push(record.payout);
-        }
-      });
-
-      let resultText = `【分析サマリー】 (全${totalRaces}R中 / 配当入力済:${racesWithPayout}R)\n`;
-      resultText += `===========================================\n`;
-      resultText += `▼ 分析①: 会場（競輪場）別の配当傾向\n`;
-      resultText += `===========================================\n`;
-
-      const venueKeys = Object.keys(venueAnalysisMap).sort();
-      venueKeys.forEach(key => {
-        const data = venueAnalysisMap[key];
-        const payouts = data.payouts;
-        resultText += `■ 会場 [${key}]\n`;
-        resultText += `・開催数 : ${data.count} レース\n`;
-        if (payouts.length > 0) {
-            const avgPayout = Math.round(payouts.reduce((sum, val) => sum + val, 0) / payouts.length);
-            const maxPayout = Math.max(...payouts);
-            resultText += `・平均配当 : ${avgPayout.toLocaleString()} 円 (入力済:${payouts.length})\n`;
-            if (payouts.length > 1) resultText += `・最高配当 : ${maxPayout.toLocaleString()} 円\n`;
-        } else {
-            resultText += `・平均配当 : データなし\n`;
-        }
-        resultText += `\n`;
-      });
-      
-      resultText += `===========================================\n`;
-      resultText += `▼ 分析②: 車番差分の構成パターン\n`;
-      resultText += `===========================================\n`;
-      
-      const diffKeys = Object.keys(diffAnalysisMap).sort();
-      diffKeys.forEach(key => {
-        const data = diffAnalysisMap[key];
-        const payouts = data.payouts;
-        
-        resultText += `■ レース構成 [${key}]\n`;
-        resultText += `・出現 : ${data.count} レース\n`;
-        if (payouts.length > 0) {
-            const avgPayout = Math.round(payouts.reduce((sum, val) => sum + val, 0) / payouts.length);
-            const maxPayout = Math.max(...payouts);
-            resultText += `・平均 : ${avgPayout.toLocaleString()} 円 (入力済:${payouts.length})\n`;
-            if (payouts.length > 1) resultText += `・最高 : ${maxPayout.toLocaleString()} 円\n`;
-        } else {
-            resultText += `・平均 : データなし\n`;
-        }
-        resultText += `\n`;
-      });
-
-      resultText += `===========================================\n`;
-      resultText += `▼ 分析③: 先頭並びパターン\n`;
-      resultText += `===========================================\n`;
-
-      const keys = Object.keys(analysisMap).sort();
-      keys.forEach(key => {
-        const data = analysisMap[key];
-        const payouts = data.payouts;
-        resultText += `■ 先頭並び [${key}]\n`;
-        resultText += `・出現 : ${data.count} レース\n`;
-        if (payouts.length > 0) {
-            const avgPayout = Math.round(payouts.reduce((sum, val) => sum + val, 0) / payouts.length);
-            const maxPayout = Math.max(...payouts);
-            resultText += `・平均 : ${avgPayout.toLocaleString()} 円 (入力済:${payouts.length})\n`;
-            if (payouts.length > 1) resultText += `・最高 : ${maxPayout.toLocaleString()} 円\n`;
-        } else {
-            resultText += `・平均 : データなし\n`;
-        }
-        resultText += `\n`;
-      });
-
-      document.getElementById('outputArea').innerText = resultText;
+      runAnalysis();
+      logToTerminal(">> DB COMMITTED. Data overrides successful.");
     }
 
     function exportData() {
@@ -391,9 +795,10 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `battleBank_extracted_data.json`;
+      a.download = `battleBank_pro_db.json`;
       a.click();
       URL.revokeObjectURL(url);
+      logToTerminal(">> EXPORT SUCCESSFUL.");
     }
 
     window.importData = function(event) {
@@ -405,29 +810,43 @@
           const imported = JSON.parse(e.target.result);
           if (Array.isArray(imported)) {
             savedRecords = imported;
-            localStorage.setItem('battleBankAutoData', JSON.stringify(savedRecords));
+            localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
             updateCountDisplay();
-            alert("データを読み込みました。");
-            analyzeData();
+            runAnalysis();
+            logToTerminal(">> IMPORT SUCCESSFUL. System overriding...");
           }
-        } catch (err) {}
+        } catch (err) {
+            logToTerminal(">> ERROR: Invalid JSON structure.");
+        }
         document.getElementById('fileInput').value = '';
       };
       reader.readAsText(file);
     }
 
     function clearData() {
-      if (confirm("全ての蓄積データを削除しますか？")) {
+      if (confirm("WARNING: Purging entire database. Confirm?")) {
         savedRecords = [];
-        localStorage.removeItem('battleBankAutoData');
+        localStorage.removeItem('battleBankProData');
         updateCountDisplay();
-        document.getElementById('outputArea').innerText = "データをクリアしました。";
+        runAnalysis();
+        logToTerminal(">> DB PURGED. System wiped clean.");
       }
     }
 
     function updateCountDisplay() {
-      document.getElementById('dataCount').innerText = `(蓄積: ${savedRecords.length}レース)`;
+      const el = document.getElementById('dataCount');
+      if(el) el.innerText = `SYS.DB.COUNT: [ ${savedRecords.length.toString().padStart(3, '0')} ]`;
     }
   </script>
 </body>
 </html>
+
+
+                  
+              
+            
+          
+        
+      
+            
+      
