@@ -149,7 +149,7 @@
           BATTLE BANK-KUN
         </h1>
         <div class="flex items-center gap-3 mt-2">
-          <span class="text-xs font-bold tracking-widest bg-cyan-950 border border-cyan-400 text-cyan-300 px-3 py-1.5 rounded animate-pulse">PRO MATRIX EXECUTION v4.0_ULTIMATE</span>
+          <span class="text-xs font-bold tracking-widest bg-cyan-950 border border-cyan-400 text-cyan-300 px-3 py-1.5 rounded animate-pulse">PRO MATRIX EXECUTION v4.1_FIXED</span>
           <span class="text-[10px] text-gray-400 border border-gray-700 px-2 py-1 flex items-center gap-1">
             <div id="audioStatus" class="w-1.5 h-1.5 rounded-full bg-red-500"></div>
             AUDIO_SYS
@@ -290,10 +290,8 @@ AWAITING COMMAND EXECUTION...</div>
         setTimeout(() => playBeep(150, 'sawtooth', 0.3, 0.05), 100);
     }
 
-    // Attach sound to classes
     document.addEventListener('mouseover', (e) => { if(e.target.closest('.hover-snd')) sndHover(); });
     document.addEventListener('click', (e) => { if(e.target.closest('.click-snd')) sndClick(); });
-    /* ----------------------- */
 
     window.onload = () => {
       const stored = localStorage.getItem('battleBankProData');
@@ -334,7 +332,6 @@ AWAITING COMMAND EXECUTION...</div>
       reader.readAsText(file);
     }
 
-    // --- Hacking Progress Bar Wrappers ---
     function triggerExtract() {
         if (!document.getElementById('dataInput').value.trim()) {
             logToTerminal("> エラー: データが入力されていません.", "error"); sndError(); return;
@@ -363,8 +360,6 @@ AWAITING COMMAND EXECUTION...</div>
             if(progress > 100) progress = 100;
             const filled = Math.floor(progress / 5); 
             if(el) el.innerHTML = `[${'='.repeat(filled)}${'_'.repeat(20-filled)}] ${progress}%`;
-            
-            // Random glitch sounds during processing
             if(Math.random() > 0.5) sndHover();
 
             if(progress === 100) {
@@ -377,7 +372,7 @@ AWAITING COMMAND EXECUTION...</div>
         }, 80);
     }
 
-    // Core logic untouched, called by wrappers
+    // --- FIXED EXTRACTION LOGIC (Venue & Race Name parsing) ---
     function extractAndSaveData() {
       const inputData = document.getElementById('dataInput').value;
       let extractedCount = 0;
@@ -385,13 +380,24 @@ AWAITING COMMAND EXECUTION...</div>
       
       blocks.forEach(block => {
           if(!block.trim()) return;
-          let venue = "UNKNOWN"; let raceName = "UNKNOWN";
-          const raceMatch = block.match(/([^\s#]*?\d+R)/);
-          if (raceMatch) {
-              raceName = raceMatch[1];
-              const venueClean = raceName.replace(/競輪レースデータ：/g, '').replace(/\d+R/g, '').trim();
-              if (venueClean) venue = venueClean;
+          let venue = "UNKNOWN"; 
+          let raceName = "UNKNOWN";
+          
+          // Enhanced Venue & Race Name extraction
+          const fullLineMatch = block.match(/(?:競輪レースデータ[：:]\s*)?([^\s#\n]+(?:競輪|[場市区町村])?[^\s#\n]*?\d+R)/);
+          if (fullLineMatch) {
+              const rawFull = fullLineMatch[1].replace(/競輪レースデータ[：:]/g, '').trim();
+              raceName = rawFull.match(/\d+R/)?.[0] || "UNKNOWN";
+              venue = rawFull.replace(raceName, '').replace(/競輪/g, '').trim();
+              if(!venue) venue = "UNKNOWN";
+          } else {
+              const raceMatch = block.match(/(\d+R)/);
+              if (raceMatch) raceName = raceMatch[1];
+              
+              const venueKeywords = block.match(/([^\s#\n]{2,4})(?=競輪|\s+\d+R)/);
+              if (venueKeywords) venue = venueKeywords[1].replace(/競輪/g, '');
           }
+
           const hasGirlsKeyword = block.includes("ガールズ") || block.includes("L級");
           const comments = block.match(/- \*\*\[\d+\]\s*.*?\*\*：(.*?)(?=\n|$)/g);
           let tankiCount = 0; let totalCommentCount = 0;
@@ -440,7 +446,7 @@ AWAITING COMMAND EXECUTION...</div>
               if (allDiffs.length > 0) { diffPatternKey = allDiffs.join('-'); diffDisplay = diffLogArr.join(' / '); }
           }
           if (patternKey || diffPatternKey) {
-              const exists = savedRecords.find(r => r.raceName === raceName && r.pattern === patternKey);
+              const exists = savedRecords.find(r => r.venue === venue && r.raceName === raceName && r.pattern === patternKey);
               if (!exists) {
                   savedRecords.push({ venue, raceName, category, pattern: patternKey, diffPattern: diffPatternKey, diffDisplay, payout: 0, timestamp: new Date().getTime() });
                   extractedCount++;
@@ -482,15 +488,14 @@ AWAITING COMMAND EXECUTION...</div>
         } else { logToTerminal("> 警告: マッチする未入力レース・配当が見つかりません.", "error"); }
     }
 
-    // --- 7-Car Deep Scan Text Output Feature ---
     function deepScan7Car() {
         const data7 = savedRecords.filter(r => r.category === "7車");
         if(data7.length === 0) {
             logToTerminal("> エラー: 7車立てのデータが存在しません.", "error"); sndError(); return;
         }
-    
-   const synced = data7.filter(r => r.payout > 0);
-        const pts = 10; // Assume 10 pts per race for ROI
+        
+        const synced = data7.filter(r => r.payout > 0);
+        const pts = 10;
         const costPerRace = pts * 100;
         const totalInv = synced.length * costPerRace;
         const totalRet = synced.reduce((sum, r) => sum + r.payout, 0);
@@ -532,14 +537,13 @@ AWAITING COMMAND EXECUTION...</div>
           });
       }
 
-      let cardsHtml = ''; let chartLabels = categories; let chartCounts = []; let chartAvgs = [];
+    let cardsHtml = ''; let chartLabels = categories; let chartCounts = []; let chartAvgs = [];
 
       categories.forEach(c => {
         const data = catStats[c];
         const avg = data.payouts.length > 0 ? Math.round(data.payouts.reduce((a,b)=>a+b,0)/data.payouts.length) : 0;
         const max = data.payouts.length > 0 ? Math.max(...data.payouts) : 0;
         
-        // Calculate ROI based on 10 pts per race
         const totalInv = data.payouts.length * 1000;
         const totalRet = data.payouts.reduce((a,b)=>a+b,0);
         const roi = totalInv > 0 ? ((totalRet / totalInv) * 100).toFixed(1) : 0;
@@ -617,18 +621,19 @@ AWAITING COMMAND EXECUTION...</div>
           }
         }
       });
-    }
 
+    // --- FIXED PAYOUT EDITOR (Showing Venue & Race Name cleanly) ---
     function showPayoutEditor() {
       if (savedRecords.length === 0) { logToTerminal("> エラー: 編集するレコードが存在しません.", "error"); sndError(); return; }
       let html = '<div class="space-y-1.5 max-h-32 overflow-y-auto pr-2 custom-scrollbar">';
       [...savedRecords].reverse().forEach((record, revIndex) => {
         const originalIndex = savedRecords.length - 1 - revIndex;
         const color = record.payout > 0 ? 'border-l-magenta-500 bg-magenta-900/10' : 'border-l-cyan-500 bg-cyan-900/10';
+        const venueText = (record.venue && record.venue !== "UNKNOWN") ? record.venue : "";
         html += `
           <div class="flex items-center justify-between p-2 rounded border-l-2 ${color} border border-gray-800 text-xs hover:border-cyan-500 transition hover-snd">
             <div class="flex flex-col">
-              <span class="text-white font-bold tracking-wide">[${record.category || '9車'}] ${record.venue || ''} ${record.raceName || ''}</span>
+              <span class="text-white font-bold tracking-wide">[${record.category || '9車'}] ${venueText} ${record.raceName || ''}</span>
               <span class="text-cyan-600 text-[9px] font-mono-tech">DIFF_SEQ: ${record.diffPattern || 'N/A'}</span>
             </div>
             <div class="flex items-center gap-1">
