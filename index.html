@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BANK-KUN">
-<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v8.2</title>
+<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v8.3</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -22,7 +22,6 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opac
 body:after{content:"";position:fixed;inset:-30%;pointer-events:none;z-index:0;background:conic-gradient(from 0deg,transparent 0 68%,rgba(0,145,255,.07),transparent 78%);animation:aurora 24s linear infinite}
 @keyframes aurora{to{transform:rotate(360deg)}}
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 8px #00f5ff55,0 0 22px #00f5ff22}50%{box-shadow:0 0 16px #00f5ffbb,0 0 42px #168cff55}}
-@keyframes pinkPulse{0%,100%{box-shadow:0 0 8px #168cff55}50%{box-shadow:0 0 24px #168cffcc,0 0 48px #65c8ff66}}
 @keyframes shine{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 @keyframes flicker{0%,94%,96%,98%,100%{opacity:1}95%,97%{opacity:.78}}
 @keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -32,7 +31,7 @@ body:after{content:"";position:fixed;inset:-30%;pointer-events:none;z-index:0;ba
 .glass-panel:before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(120deg,#00aaff12,transparent 35%,#168cff0a 75%,transparent)}
 .panel-content{position:relative;z-index:1}
 .neon-title{color:#07345b;text-shadow:0 0 3px #fff,0 0 10px #00aaff99,0 0 25px #008cff66;animation:flicker 7s infinite}
-.neon-cyan{color:var(--cyan);text-shadow:0 0 8px #00f5ff99}.neon-cyan{color:#0078c9;text-shadow:0 0 8px #00aaff55,0 0 18px #168cff33}
+.neon-cyan{color:var(--cyan);text-shadow:0 0 8px #00f5ff99}
 .kicker{font:700 10px Orbitron,sans-serif;letter-spacing:.16em;color:#0879b9}
 .touch-btn{cursor:pointer;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .16s,filter .16s,box-shadow .16s}
 .touch-btn:active{transform:scale(.97);filter:brightness(1.35)}
@@ -62,51 +61,11 @@ body:after{content:"";position:fixed;inset:-30%;pointer-events:none;z-index:0;ba
  .modal-card{padding:16px!important;border-width:2px;max-height:92dvh;overflow-y:auto}
  .modal-card header h2{font-size:25px}
 }
-
 .discovery-card{background:linear-gradient(145deg,#fff,#eaf7ff);border:1px solid #75c9f5;border-radius:15px;padding:13px;color:#123653;box-shadow:0 7px 18px rgba(20,110,170,.10)}
 .discovery-chip{display:inline-block;border:1px solid #80c9ee;background:#e8f7ff;color:#075b91;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:900}
 .discovery-meter{height:7px;border-radius:99px;background:#d9edf9;overflow:hidden}.discovery-meter>i{display:block;height:100%;background:linear-gradient(90deg,#00aaff,#168cff);border-radius:99px}
 .discovery-result{border:1px solid #a8d7f2;background:rgba(255,255,255,.92);border-radius:12px;padding:12px;margin-top:9px}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
-
-/* ===== CYBER WHITE ULTRA : VISUAL UPGRADE v8.2 ===== */
-:root{--cyan:#007cff;--pink:#00b8ff;--violet:#536dff;--gold:#e2f5ff;--ink:#092744;--panel:rgba(255,255,255,.97);--deep:#071a33;--electric:#00a8ff;--ice:#eaf7ff}
-body{color:#102b46;background:radial-gradient(ellipse at 8% 4%,rgba(0,153,255,.18),transparent 30%),radial-gradient(ellipse at 92% 14%,rgba(72,105,255,.13),transparent 29%),radial-gradient(ellipse at 50% 100%,rgba(0,190,255,.12),transparent 38%),linear-gradient(135deg,#f8fcff 0%,#eaf5ff 48%,#f9fcff 100%)}
-body:before{opacity:.18;background-image:linear-gradient(rgba(0,105,210,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(0,105,210,.13) 1px,transparent 1px);background-size:28px 28px}
-body:after{background:conic-gradient(from 0deg,transparent 0 68%,rgba(0,132,255,.09),transparent 78%)}
-.app-shell{max-width:1480px}
-.app-shell>header{padding:clamp(18px,3vw,30px);margin-bottom:24px;border:1px solid rgba(91,190,255,.55)!important;border-radius:26px;background:radial-gradient(ellipse at 90% 0%,rgba(0,170,255,.23),transparent 38%),linear-gradient(115deg,#071a33 0%,#0b2d52 55%,#123c68 100%);box-shadow:0 18px 48px rgba(4,35,73,.22),inset 0 1px 0 rgba(255,255,255,.18);overflow:hidden;position:relative}
-.app-shell>header:after{content:"";position:absolute;right:-70px;top:-110px;width:330px;height:330px;border:1px solid rgba(79,198,255,.24);border-radius:50%;box-shadow:0 0 0 24px rgba(70,180,255,.035),0 0 0 52px rgba(70,180,255,.025);pointer-events:none}
-.app-shell>header>div{position:relative;z-index:1}
-.kicker{color:#8bdcff;letter-spacing:.24em;text-shadow:0 0 14px #00aaff66}
-.neon-title{color:#f5fcff;text-shadow:0 0 4px #fff,0 0 16px #00aaffaa,0 0 38px #007cff88;letter-spacing:.045em}
-.app-shell>header .text-cyan-100{color:#e7f7ff!important}.app-shell>header .text-cyan-300{color:#83dfff!important}
-.app-shell>header .border-cyan-300\/70{border-color:#58caff88!important}.app-shell>header .bg-cyan-400\/10{background:rgba(0,170,255,.13)!important}.app-shell>header .bg-cyan-300\/10{background:rgba(0,170,255,.12)!important}
-.glass-panel{background:linear-gradient(145deg,rgba(255,255,255,.99),rgba(239,249,255,.97));border:1px solid rgba(40,157,235,.42);border-radius:23px;box-shadow:0 14px 38px rgba(13,67,115,.10),0 3px 9px rgba(0,120,220,.06),inset 0 1px 0 #fff,inset 0 0 28px rgba(0,145,255,.045)}
-.glass-panel:before{background:linear-gradient(115deg,rgba(0,164,255,.055),transparent 35%,rgba(81,110,255,.035) 78%,transparent)}
-.panel-content{color:#143653}.neon-cyan{color:#0078d7;text-shadow:0 0 12px #00aaff35}
-.touch-btn{border-radius:12px;font-weight:900;letter-spacing:.025em}
-.btn-cyber{color:#fff;font-weight:900;background:linear-gradient(105deg,#006fe8,#009fff 48%,#00b9df);border:1px solid #008be9;box-shadow:0 7px 18px rgba(0,126,230,.23),inset 0 1px 0 #ffffff66;animation:none}
-.btn-alert{color:#fff;font-weight:900;background:linear-gradient(110deg,#0754c8,#007fe9 48%,#00a9d8);border:1px solid #006bd2;box-shadow:0 8px 22px rgba(0,105,220,.27),0 0 24px rgba(0,160,255,.16);animation:pulseGlow 3.2s infinite}
-.btn-ghost{background:linear-gradient(145deg,#fff,#edf7ff);border:1px solid #a8d3f1;color:#16466b;box-shadow:0 3px 10px rgba(20,90,150,.07)}
-.field{background:#fff;color:#102d49;border:1px solid #b5d5ed;border-radius:13px;box-shadow:inset 0 1px 3px rgba(10,65,110,.035)}
-.field:focus{border-color:#008cf0;box-shadow:0 0 0 3px #008cff1c,0 0 18px #008cff22}
-.card-matrix{background:linear-gradient(145deg,#fff 0%,#f1f9ff 100%);border:1px solid #c0def2;border-radius:18px;box-shadow:0 9px 24px rgba(17,83,137,.085),inset 0 1px 0 #fff;color:#123653}
-.metric-number{color:#006fc8;text-shadow:0 0 12px #00aaff33}
-.scanline{height:3px;background:linear-gradient(90deg,transparent,#00a8ff 20%,#536dff 55%,#00c5e8 80%,transparent);box-shadow:0 0 15px #008cff66}
-#outputArea{background:linear-gradient(145deg,#071a33,#0b2b4d);color:#a8eaff;border:1px solid #1679bb;border-radius:15px;box-shadow:inset 0 0 24px rgba(0,140,255,.12),0 8px 20px rgba(5,30,60,.12)}
-#manualInputModal{background:rgba(4,25,48,.62);backdrop-filter:blur(16px)}
-.modal-card{background:linear-gradient(145deg,#fff,#eff8ff);color:#102b45;border:2px solid #49baff;box-shadow:0 0 0 1px #fff,0 20px 70px rgba(0,39,86,.32),0 0 45px #008cff33}
-.modal-field{background:#fff;color:#102d49;border:1px solid #a8cde9;border-radius:11px}
-.modal-field:focus{outline:3px solid #008cff28;border-color:#008cff}
-.discovery-card{background:linear-gradient(145deg,#fff,#f0f9ff);border:1px solid #b4dcf4;border-radius:16px;padding:14px;color:#123653;box-shadow:0 8px 20px rgba(20,90,150,.08)}
-.discovery-chip{border:1px solid #a8d8f4;background:#eaf7ff;color:#075b91}.discovery-meter{background:#e1eff8}.discovery-meter>i{background:linear-gradient(90deg,#007cff,#00c6e8)}
-.discovery-result{border:1px solid #c0def2;background:rgba(255,255,255,.97);border-radius:14px;box-shadow:0 5px 15px rgba(20,90,150,.055)}
-button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(0,140,255,.28);outline-offset:2px}
-::selection{background:#bdeaff;color:#07345b}::-webkit-scrollbar-thumb{background:linear-gradient(#008cff,#536dff);border-radius:8px}
-@media(max-width:640px){.app-shell>header{border-radius:20px;padding:18px 15px}.neon-title{font-size:clamp(2rem,10vw,3rem);line-height:1.08}.glass-panel{border-radius:17px}.btn-cyber,.btn-alert,.btn-ghost{min-height:42px}}
-@media(prefers-reduced-motion:reduce){.app-shell>header:after{display:none}}
-
 </style>
 </head>
 <body>
@@ -116,11 +75,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <div class="kicker mb-2">PATTERN MATRIX // DATA INTELLIGENCE SYSTEM</div>
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
-   <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">CYBER WHITE ULTRA v8.2</span>
+   <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-700">CYBER WHITE ULTRA v8.3</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-pink-500"></span><span>AUDIO_SYS [OFF]</span></button>
   </div>
  </div>
- <div id="dataCount" class="font-mono-tech text-xl text-cyan-100 border border-cyan-300/70 bg-cyan-400/10 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ 00000 ]</span></div>
+ <div id="dataCount" class="font-mono-tech text-xl text-sky-900 border border-sky-300 bg-sky-100/80 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] text-sky-700 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
 
 <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-7">
@@ -158,14 +117,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <div class="glass-panel p-4 sm:p-5">
    <div class="panel-content">
     <div class="flex flex-wrap justify-between items-center gap-2 mb-4"><h2 class="kicker neon-cyan">PATTERN DYNAMICS // 差分パターン別 平均配当</h2><span class="text-[10px] text-sky-700 font-mono-tech border border-sky-400/60 px-3 py-1 rounded-full">● LIVE ANALYSIS</span></div>
-    <div class="bg-[#08061b] rounded-xl border border-cyan-300/30 p-2 sm:p-3" style="height:320px"><canvas id="matrixChart"></canvas></div>
+    <div class="bg-[#ffffff] rounded-xl border border-sky-300 p-2 sm:p-3 shadow-inner" style="height:320px"><canvas id="matrixChart"></canvas></div>
    </div>
   </div>
   <div class="glass-panel p-4 sm:p-5 h-52 flex flex-col relative">
    <div class="panel-content flex flex-col flex-1 min-h-0">
     <h2 class="kicker border-l-4 border-cyan-300 pl-2 mb-3">TERMINAL LOG // 実行履歴</h2>
     <button id="clearLogBtn" type="button" class="touch-btn absolute top-3 right-3 text-[9px] btn-ghost px-3 py-1 rounded-lg">CLEAR</button>
-    <div id="outputArea" class="flex-1 p-3 font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap">SYSTEM BOOT SEQUENCE v8.2...
+    <div id="outputArea" class="flex-1 p-3 font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap">SYSTEM BOOT SEQUENCE v8.3...
 AWAITING COMMAND EXECUTION...</div>
    </div>
   </div>
@@ -174,7 +133,7 @@ AWAITING COMMAND EXECUTION...</div>
 
 <section class="glass-panel p-4 sm:p-5 mb-8" id="discoverySection">
  <div class="panel-content">
-  <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-sky-500 pl-2">AUTO PATTERN DISCOVERY // 自動パターン発見</h2><span class="discovery-chip">V8.2 ENGINE</span></div>
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-sky-500 pl-2">AUTO PATTERN DISCOVERY // 自動パターン発見</h2><span class="discovery-chip">V8.3 ENGINE</span></div>
   <p class="text-xs text-sky-800 mb-4">登録済みレースから、車番・着順ペア・差分パターンの偏りを自動探索します。時系列で古い80%を発見用、直近20%を検証用に分けます。</p>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
    <div><label class="block text-[10px] font-bold text-sky-800 mb-1">対象クラス</label><select id="discoveryClass" class="field !py-2 text-xs"><option value="ALL">全クラス</option><option value="7車">7車</option><option value="9車">9車</option><option value="ガールズ">ガールズ</option><option value="6車">6車</option><option value="5車">5車</option><option value="8車">8車</option></select></div>
@@ -184,7 +143,6 @@ AWAITING COMMAND EXECUTION...</div>
   </div>
   <div id="discoverySummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
   <div id="discoveryResults" class="space-y-2"><div class="discovery-card text-xs">スキャンを実行すると、出現頻度・高配当率・平均配当・直近20%での再現状況を表示します。</div></div>
-  <p class="text-[10px] text-slate-500 mt-3">※配当未入力レースは配当率の計算対象外。検証側の件数が少ないパターンは「検証データ不足」と表示します。相関は予測の保証ではありません。</p>
  </div>
 </section>
 
@@ -213,7 +171,6 @@ AWAITING COMMAND EXECUTION...</div>
     <tbody id="line1Results" class="divide-y divide-sky-100"><tr><td colspan="8" class="p-4 text-center text-sky-700">比較を実行すると結果が表示されます。</td></tr></tbody>
    </table>
   </div>
-  <p class="text-[10px] text-slate-500 mt-3">※ライン①は出走表の「並び予想」で最初に記載されたラインです。配当統計は配当入力済みレースのみで計算します。並び順が異なるものは別パターンとして扱います。</p>
  </div>
 </section>
 
@@ -234,7 +191,7 @@ AWAITING COMMAND EXECUTION...</div>
    </div>
    <div><label class="block text-xs mb-1">クラス（車立て）</label><select id="manClass" class="modal-field"><option value="7車">7車</option><option value="9車">9車</option><option value="ガールズ">ガールズ</option><option value="5車">5車</option><option value="6車">6車</option><option value="8車">8車</option></select></div>
    <div class="border-2 border-slate-900 rounded-xl p-3 space-y-3"><h3 class="bg-slate-900 text-white inline-block px-3 py-1 text-xs">3連単 着順入力</h3><div class="flex items-center gap-2"><input type="number" id="manCar1" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="1着"><b class="text-2xl">-</b><input type="number" id="manCar2" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="2着"><b class="text-2xl">-</b><input type="number" id="manCar3" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="3着"></div><p class="text-[10px] text-slate-500 text-center">着順から差分(DIFF)パターンを自動計算（任意）</p></div>
-   <div class="border-2 border-cyan-600 rounded-xl p-3 space-y-3"><h3 class="bg-cyan-600 text-white inline-block px-3 py-1 text-xs">2連単 配当金額</h3><div class="flex items-center gap-2"><span class="text-xl">¥</span><input type="number" id="manPayout2ren" class="modal-field text-right text-xl" placeholder="0 (任意)"></div><p class="text-[10px] text-slate-500 text-center">2連単の着順は3連単の1着・2着から自動算出されます</p></div>
+   <div><label class="block text-xs mb-1">2連単 配当金額 (任意)</label><div class="flex items-center gap-2"><span class="text-xl">¥</span><input type="number" id="manPayout2ren" class="modal-field text-right text-xl" placeholder="0"></div></div>
    <div><label class="block text-xs mb-1">3連単 配当金額</label><div class="flex items-center gap-2"><span class="text-2xl">¥</span><input type="number" id="manPayout" class="modal-field text-right text-2xl" placeholder="0"></div></div>
    <button id="manSaveBtn" type="button" class="touch-btn btn-alert w-full py-4 rounded-xl text-lg tracking-widest">SAVE RECORD</button>
   </div>
@@ -281,41 +238,13 @@ function saveManualData(){
  ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');
  closeManualModal();
 }
-function logToTerminal(msg,type="info"){const out=$('outputArea'),time=new Date().toLocaleTimeString('ja-JP',{hour12:false});const color=type==="error"?"#ff6b9d":type==="success"?"#087ac0":"#8dfaff";out.insertAdjacentHTML('afterbegin',`<div><span style="color:#6b8da7">[${time}]</span> <span style="color:${color}">${escapeHTML(msg)}</span></div>`)}
+function logToTerminal(msg,type="info"){const out=$('outputArea'),time=new Date().toLocaleTimeString('ja-JP',{hour12:false});const color=type==="error"?"#ff6b9d":type==="success"?"#087ac0":"#07345b";out.insertAdjacentHTML('afterbegin',`<div><span style="color:#6b8da7">[${time}]</span> <span style="color:${color}">${escapeHTML(msg)}</span></div>`)}
 function logToTerminalRaw(html){$('outputArea').insertAdjacentHTML('afterbegin',html)}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function persist(){localStorage.setItem('battleBankProData',JSON.stringify(savedRecords))}
 function loadMarkdown(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{$('dataInput').value=e.target.result;$('mdFileInput').value='';logToTerminal(`> ファイル読込成功: ${file.name}`,"success")};reader.readAsText(file,'UTF-8')}
 function triggerExtract(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: データが入力されていません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);extractAndSaveData()}
 function triggerSync(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: バッファに配当データがありません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);applyResults()}
-
-function checkHighPayoutRisk(category, line1, diffPattern){
-  const threshold = 10000;
-  const minSamples = 5;
-  const highRateThreshold = 25;
-  const results = [];
-  if(line1){
-    const same = savedRecords.filter(r => (r.category||'9車') === category && String(r.line1||'').replace(/\s+/g,'') === line1.replace(/\s+/g,'') && Number(r.payout) > 0);
-    if(same.length >= minSamples){
-      const high = same.filter(r => r.payout >= threshold).length;
-      const rate = (high / same.length * 100);
-      if(rate >= highRateThreshold){
-        results.push({type:'ライン①', key:line1, rate:rate.toFixed(1), count:same.length, high});
-      }
-    }
-  }
-  if(diffPattern && diffPattern !== '1-1'){
-    const same = savedRecords.filter(r => (r.category||'9車') === category && r.diffPattern === diffPattern && Number(r.payout) > 0);
-    if(same.length >= minSamples){
-      const high = same.filter(r => r.payout >= threshold).length;
-      const rate = (high / same.length * 100);
-      if(rate >= highRateThreshold){
-        results.push({type:'差分', key:diffPattern, rate:rate.toFixed(1), count:same.length, high});
-      }
-    }
-  }
-  return results;
-}
 
 function extractAndSaveData(){
   const inputData=$('dataInput').value;let extractedCount=0,globalVenue="不明";
@@ -367,17 +296,6 @@ function extractAndSaveData(){
  if(extractedCount){
   persist();$('dataInput').value='';updateCountDisplay();runAnalysis();
   logToTerminal(`> 成功: [${globalVenue}] 新規 ${extractedCount} レースをDBに格納しました。`,"success");
-  const warnings = [];
-  savedRecords.slice(-extractedCount).forEach(r => {
-    const risks = checkHighPayoutRisk(r.category, r.line1, r.diffPattern);
-    risks.forEach(rk => {
-      warnings.push(`⚠️ 要注意 [${r.venue||''} ${r.raceName}] ${rk.type}「${rk.key}」 万車率 ${rk.rate}% (${rk.high}/${rk.count}件)`);
-    });
-  });
-  if(warnings.length){
-    logToTerminal('--- 万車要注意パターン検出 ---', 'error');
-    warnings.forEach(w => logToTerminal(w, 'error'));
-  }
   playBeep(880,'sine',.15);
 }else{logToTerminal("> 警告: 解析可能なデータが検知されませんでした。","error");playBeep(220,'sawtooth',.15)}
 }
@@ -388,9 +306,9 @@ function deepScan7Car(){const data=savedRecords.filter(r=>r.category==="7車");i
 function runAnalysis(){
  const categories=["5車","6車","7車","8車","9車","ガールズ"],stats={},diffStats={};categories.forEach(c=>stats[c]={count:0,payouts:[]});
  savedRecords.forEach(r=>{const cat=r.category||"9車";if(!stats[cat])stats[cat]={count:0,payouts:[]};stats[cat].count++;if(r.payout>0)stats[cat].payouts.push(r.payout);const dp=r.diffPattern||"標準";if(!diffStats[dp])diffStats[dp]={count:0,payouts:[]};diffStats[dp].count++;if(r.payout>0)diffStats[dp].payouts.push(r.payout)});
- $('categoryCards').innerHTML=categories.map(c=>{const d=stats[c],avg=d.payouts.length?Math.round(d.payouts.reduce((a,b)=>a+b,0)/d.payouts.length):0,max=d.payouts.length?Math.max(...d.payouts):0;return `<div class="card-matrix p-3 sm:p-4"><div class="flex justify-between items-start mb-3"><div><div class="kicker text-[9px]">CLASS</div><div class="font-black text-lg">${c}</div></div><div class="text-right"><div class="text-[8px] text-sky-800">SYNCED</div><div class="font-mono-tech text-sm neon-cyan">${d.payouts.length}件</div></div></div><div class="grid grid-cols-2 gap-2 mb-3"><div class="bg-cyan-300/10 border border-cyan-300/20 rounded-lg p-2 text-center"><div class="text-[8px] text-cyan-200">LOGGED</div><div class="font-mono-tech metric-number">${d.count}</div></div><div class="bg-sky-100 border border-sky-200 rounded-lg p-2 text-center"><div class="text-[8px] text-sky-700">MAX</div><div class="font-mono-tech text-xs neon-cyan">${max?'¥'+max.toLocaleString():'-'}</div></div></div><div class="border-t border-white/10 pt-2"><div class="text-[8px] text-sky-800">AVERAGE PAYOUT</div><div class="font-mono-tech font-bold">${avg?'¥'+avg.toLocaleString():'---'}</div></div></div>`}).join("");
+ $('categoryCards').innerHTML=categories.map(c=>{const d=stats[c],avg=d.payouts.length?Math.round(d.payouts.reduce((a,b)=>a+b,0)/d.payouts.length):0,max=d.payouts.length?Math.max(...d.payouts):0;return `<div class="card-matrix p-3 sm:p-4"><div class="flex justify-between items-start mb-3"><div><div class="kicker text-[9px]">CLASS</div><div class="font-black text-lg">${c}</div></div><div class="text-right"><div class="text-[8px] text-sky-800">SYNCED</div><div class="font-mono-tech text-sm neon-cyan">${d.payouts.length}件</div></div></div><div class="grid grid-cols-2 gap-2 mb-3"><div class="bg-cyan-300/10 border border-cyan-300/20 rounded-lg p-2 text-center"><div class="text-[8px] text-cyan-700">LOGGED</div><div class="font-mono-tech metric-number">${d.count}</div></div><div class="bg-sky-100 border border-sky-200 rounded-lg p-2 text-center"><div class="text-[8px] text-sky-700">MAX</div><div class="font-mono-tech text-xs neon-cyan">${max?'¥'+max.toLocaleString():'-'}</div></div></div><div class="border-t border-sky-200 pt-2"><div class="text-[8px] text-sky-800">AVERAGE PAYOUT</div><div class="font-mono-tech font-bold">${avg?'¥'+avg.toLocaleString():'---'}</div></div></div>`}).join("");
  const sorted=Object.entries(diffStats).sort((a,b)=>b[1].count-a[1].count).slice(0,8),labels=sorted.map(x=>'差分: '+x[0]),counts=sorted.map(x=>x[1].count),avgs=sorted.map(x=>x[1].payouts.length?Math.round(x[1].payouts.reduce((a,b)=>a+b,0)/x[1].payouts.length):0);
- const ctx=$('matrixChart').getContext('2d');if(myChart)myChart.destroy();myChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'発生件数',data:counts,backgroundColor:'rgba(0,145,235,.55)',borderColor:'#008fe0',borderWidth:1.5,yAxisID:'y',borderRadius:6,order:2},{label:'平均配当 (円)',data:avgs,type:'line',borderColor:'#168cff',backgroundColor:'rgba(22,140,255,.12)',borderWidth:3,fill:true,pointBackgroundColor:'#fff',pointBorderColor:'#168cff',pointBorderWidth:2,pointRadius:4,yAxisID:'y1',tension:.25,order:1}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{color:'#315875',font:{family:"'Share Tech Mono', monospace",size:10}}},y:{ticks:{color:'#00f5ff'},grid:{color:'rgba(40,120,170,.13)'}},y1:{position:'right',grid:{display:false},ticks:{color:'#087ac0'}}},plugins:{legend:{position:'top',labels:{color:'#174365',font:{family:'Orbitron',size:9},boxWidth:10,usePointStyle:true}}}}})
+ const ctx=$('matrixChart').getContext('2d');if(myChart)myChart.destroy();myChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'発生件数',data:counts,backgroundColor:'rgba(0,145,235,.55)',borderColor:'#008fe0',borderWidth:1.5,yAxisID:'y',borderRadius:6,order:2},{label:'平均配当 (円)',data:avgs,type:'line',borderColor:'#168cff',backgroundColor:'rgba(22,140,255,.12)',borderWidth:3,fill:true,pointBackgroundColor:'#fff',pointBorderColor:'#168cff',pointBorderWidth:2,pointRadius:4,yAxisID:'y1',tension:.25,order:1}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{color:'#315875',font:{family:"'Share Tech Mono', monospace",size:10}}},y:{ticks:{color:'#007cff'},grid:{color:'rgba(40,120,170,.13)'}},y1:{position:'right',grid:{display:false},ticks:{color:'#087ac0'}}},plugins:{legend:{position:'top',labels:{color:'#174365',font:{family:'Orbitron',size:9},boxWidth:10,usePointStyle:true}}}}})
  analyzeLine1Payouts();
 }
 function analyzeLine1Payouts(){
@@ -501,26 +419,16 @@ function openEditModal(idx){
  $('manSaveBtn').textContent='UPDATE RECORD';
  openManualModal();
 }
-function savePayouts(){savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
 function exportData(){if(!savedRecords.length){logToTerminal("> 書き出すデータがありません。","error");return}const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='battleBank_pro_db.json';a.click();URL.revokeObjectURL(url);logToTerminal("> エクスポート完了。","success")}
 function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();savedRecords=data;persist();updateCountDisplay();runAnalysis();logToTerminal("> インポート成功。","success")}catch(err){logToTerminal("> エラー: 不正なJSON。","error")} $('fileInput').value=''};reader.readAsText(file)}
 function clearData(){if(confirm("データベースを初期化しますか？")){savedRecords=[];localStorage.removeItem('battleBankProData');updateCountDisplay();runAnalysis();logToTerminal("> DBパージ完了。","success")}}
-function updateCountDisplay(){const n=savedRecords.length.toString().padStart(5,'0');$('dataCount').innerHTML=`<span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ ${n} ]</span>`}
+function updateCountDisplay(){const n=savedRecords.length.toString().padStart(5,'0');$('dataCount').innerHTML=`<span class="text-[10px] text-sky-700 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ ${n} ]</span>`}
 document.addEventListener('DOMContentLoaded',()=>{
  bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);
  $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed))savedRecords=parsed}}catch(e){savedRecords=[]}
- updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v8.2 稼働中.":"> SYSTEM READY // v8.2 稼働中.","success");
+ updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v8.3 稼働中.":"> SYSTEM READY // v8.3 稼働中.","success");
 });
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js")
-      .then((reg) => console.log("SW registered:", reg.scope))
-      .catch((err) => console.log("SW registration failed:", err));
-  });
-}
 </script>
 </body>
 </html>
