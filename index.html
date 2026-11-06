@@ -107,11 +107,50 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @media(max-width:640px){.app-shell>header{border-radius:20px;padding:18px 15px}.neon-title{font-size:clamp(2rem,10vw,3rem);line-height:1.08}.glass-panel{border-radius:17px}.btn-cyber,.btn-alert,.btn-ghost{min-height:42px}}
 @media(prefers-reduced-motion:reduce){.app-shell>header:after{display:none}}
 
+
+/* ===== DYNAMIC BANK & PARTICLES ===== */
+.cyber-particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.cp { position: absolute; border-radius: 50%; animation: float-up linear infinite; }
+.cp:nth-child(1) { width: 6px; height: 6px; left: 15%; bottom: -10px; animation-duration: 12s; animation-delay: 0s; background: rgba(0, 168, 255, 0.5); box-shadow: 0 0 12px #00a8ff; }
+.cp:nth-child(2) { width: 4px; height: 4px; left: 35%; bottom: -10px; animation-duration: 9s; animation-delay: 3s; background: rgba(83, 109, 255, 0.5); box-shadow: 0 0 10px #536dff; }
+.cp:nth-child(3) { width: 8px; height: 8px; left: 55%; bottom: -10px; animation-duration: 15s; animation-delay: 1s; background: rgba(0, 184, 255, 0.5); box-shadow: 0 0 15px #00b8ff; }
+.cp:nth-child(4) { width: 3px; height: 3px; left: 75%; bottom: -10px; animation-duration: 8s; animation-delay: 5s; background: rgba(0, 245, 255, 0.5); box-shadow: 0 0 8px #00f5ff; }
+.cp:nth-child(5) { width: 5px; height: 5px; left: 90%; bottom: -10px; animation-duration: 11s; animation-delay: 2s; background: rgba(0, 168, 255, 0.5); box-shadow: 0 0 10px #00a8ff; }
+@keyframes float-up { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-110vh) scale(0.5); opacity: 0; } }
+
+.bank-track { position: absolute; top: 0; left: 0; right: 0; height: 100%; overflow: hidden; pointer-events: none; z-index: 0; border-radius: 26px; }
+.bank-line { position: absolute; top: 25%; left: -5%; right: -5%; height: 50%; border-bottom: 2px dashed rgba(0, 168, 255, 0.2); border-top: 2px dashed rgba(0, 168, 255, 0.2); background: linear-gradient(90deg, transparent, rgba(0,168,255,0.06) 50%, transparent); border-radius: 50% / 30%; transform: skewY(-1deg); }
+.bg-racer { position: absolute; opacity: 0.65; }
+.bg-racer.right { animation: race-right linear infinite; }
+.bg-racer.left { animation: race-left linear infinite; }
+@keyframes race-right { 0% { left: -10%; transform: scaleX(-1) rotate(5deg); } 50% { transform: scaleX(-1) rotate(-2deg) translateY(-4px); } 100% { left: 110%; transform: scaleX(-1) rotate(5deg); } }
+@keyframes race-left { 0% { right: -10%; transform: scaleX(1) rotate(-5deg); } 50% { transform: scaleX(1) rotate(2deg) translateY(-4px); } 100% { right: 110%; transform: scaleX(1) rotate(-5deg); } }
+.r-1 { top: 15%; font-size: 24px; animation-duration: 7s; animation-delay: 0s; filter: drop-shadow(0 0 6px #ff0055); z-index: 3;}
+.r-2 { top: 45%; font-size: 16px; animation-duration: 11s; animation-delay: 2.5s; filter: drop-shadow(0 0 6px #00a8ff); z-index: 2;}
+.r-3 { top: 65%; font-size: 32px; animation-duration: 5.5s; animation-delay: 4s; filter: drop-shadow(0 0 6px #00ff88); z-index: 4;}
+
+.scanline { position: relative; overflow: visible !important; }
+.scanline-racer { position: absolute; top: -19px; font-size: 22px; animation: scanline-dash 3.5s infinite cubic-bezier(0.25, 0.1, 0.25, 1); filter: drop-shadow(0 0 8px #00b8ff); transform: scaleX(-1); white-space: nowrap; pointer-events: none; }
+@keyframes scanline-dash { 0% { left: -15%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { left: 105%; opacity: 0; } }
+
 </style>
 </head>
 <body>
+
+<div class="cyber-particles">
+    <div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div>
+</div>
+
 <div class="app-shell">
 <header class="flex flex-col md:flex-row justify-between items-end border-b border-cyan-300/50 pb-5 mb-6 gap-3">
+
+<div class="bank-track">
+    <div class="bank-line"></div>
+    <div class="bg-racer right r-1">🚴‍♂️</div>
+    <div class="bg-racer right r-2">🚴‍♀️</div>
+    <div class="bg-racer left r-3">🚴‍♂️</div>
+</div>
+
  <div class="w-full">
   <div class="kicker mb-2">PATTERN MATRIX // DATA INTELLIGENCE SYSTEM</div>
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
@@ -144,7 +183,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
      <button id="analysisBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">UI再構築</button>
      <button id="deepScanBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">7車 DEEP SCAN</button>
     </div>
-    <div class="scanline mb-4"></div>
+    <div class="scanline mb-4"><div class="scanline-racer">🚴💨</div></div>
     <div class="grid grid-cols-3 gap-2">
      <button id="exportBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[9px]">データ書出</button>
      <button id="importTriggerBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[9px]">データ読込</button><input type="file" id="fileInput" class="hidden" accept=".json,application/json,text/plain">
