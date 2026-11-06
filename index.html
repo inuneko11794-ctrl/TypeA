@@ -214,7 +214,7 @@ AWAITING COMMAND EXECUTION...</div>
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4" id="categoryCards"></div>
   </div>
 
-  <script>
+   <script>
     let savedRecords = [];
     let myChart = null;
     let audioCtx = null;
@@ -381,18 +381,10 @@ AWAITING COMMAND EXECUTION...</div>
                       }
                   }
               });
-
-        if (raceName !== "UNKNOWN" || patternKey || diffPatternKey || block.includes("大中拓磨") || block.includes("選手")) {
-              if (raceName === "UNKNOWN") raceName = "1R";
-              const exists = savedRecords.find(r => r.venue === venue && r.raceName === raceName && r.pattern === patternKey);
-              if (!exists) {
-                  savedRecords.push({ venue, raceName, category, pattern: patternKey || '1-2-3', diffPattern: diffPatternKey || '1-1', diffDisplay, payout: 0, timestamp: new Date().getTime() });
-                  extractedCount++;
-              }
+              if (allDiffs.length > 0) { diffPatternKey = allDiffs.join('-'); diffDisplay = diffLogArr.join(' / '); }
           }
-      });
 
-      if (extractedCount === 0 && inputData.length > 20) {
+                     if (extractedCount === 0 && inputData.length > 20) {
           const fallbackRace = inputData.match(/\d+R/)?.[0] || "1R";
           const fallbackVenue = inputData.includes("小倉") ? "小倉" : "UNKNOWN";
           const exists = savedRecords.find(r => r.raceName === fallbackRace);
@@ -584,7 +576,7 @@ AWAITING COMMAND EXECUTION...</div>
       logToTerminal("> 手動エディタ起動。リストから配当を直接入力・修正できます。");
     }
 
-    function savePayouts() {
+     function savePayouts() {
       savedRecords.forEach((record, index) => {
         const inputEl = document.getElementById(`edit_payout_${index}`);
         if (inputEl) { const val = parseInt(inputEl.value, 10); record.payout = (!isNaN(val) && val >= 0) ? val : 0; }
