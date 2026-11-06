@@ -3,39 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>バトルバンクくん - 出走表 並び＆配当分析ツール</title>
+  <title>バトルバンクくん - 分析ツール</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 text-gray-800 p-4 font-sans leading-relaxed">
-  <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md mb-6">
-    <h1 class="text-xl font-bold text-blue-600 mb-2">出走表から並び抽出 ＆ 配当追記ツール</h1>
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md mb-6">
+    <h1 class="text-xl font-bold text-blue-600 mb-2">バトルバンクくん - 分析ツール</h1>
     <p class="text-sm text-gray-600 mb-4">
-      レース前は「MD読込→保存」。レース後は「配当を入力」から結果を追記してデータを育てましょう。
+      出走表や結果のテキストを読み込み、自動で分析を行います。
     </p>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
       <div>
         <label class="block text-sm font-bold text-gray-700 mb-1 flex justify-between items-center">
-          <span>1. 出走表テキスト</span>
+          <span>1. テキスト入力（出走表 or 結果）</span>
           <button onclick="document.getElementById('mdFileInput').click()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded text-xs shadow transition">
-            📄 MDファイルを読込
+            📄 ファイル読込
           </button>
           <input type="file" id="mdFileInput" class="hidden" accept=".md,.txt" onchange="loadMarkdown(event)">
         </label>
-        <textarea id="dataInput" rows="11" class="w-full p-3 border rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs" placeholder="ここにテキストが読み込まれます。直接貼り付けることも可能です。"></textarea>
+        <textarea id="dataInput" rows="11" class="w-full p-3 border rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs" placeholder="【使い方】
+① レース前：出走表テキストを貼り付けて「📥 データを抽出して保存」
+② レース後：レース結果テキストを貼り付けて「🏁 結果から配当を自動反映」"></textarea>
       </div>
       <div class="flex flex-col gap-2">
         <label class="block text-sm font-bold text-gray-700 mb-1">操作パネル</label>
-        <button onclick="extractAndSaveData()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-md transition duration-200 text-sm shadow">
-          📥 並びを抽出して保存
+        <button onclick="extractAndSaveData()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-md transition duration-200 text-sm shadow">
+          📥 データを抽出して保存
         </button>
-        <button onclick="showPayoutEditor()" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2.5 rounded-md transition duration-200 text-sm shadow">
-          💰 保存データに配当を入力
-        </button>
-        <button onclick="analyzeData()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-md transition duration-200 text-sm shadow">
-          📊 蓄積データで分析
+        <button onclick="applyResults()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 rounded-md transition duration-200 text-sm shadow">
+          🏁 結果から配当を自動反映
         </button>
         
+        <div class="flex gap-2">
+          <button onclick="showPayoutEditor()" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 rounded-md transition duration-200 text-xs shadow">
+            💰 手動で配当入力
+          </button>
+          <button onclick="analyzeData()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-md transition duration-200 text-xs shadow">
+            📊 蓄積データで分析
+          </button>
+        </div>
+
         <div class="flex gap-2 mt-auto">
           <button onclick="exportData()" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 rounded-md transition duration-200 text-xs">
             バックアップ保存
@@ -56,8 +64,8 @@
         <span>抽出・分析結果</span>
         <span id="dataCount" class="text-sm font-normal text-gray-500">(蓄積: 0レース)</span>
       </h2>
-      <div id="outputArea" class="bg-gray-800 text-green-400 p-4 rounded-md text-sm whitespace-pre-wrap font-mono min-h-[150px]">
-        MDファイルを読み込むか、テキストを貼り付けて「並びを抽出して保存」を押してください。
+      <div id="outputArea" class="bg-gray-800 text-green-400 p-4 rounded-md text-sm whitespace-pre-wrap font-mono h-96 overflow-y-auto">
+        テキストを貼り付けて、操作パネルのボタンを押してください。
       </div>
     </div>
   </div>
@@ -65,7 +73,6 @@
   <script>
     let savedRecords = [];
 
-    // 起動時にローカルストレージからデータを読み込む
     window.onload = () => {
       const stored = localStorage.getItem('battleBankAutoData');
       if (stored) {
@@ -74,21 +81,18 @@
       }
     };
 
-    // ファイル読み込み処理
     function loadMarkdown(event) {
       const file = event.target.files[0];
       if (!file) return;
-      
       const reader = new FileReader();
       reader.onload = function(e) {
         document.getElementById('dataInput').value = e.target.result;
         document.getElementById('mdFileInput').value = ''; 
-        document.getElementById('outputArea').innerText = "ファイルを読み込みました。「並びを抽出して保存」ボタンを押してください。";
+        document.getElementById('outputArea').innerText = "ファイルを読み込みました。ボタンを押して処理してください。";
       };
       reader.readAsText(file);
     }
 
-    // 並びの抽出と保存
     function extractAndSaveData() {
       const inputData = document.getElementById('dataInput').value;
       if (!inputData.trim()) {
@@ -99,35 +103,71 @@
       let extractedCount = 0;
       let logText = "【抽出ログ】\n";
       
-      // レースごとにブロック分割
       const blocks = inputData.split(/(?=競輪レースデータ|レース名|第?\d+R)/);
       
       blocks.forEach(block => {
           if(!block.trim()) return;
           
+          let raceName = "不明";
+          const raceMatch = block.match(/([^\s#]*?\d+R)/);
+          if (raceMatch) raceName = raceMatch[1];
+
           let patternKey = null;
-          let payoutValue = 0; 
+          let diffPatternKey = null;
+          let diffDisplay = null;
           
-          // [ ] で囲まれた数字の並びを抽出
-          const lineMatch = block.match(/\[([\d\s]+)\]/);
-          if (lineMatch) {
-              const carsArr = lineMatch[1].trim().split(/\s+/);
-              if (carsArr.length > 1) { // 単騎(1車)は除外
-                  patternKey = carsArr.join('-');
+          const allLineMatches = block.match(/\[([\d\s]+)\]/g);
+          let allDiffs = [];
+          let diffLogArr = [];
+          
+          if (allLineMatches) {
+              allLineMatches.forEach((lm, index) => {
+                  const carsArr = lm.replace(/[\[\]]/g, '').trim().split(/\s+/).map(Number);
+                  
+                  if (index === 0 && carsArr.length > 1) {
+                      patternKey = carsArr.join('-');
+                  }
+                  
+                  if (carsArr.length > 1) {
+                      let localDiffs = [];
+                      for (let i = 0; i < carsArr.length - 1; i++) {
+                          localDiffs.push(Math.abs(carsArr[i] - carsArr[i+1]));
+                      }
+                      let sum = localDiffs.reduce((a, b) => a + b, 0);
+                      
+                      if (sum === 4) {
+                          allDiffs.push(4);
+                          diffLogArr.push("4(合算)");
+                      } else {
+                          allDiffs.push(...localDiffs);
+                          diffLogArr.push(localDiffs.join('-'));
+                      }
+                  }
+              });
+              
+              if (allDiffs.length > 0) {
+                  diffPatternKey = allDiffs.join('-');
+                  diffDisplay = diffLogArr.join(' / ');
               }
           }
           
-          // 配当の抽出
-          const payoutMatch = block.match(/配当.*?(\d+)/);
-          if (payoutMatch) {
-              payoutValue = parseInt(payoutMatch[1], 10);
-          }
-          
-          if (patternKey) {
-              const record = { pattern: patternKey, payout: payoutValue, timestamp: new Date().getTime() };
-              savedRecords.push(record);
-              extractedCount++;
-              logText += `・抽出成功: 先頭並び [${patternKey}] (配当: ${payoutValue > 0 ? payoutValue + '円' : '未入力'})\n`;
+          if (patternKey || diffPatternKey) {
+              const exists = savedRecords.find(r => r.raceName === raceName && r.pattern === patternKey);
+              if (!exists) {
+                  const record = { 
+                      raceName: raceName,
+                      pattern: patternKey, 
+                      diffPattern: diffPatternKey, 
+                      diffDisplay: diffDisplay,
+                      payout: 0, 
+                      timestamp: new Date().getTime() 
+                  };
+                  savedRecords.push(record);
+                  extractedCount++;
+                  logText += `・[${raceName}] 抽出完了\n`;
+              } else {
+                  logText += `・[${raceName}] スキップ (登録済み)\n`;
+              }
           }
       });
 
@@ -135,33 +175,74 @@
         localStorage.setItem('battleBankAutoData', JSON.stringify(savedRecords));
         document.getElementById('dataInput').value = '';
         updateCountDisplay();
-        document.getElementById('outputArea').innerText = logText + "\n合計 " + extractedCount + " レースの並びデータを保存しました。";
+        document.getElementById('outputArea').innerText = logText + "\n合計 " + extractedCount + " レースのデータを保存しました。";
       } else {
-        alert("有効な並びデータ（2車以上の先頭ライン）が見つかりませんでした。");
+        alert("有効な並びデータが見つかりませんでした。");
+        document.getElementById('outputArea').innerText = logText;
       }
     }
 
-    // 配当編集エディタの表示
+    function applyResults() {
+        const text = document.getElementById('dataInput').value;
+        if (!text.trim()) {
+            alert("結果のテキストを入力・貼り付けてください。");
+            return;
+        }
+
+        let updatedCount = 0;
+        let logText = "【結果反映ログ】\n";
+
+        savedRecords.forEach(record => {
+            if (record.raceName && record.raceName !== "不明" && record.payout === 0) {
+                const raceIdx = text.indexOf(record.raceName);
+                if (raceIdx !== -1) {
+                    const searchArea = text.substring(raceIdx, raceIdx + 300);
+                    const payoutMatch = searchArea.match(/3連単.*?(\d{1,3}(?:,\d{3})*|\d+)\s*円/);
+                    
+                    if (payoutMatch) {
+                        const moneyStr = payoutMatch[1].replace(/,/g, '');
+                        const money = parseInt(moneyStr, 10);
+                        if (money > 0) {
+                            record.payout = money;
+                            updatedCount++;
+                            logText += `・[${record.raceName}] 配当反映: ${money.toLocaleString()}円\n`;
+                        }
+                    } else {
+                        const genericMatch = searchArea.match(/配当.*?(\d{1,3}(?:,\d{3})*|\d+)円/);
+                        if (genericMatch) {
+                            const moneyStr = genericMatch[1].replace(/,/g, '');
+                            record.payout = parseInt(moneyStr, 10);
+                            updatedCount++;
+                            logText += `・[${record.raceName}] 配当反映(汎用): ${record.payout.toLocaleString()}円\n`;
+                        }
+                    }
+                }
+            }
+        });
+
+        if (updatedCount > 0) {
+            localStorage.setItem('battleBankAutoData', JSON.stringify(savedRecords));
+            document.getElementById('dataInput').value = '';
+            updateCountDisplay();
+            document.getElementById('outputArea').innerText = logText + `\n${updatedCount} レースの配当を自動反映しました！`;
+        } else {
+            alert("反映できる未入力レース、または配当データが見つかりませんでした。");
+        }
+    }
+
     function showPayoutEditor() {
       if (savedRecords.length === 0) {
         document.getElementById('outputArea').innerText = "蓄積データがありません。";
         return;
       }
-
       let html = '<h3 class="text-white mb-3 font-bold">💰 【配当の入力・編集】 (新しい順)</h3>';
       html += '<div class="space-y-2 max-h-72 overflow-y-auto pr-2">';
-      
-      // 新しいデータから順に表示
       [...savedRecords].reverse().forEach((record, revIndex) => {
         const originalIndex = savedRecords.length - 1 - revIndex;
-        const dateObj = new Date(record.timestamp || Date.now());
-        const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours()}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
-        
         html += `
           <div class="flex items-center justify-between bg-gray-700 p-2 rounded border-l-4 ${record.payout > 0 ? 'border-green-500' : 'border-yellow-500'}">
             <div class="flex flex-col">
-              <span class="text-white font-bold text-base">[${record.pattern}]</span>
-              <span class="text-gray-400 text-[10px]">${dateStr}</span>
+              <span class="text-white font-bold text-base">[${record.raceName || '不明'}] 差分[${record.diffPattern || '-'}]</span>
             </div>
             <div class="flex items-center">
               <input type="number" id="edit_payout_${originalIndex}" 
@@ -174,74 +255,91 @@
         `;
       });
       html += '</div>';
-      html += '<button onclick="savePayouts()" class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-md text-sm transition duration-200 shadow-md">配当を保存して更新</button>';
-
+      html += '<button onclick="savePayouts()" class="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-md text-sm transition duration-200 shadow-md">手動入力を保存して更新</button>';
       document.getElementById('outputArea').innerHTML = html;
     }
 
-    // 入力された配当を保存
     function savePayouts() {
       savedRecords.forEach((record, index) => {
         const inputEl = document.getElementById(`edit_payout_${index}`);
         if (inputEl) {
           const val = parseInt(inputEl.value, 10);
-          if (!isNaN(val) && val >= 0) {
-            record.payout = val;
-          } else {
-            record.payout = 0;
-          }
+          record.payout = (!isNaN(val) && val >= 0) ? val : 0;
         }
       });
-      
       localStorage.setItem('battleBankAutoData', JSON.stringify(savedRecords));
       updateCountDisplay();
       alert("配当データを更新しました！");
       analyzeData();
     }
 
-    // 蓄積データの分析
     function analyzeData() {
       if (savedRecords.length === 0) {
         document.getElementById('outputArea').innerText = "蓄積データがありません。";
         return;
       }
 
-      const analysisMap = {};
+      const diffAnalysisMap = {}; 
+      const analysisMap = {}; 
       let totalRaces = 0;
       let racesWithPayout = 0;
 
       savedRecords.forEach(record => {
-        if (!analysisMap[record.pattern]) {
-          analysisMap[record.pattern] = { count: 0, payouts: [] };
-        }
-        analysisMap[record.pattern].count++;
         totalRaces++;
-        
-        if (record.payout > 0) {
-            analysisMap[record.pattern].payouts.push(record.payout);
-            racesWithPayout++;
+        if (record.payout > 0) racesWithPayout++;
+
+        if (record.diffPattern) {
+            if (!diffAnalysisMap[record.diffPattern]) diffAnalysisMap[record.diffPattern] = { count: 0, payouts: [] };
+            diffAnalysisMap[record.diffPattern].count++;
+            if (record.payout > 0) diffAnalysisMap[record.diffPattern].payouts.push(record.payout);
+        }
+        if (record.pattern) {
+            if (!analysisMap[record.pattern]) analysisMap[record.pattern] = { count: 0, payouts: [] };
+            analysisMap[record.pattern].count++;
+            if (record.payout > 0) analysisMap[record.pattern].payouts.push(record.payout);
         }
       });
 
-      let resultText = `【蓄積データの自動集計結果】\n※全${totalRaces}レース中、配当入力済み: ${racesWithPayout}レース\n\n`;
-      const keys = Object.keys(analysisMap).sort();
-
-      keys.forEach(key => {
-        const data = analysisMap[key];
+      let resultText = `【分析サマリー】 (全${totalRaces}R中 / 配当入力済:${racesWithPayout}R)\n`;
+      resultText += `===========================================\n`;
+      resultText += `▼ 分析①: 車番差分の構成パターン\n`;
+      resultText += `===========================================\n`;
+      
+      const diffKeys = Object.keys(diffAnalysisMap).sort();
+      diffKeys.forEach(key => {
+        const data = diffAnalysisMap[key];
         const payouts = data.payouts;
         
-        resultText += `■ 先頭並び [${key}]\n`;
-        resultText += `・出現回数 : ${data.count} レース\n`;
-        
+        resultText += `■ レース構成 [${key}]\n`;
+        resultText += `・出現 : ${data.count} レース\n`;
         if (payouts.length > 0) {
             const avgPayout = Math.round(payouts.reduce((sum, val) => sum + val, 0) / payouts.length);
             const maxPayout = Math.max(...payouts);
-            resultText += `・平均配当 : ${avgPayout.toLocaleString()} 円 (入力済: ${payouts.length}件)\n`;
-            if (payouts.length > 1) {
-                resultText += `・最高配当 : ${maxPayout.toLocaleString()} 円\n`;
-            }
+            resultText += `・平均 : ${avgPayout.toLocaleString()} 円 (入力済:${payouts.length})\n`;
+            if (payouts.length > 1) resultText += `・最高 : ${maxPayout.toLocaleString()} 円\n`;
         } else {
-            resultText += `・平均配当 : データなし (配当未入力)\n`;
+            resultText += `・平均 : データなし\n`;
+        }
+        resultText += `\n`;
+      });
+
+      resultText += `===========================================\n`;
+      resultText += `▼ 分析②: 先頭並びパターン\n`;
+      resultText += `===========================================\n`;
+
+      const keys = Object.keys(analysisMap).sort();
+      keys.forEach(key => {
+        const data = analysisMap[key];
+        const payouts = data.payouts;
+        resultText += `■ 先頭並び [${key}]\n`;
+        resultText += `・出現 : ${data.count} レース\n`;
+        if (payouts.length > 0) {
+            const avgPayout = Math.round(payouts.reduce((sum, val) => sum + val, 0) / payouts.length);
+            const maxPayout = Math.max(...payouts);
+            resultText += `・平均 : ${avgPayout.toLocaleString()} 円 (入力済:${payouts.length})\n`;
+            if (payouts.length > 1) resultText += `・最高 : ${maxPayout.toLocaleString()} 円\n`;
+        } else {
+            resultText += `・平均 : データなし\n`;
         }
         resultText += `\n`;
       });
@@ -249,7 +347,6 @@
       document.getElementById('outputArea').innerText = resultText;
     }
 
-    // JSONでエクスポート
     function exportData() {
       if (savedRecords.length === 0) return;
       const dataStr = JSON.stringify(savedRecords, null, 2);
@@ -262,7 +359,6 @@
       URL.revokeObjectURL(url);
     }
 
-    // JSONからインポート
     function importData(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -283,9 +379,8 @@
       reader.readAsText(file);
     }
 
-    // データ全削除
     function clearData() {
-      if (confirm("全ての蓄積データを削除しますか？\n（復元できないため、事前にバックアップ保存をおすすめします）")) {
+      if (confirm("全ての蓄積データを削除しますか？")) {
         savedRecords = [];
         localStorage.removeItem('battleBankAutoData');
         updateCountDisplay();
