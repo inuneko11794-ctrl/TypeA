@@ -128,7 +128,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   <div class="glass-panel p-4 sm:p-5">
    <div class="panel-content">
     <button id="openManualBtn" type="button" class="touch-btn btn-alert w-full py-4 px-4 mb-5 rounded-xl flex justify-between items-center text-sm tracking-widest"><span>⚡ 手動入力モード</span><span>▶</span></button>
-    <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.txt"></div>
+    <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.txt,text/plain,text/markdown,text/*"></div>
     <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-4" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea>
     <div class="flex flex-col gap-3">
      <button id="extractBtn" type="button" class="touch-btn btn-cyber py-4 rounded-xl text-xs tracking-widest">📥 EXTRACT & ARCHIVE [データ抽出保存]</button>
@@ -147,7 +147,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
     <div class="scanline mb-4"></div>
     <div class="grid grid-cols-3 gap-2">
      <button id="exportBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[9px]">データ書出</button>
-     <button id="importTriggerBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[9px]">データ読込</button><input type="file" id="fileInput" class="hidden" accept=".json">
+     <button id="importTriggerBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[9px]">データ読込</button><input type="file" id="fileInput" class="hidden" accept=".json,application/json,text/plain">
      <button id="clearBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[9px] !text-sky-700 !border-sky-500/60">完全消去</button>
     </div>
    </div>
@@ -309,7 +309,7 @@ function logToTerminal(msg,type="info"){const out=$('outputArea'),time=new Date(
 function logToTerminalRaw(html){$('outputArea').insertAdjacentHTML('afterbegin',html)}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function persist(){localStorage.setItem('battleBankProData',JSON.stringify(savedRecords))}
-function loadMarkdown(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{$('dataInput').value=e.target.result;$('mdFileInput').value='';logToTerminal(`> ファイル読込成功: ${file.name}`,"success")};reader.readAsText(file,'UTF-8')}
+function loadMarkdown(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{$('dataInput').value=e.target.result;$('mdFileInput').value='';logToTerminal(`> ファイル読込成功: ${file.name}`,"success");setTimeout(triggerExtract, 150);};reader.readAsText(file,'UTF-8')}
 function triggerExtract(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: データが入力されていません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);extractAndSaveData()}
 function triggerSync(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: バッファに配当データがありません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);applyResults()}
 
@@ -734,7 +734,7 @@ function openEditModal(idx){
 }
 function savePayouts(){savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
 function exportData(){if(!savedRecords.length){logToTerminal("> 書き出すデータがありません。","error");return}const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='battleBank_pro_db.json';a.click();URL.revokeObjectURL(url);logToTerminal("> エクスポート完了。","success")}
-function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();logToTerminal("> インポート成功。","success")}catch(err){logToTerminal("> エラー: 不正なJSON。","error")} $('fileInput').value=''};reader.readAsText(file)}
+function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();logToTerminal(`> 復元成功: ${data.length}件のデータを読み込みました。`,"success")}catch(err){logToTerminal("> エラー: JSONファイルの形式が不正です。","error")} $('fileInput').value=''};reader.readAsText(file,'UTF-8')}
 function clearData(){if(confirm("データベースを初期化しますか？")){savedRecords=[];localStorage.removeItem('battleBankProData');updateCountDisplay();runAnalysis();logToTerminal("> DBパージ完了。","success")}}
 function updateCountDisplay(){const n=savedRecords.length.toString().padStart(5,'0');$('dataCount').innerHTML=`<span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ ${n} ]</span>`}
 document.addEventListener('DOMContentLoaded',()=>{
