@@ -6,167 +6,235 @@
   <title>BATTLE BANK-KUN | PRO MATRIX EXECUTION</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     :root {
       --color-cyan: 0, 240, 255;
       --color-magenta: 255, 0, 128;
       --color-dark: 10, 15, 30;
+      --color-alert: 255, 50, 50;
     }
     body {
-      background-color: #05050a;
+      background-color: #030508;
       background-image: 
-        radial-gradient(circle at 15% 50%, rgba(var(--color-cyan), 0.08), transparent 30%),
-        radial-gradient(circle at 85% 30%, rgba(var(--color-magenta), 0.08), transparent 30%),
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
-      font-family: 'Rajdhani', sans-serif;
+        radial-gradient(circle at 15% 50%, rgba(var(--color-cyan), 0.1), transparent 30%),
+        radial-gradient(circle at 85% 30%, rgba(var(--color-magenta), 0.1), transparent 30%),
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      font-family: 'Noto Sans JP', sans-serif;
       color: #e2e8f0;
       overflow-x: hidden;
+      animation: bg-flicker 5s infinite;
     }
     .font-orbitron { font-family: 'Orbitron', sans-serif; }
     .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
     
+    @keyframes bg-flicker {
+      0%, 96%, 98%, 100% { background-color: #030508; }
+      97%, 99% { background-color: #0a0f1a; }
+    }
+
     .glass-panel {
-      background: rgba(var(--color-dark), 0.65);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(var(--color-cyan), 0.2);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(var(--color-cyan), 0.05);
+      background: rgba(var(--color-dark), 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(var(--color-cyan), 0.3);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(var(--color-cyan), 0.1);
       position: relative;
       overflow: hidden;
+      animation: border-pulse 3s infinite alternate;
     }
+    @keyframes border-pulse {
+      0% { border-color: rgba(var(--color-cyan), 0.2); box-shadow: inset 0 0 10px rgba(var(--color-cyan), 0.05); }
+      100% { border-color: rgba(var(--color-cyan), 0.8); box-shadow: inset 0 0 30px rgba(var(--color-cyan), 0.2); }
+    }
+
     .glass-panel::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(var(--color-cyan), 0.6), transparent);
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(var(--color-cyan), 0.9), transparent);
     }
     
-    .neon-text-cyan { text-shadow: 0 0 10px rgba(var(--color-cyan), 0.7); }
-    .neon-text-magenta { text-shadow: 0 0 10px rgba(var(--color-magenta), 0.7); }
+    .neon-text-cyan { 
+      text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px rgba(var(--color-cyan), 1), 0 0 40px rgba(var(--color-cyan), 1); 
+      animation: text-flicker 2s infinite alternate;
+    }
+    .neon-text-magenta { 
+      text-shadow: 0 0 5px #fff, 0 0 10px rgba(var(--color-magenta), 1), 0 0 20px rgba(var(--color-magenta), 1); 
+    }
+
+    @keyframes text-flicker {
+      0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; }
+      20%, 24%, 55% { opacity: 0.4; text-shadow: none; }
+    }
+
+    .glitch {
+      position: relative;
+    }
+    .glitch::before, .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      opacity: 0.8;
+      color: white;
+    }
+    .glitch::before {
+      left: 2px; text-shadow: -2px 0 red;
+      animation: glitch-anim-1 2s infinite linear alternate-reverse;
+    }
+    .glitch::after {
+      left: -2px; text-shadow: -2px 0 blue;
+      animation: glitch-anim-2 3s infinite linear alternate-reverse;
+    }
+    @keyframes glitch-anim-1 {
+      0% { clip-path: inset(20% 0 80% 0); }
+      20% { clip-path: inset(60% 0 10% 0); }
+      40% { clip-path: inset(40% 0 50% 0); }
+      60% { clip-path: inset(80% 0 5% 0); }
+      80% { clip-path: inset(10% 0 70% 0); }
+      100% { clip-path: inset(30% 0 20% 0); }
+    }
+    @keyframes glitch-anim-2 {
+      0% { clip-path: inset(10% 0 60% 0); }
+      20% { clip-path: inset(30% 0 20% 0); }
+      40% { clip-path: inset(70% 0 10% 0); }
+      60% { clip-path: inset(20% 0 50% 0); }
+      80% { clip-path: inset(50% 0 30% 0); }
+      100% { clip-path: inset(5% 0 80% 0); }
+    }
+
+    .blink-fast {
+      animation: blink-fast 0.15s infinite;
+    }
+    @keyframes blink-fast {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
     
     .btn-cyber {
-      background: rgba(var(--color-cyan), 0.1);
-      border: 1px solid rgba(var(--color-cyan), 0.5);
+      background: rgba(var(--color-cyan), 0.15);
+      border: 1px solid rgba(var(--color-cyan), 0.7);
       color: rgb(var(--color-cyan));
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s;
       position: relative;
       overflow: hidden;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
     }
     .btn-cyber:hover {
-      background: rgba(var(--color-cyan), 0.25);
-      box-shadow: 0 0 15px rgba(var(--color-cyan), 0.4);
-      transform: translateY(-1px);
+      background: rgba(var(--color-cyan), 0.4);
+      box-shadow: 0 0 20px rgba(var(--color-cyan), 0.6);
+      color: #fff;
     }
-    .btn-cyber::after {
-      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-      background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
-      transform: rotate(45deg) translate(-100%, -100%);
-      transition: all 0.5s ease;
+    .btn-alert {
+      background: rgba(var(--color-alert), 0.15);
+      border: 1px solid rgba(var(--color-alert), 0.7);
+      color: rgb(var(--color-alert));
+      animation: alert-pulse 1s infinite alternate;
     }
-    .btn-cyber:hover::after { transform: rotate(45deg) translate(100%, 100%); }
-
-    .btn-magenta {
-      background: rgba(var(--color-magenta), 0.1);
-      border: 1px solid rgba(var(--color-magenta), 0.5);
-      color: #ff66a3;
+    .btn-alert:hover {
+      background: rgba(var(--color-alert), 0.4);
+      box-shadow: 0 0 20px rgba(var(--color-alert), 0.8);
+      color: #fff;
     }
-    .btn-magenta:hover {
-      background: rgba(var(--color-magenta), 0.25);
-      box-shadow: 0 0 15px rgba(var(--color-magenta), 0.4);
+    @keyframes alert-pulse {
+      0% { box-shadow: inset 0 0 0 rgba(var(--color-alert), 0); }
+      100% { box-shadow: inset 0 0 15px rgba(var(--color-alert), 0.5); }
     }
 
     .card-matrix {
-      transition: all 0.4s ease;
-      border: 1px solid rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s;
     }
     .card-matrix:hover {
-      border-color: rgba(var(--color-cyan), 0.5);
-      box-shadow: 0 10px 30px -10px rgba(var(--color-cyan), 0.4);
-      transform: translateY(-4px);
+      border-color: rgba(var(--color-cyan), 0.8);
+      box-shadow: 0 0 20px rgba(var(--color-cyan), 0.5), inset 0 0 15px rgba(var(--color-cyan), 0.2);
+      transform: scale(1.02);
     }
     
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
-    ::-webkit-scrollbar-thumb { background: rgba(var(--color-cyan), 0.4); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(var(--color-cyan), 0.8); }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.8); }
+    ::-webkit-scrollbar-thumb { background: rgba(var(--color-cyan), 0.8); }
     
     .scanline {
-      width: 100%; height: 100px;
-      background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(var(--color-cyan), 0.1) 50%, rgba(0,0,0,0) 100%);
-      opacity: 0.1;
-      position: absolute; bottom: 100%;
-      animation: scanline 8s linear infinite;
+      width: 100%; height: 20vh;
+      background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(var(--color-cyan), 0.2) 50%, rgba(255,255,255,0));
+      opacity: 0.3;
+      position: fixed; top: -20vh; left: 0;
+      animation: scanline 4s linear infinite;
       pointer-events: none;
+      z-index: 9999;
     }
     @keyframes scanline {
-      0% { bottom: 100%; }
-      100% { bottom: -100px; }
+      0% { top: -20vh; }
+      100% { top: 120vh; }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-4 md:p-8">
+<body class="min-h-screen flex flex-col items-center justify-start p-2 md:p-6 relative">
+  <div class="scanline"></div>
 
   <!-- Main Container -->
   <div class="w-full max-w-7xl relative z-10">
-    <div class="scanline"></div>
     
     <!-- Header -->
-    <header class="flex flex-col md:flex-row justify-between items-end border-b border-[rgba(0,240,255,0.3)] pb-4 mb-8">
+    <header class="flex flex-col md:flex-row justify-between items-end border-b-2 border-cyan-500/50 pb-4 mb-6 relative">
+      <div class="absolute bottom-0 left-0 w-1/3 h-0.5 bg-cyan-400 shadow-[0_0_10px_#0ff]"></div>
       <div>
-        <h1 class="font-orbitron text-3xl md:text-4xl font-black tracking-widest text-white neon-text-cyan flex items-center gap-3">
+        <h1 class="font-orbitron text-4xl md:text-5xl font-black tracking-widest text-white neon-text-cyan flex items-center gap-3 glitch" data-text="BATTLE BANK-KUN">
           BATTLE BANK-KUN
-          <span class="text-xs tracking-normal bg-cyan-900/50 border border-cyan-500 text-cyan-300 px-2 py-1 rounded">PRO MATRIX EXECUTION</span>
         </h1>
-        <p class="text-gray-400 text-sm tracking-widest uppercase mt-2">v3.0.0 // Kinetic Visualization & Deep Data Parser</p>
+        <div class="flex items-center gap-3 mt-2">
+          <span class="text-xs font-bold tracking-widest bg-cyan-950 border border-cyan-400 text-cyan-300 px-3 py-1.5 rounded animate-pulse">PRO MATRIX EXECUTION v3.1_JP</span>
+          <span class="text-[10px] text-gray-400 border border-gray-700 px-2 py-1">極秘解析システム稼働中</span>
+        </div>
       </div>
-      <div id="dataCount" class="font-mono-tech text-lg text-cyan-400 border border-cyan-500/30 bg-cyan-950/30 px-4 py-1.5 rounded mt-4 md:mt-0 shadow-[0_0_10px_rgba(0,240,255,0.1)]">
-        SYS.DB.COUNT: [ 0 ]
+      <div id="dataCount" class="font-mono-tech text-xl text-cyan-400 border border-cyan-400 bg-cyan-950/40 px-6 py-2 mt-4 md:mt-0 shadow-[0_0_15px_rgba(0,240,255,0.4)] flex items-center gap-2">
+        <span class="text-xs text-cyan-200">DB.RECORDS</span>
+        <span class="font-bold tracking-widest">[ 000 ]</span>
       </div>
     </header>
 
     <!-- Dashboard Grid -->
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 mb-8">
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-6">
       
       <!-- Control Terminal (Left Column) -->
-      <div class="xl:col-span-4 flex flex-col gap-6">
-        <div class="glass-panel p-5 rounded-xl">
+      <div class="xl:col-span-4 flex flex-col gap-5">
+        <div class="glass-panel p-4 rounded-lg">
           <div class="flex justify-between items-center mb-3">
-            <h2 class="font-orbitron text-sm tracking-widest text-cyan-400 border-l-2 border-cyan-400 pl-2">DATA UPLINK</h2>
-            <button onclick="document.getElementById('mdFileInput').click()" class="text-xs font-bold text-gray-300 hover:text-white transition flex items-center gap-1 bg-gray-800/50 px-2 py-1 rounded border border-gray-600 hover:border-cyan-400">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-              FILE LOAD
+            <h2 class="font-bold text-xs tracking-widest text-cyan-400 border-l-4 border-cyan-400 pl-2">▶ DATA UPLINK // データ受信</h2>
+            <button onclick="document.getElementById('mdFileInput').click()" class="text-[10px] font-bold text-gray-300 hover:text-cyan-300 transition flex items-center gap-1 bg-black/60 px-3 py-1.5 border border-gray-600 hover:border-cyan-400 hover:shadow-[0_0_8px_#0ff]">
+              📄 FILE UPLOAD
             </button>
             <input type="file" id="mdFileInput" class="hidden" accept=".md,.txt" onchange="loadMarkdown(event)">
           </div>
           
-          <textarea id="dataInput" rows="7" class="w-full p-3 bg-black/50 border border-gray-700 rounded-lg text-gray-300 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono-tech text-xs placeholder-gray-600 resize-none transition" placeholder="> Awaiting raw race data or result text...&#10;> Paste content here to initiate parse sequence."></textarea>
+          <textarea id="dataInput" rows="7" class="w-full p-3 bg-black/80 border border-cyan-900/50 text-cyan-100 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 font-mono-tech text-xs placeholder-cyan-900/70 resize-none transition shadow-inner" placeholder="> Awaiting raw data sequence...&#10;> 出走表・結果テキストをここにペーストして解析を開始してください。"></textarea>
           
           <div class="flex flex-col gap-3 mt-4">
-            <button onclick="extractAndSaveData()" class="btn-cyber font-bold py-3 rounded-lg text-sm flex justify-center items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-              EXTRACT & ARCHIVE
+            <button onclick="extractAndSaveData()" class="btn-cyber font-bold py-3 text-xs flex justify-center items-center gap-2">
+              📥 EXTRACT & ARCHIVE [データ抽出保存]
             </button>
-            <button onclick="applyResults()" class="btn-cyber btn-magenta font-bold py-3 rounded-lg text-sm flex justify-center items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-              SYNC PAYOUT RESULTS
+            <button onclick="applyResults()" class="btn-alert font-bold py-3 text-xs flex justify-center items-center gap-2">
+              <span class="blink-fast">⚠️</span> SYNC PAYOUT [配当金同期プロセス]
             </button>
           </div>
         </div>
 
-        <div class="glass-panel p-5 rounded-xl">
-          <h2 class="font-orbitron text-sm tracking-widest text-cyan-400 border-l-2 border-cyan-400 pl-2 mb-4">SYSTEM COMMANDS</h2>
+        <div class="glass-panel p-4 rounded-lg">
+          <h2 class="font-bold text-xs tracking-widest text-cyan-400 border-l-4 border-cyan-400 pl-2 mb-4">▶ SYS.COMMANDS // 制御</h2>
           <div class="grid grid-cols-2 gap-3 mb-4">
-            <button onclick="showPayoutEditor()" class="bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-600 font-bold py-2 rounded text-xs transition uppercase tracking-wider">Manual Edit</button>
-            <button onclick="runAnalysis()" class="bg-gray-800 hover:bg-cyan-900 text-cyan-300 border border-cyan-800 font-bold py-2 rounded text-xs transition uppercase tracking-wider">Run Matrix</button>
+            <button onclick="showPayoutEditor()" class="bg-black hover:bg-gray-800 text-gray-300 border border-gray-600 hover:border-gray-400 font-bold py-2.5 text-[10px] transition uppercase tracking-widest">
+              手動エディタ起動
+            </button>
+            <button onclick="runAnalysis()" class="bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-600 hover:border-cyan-300 font-bold py-2.5 text-[10px] transition uppercase tracking-widest shadow-[0_0_10px_rgba(0,255,255,0.2)]">
+              マトリクス再構築
+            </button>
           </div>
-          <div class="grid grid-cols-3 gap-2 border-t border-gray-800 pt-4">
-            <button onclick="exportData()" class="bg-black border border-gray-700 hover:border-gray-500 text-gray-400 py-1.5 rounded text-[10px] uppercase">Export</button>
-            <button onclick="document.getElementById('fileInput').click()" class="bg-black border border-gray-700 hover:border-gray-500 text-gray-400 py-1.5 rounded text-[10px] uppercase">Import</button>
+          <div class="grid grid-cols-3 gap-2 border-t border-gray-800/80 pt-4">
+            <button onclick="exportData()" class="bg-black border border-gray-800 hover:border-cyan-500 hover:text-cyan-400 text-gray-500 py-2 text-[9px] uppercase tracking-wider transition">データ書出</button>
+            <button onclick="document.getElementById('fileInput').click()" class="bg-black border border-gray-800 hover:border-cyan-500 hover:text-cyan-400 text-gray-500 py-2 text-[9px] uppercase tracking-wider transition">データ読込</button>
             <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
-            <button onclick="clearData()" class="bg-black border border-red-900/50 hover:border-red-600 text-red-500 py-1.5 rounded text-[10px] uppercase">Purge</button>
+            <button onclick="clearData()" class="bg-black border border-red-900/50 hover:border-red-500 hover:text-red-400 hover:shadow-[0_0_10px_red] text-red-900 py-2 text-[9px] uppercase tracking-wider transition">完全消去</button>
           </div>
         </div>
       </div>
@@ -175,27 +243,30 @@
       <div class="xl:col-span-8 flex flex-col gap-6">
         
         <!-- Graph Area -->
-        <div class="glass-panel p-5 rounded-xl flex-grow flex flex-col">
-          <h2 class="font-orbitron text-sm tracking-widest text-white border-l-2 border-magenta-500 pl-2 mb-4 flex justify-between">
-            <span class="neon-text-magenta">KINETIC VISUALIZER</span>
-            <span class="text-xs text-gray-500 tracking-normal font-mono-tech">STATUS: ONLINE</span>
+        <div class="glass-panel p-4 rounded-lg flex-grow flex flex-col">
+          <h2 class="font-bold text-xs tracking-widest text-white border-l-4 border-magenta-500 pl-2 mb-3 flex justify-between items-center">
+            <span class="neon-text-magenta">▶ KINETIC VISUALIZER // 動的解析グラフ</span>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-red-500 blink-fast"></span>
+              <span class="text-[10px] text-red-400 tracking-widest font-mono-tech">REC</span>
+            </div>
           </h2>
-          <div class="flex-grow w-full bg-black/40 rounded-lg border border-gray-800/50 p-4 relative" style="min-height: 280px;">
+          <div class="flex-grow w-full bg-black/70 rounded border border-gray-800 p-2 relative shadow-inner" style="min-height: 250px;">
             <canvas id="matrixChart"></canvas>
           </div>
         </div>
 
         <!-- Terminal Output -->
-        <div class="glass-panel p-5 rounded-xl h-48 flex flex-col">
-          <h2 class="font-orbitron text-xs tracking-widest text-gray-400 border-l-2 border-gray-600 pl-2 mb-2">TERMINAL LOG</h2>
-          <div id="outputArea" class="flex-grow bg-black/60 rounded border border-gray-800 p-3 overflow-y-auto font-mono-tech text-xs text-cyan-500 leading-relaxed whitespace-pre-wrap">SYSTEM BOOT SEQUENCE INITIATED...
+        <div class="glass-panel p-4 rounded-lg h-40 flex flex-col">
+          <h2 class="font-bold text-[10px] tracking-widest text-cyan-500 border-l-4 border-cyan-800 pl-2 mb-2">▶ TERMINAL LOG // 実行履歴</h2>
+          <div id="outputArea" class="flex-grow bg-black/90 rounded border border-cyan-900/30 p-3 overflow-y-auto font-mono-tech text-[11px] text-cyan-400 leading-relaxed whitespace-pre-wrap shadow-inner">SYSTEM BOOT SEQUENCE INITIATED...
 AWAITING COMMAND EXECUTION...</div>
         </div>
       </div>
     </div>
 
     <!-- Stats Cards Grid -->
-    <h2 class="font-orbitron text-sm tracking-widest text-cyan-400 border-l-2 border-cyan-400 pl-2 mb-4">CATEGORY METRICS</h2>
+    <h2 class="font-bold text-xs tracking-widest text-cyan-400 border-l-4 border-cyan-400 pl-2 mb-4">▶ CATEGORY METRICS // 階級別解析データ</h2>
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4" id="categoryCards">
       <!-- Generated via JS -->
     </div>
@@ -212,16 +283,16 @@ AWAITING COMMAND EXECUTION...</div>
         savedRecords = JSON.parse(stored);
         updateCountDisplay();
         runAnalysis();
-        logToTerminal("System restored from local database.\nReady.");
+        logToTerminal("> DBリカバリ完了. システムは正常に稼働しています.");
       } else {
-        runAnalysis(); 
+        runAnalysis(); // Draw empty state
       }
     };
     
     function logToTerminal(msg) {
         const out = document.getElementById('outputArea');
-        const time = new Date().toLocaleTimeString('ja-JP', { hour12: false });
-        out.innerText = `[${time}] ${msg}`;
+        const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' });
+        out.innerHTML = `<span class="text-cyan-600">[${time}]</span> <span class="text-cyan-100">${msg}</span><br>` + out.innerHTML;
     }
 
     function loadMarkdown(event) {
@@ -231,7 +302,7 @@ AWAITING COMMAND EXECUTION...</div>
       reader.onload = function(e) {
         document.getElementById('dataInput').value = e.target.result;
         document.getElementById('mdFileInput').value = ''; 
-        logToTerminal("File injected into memory cache. Ready for extraction.");
+        logToTerminal("> ファイルをメモリに展開. 抽出プロセス待機中...");
       };
       reader.readAsText(file);
     }
@@ -239,12 +310,12 @@ AWAITING COMMAND EXECUTION...</div>
     function extractAndSaveData() {
       const inputData = document.getElementById('dataInput').value;
       if (!inputData.trim()) {
-        alert("NO DATA DETECTED IN BUFFER.");
+        alert("データが入力されていません。");
         return;
       }
 
       let extractedCount = 0;
-      let logText = "INITIATING PARSE SEQUENCE...\n";
+      let logMsg = "";
       const blocks = inputData.split(/(?=競輪レースデータ|レース名|第?\d+R)/);
       
       blocks.forEach(block => {
@@ -260,7 +331,6 @@ AWAITING COMMAND EXECUTION...</div>
               if (venueClean) venue = venueClean;
           }
 
-          // Girls precision logic
           const hasGirlsKeyword = block.includes("ガールズ") || block.includes("L級");
           const comments = block.match(/- \*\*\[\d+\]\s*.*?\*\*：(.*?)(?=\n|$)/g);
           let tankiCount = 0;
@@ -353,7 +423,7 @@ AWAITING COMMAND EXECUTION...</div>
                   };
                   savedRecords.push(record);
                   extractedCount++;
-                  logText += `> [${category}] ${venue} / ${raceName} >> LOGGED\n`;
+                  logMsg += `> [${category}] ${venue} ${raceName} 取得.\n`;
               }
           }
       });
@@ -363,21 +433,21 @@ AWAITING COMMAND EXECUTION...</div>
         document.getElementById('dataInput').value = '';
         updateCountDisplay();
         runAnalysis();
-        logToTerminal(logText + `\n>> SUCCESS: ${extractedCount} races archived into Matrix.`);
+        logToTerminal(logMsg + `> 完了. 計 ${extractedCount} レースをDBに格納.`);
       } else {
-        logToTerminal(">> WARNING: No valid format data found in buffer.");
+        logToTerminal("> 警告: 解析可能なデータフォーマットが見つかりません.");
       }
     }
 
     function applyResults() {
         const text = document.getElementById('dataInput').value;
         if (!text.trim()) {
-            alert("NO PAYOUT DATA DETECTED IN BUFFER.");
+            alert("バッファに結果データが存在しません。");
             return;
         }
 
-        let updatedCount = 0;
-        let logText = "INITIATING PAYOUT SYNC...\n";
+      let updatedCount = 0;
+        let logMsg = "";
 
         savedRecords.forEach(record => {
             if (record.raceName && record.payout === 0) {
@@ -390,14 +460,14 @@ AWAITING COMMAND EXECUTION...</div>
                         if (money > 0) {
                             record.payout = money;
                             updatedCount++;
-                            logText += `> ${record.raceName} >> JPY ${money.toLocaleString()}\n`;
+                            logMsg += `> ${record.raceName} -> 配当反映: ¥${money.toLocaleString()}\n`;
                         }
                     } else {
                         const genericMatch = searchArea.match(/配当.*?(\d{1,3}(?:,\d{3})*|\d+)円/);
                         if (genericMatch) {
                             record.payout = parseInt(genericMatch[1].replace(/,/g, ''), 10);
                             updatedCount++;
-                            logText += `> ${record.raceName} >> JPY ${record.payout.toLocaleString()} (GENERIC)\n`;
+                            logMsg += `> ${record.raceName} -> 配当反映(汎用): ¥${record.payout.toLocaleString()}\n`;
                         }
                     }
                 }
@@ -409,9 +479,9 @@ AWAITING COMMAND EXECUTION...</div>
             document.getElementById('dataInput').value = '';
             updateCountDisplay();
             runAnalysis();
-            logToTerminal(logText + `\n>> SYNC COMPLETE: ${updatedCount} records updated.`);
+            logToTerminal(logMsg + `> 同期完了. ${updatedCount} 件の配当情報を更新.`);
         } else {
-            logToTerminal(">> WARNING: No matching empty records found for sync.");
+            logToTerminal("> 警告: マッチする未入力レース・配当が見つかりません.");
         }
     }
 
@@ -428,7 +498,8 @@ AWAITING COMMAND EXECUTION...</div>
             if (record.payout > 0) catStats[cat].payouts.push(record.payout);
           });
       }
-let cardsHtml = '';
+
+      let cardsHtml = '';
       let chartLabels = categories;
       let chartCounts = [];
       let chartAvgs = [];
@@ -441,35 +512,35 @@ let cardsHtml = '';
         chartCounts.push(data.count);
         chartAvgs.push(avg);
 
-        // Pro Card Design
+        // Cyber Pro Card Design
         cardsHtml += `
-          <div class="card-matrix bg-black/60 backdrop-blur-sm p-4 rounded-xl flex flex-col justify-between relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[rgba(0,240,255,0.05)] to-transparent rounded-bl-full pointer-events-none group-hover:from-[rgba(0,240,255,0.15)] transition"></div>
+          <div class="card-matrix bg-black/60 backdrop-blur-sm p-3 rounded-lg flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[rgba(0,240,255,0.05)] to-transparent rounded-bl-full pointer-events-none group-hover:from-[rgba(0,240,255,0.2)] transition"></div>
             
-            <div class="mb-4">
-              <div class="font-orbitron text-[11px] text-gray-500 tracking-widest mb-1 uppercase">Target Group</div>
-              <div class="font-bold text-lg text-white group-hover:neon-text-cyan transition">${c}</div>
+            <div class="mb-3">
+              <div class="font-mono-tech text-[9px] text-cyan-600 tracking-widest mb-1 uppercase border-b border-cyan-900/50 pb-1">TARGET: ${c}</div>
+              <div class="font-bold text-lg text-white group-hover:neon-text-cyan transition tracking-wider">${c}</div>
             </div>
             
-            <div class="grid grid-cols-2 gap-2 mb-3">
-              <div class="bg-gray-900/80 border border-gray-800 rounded p-2 text-center">
-                <div class="text-[9px] text-gray-500 uppercase tracking-widest">Logged</div>
-                <div class="font-mono-tech text-cyan-400 text-sm">${data.count}</div>
+            <div class="grid grid-cols-2 gap-2 mb-2">
+              <div class="bg-black border border-cyan-900/30 rounded p-1.5 text-center">
+                <div class="text-[8px] text-gray-500 uppercase tracking-widest">Logged</div>
+                <div class="font-mono-tech text-cyan-400 text-xs font-bold">${data.count}</div>
               </div>
-              <div class="bg-gray-900/80 border border-gray-800 rounded p-2 text-center">
-                <div class="text-[9px] text-gray-500 uppercase tracking-widest">Synced</div>
-                <div class="font-mono-tech text-magenta-400 text-sm">${data.payouts.length}</div>
+              <div class="bg-black border border-magenta-900/30 rounded p-1.5 text-center">
+                <div class="text-[8px] text-gray-500 uppercase tracking-widest">Synced</div>
+                <div class="font-mono-tech text-magenta-400 text-xs font-bold">${data.payouts.length}</div>
               </div>
             </div>
             
             <div class="mt-2 pt-2 border-t border-gray-800">
-              <div class="text-[9px] text-gray-500 uppercase tracking-widest mb-1 flex justify-between">
+              <div class="text-[8px] text-gray-500 uppercase tracking-widest mb-1 flex justify-between">
                 <span>Avg Return</span>
                 <span>Max</span>
               </div>
               <div class="flex justify-between items-end">
-                <div class="font-mono-tech font-bold text-lg text-white">${avg > 0 ? '¥' + avg.toLocaleString() : '---'}</div>
-                <div class="font-mono-tech text-[10px] text-gray-400">${max > 0 ? '¥' + max.toLocaleString() : '-'}</div>
+                <div class="font-mono-tech font-bold text-base text-white group-hover:text-cyan-100">${avg > 0 ? '¥' + avg.toLocaleString() : '---'}</div>
+                <div class="font-mono-tech text-[9px] text-gray-400">${max > 0 ? '¥' + max.toLocaleString() : '-'}</div>
               </div>
             </div>
           </div>
@@ -478,17 +549,15 @@ let cardsHtml = '';
 
       document.getElementById('categoryCards').innerHTML = cardsHtml;
 
-      // Draw Advanced Chart
       const canvas = document.getElementById('matrixChart');
       const ctx = canvas.getContext('2d');
       
-      // Gradients
       const barGrad = ctx.createLinearGradient(0, 0, 0, 300);
-      barGrad.addColorStop(0, 'rgba(0, 240, 255, 0.6)');
-      barGrad.addColorStop(1, 'rgba(0, 240, 255, 0.05)');
+      barGrad.addColorStop(0, 'rgba(0, 240, 255, 0.8)');
+      barGrad.addColorStop(1, 'rgba(0, 240, 255, 0.1)');
       
       const lineGrad = ctx.createLinearGradient(0, 0, 0, 300);
-      lineGrad.addColorStop(0, 'rgba(255, 0, 128, 0.3)');
+      lineGrad.addColorStop(0, 'rgba(255, 0, 128, 0.5)');
       lineGrad.addColorStop(1, 'rgba(255, 0, 128, 0.0)');
 
       if (myChart) myChart.destroy();
@@ -499,33 +568,33 @@ let cardsHtml = '';
           labels: chartLabels,
           datasets: [
             {
-              label: ' LOGGED RACES',
+              label: ' LOGGED RACES (件数)',
               data: chartCounts,
               backgroundColor: barGrad,
               borderColor: 'rgba(0, 240, 255, 1)',
-              borderWidth: 1.5,
+              borderWidth: 1,
               yAxisID: 'y',
-              borderRadius: 2,
-              barPercentage: 0.5,
+              borderRadius: 0,
+              barPercentage: 0.6,
               order: 2
             },
             {
-              label: ' AVG RETURN (JPY)',
+              label: ' AVG PAYOUT (平均払戻)',
               data: chartAvgs,
               type: 'line',
               borderColor: 'rgba(255, 0, 128, 1)',
               backgroundColor: lineGrad,
-              borderWidth: 2.5,
+              borderWidth: 2,
               fill: true,
-              pointBackgroundColor: '#05050a',
+              pointBackgroundColor: '#fff',
               pointBorderColor: 'rgba(255, 0, 128, 1)',
               pointBorderWidth: 2,
               pointRadius: 4,
-              pointHoverRadius: 6,
-              pointHoverBackgroundColor: 'rgba(255, 0, 128, 1)',
+              pointHoverRadius: 7,
+              pointHoverBackgroundColor: 'rgba(0, 240, 255, 1)',
               pointHoverBorderColor: '#fff',
               yAxisID: 'y1',
-              tension: 0.4,
+              tension: 0.2,
               order: 1
             }
           ]
@@ -536,12 +605,12 @@ let cardsHtml = '';
           interaction: { mode: 'index', intersect: false },
           scales: {
             x: {
-              grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
-              ticks: { color: '#64748b', font: { family: "'Share Tech Mono', monospace", size: 11 } }
+              grid: { color: 'rgba(0, 240, 255, 0.1)', drawBorder: false },
+              ticks: { color: '#88a', font: { family: "'Noto Sans JP', sans-serif", size: 10, weight: 'bold' } }
             },
             y: {
               type: 'linear', position: 'left',
-              grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+              grid: { color: 'rgba(0, 240, 255, 0.1)', drawBorder: false },
               ticks: { color: 'rgba(0, 240, 255, 0.8)', font: { family: "'Share Tech Mono', monospace", size: 11 } }
             },
             y1: {
@@ -555,223 +624,62 @@ let cardsHtml = '';
               position: 'top',
               align: 'end',
               labels: {
-                color: '#94a3b8',
-                font: { family: "'Rajdhani', sans-serif", size: 12, weight: '600' },
-                boxWidth: 12, boxHeight: 12, usePointStyle: true
+                color: '#fff',
+                font: { family: "'Orbitron', sans-serif", size: 10 },
+                boxWidth: 10, boxHeight: 10, usePointStyle: true
               }
             },
             tooltip: {
-              backgroundColor: 'rgba(10, 15, 30, 0.9)',
+              backgroundColor: 'rgba(5, 10, 20, 0.95)',
               titleColor: '#fff',
-              titleFont: { family: "'Orbitron', sans-serif" },
+              titleFont: { family: "'Noto Sans JP', sans-serif", size: 12 },
               bodyColor: '#e2e8f0',
               bodyFont: { family: "'Share Tech Mono', monospace" },
-              borderColor: 'rgba(0, 240, 255, 0.3)',
+              borderColor: 'rgba(0, 240, 255, 0.5)',
               borderWidth: 1,
               padding: 10,
               displayColors: true,
               callbacks: {
                   label: function(context) {
                       let label = context.dataset.label || '';
-                      if (label) { label += ': '; }
                       if (context.datasetIndex === 1) {
-                          label += '¥' + context.parsed.y.toLocaleString();
+                          return label + ' : ¥' + context.parsed.y.toLocaleString();
                       } else {
-                          label += context.parsed.y;
+                          return label + ' : ' + context.parsed.y + ' 件';
                       }
-                      return label;
                   }
               }
             }
           }
         }
       });
-    }
 
-    let cardsHtml = '';
-      let chartLabels = categories;
-      let chartCounts = [];
-      let chartAvgs = [];
-
-      categories.forEach(c => {
-        const data = catStats[c];
-        const avg = data.payouts.length > 0 ? Math.round(data.payouts.reduce((a,b)=>a+b,0)/data.payouts.length) : 0;
-        const max = data.payouts.length > 0 ? Math.max(...data.payouts) : 0;
-        
-        chartCounts.push(data.count);
-        chartAvgs.push(avg);
-
-        // Pro Card Design
-        cardsHtml += `
-          <div class="card-matrix bg-black/60 backdrop-blur-sm p-4 rounded-xl flex flex-col justify-between relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[rgba(0,240,255,0.05)] to-transparent rounded-bl-full pointer-events-none group-hover:from-[rgba(0,240,255,0.15)] transition"></div>
-            
-            <div class="mb-4">
-              <div class="font-orbitron text-[11px] text-gray-500 tracking-widest mb-1 uppercase">Target Group</div>
-              <div class="font-bold text-lg text-white group-hover:neon-text-cyan transition">${c}</div>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-2 mb-3">
-              <div class="bg-gray-900/80 border border-gray-800 rounded p-2 text-center">
-                <div class="text-[9px] text-gray-500 uppercase tracking-widest">Logged</div>
-                <div class="font-mono-tech text-cyan-400 text-sm">${data.count}</div>
-              </div>
-              <div class="bg-gray-900/80 border border-gray-800 rounded p-2 text-center">
-                <div class="text-[9px] text-gray-500 uppercase tracking-widest">Synced</div>
-                <div class="font-mono-tech text-magenta-400 text-sm">${data.payouts.length}</div>
-              </div>
-            </div>
-            
-            <div class="mt-2 pt-2 border-t border-gray-800">
-              <div class="text-[9px] text-gray-500 uppercase tracking-widest mb-1 flex justify-between">
-                <span>Avg Return</span>
-                <span>Max</span>
-              </div>
-              <div class="flex justify-between items-end">
-                <div class="font-mono-tech font-bold text-lg text-white">${avg > 0 ? '¥' + avg.toLocaleString() : '---'}</div>
-                <div class="font-mono-tech text-[10px] text-gray-400">${max > 0 ? '¥' + max.toLocaleString() : '-'}</div>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      document.getElementById('categoryCards').innerHTML = cardsHtml;
-
-      // Draw Advanced Chart
-      const canvas = document.getElementById('matrixChart');
-      const ctx = canvas.getContext('2d');
-      
-      // Gradients
-      const barGrad = ctx.createLinearGradient(0, 0, 0, 300);
-      barGrad.addColorStop(0, 'rgba(0, 240, 255, 0.6)');
-      barGrad.addColorStop(1, 'rgba(0, 240, 255, 0.05)');
-      
-      const lineGrad = ctx.createLinearGradient(0, 0, 0, 300);
-      lineGrad.addColorStop(0, 'rgba(255, 0, 128, 0.3)');
-      lineGrad.addColorStop(1, 'rgba(255, 0, 128, 0.0)');
-
-      if (myChart) myChart.destroy();
-
-      myChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: chartLabels,
-          datasets: [
-            {
-              label: ' LOGGED RACES',
-              data: chartCounts,
-              backgroundColor: barGrad,
-              borderColor: 'rgba(0, 240, 255, 1)',
-              borderWidth: 1.5,
-              yAxisID: 'y',
-              borderRadius: 2,
-              barPercentage: 0.5,
-              order: 2
-            },
-            {
-              label: ' AVG RETURN (JPY)',
-              data: chartAvgs,
-              type: 'line',
-              borderColor: 'rgba(255, 0, 128, 1)',
-              backgroundColor: lineGrad,
-              borderWidth: 2.5,
-              fill: true,
-              pointBackgroundColor: '#05050a',
-              pointBorderColor: 'rgba(255, 0, 128, 1)',
-              pointBorderWidth: 2,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              pointHoverBackgroundColor: 'rgba(255, 0, 128, 1)',
-              pointHoverBorderColor: '#fff',
-              yAxisID: 'y1',
-              tension: 0.4,
-              order: 1
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          scales: {
-            x: {
-              grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
-              ticks: { color: '#64748b', font: { family: "'Share Tech Mono', monospace", size: 11 } }
-            },
-            y: {
-              type: 'linear', position: 'left',
-              grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
-              ticks: { color: 'rgba(0, 240, 255, 0.8)', font: { family: "'Share Tech Mono', monospace", size: 11 } }
-            },
-            y1: {
-              type: 'linear', position: 'right',
-              grid: { display: false },
-              ticks: { color: 'rgba(255, 0, 128, 0.8)', font: { family: "'Share Tech Mono', monospace", size: 11 } }
-            }
-          },
-          plugins: {
-            legend: {
-              position: 'top',
-              align: 'end',
-              labels: {
-                color: '#94a3b8',
-                font: { family: "'Rajdhani', sans-serif", size: 12, weight: '600' },
-                boxWidth: 12, boxHeight: 12, usePointStyle: true
-              }
-            },
-            tooltip: {
-              backgroundColor: 'rgba(10, 15, 30, 0.9)',
-              titleColor: '#fff',
-              titleFont: { family: "'Orbitron', sans-serif" },
-              bodyColor: '#e2e8f0',
-              bodyFont: { family: "'Share Tech Mono', monospace" },
-              borderColor: 'rgba(0, 240, 255, 0.3)',
-              borderWidth: 1,
-              padding: 10,
-              displayColors: true,
-              callbacks: {
-                  label: function(context) {
-                      let label = context.dataset.label || '';
-                      if (label) { label += ': '; }
-                      if (context.datasetIndex === 1) {
-                          label += '¥' + context.parsed.y.toLocaleString();
-                      } else {
-                          label += context.parsed.y;
-                      }
-                      return label;
-                  }
-              }
-            }
-          }
-        }
-      });
-    }
-    function showPayoutEditor() {
+      function showPayoutEditor() {
       if (savedRecords.length === 0) {
-        logToTerminal(">> ERROR: No records in DB to edit.");
+        logToTerminal("> エラー: 編集するレコードが存在しません.");
         return;
       }
-      let html = '<div class="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">';
+      let html = '<div class="space-y-1.5 max-h-32 overflow-y-auto pr-2">';
       [...savedRecords].reverse().forEach((record, revIndex) => {
         const originalIndex = savedRecords.length - 1 - revIndex;
-        const color = record.payout > 0 ? 'border-l-magenta-500 bg-gray-900/50' : 'border-l-cyan-500 bg-black/50';
+        const color = record.payout > 0 ? 'border-l-magenta-500 bg-magenta-900/10' : 'border-l-cyan-500 bg-cyan-900/10';
         html += `
-          <div class="flex items-center justify-between p-2 rounded border-l-2 ${color} border-y border-r border-gray-800 text-xs transition hover:border-gray-600">
+          <div class="flex items-center justify-between p-2 rounded border-l-2 ${color} border border-gray-800 text-xs hover:border-cyan-500 transition">
             <div class="flex flex-col">
-              <span class="text-white font-mono-tech tracking-wide">[${record.category || '9車'}] ${record.venue || ''} ${record.raceName || ''}</span>
-              <span class="text-gray-500 text-[9px] font-mono-tech uppercase">Diff: ${record.diffPattern || 'N/A'}</span>
+              <span class="text-white font-bold tracking-wide">[${record.category || '9車'}] ${record.venue || ''} ${record.raceName || ''}</span>
+              <span class="text-cyan-600 text-[9px] font-mono-tech">DIFF_SEQ: ${record.diffPattern || 'N/A'}</span>
             </div>
             <div class="flex items-center gap-1">
-              <span class="text-[9px] text-gray-500 uppercase">JPY</span>
-              <input type="number" id="edit_payout_${originalIndex}" value="${record.payout > 0 ? record.payout : ''}" placeholder="0" class="w-20 p-1 text-right bg-black text-cyan-400 rounded text-xs border border-gray-700 font-mono-tech focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500">
+              <span class="text-[9px] text-gray-500">¥</span>
+              <input type="number" id="edit_payout_${originalIndex}" value="${record.payout > 0 ? record.payout : ''}" placeholder="0" class="w-24 p-1 text-right bg-black text-cyan-300 rounded text-xs border border-cyan-900 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 font-mono-tech shadow-inner">
             </div>
           </div>
         `;
       });
       html += '</div>';
-      html += '<button onclick="savePayouts()" class="mt-3 w-full btn-cyber py-2 rounded text-xs">Commit Changes</button>';
+      html += '<button onclick="savePayouts()" class="mt-2 w-full bg-cyan-900/50 hover:bg-cyan-600 text-cyan-100 border border-cyan-500 py-2 rounded text-xs font-bold tracking-widest uppercase transition">Overwrite DB [上書き保存]</button>';
       document.getElementById('outputArea').innerHTML = html;
+      logToTerminal("> 手動エディタを起動しました.");
     }
 
     function savePayouts() {
@@ -785,7 +693,7 @@ let cardsHtml = '';
       localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
       updateCountDisplay();
       runAnalysis();
-      logToTerminal(">> DB COMMITTED. Data overrides successful.");
+      logToTerminal("> DB更新完了. 手動オーバーライド成功.");
     }
 
     function exportData() {
@@ -798,7 +706,7 @@ let cardsHtml = '';
       a.download = `battleBank_pro_db.json`;
       a.click();
       URL.revokeObjectURL(url);
-      logToTerminal(">> EXPORT SUCCESSFUL.");
+      logToTerminal("> データエクスポート処理完了.");
     }
 
     window.importData = function(event) {
@@ -813,10 +721,10 @@ let cardsHtml = '';
             localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
             updateCountDisplay();
             runAnalysis();
-            logToTerminal(">> IMPORT SUCCESSFUL. System overriding...");
+            logToTerminal("> インポート成功. システムを上書きしました.");
           }
         } catch (err) {
-            logToTerminal(">> ERROR: Invalid JSON structure.");
+            logToTerminal("> エラー: 不正なJSONファイルです.");
         }
         document.getElementById('fileInput').value = '';
       };
@@ -824,29 +732,23 @@ let cardsHtml = '';
     }
 
     function clearData() {
-      if (confirm("WARNING: Purging entire database. Confirm?")) {
+      if (confirm("警告: データベースを完全に初期化します。よろしいですか？")) {
         savedRecords = [];
         localStorage.removeItem('battleBankProData');
         updateCountDisplay();
         runAnalysis();
-        logToTerminal(">> DB PURGED. System wiped clean.");
+        logToTerminal("> DBパージ完了. システムは初期状態です.");
       }
     }
 
     function updateCountDisplay() {
       const el = document.getElementById('dataCount');
-      if(el) el.innerText = `SYS.DB.COUNT: [ ${savedRecords.length.toString().padStart(3, '0')} ]`;
+      if(el) el.innerHTML = `<span class="text-[10px] text-cyan-200 mt-1 block">DB.RECORDS</span><span class="font-bold tracking-widest">[ ${savedRecords.length.toString().padStart(3, '0')} ]</span>`;
     }
   </script>
 </body>
 </html>
 
 
-                  
-              
-            
-          
+
         
-      
-            
-      
