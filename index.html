@@ -47,7 +47,6 @@
     .blink-fast { animation: blink-fast 0.15s infinite; }
     @keyframes blink-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     
-    /* 完全にタッチを遮らせない超強固なボタン設定 */
     .touch-btn {
       position: relative;
       z-index: 999 !important;
@@ -93,14 +92,13 @@
 <body class="min-h-screen flex flex-col items-center justify-start p-3 md:p-6 relative">
 
   <div class="w-full max-w-7xl relative z-10">
-    <!-- Header -->
     <header class="flex flex-col md:flex-row justify-between items-end border-b-2 border-sky-400/60 pb-4 mb-6 relative">
       <div>
         <h1 class="font-orbitron text-3xl md:text-5xl font-black tracking-widest text-slate-900 neon-text-cyan flex items-center gap-3">
           BATTLE BANK-KUN
         </h1>
         <div class="flex items-center gap-3 mt-2">
-          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm">PATTERN MATRIX v5.8</span>
+          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm">PATTERN MATRIX v5.9</span>
           <button id="audioToggleBtn" type="button" class="touch-btn text-[10px] text-slate-700 border border-slate-300 bg-white px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-md">
             <div id="audioStatus" class="w-2 h-2 rounded-full bg-red-500"></div>
             <span>AUDIO_SYS [OFF]</span>
@@ -113,10 +111,8 @@
       </div>
     </header>
 
-    <!-- Dashboard Grid -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-6">
       
-      <!-- Control Terminal (Left Column) -->
       <div class="xl:col-span-4 flex flex-col gap-5">
         <div class="glass-panel p-5 rounded-2xl">
           <div class="flex justify-between items-center mb-3">
@@ -127,7 +123,7 @@
             <input type="file" id="mdFileInput" class="hidden" accept=".md,.txt">
           </div>
           
-          <textarea id="dataInput" rows="7" class="w-full p-3.5 bg-white border border-sky-300 text-slate-800 rounded-xl focus:outline-none focus:border-sky-500 font-mono-tech text-xs placeholder-slate-400 resize-y shadow-inner mb-4" placeholder="> 出走表・結果テキストをここにペーストして解析を開始してください。"></textarea>
+          <textarea id="dataInput" rows="7" class="w-full p-3.5 bg-white border border-sky-300 text-slate-800 rounded-xl focus:outline-none focus:border-sky-500 font-mono-tech text-xs placeholder-slate-400 resize-y shadow-inner mb-4" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea>
           
           <div class="flex flex-col gap-3">
             <button type="button" id="extractBtn" class="touch-btn btn-cyber font-bold py-4 rounded-xl text-xs flex justify-center items-center gap-2 shadow-lg">
@@ -142,7 +138,7 @@
         <div class="glass-panel p-5 rounded-2xl">
           <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2 mb-4">▶ SYS.COMMANDS // 制御</h2>
           <div class="grid grid-cols-3 gap-2 mb-4">
-            <button type="button" id="editPayoutBtn" class="touch-btn bg-white text-slate-700 border border-slate-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm">手動修正(配当)</button>
+            <button type="button" id="editPayoutBtn" class="touch-btn bg-white text-slate-700 border border-slate-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm">手動修正(会場・配当)</button>
             <button type="button" id="analysisBtn" class="touch-btn bg-sky-50 text-sky-700 border border-sky-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm">UI再構築</button>
             <button type="button" id="deepScanBtn" class="touch-btn bg-pink-50 text-pink-700 border border-pink-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm">7車 DEEP SCAN</button>
           </div>
@@ -155,10 +151,7 @@
         </div>
       </div>
 
-      <!-- Main Visual Analytics (Right Column) -->
       <div class="xl:col-span-8 flex flex-col gap-6">
-        
-        <!-- Graph Area -->
         <div class="glass-panel p-5 rounded-2xl flex-grow flex flex-col">
           <h2 class="font-bold text-xs tracking-widest text-slate-900 border-l-4 border-pink-500 pl-2 mb-3 flex justify-between items-center">
             <span class="neon-text-magenta">▶ PATTERN DYNAMICS // 差分パターン別 平均配当グラフ</span>
@@ -172,11 +165,10 @@
           </div>
         </div>
 
-        <!-- Terminal Output -->
         <div class="glass-panel p-5 rounded-2xl h-48 flex flex-col relative">
           <h2 class="font-bold text-[10px] tracking-widest text-sky-700 border-l-4 border-sky-800 pl-2 mb-2">▶ TERMINAL LOG // 実行履歴</h2>
           <button type="button" id="clearLogBtn" class="touch-btn absolute top-4 right-4 text-[9px] text-slate-500 border border-slate-200 bg-white px-2.5 py-1 rounded-lg shadow-sm">CLEAR</button>
-          <div id="outputArea" class="flex-grow bg-slate-900 text-sky-400 rounded-xl border border-sky-900/40 p-3.5 overflow-y-auto font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner custom-scrollbar">SYSTEM BOOT SEQUENCE v5.8...
+          <div id="outputArea" class="flex-grow bg-slate-900 text-sky-400 rounded-xl border border-sky-900/40 p-3.5 overflow-y-auto font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner custom-scrollbar">SYSTEM BOOT SEQUENCE v5.9...
 AWAITING COMMAND EXECUTION...</div>
         </div>
       </div>
@@ -228,7 +220,6 @@ AWAITING COMMAND EXECUTION...</div>
         } catch(e) { console.log(e); }
     }
 
-    // すべてのボタンにクリックとタッチイベントを強制登録する絶対防御バインド
     function bindTouchAction(id, callback) {
         const el = document.getElementById(id);
         if(!el) return;
@@ -262,7 +253,7 @@ AWAITING COMMAND EXECUTION...</div>
             try { savedRecords = JSON.parse(stored); } catch(e) { savedRecords = []; }
             updateCountDisplay();
             runAnalysis();
-            logToTerminal("> DBリカバリ完了. v5.8 稼働中.", "success");
+            logToTerminal("> DBリカバリ完了. v5.9 稼働中.", "success");
         } else {
             runAnalysis(); 
         }
@@ -316,19 +307,34 @@ AWAITING COMMAND EXECUTION...</div>
       const inputData = document.getElementById('dataInput').value;
       let extractedCount = 0;
       
-      const blocks = inputData.split(/(?=\d+R|レース名|競輪レースデータ|小倉|京王閣|平塚|大宮|福井)/);
+      // テキスト全体からファイル名や冒頭のキーワードから会場名を探す
+      let globalVenue = "不明";
+      const knownVenues = ["小倉", "京王閣", "平塚", "大宮", "福井", "函館", "青森", "いわき平", "弥彦", "前橋", "取手", "宇都宮", "大宮", "西武園", "京王閣", "立川", "松戸", "千葉", "川崎", "平塚", "小田原", "伊東", "静岡", "名古屋", "岐阜", "大垣", "富山", "松阪", "四日市", "福井", "岸和田", "奈良", "和歌山", "玉野", "広島", "防府", "高松", "徳島", "松山", "高知", "小松島", "久留米", "武雄", "佐世保", "別府", "熊本"];
+      
+      for(let v of knownVenues) {
+          if(inputData.includes(v)) {
+              globalVenue = v;
+              break;
+          }
+      }
+
+      const blocks = inputData.split(/(?=\d+R|レース名|競輪レースデータ)/);
       
       blocks.forEach(block => {
           if(!block.trim()) return;
-          let venue = "UNKNOWN"; 
+          let venue = globalVenue; 
           let raceName = "UNKNOWN";
           
           const raceMatch = block.match(/(\d+R)/);
           if (raceMatch) raceName = raceMatch[1];
           
-          const venueMatch = block.match(/([^\s#\n]{2,4})(?=競輪|\s*\d+R)/);
-          if (venueMatch) venue = venueMatch[1].replace(/競輪/g, '');
-          if (venue === "UNKNOWN" && block.includes("小倉")) venue = "小倉";
+          // ブロック内からも個別に会場名を探す
+          for(let v of knownVenues) {
+              if(block.includes(v)) {
+                  venue = v;
+                  break;
+              }
+          }
 
           const hasGirls = block.includes("ガールズ") || block.includes("L級");
           let category = "9車";
@@ -369,7 +375,7 @@ AWAITING COMMAND EXECUTION...</div>
               if (allDiffs.length > 0) { diffPatternKey = allDiffs.join('-'); diffDisplay = diffLogArr.join(' / '); }
           }
           
-          if (raceName !== "UNKNOWN" || patternKey || diffPatternKey || block.includes("大中拓磨") || block.includes("選手")) {
+          if (raceName !== "UNKNOWN" || patternKey || diffPatternKey || block.includes("選手")) {
               if (raceName === "UNKNOWN") raceName = "1R";
               const exists = savedRecords.find(r => r.venue === venue && r.raceName === raceName && r.pattern === patternKey);
               if (!exists) {
@@ -381,10 +387,9 @@ AWAITING COMMAND EXECUTION...</div>
 
       if (extractedCount === 0 && inputData.length > 20) {
           const fallbackRace = inputData.match(/\d+R/)?.[0] || "1R";
-          const fallbackVenue = inputData.includes("小倉") ? "小倉" : "UNKNOWN";
-          const exists = savedRecords.find(r => r.raceName === fallbackRace);
+          const exists = savedRecords.find(r => r.raceName === fallbackRace && r.venue === globalVenue);
           if (!exists) {
-              savedRecords.push({ venue: fallbackVenue, raceName: fallbackRace, category: "9車", pattern: "1-2-3", diffPattern: "1-1", diffDisplay: "1-1", payout: 0, timestamp: new Date().getTime() });
+              savedRecords.push({ venue: globalVenue, raceName: fallbackRace, category: "9車", pattern: "1-2-3", diffPattern: "1-1", diffDisplay: "1-1", payout: 0, timestamp: new Date().getTime() });
               extractedCount = 1;
           }
       }
@@ -393,7 +398,7 @@ AWAITING COMMAND EXECUTION...</div>
         localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
         document.getElementById('dataInput').value = '';
         updateCountDisplay(); runAnalysis();
-        logToTerminal(`> 成功: 新規 ${extractedCount} レースをDBに格納しました。`, "success");
+        logToTerminal(`> 成功: [${globalVenue}] 新規 ${extractedCount} レースをDBに格納しました。`, "success");
         playBeep(880, 'sine', 0.15);
       } else { 
         logToTerminal("> 警告: 解析可能なデータが検知されませんでした。", "error"); 
@@ -547,20 +552,25 @@ AWAITING COMMAND EXECUTION...</div>
 
     function showPayoutEditor() {
       if (savedRecords.length === 0) { logToTerminal("> エラー: レコードがありません.", "error"); return; }
-      let html = '<div class="space-y-1.5 max-h-40 overflow-y-auto pr-2 custom-scrollbar">';
+      let html = '<div class="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">';
       [...savedRecords].reverse().forEach((record, revIndex) => {
         const originalIndex = savedRecords.length - 1 - revIndex;
         const color = record.payout > 0 ? 'border-l-pink-500 bg-pink-50' : 'border-l-sky-500 bg-sky-50';
-        const venueText = (record.venue && record.venue !== "UNKNOWN") ? record.venue : "";
         html += `
-          <div class="flex items-center justify-between p-2.5 rounded-xl border-l-4 ${color} border border-slate-200 text-xs bg-white shadow-sm">
-            <div class="flex flex-col">
-              <span class="text-slate-800 font-bold">[${record.category || '9車'}] ${venueText} ${record.raceName || ''}</span>
+          <div class="flex flex-col gap-1.5 p-3 rounded-xl border-l-4 ${color} border border-slate-200 text-xs bg-white shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="text-slate-800 font-bold">[${record.category || '9車'}] ${record.raceName || ''}</span>
               <span class="text-sky-600 text-[9px] font-mono-tech">DIFF: ${record.diffPattern || 'N/A'}</span>
             </div>
-            <div class="flex items-center gap-1">
-              <span class="text-[9px] text-slate-400">¥</span>
-              <input type="number" id="edit_payout_${originalIndex}" value="${record.payout > 0 ? record.payout : ''}" placeholder="0" class="w-24 p-1.5 text-right bg-slate-50 text-sky-700 rounded-lg text-xs border border-slate-300 font-mono-tech">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-1 w-1/2">
+                <span class="text-[9px] text-slate-400">会場:</span>
+                <input type="text" id="edit_venue_${originalIndex}" value="${record.venue || '不明'}" class="w-full p-1 bg-slate-50 text-slate-700 rounded text-xs border border-slate-300 font-bold">
+              </div>
+              <div class="flex items-center gap-1 w-1/2 justify-end">
+                <span class="text-[9px] text-slate-400">配当¥</span>
+                <input type="number" id="edit_payout_${originalIndex}" value="${record.payout > 0 ? record.payout : ''}" placeholder="0" class="w-24 p-1 text-right bg-slate-50 text-sky-700 rounded text-xs border border-slate-300 font-mono-tech">
+              </div>
             </div>
           </div>
         `;
@@ -569,22 +579,23 @@ AWAITING COMMAND EXECUTION...</div>
       html += '<button type="button" id="savePayoutsBtn" class="touch-btn mt-3 w-full bg-sky-600 hover:bg-sky-500 text-white py-2.5 rounded-xl text-xs font-bold uppercase shadow-md">上書き保存 [OVERWRITE]</button>';
       document.getElementById('outputArea').innerHTML = html + document.getElementById('outputArea').innerHTML;
       
-      // 動的に生成される保存ボタンにもタッチイベントを付与
       setTimeout(() => {
           bindTouchAction('savePayoutsBtn', savePayouts);
       }, 100);
 
-      logToTerminal("> 手動エディタ起動。リストから配当を直接入力・修正できます。");
+      logToTerminal("> 手動エディタ起動。会場名と配当を直接修正できます。");
     }
 
     function savePayouts() {
       savedRecords.forEach((record, index) => {
+        const venueEl = document.getElementById(`edit_venue_${index}`);
+        if (venueEl) { record.venue = venueEl.value.trim() || '不明'; }
         const inputEl = document.getElementById(`edit_payout_${index}`);
         if (inputEl) { const val = parseInt(inputEl.value, 10); record.payout = (!isNaN(val) && val >= 0) ? val : 0; }
       });
       localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
       updateCountDisplay(); runAnalysis();
-      logToTerminal("> DB更新完了。配当データが反映されました。", "success");
+      logToTerminal("> DB更新完了。会場名と配当が反映されました。", "success");
       playBeep(880, 'sine', 0.15);
     }
 
