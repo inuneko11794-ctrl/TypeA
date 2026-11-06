@@ -133,7 +133,7 @@
       <div class="xl:col-span-4 flex flex-col gap-5">
         <div class="glass-panel p-5 rounded-2xl">
           
-          <!-- 新設：チカチカ手入力モード起動ボタン -->
+          <!-- 手動入力モード起動ボタン -->
           <button type="button" id="openManualBtn" class="touch-btn chika-border border-4 border-black bg-white text-black font-black py-3 px-4 mb-6 w-full flex justify-between items-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-slate-100 transition-colors">
             <span class="tracking-widest uppercase chika-text">⚡ 手動入力モード (ULTRA WHITE)</span>
             <span>▶</span>
@@ -400,7 +400,7 @@ AWAITING COMMAND EXECUTION...</div>
         return;
       }
 
-      // 差分計算ロジック（既存システム互換）
+      // 差分計算ロジック
       const diff1 = Math.abs(c1 - c2);
       const diff2 = Math.abs(c2 - c3);
       let diffPatternKey = `${diff1}-${diff2}`;
@@ -440,7 +440,6 @@ AWAITING COMMAND EXECUTION...</div>
     }
     // -------------------------
 
-    
     function logToTerminal(msg, type="info") {
         const out = document.getElementById('outputArea');
         const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' });
@@ -490,11 +489,15 @@ AWAITING COMMAND EXECUTION...</div>
       let extractedCount = 0;
       
       let globalVenue = "不明";
-      // 解析用にもリアル43場を利用
-      for(let v of REAL_VENUES) {
-          if(inputData.includes(v)) {
-              globalVenue = v;
-              break;
+      
+      // 全文検索をやめ、「〇〇1R」の形から会場名を正確に抽出
+      const titleMatch = inputData.match(/([一-龠]{2,3})\s?(\d+)R/);
+      if (titleMatch) {
+          for (let v of REAL_VENUES) {
+              if (titleMatch[1].includes(v)) {
+                  globalVenue = v;
+                  break;
+              }
           }
       }
 
@@ -505,14 +508,19 @@ AWAITING COMMAND EXECUTION...</div>
           let venue = globalVenue; 
           let raceName = "UNKNOWN";
           
-          const raceMatch = block.match(/(\d+R)/);
-          if (raceMatch) raceName = raceMatch[1];
-          
-          for(let v of REAL_VENUES) {
-              if(block.includes(v)) {
-                  venue = v;
-                  break;
+          // 各ブロック内でも「〇〇nR」から会場・レースを特定
+          const headerMatch = block.match(/([一-龠]{2,3})\s?(\d+)R/);
+          if (headerMatch) {
+              raceName = headerMatch[2] + "R";
+              for (let v of REAL_VENUES) {
+                  if (headerMatch[1].includes(v)) {
+                      venue = v;
+                      break;
+                  }
               }
+          } else {
+              const raceMatch = block.match(/(\d+R)/);
+              if (raceMatch) raceName = raceMatch[1];
           }
 
           const hasGirls = block.includes("ガールズ") || block.includes("L級");
@@ -614,7 +622,7 @@ AWAITING COMMAND EXECUTION...</div>
             logToTerminal("> 警告: 一致する未入力の配当データが見つかりませんでした。", "error"); 
             playBeep(220, 'sawtooth', 0.15);
         }
-        }
+    }
 
     function deepScan7Car() {
         const data7 = savedRecords.filter(r => r.category === "7車");
@@ -823,6 +831,3 @@ AWAITING COMMAND EXECUTION...</div>
 </body>
 </html>
 
-
-
-    
