@@ -108,9 +108,17 @@
       blocks.forEach(block => {
           if(!block.trim()) return;
           
+          let venue = "不明";
           let raceName = "不明";
+          
           const raceMatch = block.match(/([^\s#]*?\d+R)/);
-          if (raceMatch) raceName = raceMatch[1];
+          if (raceMatch) {
+              raceName = raceMatch[1];
+              const venueMatch = raceName.match(/^([^\dＲＲ]+)/);
+              if (venueMatch) {
+                  venue = venueMatch[1].replace('競輪レースデータ：', '').trim();
+              }
+          }
 
           let patternKey = null;
           let diffPatternKey = null;
@@ -155,6 +163,7 @@
               const exists = savedRecords.find(r => r.raceName === raceName && r.pattern === patternKey);
               if (!exists) {
                   const record = { 
+                      venue: venue,
                       raceName: raceName,
                       pattern: patternKey, 
                       diffPattern: diffPatternKey, 
@@ -164,7 +173,7 @@
                   };
                   savedRecords.push(record);
                   extractedCount++;
-                  logText += `・[${raceName}] 抽出完了\n`;
+                  logText += `・[${venue} / ${raceName}] 抽出完了\n`;
               } else {
                   logText += `・[${raceName}] スキップ (登録済み)\n`;
               }
@@ -211,7 +220,7 @@
                         const genericMatch = searchArea.match(/配当.*?(\d{1,3}(?:,\d{3})*|\d+)円/);
                         if (genericMatch) {
                             const moneyStr = genericMatch[1].replace(/,/g, '');
-                            record.payout = parseInt(moneyStr, 10);
+                            record.payout = parseInt(genericMatch, 10);
                             updatedCount++;
                             logText += `・[${record.raceName}] 配当反映(汎用): ${record.payout.toLocaleString()}円\n`;
                         }
@@ -279,6 +288,7 @@
         return;
       }
 
+      const venueAnalysisMap = {}; 
       const diffAnalysisMap = {}; 
       const analysisMap = {}; 
       let totalRaces = 0;
@@ -287,6 +297,11 @@
       savedRecords.forEach(record => {
         totalRaces++;
         if (record.payout > 0) racesWithPayout++;
+
+        const venue = record.venue || "不明";
+        if (!venueAnalysisMap[venue]) venueAnalysisMap[venue] = { count: 0, payouts: [] };
+        venueAnalysisMap[venue].count++;
+        if (record.payout > 0) venueAnalysisMap[venue].payouts.push(record.payout);
 
         if (record.diffPattern) {
             if (!diffAnalysisMap[record.diffPattern]) diffAnalysisMap[record.diffPattern] = { count: 0, payouts: [] };
@@ -302,7 +317,28 @@
 
       let resultText = `【分析サマリー】 (全${totalRaces}R中 / 配当入力済:${racesWithPayout}R)\n`;
       resultText += `===========================================\n`;
-      resultText += `▼ 分析①: 車番差分の構成パターン\n`;
+      resultText += `▼ 分析①: 会場（競輪場）別の配当傾向\n`;
+      resultText += `===========================================\n`;
+
+      const venueKeys = Object.keys(venueAnalysisMap).sort();
+      venueKeys.forEach(key => {
+        const data = venueAnalysisMap[key];
+        const payouts = data.payouts;
+        resultText += `■ 会場 [${key}]\n`;
+        resultText += `・開催数 : ${data.count} レース\n`;
+        if (payouts.length > 0) {
+            const avgPayout = Math.round(payouts.reduce((sum, val) => sum + val, 0) / payouts.length);
+            const maxPayout = Math.max(...payouts);
+            resultText += `・平均配当 : ${avgPayout.toLocaleString()} 円 (入力済:${payouts.length})\n`;
+            if (payouts.length > 1) resultText += `・最高配当 : ${maxPayout.toLocaleString()} 円\n`;
+        } else {
+            resultText += `・平均配当 : データなし\n`;
+        }
+        resultText += `\n`;
+      });
+      
+      resultText += `===========================================\n`;
+      resultText += `▼ 分析②: 車番差分の構成パターン\n`;
       resultText += `===========================================\n`;
       
       const diffKeys = Object.keys(diffAnalysisMap).sort();
@@ -324,7 +360,7 @@
       });
 
       resultText += `===========================================\n`;
-      resultText += `▼ 分析②: 先頭並びパターン\n`;
+      resultText += `▼ 分析③: 先頭並びパターン\n`;
       resultText += `===========================================\n`;
 
       const keys = Object.keys(analysisMap).sort();
@@ -359,7 +395,7 @@
       URL.revokeObjectURL(url);
     }
 
-    function importData(event) {
+    window.importData = function(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
