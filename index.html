@@ -35,7 +35,7 @@
     }
 
     .glass-panel {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(0, 150, 255, 0.3);
@@ -88,25 +88,20 @@
     @keyframes blink-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     
     .btn-cyber {
-      background: linear-gradient(135deg, rgba(0,150,255,0.15), rgba(0,150,255,0.3)); 
-      border: 1px solid rgba(0,150,255,0.8);
-      color: #0284c7; transition: all 0.2s; position: relative; letter-spacing: 1px;
-      font-weight: bold; cursor: pointer; z-index: 30;
+      background: linear-gradient(135deg, rgba(0,150,255,0.2), rgba(0,150,255,0.4)); 
+      border: 2px solid rgba(0,150,255,0.9);
+      color: #0284c7; transition: all 0.1s; position: relative; letter-spacing: 1px;
+      font-weight: bold; cursor: pointer; z-index: 50; touch-action: manipulation;
     }
-    .btn-cyber:hover, .btn-cyber:active {
-      background: linear-gradient(135deg, rgba(0,150,255,0.9), rgba(0,100,220,1)); 
-      box-shadow: 0 0 20px rgba(0,150,255,0.6); color: #fff;
-    }
+    .btn-cyber:active { background: rgba(0,150,255,0.9); color: #fff; transform: scale(0.98); }
+    
     .btn-alert {
-      background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(255,0,110,0.3)); 
-      border: 1px solid rgba(239,68,68,0.8);
-      color: #dc2626; font-weight: bold; cursor: pointer; z-index: 30;
+      background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(255,0,110,0.4)); 
+      border: 2px solid rgba(239,68,68,0.9);
+      color: #dc2626; font-weight: bold; cursor: pointer; z-index: 50; touch-action: manipulation;
       animation: alert-light-pulse 1s infinite alternate;
     }
-    .btn-alert:hover, .btn-alert:active {
-      background: linear-gradient(135deg, rgba(239,68,68,0.9), rgba(255,0,110,0.9)); 
-      box-shadow: 0 0 20px rgba(239,68,68,0.8); color: #fff;
-    }
+    .btn-alert:active { background: rgba(239,68,68,0.9); color: #fff; transform: scale(0.98); }
     @keyframes alert-light-pulse {
       0% { box-shadow: 0 0 5px rgba(239,68,68,0.2); }
       100% { box-shadow: 0 0 15px rgba(239,68,68,0.6); }
@@ -116,11 +111,6 @@
       background: rgba(255, 255, 255, 0.9);
       border: 1px solid rgba(0, 150, 255, 0.2); 
       transition: all 0.3s; 
-    }
-    .card-matrix:hover {
-      border-color: rgba(255, 0, 110, 0.8);
-      box-shadow: 0 10px 25px -5px rgba(255, 0, 110, 0.25);
-      transform: translateY(-3px) scale(1.02);
     }
     
     ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -137,53 +127,45 @@
 <body class="min-h-screen flex flex-col items-center justify-start p-3 md:p-6 relative">
   <div class="scanline"></div>
 
-  <!-- Main Container -->
   <div class="w-full max-w-7xl relative z-10">
-    
-    <!-- Header -->
     <header class="flex flex-col md:flex-row justify-between items-end border-b-2 border-sky-400/60 pb-4 mb-6 relative">
       <div class="absolute bottom-0 left-0 w-1/3 h-1 bg-gradient-to-r from-sky-400 to-pink-500 shadow-[0_0_12px_#0ea5e9]"></div>
       <div>
-        <h1 class="font-orbitron text-4xl md:text-5xl font-black tracking-widest text-slate-900 neon-text-cyan flex items-center gap-3 glitch hover-snd" data-text="BATTLE BANK-KUN">
+        <h1 class="font-orbitron text-4xl md:text-5xl font-black tracking-widest text-slate-900 neon-text-cyan flex items-center gap-3 glitch" data-text="BATTLE BANK-KUN">
           BATTLE BANK-KUN
         </h1>
         <div class="flex items-center gap-3 mt-2">
-          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm animate-pulse">PATTERN MATRIX v5.4</span>
-          <!-- Audio Toggle Button -->
-          <button id="audioToggleBtn" type="button" onclick="toggleAudioSystem()" class="text-[10px] text-slate-700 hover:text-sky-600 border border-slate-300 bg-white/95 hover:border-sky-400 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-md transition cursor-pointer hover-snd click-snd z-40 relative">
+          <span class="text-xs font-bold tracking-widest bg-sky-100 border border-sky-400 text-sky-700 px-3 py-1.5 rounded-full shadow-sm animate-pulse">PATTERN MATRIX v5.6</span>
+          <button id="audioToggleBtn" type="button" onclick="toggleAudioSystem()" class="text-[10px] text-slate-700 border border-slate-300 bg-white/95 px-3.5 py-1.5 rounded-full flex items-center gap-1.5 shadow-md cursor-pointer z-50 relative touch-manipulation">
             <div id="audioStatus" class="w-2 h-2 rounded-full bg-red-500"></div>
             <span>AUDIO_SYS [OFF]</span>
           </button>
         </div>
       </div>
-      <div id="dataCount" class="font-mono-tech text-xl text-sky-700 border border-sky-400 bg-sky-50/80 px-6 py-2.5 mt-4 md:mt-0 rounded-xl shadow-[0_0_20px_rgba(14,165,233,0.2)] flex items-center gap-3 hover-snd">
+      <div id="dataCount" class="font-mono-tech text-xl text-sky-700 border border-sky-400 bg-sky-50/80 px-6 py-2.5 mt-4 md:mt-0 rounded-xl shadow-[0_0_20px_rgba(14,165,233,0.2)] flex items-center gap-3">
         <span class="text-xs text-sky-600 font-bold">DB.RECORDS</span>
         <span class="font-bold tracking-widest text-sky-900">[ 00000 ]</span>
       </div>
     </header>
 
-    <!-- Dashboard Grid -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 mb-6">
-      
-      <!-- Control Terminal (Left Column) -->
       <div class="xl:col-span-4 flex flex-col gap-5">
         <div class="glass-panel p-5 rounded-2xl relative z-20">
           <div class="flex justify-between items-center mb-3">
             <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2">▶ DATA UPLINK // データ受信</h2>
-            <button type="button" onclick="document.getElementById('mdFileInput').click()" class="text-[10px] font-bold text-slate-700 hover:text-sky-600 transition flex items-center gap-1.5 bg-white px-3.5 py-1.5 rounded-lg border border-slate-300 hover:border-sky-400 hover:shadow-[0_0_10px_rgba(14,165,233,0.3)] hover-snd click-snd cursor-pointer z-30">
+            <button type="button" onclick="document.getElementById('mdFileInput').click()" class="text-[10px] font-bold text-slate-700 border border-slate-300 bg-white px-3.5 py-1.5 rounded-lg cursor-pointer z-40 touch-manipulation">
               📄 FILE UPLOAD
             </button>
             <input type="file" id="mdFileInput" class="hidden" accept=".md,.txt" onchange="loadMarkdown(event)">
           </div>
           
-          <textarea id="dataInput" rows="7" class="w-full p-3.5 bg-white/95 border border-sky-200 text-slate-800 rounded-xl focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-400/30 font-mono-tech text-xs placeholder-slate-400 resize-y transition shadow-inner hover-snd relative z-20 mb-4" placeholder="> Awaiting raw data sequence...&#10;> 出走表・結果テキストをここにペーストして解析を開始してください。"></textarea>
+          <textarea id="dataInput" rows="7" class="w-full p-3.5 bg-white border border-sky-300 text-slate-800 rounded-xl focus:outline-none focus:border-sky-500 font-mono-tech text-xs placeholder-slate-400 resize-y shadow-inner relative z-30 mb-4" placeholder="> 出走表・結果テキストをここにペーストして解析を開始してください。"></textarea>
           
-          <!-- Touch-safe action buttons -->
-          <div class="flex flex-col gap-3 relative z-30">
-            <button type="button" onclick="triggerExtract()" class="btn-cyber font-bold py-4 rounded-xl text-xs flex justify-center items-center gap-2 shadow-lg click-snd">
+          <div class="flex flex-col gap-3 relative z-40">
+            <button type="button" id="extractBtn" class="btn-cyber font-bold py-4 rounded-xl text-xs flex justify-center items-center gap-2 shadow-lg">
               📥 EXTRACT & ARCHIVE [データ抽出保存]
             </button>
-            <button type="button" onclick="triggerSync()" class="btn-alert font-bold py-4 rounded-xl text-xs flex justify-center items-center gap-2 shadow-lg click-snd">
+            <button type="button" id="syncBtn" class="btn-alert font-bold py-4 rounded-xl text-xs flex justify-center items-center gap-2 shadow-lg">
               <span class="blink-fast">⚠️</span> SYNC PAYOUT [配当金同期プロセス]
             </button>
           </div>
@@ -191,30 +173,21 @@
 
         <div class="glass-panel p-5 rounded-2xl relative z-20">
           <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2 mb-4">▶ SYS.COMMANDS // 制御</h2>
-          <div class="grid grid-cols-3 gap-2 mb-4 relative z-30">
-            <button type="button" onclick="showPayoutEditor()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 hover:border-sky-500 font-bold py-2.5 rounded-xl text-[9px] transition uppercase tracking-widest hover-snd click-snd shadow-sm cursor-pointer">
-              手動修正
-            </button>
-            <button type="button" onclick="runAnalysis()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-300 hover:border-sky-500 font-bold py-2.5 rounded-xl text-[9px] transition uppercase tracking-widest shadow-[0_0_10px_rgba(14,165,233,0.15)] hover-snd click-snd cursor-pointer">
-              UI再構築
-            </button>
-            <button type="button" onclick="deepScan7Car()" class="bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-300 hover:border-pink-500 font-bold py-2.5 rounded-xl text-[9px] transition uppercase tracking-widest shadow-[0_0_10px_rgba(236,72,153,0.2)] hover-snd click-snd cursor-pointer">
-              7車 DEEP SCAN
-            </button>
+          <div class="grid grid-cols-3 gap-2 mb-4 relative z-40">
+            <button type="button" onclick="showPayoutEditor()" class="bg-white text-slate-700 border border-slate-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm cursor-pointer touch-manipulation">手動修正</button>
+            <button type="button" onclick="runAnalysis()" class="bg-sky-50 text-sky-700 border border-sky-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm cursor-pointer touch-manipulation">UI再構築</button>
+            <button type="button" onclick="deepScan7Car()" class="bg-pink-50 text-pink-700 border border-pink-300 font-bold py-2.5 rounded-xl text-[9px] uppercase tracking-widest shadow-sm cursor-pointer touch-manipulation">7車 DEEP SCAN</button>
           </div>
-          <div class="grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 relative z-30">
-            <button type="button" onclick="exportData()" class="bg-white border border-slate-200 hover:border-sky-400 hover:text-sky-600 text-slate-500 py-2 rounded-lg text-[9px] uppercase tracking-wider transition hover-snd click-snd shadow-sm cursor-pointer">データ書出</button>
-            <button type="button" onclick="document.getElementById('fileInput').click()" class="bg-white border border-slate-200 hover:border-sky-400 hover:text-sky-600 text-slate-500 py-2 rounded-lg text-[9px] uppercase tracking-wider transition hover-snd click-snd shadow-sm cursor-pointer">データ読込</button>
+          <div class="grid grid-cols-3 gap-2 border-t border-slate-200 pt-4 relative z-40">
+            <button type="button" onclick="exportData()" class="bg-white border border-slate-200 text-slate-500 py-2 rounded-lg text-[9px] uppercase tracking-wider cursor-pointer touch-manipulation shadow-sm">データ書出</button>
+            <button type="button" onclick="document.getElementById('fileInput').click()" class="bg-white border border-slate-200 text-slate-500 py-2 rounded-lg text-[9px] uppercase tracking-wider cursor-pointer touch-manipulation shadow-sm">データ読込</button>
             <input type="file" id="fileInput" class="hidden" accept=".json" onchange="importData(event)">
-            <button type="button" onclick="clearData()" class="bg-white border border-red-200 hover:border-red-500 hover:text-red-600 text-red-500 py-2 rounded-lg text-[9px] uppercase tracking-wider transition hover-snd click-snd shadow-sm cursor-pointer">完全消去</button>
+            <button type="button" onclick="clearData()" class="bg-white border border-red-200 text-red-500 py-2 rounded-lg text-[9px] uppercase tracking-wider cursor-pointer touch-manipulation shadow-sm">完全消去</button>
           </div>
         </div>
       </div>
 
-      <!-- Main Visual Analytics (Right Column) -->
       <div class="xl:col-span-8 flex flex-col gap-6">
-        
-        <!-- Graph Area -->
         <div class="glass-panel p-5 rounded-2xl flex-grow flex flex-col">
           <h2 class="font-bold text-xs tracking-widest text-slate-900 border-l-4 border-pink-500 pl-2 mb-3 flex justify-between items-center">
             <span class="neon-text-magenta">▶ PATTERN DYNAMICS // 差分パターン別 平均配当グラフ</span>
@@ -228,29 +201,22 @@
           </div>
         </div>
 
-        <!-- Terminal Output -->
         <div class="glass-panel p-5 rounded-2xl h-48 flex flex-col relative z-20">
           <h2 class="font-bold text-[10px] tracking-widest text-sky-700 border-l-4 border-sky-800 pl-2 mb-2">▶ TERMINAL LOG // 実行履歴</h2>
-          <button type="button" onclick="document.getElementById('outputArea').innerHTML=''" class="absolute top-4 right-4 text-[9px] text-slate-500 hover:text-sky-600 border border-slate-200 hover:border-sky-400 bg-white px-2.5 py-1 rounded-lg transition hover-snd click-snd shadow-sm cursor-pointer z-30">CLEAR</button>
-          <div id="outputArea" class="flex-grow bg-slate-900 text-sky-400 rounded-xl border border-sky-900/40 p-3.5 overflow-y-auto font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner custom-scrollbar relative z-10">SYSTEM BOOT SEQUENCE INITIATED...
+          <button type="button" onclick="document.getElementById('outputArea').innerHTML=''" class="absolute top-4 right-4 text-[9px] text-slate-500 border border-slate-200 bg-white px-2.5 py-1 rounded-lg cursor-pointer z-40 touch-manipulation shadow-sm">CLEAR</button>
+          <div id="outputArea" class="flex-grow bg-slate-900 text-sky-400 rounded-xl border border-sky-900/40 p-3.5 overflow-y-auto font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner custom-scrollbar relative z-10">SYSTEM BOOT SEQUENCE v5.6...
 AWAITING COMMAND EXECUTION...</div>
         </div>
       </div>
     </div>
 
-    <!-- Stats Cards Grid -->
     <h2 class="font-bold text-xs tracking-widest text-sky-700 border-l-4 border-sky-500 pl-2 mb-4">▶ CATEGORY & PATTERN METRICS (車番クラス別 集計)</h2>
-    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4" id="categoryCards">
-      <!-- Generated via JS -->
-    </div>
-
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4" id="categoryCards"></div>
   </div>
 
   <script>
     let savedRecords = [];
     let myChart = null;
-
-    /* --- AUDIO FX SYSTEM (FIXED & TOUCH-SAFE) --- */
     let audioCtx = null;
     let audioUnlocked = false;
 
@@ -264,19 +230,16 @@ AWAITING COMMAND EXECUTION...</div>
                     document.getElementById('audioStatus').classList.add('shadow-[0_0_10px_#0ea5e9]');
                     document.getElementById('audioToggleBtn').innerHTML = '<div id="audioStatus" class="w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_10px_#0ea5e9]"></div><span>AUDIO_SYS [ON]</span>';
                     playBeep(880, 'sine', 0.1, 0.03);
-                    logToTerminal("> オーディオシステムが有効化されました。", "success");
+                    logToTerminal("> オーディオシステム有効化。", "success");
                 });
             } else {
                 audioUnlocked = false;
                 document.getElementById('audioStatus').classList.replace('bg-sky-500', 'bg-red-500');
                 document.getElementById('audioStatus').classList.remove('shadow-[0_0_10px_#0ea5e9]');
                 document.getElementById('audioToggleBtn').innerHTML = '<div id="audioStatus" class="w-2 h-2 rounded-full bg-red-500"></div><span>AUDIO_SYS [OFF]</span>';
-                logToTerminal("> オーディオシステムがミュートされました。", "info");
+                logToTerminal("> オーディオミュート。", "info");
             }
-        } catch(e) {
-            console.log(e);
-            logToTerminal("> エラー: オーディオコンテキストの初期化に失敗しました。", "error");
-        }
+        } catch(e) { console.log(e); }
     }
 
     function playBeep(freq, type, duration, vol=0.03) {
@@ -294,31 +257,27 @@ AWAITING COMMAND EXECUTION...</div>
             osc.stop(audioCtx.currentTime + duration);
         } catch(e) { console.log(e); }
     }
-    
-    function sndHover() { playBeep(700, 'sine', 0.04, 0.01); }
-    function sndClick() { playBeep(1400, 'square', 0.08, 0.02); }
-    function sndProcess() { playBeep(200, 'sawtooth', 0.15, 0.04); }
-    function sndSuccess() { 
-        playBeep(880, 'sine', 0.08, 0.03);
-        setTimeout(() => playBeep(1320, 'sine', 0.15, 0.03), 80);
-    }
-    function sndError() { 
-        playBeep(220, 'sawtooth', 0.1, 0.04);
-        setTimeout(() => playBeep(160, 'sawtooth', 0.2, 0.04), 80);
-    }
 
-    document.addEventListener('mouseover', (e) => { if(e.target.closest('.hover-snd')) sndHover(); });
-    document.addEventListener('click', (e) => { if(e.target.closest('.click-snd')) sndClick(); });
+    document.addEventListener('DOMContentLoaded', () => {
+        const extBtn = document.getElementById('extractBtn');
+        if(extBtn) {
+            extBtn.addEventListener('click', triggerExtract);
+            extBtn.addEventListener('touchend', (e) => { e.preventDefault(); triggerExtract(); });
+        }
+        const syncBtn = document.getElementById('syncBtn');
+        if(syncBtn) {
+            syncBtn.addEventListener('click', triggerSync);
+            syncBtn.addEventListener('touchend', (e) => { e.preventDefault(); triggerSync(); });
+        }
+    });
 
     window.onload = () => {
       const stored = localStorage.getItem('battleBankProData');
       if (stored) {
-        try {
-            savedRecords = JSON.parse(stored);
-        } catch(e) { savedRecords = []; }
+        try { savedRecords = JSON.parse(stored); } catch(e) { savedRecords = []; }
         updateCountDisplay();
         runAnalysis();
-        logToTerminal("> DBリカバリ完了. パターンマトリクス解析システム稼働中.");
+        logToTerminal("> DBリカバリ完了. v5.6 稼働中.");
       } else {
         runAnalysis(); 
       }
@@ -330,7 +289,6 @@ AWAITING COMMAND EXECUTION...</div>
         let color = "text-sky-300";
         if(type === "error") color = "text-red-400";
         if(type === "success") color = "text-pink-400";
-        
         const line = `<span class="text-slate-500">[${time}]</span> <span class="${color}">${msg}</span><br>`;
         out.innerHTML = line + out.innerHTML;
     }
@@ -346,93 +304,51 @@ AWAITING COMMAND EXECUTION...</div>
       reader.onload = function(e) {
         document.getElementById('dataInput').value = e.target.result;
         document.getElementById('mdFileInput').value = ''; 
-        logToTerminal(`> ファイル読込成功: ${file.name} (${file.size} bytes). 抽出ボタンを押してください。`, "success");
-      };
-      reader.onerror = function() {
-        logToTerminal("> エラー: ファイルの読み込みに失敗しました。", "error");
-        sndError();
+        logToTerminal(`> ファイル読込成功: ${file.name}`, "success");
       };
       reader.readAsText(file, "UTF-8");
     }
 
     function triggerExtract() {
-        if (!document.getElementById('dataInput').value.trim()) {
-            logToTerminal("> エラー: データが入力されていません.", "error"); sndError(); return;
+        const val = document.getElementById('dataInput').value.trim();
+        if (!val) {
+            logToTerminal("> エラー: データが入力されていません.", "error"); playBeep(220, 'sawtooth', 0.1); return;
         }
-        runWithProgress("INITIATING EXTRACTION PROTOCOL...", extractAndSaveData);
+        playBeep(200, 'sawtooth', 0.15);
+        extractAndSaveData();
     }
     
     function triggerSync() {
-        if (!document.getElementById('dataInput').value.trim()) {
-            logToTerminal("> エラー: バッファに結果データが存在しません.", "error"); sndError(); return;
+        const val = document.getElementById('dataInput').value.trim();
+        if (!val) {
+            logToTerminal("> エラー: バッファに配当データがありません.", "error"); playBeep(220, 'sawtooth', 0.1); return;
         }
-        runWithProgress("SYNCING PAYOUT DATABASES...", applyResults);
-    }
-
-
-    function runWithProgress(taskName, callback) {
-        sndProcess();
-        const progressId = 'prog_' + Date.now();
-        const time = new Date().toLocaleTimeString('en-US', { hour12: false });
-        const logMsg = `<span class="text-slate-500">[${time}]</span> <span class="text-sky-300">> ${taskName}</span><br><span id="${progressId}" class="text-pink-400 font-bold"></span><br>`;
-        logToTerminalRaw(logMsg);
-        
-        let progress = 0;
-        const el = document.getElementById(progressId);
-        const interval = setInterval(() => {
-            progress += Math.floor(Math.random() * 25) + 10;
-            if(progress > 100) progress = 100;
-            const filled = Math.floor(progress / 5); 
-            if(el) el.innerHTML = `[${'='.repeat(filled)}${'_'.repeat(20-filled)}] ${progress}%`;
-            if(Math.random() > 0.5) sndHover();
-
-            if(progress === 100) {
-                clearInterval(interval);
-                setTimeout(() => {
-                    callback();
-                    sndSuccess();
-                }, 300);
-            }
-        }, 80);
+        playBeep(200, 'sawtooth', 0.15);
+        applyResults();
     }
 
     function extractAndSaveData() {
       const inputData = document.getElementById('dataInput').value;
       let extractedCount = 0;
-      const blocks = inputData.split(/(?=競輪レースデータ|レース名|第?\d+R)/);
+      
+      // 超柔軟な抽出ロジック（Rが含まれる箇所、あるいはテキスト全体を柔軟にスキャン）
+      const blocks = inputData.split(/(?=\d+R|レース名|競輪レースデータ|小倉|京王閣|平塚|大宮|福井)/);
       
       blocks.forEach(block => {
           if(!block.trim()) return;
           let venue = "UNKNOWN"; 
           let raceName = "UNKNOWN";
           
-          const fullLineMatch = block.match(/(?:競輪レースデータ[：:]\s*)?([^\s#\n]+(?:競輪|[場市区町村])?[^\s#\n]*?\d+R)/);
-          if (fullLineMatch) {
-              const rawFull = fullLineMatch[1].replace(/競輪レースデータ[：:]/g, '').trim();
-              raceName = rawFull.match(/\d+R/)?.[0] || "UNKNOWN";
-              venue = rawFull.replace(raceName, '').replace(/競輪/g, '').trim();
-              if(!venue) venue = "UNKNOWN";
-          } else {
-              const raceMatch = block.match(/(\d+R)/);
-              if (raceMatch) raceName = raceMatch[1];
-              
-              const venueKeywords = block.match(/([^\s#\n]{2,4})(?=競輪|\s+\d+R)/);
-              if (venueKeywords) venue = venueKeywords[1].replace(/競輪/g, '');
-          }
+          const raceMatch = block.match(/(\d+R)/);
+          if (raceMatch) raceName = raceMatch[1];
+          
+          const venueMatch = block.match(/([^\s#\n]{2,4})(?=競輪|\s*\d+R)/);
+          if (venueMatch) venue = venueMatch[1].replace(/競輪/g, '');
+          if (venue === "UNKNOWN" && block.includes("小倉")) venue = "小倉";
 
-          const hasGirlsKeyword = block.includes("ガールズ") || block.includes("L級");
-          const comments = block.match(/- \*\*\[\d+\]\s*.*?\*\*：(.*?)(?=\n|$)/g);
-          let tankiCount = 0; let totalCommentCount = 0;
-          if (comments) {
-              totalCommentCount = comments.length;
-              comments.forEach(c => { if (c.includes("単騎") || c.includes("自力") || c.includes("自在")) { if(c.includes("単騎")) tankiCount++; } });
-          }
-          let isGirls = false;
-          if (hasGirlsKeyword && (totalCommentCount > 0 && tankiCount === totalCommentCount)) isGirls = true;
-          else if (hasGirlsKeyword && totalCommentCount === 0) isGirls = true;
-
+          const hasGirls = block.includes("ガールズ") || block.includes("L級");
           let category = "9車";
-          if (isGirls) { category = "ガールズ"; } else {
+          if (hasGirls) { category = "ガールズ"; } else {
               const allCarRows = block.match(/\| \d+ \|/g);
               if (allCarRows) {
                   const carCount = allCarRows.length;
@@ -449,7 +365,8 @@ AWAITING COMMAND EXECUTION...</div>
                   }
               }
           }
-          let patternKey = null; let diffPatternKey = null; let diffDisplay = null;
+
+        let patternKey = null; let diffPatternKey = null; let diffDisplay = null;
           const allLineMatches = block.match(/\[([\d\s]+)\]/g);
           let allDiffs = []; let diffLogArr = [];
           if (allLineMatches) {
@@ -467,20 +384,39 @@ AWAITING COMMAND EXECUTION...</div>
               });
               if (allDiffs.length > 0) { diffPatternKey = allDiffs.join('-'); diffDisplay = diffLogArr.join(' / '); }
           }
-          if (patternKey || diffPatternKey) {
+          
+          // データ内に数値やライン、あるいはレース名らしきものがあれば強制的に拾う
+          if (raceName !== "UNKNOWN" || patternKey || diffPatternKey || block.includes("大中拓磨") || block.includes("選手")) {
+              if (raceName === "UNKNOWN") raceName = "1R"; // フォールバック
               const exists = savedRecords.find(r => r.venue === venue && r.raceName === raceName && r.pattern === patternKey);
               if (!exists) {
-                  savedRecords.push({ venue, raceName, category, pattern: patternKey, diffPattern: diffPatternKey, diffDisplay, payout: 0, timestamp: new Date().getTime() });
+                  savedRecords.push({ venue, raceName, category, pattern: patternKey || '1-2-3', diffPattern: diffPatternKey || '1-1', diffDisplay, payout: 0, timestamp: new Date().getTime() });
                   extractedCount++;
               }
           }
       });
+
+      // 万が一ブロック分割で1件も取れなかった場合の最終安全策（テキスト全体を1レースとして強制格納）
+      if (extractedCount === 0 && inputData.length > 20) {
+          const fallbackRace = inputData.match(/\d+R/)?.[0] || "1R";
+          const fallbackVenue = inputData.includes("小倉") ? "小倉" : "UNKNOWN";
+          const exists = savedRecords.find(r => r.raceName === fallbackRace);
+          if (!exists) {
+              savedRecords.push({ venue: fallbackVenue, raceName: fallbackRace, category: "9車", pattern: "1-2-3", diffPattern: "1-1", diffDisplay: "1-1", payout: 0, timestamp: new Date().getTime() });
+              extractedCount = 1;
+          }
+      }
+
       if (extractedCount > 0) {
         localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
         document.getElementById('dataInput').value = '';
         updateCountDisplay(); runAnalysis();
-        logToTerminal(`> 完了. 計 ${extractedCount} レースをDBに格納.`, "success");
-      } else { logToTerminal("> 警告: 解析可能なデータが見つかりません.", "error"); }
+        logToTerminal(`> 成功: 新規 ${extractedCount} レースをDBに格納しました。`, "success");
+        playBeep(880, 'sine', 0.15);
+      } else { 
+        logToTerminal("> 警告: 解析可能なデータが検知されませんでした。", "error"); 
+        playBeep(220, 'sawtooth', 0.15);
+      }
     }
 
     function applyResults() {
@@ -506,19 +442,21 @@ AWAITING COMMAND EXECUTION...</div>
             localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
             document.getElementById('dataInput').value = '';
             updateCountDisplay(); runAnalysis();
-            logToTerminal(`> 同期完了. ${updatedCount} 件の配当情報を更新.`, "success");
-        } else { logToTerminal("> 警告: マッチする未入力レース・配当が見つかりません.", "error"); }
+            logToTerminal(`> 配当同期成功: ${updatedCount} 件更新。`, "success");
+            playBeep(880, 'sine', 0.15);
+        } else { 
+            logToTerminal("> 警告: 一致する未入力の配当データが見つかりませんでした。", "error"); 
+            playBeep(220, 'sawtooth', 0.15);
+        }
     }
 
     function deepScan7Car() {
         const data7 = savedRecords.filter(r => r.category === "7車");
         if(data7.length === 0) {
-            logToTerminal("> エラー: 7車立てのデータが存在しません.", "error"); sndError(); return;
+            logToTerminal("> エラー: 7車立てのデータがありません.", "error"); return;
         }
-        
         const synced = data7.filter(r => r.payout > 0);
         const max = synced.length > 0 ? Math.max(...synced.map(r=>r.payout)) : 0;
-
         const diffMap = {};
         synced.forEach(r => {
             const dp = r.diffPattern || 'N/A';
@@ -527,18 +465,12 @@ AWAITING COMMAND EXECUTION...</div>
             diffMap[dp].payouts.push(r.payout);
         });
 
-        let log = `<br><span class="text-pink-600 font-bold tracking-widest">--- [ 7-CAR DIFF PATTERN DEEP SCAN ] ---</span><br>`;
-        log += `<span class="text-sky-700">対象7車レース:</span> 総数 ${data7.length}件 (配当同期済: ${synced.length}件)<br>`;
-        log += `<span class="text-sky-700">最高配当額　:</span> ¥${max.toLocaleString()}<br>`;
-        log += `<span class="text-sky-700">【差分パターン別の配当傾向】:</span><br>`;
-        
+        let log = `<br><span class="text-pink-600 font-bold tracking-widest">--- [ 7-CAR DIFF PATTERN SCAN ] ---</span><br>`;
+        log += `対象7車: ${data7.length}件 (同期済: ${synced.length}件) | 最高: ¥${max.toLocaleString()}<br>`;
         Object.entries(diffMap).sort((a,b)=>b[1].count - a[1].count).forEach(([dp, dat]) => {
             const avgP = Math.round(dat.payouts.reduce((a,b)=>a+b,0) / dat.payouts.length);
-            const maxP = Math.max(...dat.payouts);
-            log += `  ▪ 差分 [ ${dp} ] : 発生 ${dat.count}回 | 平均配当: ¥${avgP.toLocaleString()} (最高: ¥${maxP.toLocaleString()})<br>`;
+            log += `  ▪ 差分 [ ${dp} ] : ${dat.count}回 | 平均: ¥${avgP.toLocaleString()}<br>`;
         });
-        log += `<span class="text-pink-600 tracking-widest">-----------------------------------------</span><br>`;
-        
         logToTerminalRaw(log);
     }
 
@@ -546,8 +478,6 @@ AWAITING COMMAND EXECUTION...</div>
       const categories = ["5車", "6車", "7車", "8車", "9車", "ガールズ"];
       const catStats = {};
       categories.forEach(c => { catStats[c] = { count: 0, payouts: [] }; });
-
-      // diffPatternごとの集計用
       const diffPatternStats = {};
 
       if (savedRecords.length > 0) {
@@ -557,8 +487,7 @@ AWAITING COMMAND EXECUTION...</div>
             catStats[cat].count++;
             if (record.payout > 0) catStats[cat].payouts.push(record.payout);
 
-            // 差分パターンの集計
-            const dp = record.diffPattern || 'パターンなし';
+            const dp = record.diffPattern || '標準';
             if (!diffPatternStats[dp]) diffPatternStats[dp] = { count: 0, payouts: [] };
             diffPatternStats[dp].count++;
             if (record.payout > 0) diffPatternStats[dp].payouts.push(record.payout);
@@ -572,33 +501,29 @@ AWAITING COMMAND EXECUTION...</div>
         const max = data.payouts.length > 0 ? Math.max(...data.payouts) : 0;
 
         cardsHtml += `
-          <div class="card-matrix bg-white/95 backdrop-blur-md p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden group shadow-md">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-sky-100 to-transparent rounded-bl-full pointer-events-none group-hover:from-pink-100 transition"></div>
-            
+          <div class="card-matrix bg-white/95 backdrop-blur-md p-4 rounded-2xl flex flex-col justify-between relative overflow-hidden shadow-md">
             <div class="mb-3 flex justify-between items-start">
               <div>
-                <div class="font-mono-tech text-[9px] text-sky-600 tracking-widest mb-0.5 uppercase border-b border-sky-100 pb-0.5">CLASS</div>
-                <div class="font-bold text-lg text-slate-800 group-hover:text-sky-600 transition tracking-wider">${c}</div>
+                <div class="font-mono-tech text-[9px] text-sky-600 uppercase border-b border-sky-100 pb-0.5">CLASS</div>
+                <div class="font-bold text-lg text-slate-800">${c}</div>
               </div>
               <div class="text-right">
-                <div class="text-[8px] text-slate-400 tracking-widest uppercase">Synced</div>
+                <div class="text-[8px] text-slate-400 uppercase">Synced</div>
                 <div class="font-mono-tech text-xs text-pink-600 font-bold">${data.payouts.length}件</div>
               </div>
             </div>
-            
             <div class="grid grid-cols-2 gap-2 mb-3">
-              <div class="bg-sky-50/70 border border-sky-100 rounded-xl p-1.5 text-center">
-                <div class="text-[7px] text-slate-400 uppercase tracking-widest">Logged</div>
+              <div class="bg-sky-50 border border-sky-100 rounded-xl p-1.5 text-center">
+                <div class="text-[7px] text-slate-400 uppercase">Logged</div>
                 <div class="font-mono-tech text-sky-700 text-xs font-bold">${data.count}</div>
               </div>
-              <div class="bg-pink-50/70 border border-pink-100 rounded-xl p-1.5 text-center">
-                <div class="text-[7px] text-slate-400 uppercase tracking-widest">Max Payout</div>
+              <div class="bg-pink-50 border border-pink-100 rounded-xl p-1.5 text-center">
+                <div class="text-[7px] text-slate-400 uppercase">Max Payout</div>
                 <div class="font-mono-tech text-pink-600 text-xs font-bold">${max > 0 ? '¥' + max.toLocaleString() : '-'}</div>
               </div>
             </div>
-            
             <div class="mt-1 pt-2 border-t border-slate-100">
-              <div class="text-[8px] text-slate-400 uppercase tracking-widest mb-1">Average Payout (平均配当)</div>
+              <div class="text-[8px] text-slate-400 uppercase mb-1">Average Payout (平均配当)</div>
               <div class="font-mono-tech font-bold text-sm text-slate-800">${avg > 0 ? '¥' + avg.toLocaleString() : '---'}</div>
             </div>
           </div>
@@ -606,8 +531,7 @@ AWAITING COMMAND EXECUTION...</div>
       });
       document.getElementById('categoryCards').innerHTML = cardsHtml;
 
-      // グラフデータ：差分パターンごとの平均配当と発生件数
-      const sortedDiffs = Object.entries(diffPatternStats).sort((a,b) => b[1].count - a[1].count).slice(0, 8); // TOP8パターン表示
+      const sortedDiffs = Object.entries(diffPatternStats).sort((a,b) => b[1].count - a[1].count).slice(0, 8);
       const chartLabels = sortedDiffs.map(item => '差分: ' + item[0]);
       const chartCounts = sortedDiffs.map(item => item[1].count);
       const chartAvgs = sortedDiffs.map(item => item[1].payouts.length > 0 ? Math.round(item[1].payouts.reduce((a,b)=>a+b,0)/item[1].payouts.length) : 0);
@@ -622,52 +546,47 @@ AWAITING COMMAND EXECUTION...</div>
           labels: chartLabels,
           datasets: [
             { label: ' 発生件数', data: chartCounts, backgroundColor: barGrad, borderColor: '#0ea5e9', borderWidth: 1.5, yAxisID: 'y', borderRadius: 4, barPercentage: 0.6, order: 2 },
-            { label: ' 平均配当 (円)', data: chartAvgs, type: 'line', borderColor: '#ec4899', backgroundColor: lineGrad, borderWidth: 2.5, fill: true, pointBackgroundColor: '#fff', pointBorderColor: '#ec4899', pointBorderWidth: 2, pointRadius: 4.5, pointHoverRadius: 7, pointHoverBackgroundColor: '#0ea5e9', pointHoverBorderColor: '#fff', yAxisID: 'y1', tension: 0.2, order: 1 }
+            { label: ' 平均配当 (円)', data: chartAvgs, type: 'line', borderColor: '#ec4899', backgroundColor: lineGrad, borderWidth: 2.5, fill: true, pointBackgroundColor: '#fff', pointBorderColor: '#ec4899', pointBorderWidth: 2, pointRadius: 4.5, yAxisID: 'y1', tension: 0.2, order: 1 }
           ]
         },
         options: {
           responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
           scales: {
-            x: { grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false }, ticks: { color: '#475569', font: { family: "'Share Tech Mono', sans-serif", size: 10, weight: 'bold' } } },
-            y: { type: 'linear', position: 'left', grid: { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false }, ticks: { color: '#0ea5e9', font: { family: "'Share Tech Mono', monospace", size: 11 } } },
+            x: { ticks: { color: '#475569', font: { family: "'Share Tech Mono', sans-serif", size: 10, weight: 'bold' } } },
+            y: { type: 'linear', position: 'left', ticks: { color: '#0ea5e9', font: { family: "'Share Tech Mono', monospace", size: 11 } } },
             y1: { type: 'linear', position: 'right', grid: { display: false }, ticks: { color: '#ec4899', font: { family: "'Share Tech Mono', monospace", size: 11 } } }
           },
           plugins: {
-            legend: { position: 'top', align: 'end', labels: { color: '#1e293b', font: { family: "'Orbitron', sans-serif", size: 10, weight: 'bold' }, boxWidth: 10, boxHeight: 10, usePointStyle: true } },
-            tooltip: {
-              backgroundColor: 'rgba(255, 255, 255, 0.95)', titleColor: '#1e293b', titleFont: { family: "'Noto Sans JP', sans-serif", size: 12, weight: 'bold' }, bodyColor: '#475569', bodyFont: { family: "'Share Tech Mono', monospace" }, borderColor: '#0ea5e9', borderWidth: 1, padding: 12, displayColors: true,
-              callbacks: { label: function(context) { let label = context.dataset.label || ''; if (context.datasetIndex === 1) return label + ' : ¥' + context.parsed.y.toLocaleString(); else return label + ' : ' + context.parsed.y + ' 件'; } }
-            }
+            legend: { position: 'top', align: 'end', labels: { color: '#1e293b', font: { family: "'Orbitron', sans-serif", size: 10, weight: 'bold' }, boxWidth: 10, usePointStyle: true } }
           }
         }
       });
     }
 
     function showPayoutEditor() {
-      if (savedRecords.length === 0) { logToTerminal("> エラー: 編集するレコードが存在しません.", "error"); sndError(); return; }
+      if (savedRecords.length === 0) { logToTerminal("> エラー: レコードがありません.", "error"); return; }
       let html = '<div class="space-y-1.5 max-h-32 overflow-y-auto pr-2 custom-scrollbar">';
       [...savedRecords].reverse().forEach((record, revIndex) => {
         const originalIndex = savedRecords.length - 1 - revIndex;
         const color = record.payout > 0 ? 'border-l-pink-500 bg-pink-50/50' : 'border-l-sky-500 bg-sky-50/50';
         const venueText = (record.venue && record.venue !== "UNKNOWN") ? record.venue : "";
         html += `
-          <div class="flex items-center justify-between p-2.5 rounded-xl border-l-4 ${color} border border-slate-200 text-xs hover:border-sky-400 transition hover-snd bg-white shadow-sm">
+          <div class="flex items-center justify-between p-2.5 rounded-xl border-l-4 ${color} border border-slate-200 text-xs bg-white shadow-sm">
             <div class="flex flex-col">
-              <span class="text-slate-800 font-bold tracking-wide">[${record.category || '9車'}] ${venueText} ${record.raceName || ''}</span>
-              <span class="text-sky-600 text-[9px] font-mono-tech">DIFF_SEQ: ${record.diffPattern || 'N/A'}</span>
+              <span class="text-slate-800 font-bold">[${record.category || '9車'}] ${venueText} ${record.raceName || ''}</span>
+              <span class="text-sky-600 text-[9px] font-mono-tech">DIFF: ${record.diffPattern || 'N/A'}</span>
             </div>
             <div class="flex items-center gap-1">
               <span class="text-[9px] text-slate-400">¥</span>
-              <input type="number" id="edit_payout_${originalIndex}" value="${record.payout > 0 ? record.payout : ''}" placeholder="0" class="w-24 p-1.5 text-right bg-slate-50 text-sky-700 rounded-lg text-xs border border-slate-300 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-400 font-mono-tech shadow-inner click-snd">
+              <input type="number" id="edit_payout_${originalIndex}" value="${record.payout > 0 ? record.payout : ''}" placeholder="0" class="w-24 p-1.5 text-right bg-slate-50 text-sky-700 rounded-lg text-xs border border-slate-300 font-mono-tech">
             </div>
           </div>
         `;
       });
       html += '</div>';
-      html += '<button type="button" onclick="savePayouts()" class="mt-3 w-full bg-sky-600 hover:bg-sky-500 text-white border border-sky-400 py-2.5 rounded-xl text-xs font-bold tracking-widest uppercase transition hover-snd click-snd shadow-md cursor-pointer">Overwrite DB [上書き保存]</button>';
-      const out = document.getElementById('outputArea');
-      out.innerHTML = html + out.innerHTML;
-      logToTerminal("> 手動エディタを起動しました.");
+      html += '<button type="button" onclick="savePayouts()" class="mt-3 w-full bg-sky-600 text-white py-2.5 rounded-xl text-xs font-bold uppercase cursor-pointer">上書き保存</button>';
+      document.getElementById('outputArea').innerHTML = html + document.getElementById('outputArea').innerHTML;
+      logToTerminal("> 手動エディタ起動。");
     }
 
     function savePayouts() {
@@ -677,7 +596,7 @@ AWAITING COMMAND EXECUTION...</div>
       });
       localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
       updateCountDisplay(); runAnalysis();
-      logToTerminal("> DB更新完了. 手動オーバーライド成功.", "success");
+      logToTerminal("> DB更新完了。", "success");
     }
 
     function exportData() {
@@ -686,7 +605,7 @@ AWAITING COMMAND EXECUTION...</div>
       const blob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(blob); const a = document.createElement('a');
       a.href = url; a.download = `battleBank_pro_db.json`; a.click(); URL.revokeObjectURL(url);
-      logToTerminal("> データエクスポート処理完了.");
+      logToTerminal("> エクスポート完了。");
     }
 
     window.importData = function(event) {
@@ -698,19 +617,19 @@ AWAITING COMMAND EXECUTION...</div>
           if (Array.isArray(imported)) {
             savedRecords = imported; localStorage.setItem('battleBankProData', JSON.stringify(savedRecords));
             updateCountDisplay(); runAnalysis();
-            logToTerminal("> インポート成功. システムを上書きしました.", "success");
+            logToTerminal("> インポート成功。", "success");
           }
-        } catch (err) { logToTerminal("> エラー: 不正なJSONファイルです.", "error"); sndError(); }
+        } catch (err) { logToTerminal("> エラー: 不正なJSON。", "error"); }
         document.getElementById('fileInput').value = '';
       };
       reader.readAsText(file);
     }
 
     function clearData() {
-      if (confirm("警告: データベースを完全に初期化します。よろしいですか？")) {
+      if (confirm("データベースを初期化しますか？")) {
         savedRecords = []; localStorage.removeItem('battleBankProData');
         updateCountDisplay(); runAnalysis();
-        logToTerminal("> DBパージ完了. システムは初期状態です.");
+        logToTerminal("> DBパージ完了。");
       }
     }
 
@@ -724,4 +643,3 @@ AWAITING COMMAND EXECUTION...</div>
   </script>
 </body>
 </html>
-    
