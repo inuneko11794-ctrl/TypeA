@@ -211,8 +211,6 @@ body:after {
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">CYBER WHITE ULTRA v9.0</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-pink-500"></span><span>AUDIO_SYS [OFF]</span></button>
-   <button id="bgmSelectBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full">🎵 BGM読込</button>
-   <input type="file" id="bgmInput" class="hidden" accept="audio/*,video/*">
   </div>
  </div>
  <div id="dataCount" class="font-mono-tech text-xl text-cyan-100 border border-cyan-300/70 bg-cyan-400/10 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ 00000 ]</span></div>
@@ -355,7 +353,6 @@ AWAITING COMMAND EXECUTION...</div>
 </div>
 
 <script>
-let customBgmUrl = null;
 let savedRecords=[],myChart=null,bgmAudio=null,audioUnlocked=false,editingIndex=-1;
 const normalizeRecord = r => ({
     ...r,
@@ -365,36 +362,7 @@ const normalizeRecord = r => ({
 const REAL_VENUES=["函館","青森","いわき平","弥彦","前橋","取手","宇都宮","大宮","西武園","京王閣","立川","松戸","川崎","平塚","小田原","伊東","静岡","豊橋","名古屋","岐阜","大垣","富山","松阪","四日市","福井","奈良","向日町","和歌山","岸和田","玉野","広島","防府","高松","小松島","高知","松山","小倉","久留米","武雄","佐世保","別府","熊本","千葉"];
 const $=id=>document.getElementById(id);
 function bind(id,fn){const el=$(id);if(!el)return;el.addEventListener('click',e=>{e.preventDefault();fn()})}
-function toggleAudioSystem(){
- try{
-  if(!bgmAudio){
-   if(customBgmUrl){
-    bgmAudio=new Audio(customBgmUrl);
-    bgmAudio.loop=true;
-    bgmAudio.volume=0.3;
-   }else{
-    logToTerminal("> エラー: BGMが読み込まれていません。「🎵 BGM読込」からファイルを選択してください。","error");
-    return;
-   }
-  }
-  if(!audioUnlocked){
-   bgmAudio.play().then(()=>{
-    audioUnlocked=true;
-    $('audioToggleBtn').innerHTML='<span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>AUDIO_SYS [ON]</span>';
-    logToTerminal("> BGM再生開始","success");
-   }).catch(e=>{
-    logToTerminal("> BGM再生エラー。","error");
-    console.log(e);
-   });
-  }else{
-   bgmAudio.pause();
-   audioUnlocked=false;
-   $('audioStatus').classList.replace('bg-cyan-300','bg-pink-500');
-   $('audioToggleBtn').lastElementChild.textContent='AUDIO_SYS [OFF]';
-   logToTerminal("> BGM停止。","info");
-  }
- }catch(e){console.log(e)}
-}
+function toggleAudioSystem(){try{if(!bgmAudio){bgmAudio=new Audio('100倍ドパガキの狂気.mp3');bgmAudio.loop=true;bgmAudio.volume=0.3;}if(!audioUnlocked){bgmAudio.play().then(()=>{audioUnlocked=true;$('audioToggleBtn').innerHTML='<span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>AUDIO_SYS [ON]</span>';logToTerminal("> BGM再生開始: 100倍ドパガキの狂気","success")}).catch(e=>{logToTerminal("> BGM再生エラー。ファイル名を確認してください。","error");console.log(e)});}else{bgmAudio.pause();audioUnlocked=false;$('audioStatus').classList.replace('bg-cyan-300','bg-pink-500');$('audioToggleBtn').lastElementChild.textContent='AUDIO_SYS [OFF]';logToTerminal("> BGM停止。","info")}}catch(e){console.log(e)}}
 function playBeep(freq,type,duration,vol=.03){/* Synth beep disabled to prioritize BGM. Can be mixed in future. */ }
 function initManualSelects(){REAL_VENUES.forEach(v=>$('manVenue').add(new Option(v,v)));for(let i=1;i<=12;i++)$('manRace').add(new Option(i+'R',i+'R'))}
 function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');playBeep(600,'square',.1)}
@@ -485,19 +453,17 @@ function extractAndSaveData(){
   blocks.forEach(block=>{if(!block.trim())return;let venue=globalVenue,raceName="UNKNOWN";
   const heading=block.match(/^#\s*競輪レースデータ：(.+)$/m);
   if(heading){
-   const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R/i);
+   const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R\b/i);
    if(raceMatch)raceName=String(parseInt(raceMatch[1],10))+"R";
    for(const v of REAL_VENUES)if(heading[1].includes(v)){venue=v;break}
   }else{
-   const rm=block.match(/(?<!\d)(\d{1,2})\s*R/i);
+   const rm=block.match(/(?<!\d)(\d{1,2})\s*R\b/i);
    if(rm)raceName=String(parseInt(rm[1],10))+"R";
   }
   const girls=block.includes("ガールズ")||block.includes("L級");let category="9車";
  if(girls)category="ガールズ";else{
   // 出走表セクション内の車番行だけを数える（全Markdown行の「| 数字 |」を数えない）。
-  const roster=block.match(/##\s*出走表([\s\S]*?)(?=
-##|
----|$)/);
+  const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
   const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
   let carCount=rosterRows?rosterRows.length:0;
   if(!carCount){const lineup=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);if(lineup){const members=lineup[1].match(/\[([\d\s]+)\]/g)||[];carCount=members.reduce((n,m)=>n+m.replace(/[\[\]]/g,'').trim().split(/\s+/).filter(Boolean).length,0)}}
@@ -866,28 +832,6 @@ function clearData(){if(confirm("データベースを初期化しますか？")
 function updateCountDisplay(){const n=savedRecords.length.toString().padStart(5,'0');$('dataCount').innerHTML=`<span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ ${n} ]</span>`}
 document.addEventListener('DOMContentLoaded',()=>{
  bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);
- 
- bind('bgmSelectBtn',()=>$('bgmInput').click());
- $('bgmInput').addEventListener('change',e=>{
-  const file=e.target.files[0];
-  if(!file)return;
-  if(customBgmUrl) URL.revokeObjectURL(customBgmUrl);
-  customBgmUrl = URL.createObjectURL(file);
-  if(bgmAudio){
-   const wasPlaying = audioUnlocked;
-   bgmAudio.pause();
-   bgmAudio.src = customBgmUrl;
-   if(wasPlaying){
-    bgmAudio.play().catch(err=>console.log(err));
-   } else {
-    audioUnlocked = false;
-    $('audioStatus').classList.replace('bg-cyan-300','bg-pink-500');
-    $('audioToggleBtn').lastElementChild.textContent='AUDIO_SYS [OFF]';
-   }
-  }
-  logToTerminal(`> BGMセット完了: ${file.name} (AUDIO_SYSで再生可能)`,"success");
- });
- 
  $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
  updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v9.0 稼働中.":"> SYSTEM READY // v9.0 稼働中.","success");
