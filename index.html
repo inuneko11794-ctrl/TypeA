@@ -929,14 +929,34 @@ function parseMarkdownForBulk(inputData){
     }
     if(carCount>=5&&carCount<=9)category=carCount+"車";
    }
-   if(raceName!=="UNKNOWN"){
-    races.push({venue, raceName, category, rawBlock: block.substring(0, 200)});
+   // Extract line1 from 並び予想 (same logic as extractAndSaveData)
+   let line1Key = null;
+   const lineupRow = block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);
+   if(lineupRow){
+    const groups = lineupRow[1].match(/\[([\d\s]+)\]/g) || [];
+    for(const g of groups){
+     const nums = g.replace(/[\[\]]/g, '').trim().split(/\s+/).map(Number).filter(n => n >= 1 && n <= 9);
+     if(nums.length >= 2){
+      line1Key = nums.join('-');
+      break;
+     }
+    }
+   }
+   
+   if(raceName !== "UNKNOWN"){
+    races.push({
+     venue,
+     raceName,
+     category,
+     line1: line1Key || '',
+     rawBlock: block.substring(0, 300)
+    });
    }
   });
   // Sort by race number
-  races.sort((a,b)=>{
-   const na=parseInt(a.raceName)||0, nb=parseInt(b.raceName)||0;
-   return na-nb;
+  races.sort((a,b) => {
+   const na = parseInt(a.raceName) || 0, nb = parseInt(b.raceName) || 0;
+   return na - nb;
   });
   return races;
 }
@@ -947,11 +967,13 @@ function openBulkInputModal(races){
   races.forEach((r, idx) => {
    const card = document.createElement('div');
    card.className = 'border-2 border-cyan-500 rounded-xl p-3 bg-white/90';
+   const line1Display = r.line1 ? `<div class="text-[10px] text-sky-600 mb-1">ライン①: <span class="font-mono-tech font-bold">${escapeHTML(r.line1)}</span></div>` : '';
    card.innerHTML = `
-    <div class="flex justify-between items-center mb-2">
+    <div class="flex justify-between items-center mb-1">
      <div class="font-black text-lg text-sky-900">${escapeHTML(r.venue)} ${escapeHTML(r.raceName)}</div>
      <div class="text-xs font-bold text-sky-700">${escapeHTML(r.category)}</div>
     </div>
+    ${line1Display}
     <div class="grid grid-cols-3 gap-2 mb-2">
      <div><label class="text-[10px] font-bold">1着</label><input type="number" id="bulk_c1_${idx}" min="1" max="9" class="modal-field text-center text-xl" placeholder="1"></div>
      <div><label class="text-[10px] font-bold">2着</label><input type="number" id="bulk_c2_${idx}" min="1" max="9" class="modal-field text-center text-xl" placeholder="2"></div>
@@ -964,6 +986,7 @@ function openBulkInputModal(races){
     <input type="hidden" id="bulk_venue_${idx}" value="${escapeHTML(r.venue)}">
     <input type="hidden" id="bulk_race_${idx}" value="${escapeHTML(r.raceName)}">
     <input type="hidden" id="bulk_cat_${idx}" value="${escapeHTML(r.category)}">
+    <input type="hidden" id="bulk_line1_${idx}" value="${escapeHTML(r.line1 || '')}">
    `;
    container.appendChild(card);
   });
@@ -1004,7 +1027,8 @@ function saveAllBulkRecords(){
    const patternKey=`${c1}-${c2}-${c3}`;
    const exacta=`${c1}-${c2}`;
    
-   const rec={venue, raceName, category, pattern:patternKey, diffPattern:diffPatternKey, diffDisplay, exacta, payout:p3, payout2ren:p2, timestamp:Date.now(), sourceType:'bulk-manual'};
+   const line1 = $('bulk_line1_'+i)?.value || '';
+   const rec={venue, raceName, category, pattern:patternKey, line1: line1, diffPattern:diffPatternKey, diffDisplay, exacta, payout:p3, payout2ren:p2, timestamp:Date.now(), sourceType:'bulk-manual'};
    
    // Check if already exists, update or add
    const existsIdx = savedRecords.findIndex(r=>r.venue===venue && r.raceName===raceName);
