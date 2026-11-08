@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BANK-KUN">
-<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v11.1</title>
+<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v10.9</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -241,7 +241,7 @@ html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-mo
   <div class="glass-panel p-4 sm:p-5">
    <div class="panel-content">
     <button id="openManualBtn" type="button" class="touch-btn btn-alert w-full py-4 px-4 mb-5 rounded-xl flex justify-between items-center text-sm tracking-widest"><span>⚡ 手動入力モード</span><span>▶</span></button>
-    <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.txt,text/plain,text/markdown,text/*"><span class="sr-only">ファイル選択後、自動で読み込み、認識したレースの事前登録フォームを表示します。</span></div>
+    <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.txt,text/plain,text/markdown,text/*"></div>
     <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-4" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea>
     <div class="flex flex-col gap-3">
      <button id="extractBtn" type="button" class="touch-btn btn-cyber py-4 rounded-xl text-xs tracking-widest">📥 EXTRACT & ARCHIVE [データ抽出保存]</button>
@@ -339,6 +339,15 @@ AWAITING COMMAND EXECUTION...</div>
    <div class="mt-5 border-t border-emerald-200 pt-4"><h4 class="kicker border-l-4 border-cyan-500 pl-2 mb-2">CSV × LIVE JSON COMPARISON // 過去CSVと直近収集データの比較</h4><p class="text-[11px] text-slate-600 mb-2">事前登録したライン①〜④の先頭車番と、結果入力後の3連単配当を同じ条件で比較します。古いJSONでライン情報がないレースは比較対象外です。</p><div id="lowPayoutRecentCompare" class="space-y-2"><div class="discovery-card text-xs">CSV分析と直近JSONデータの両方を用意して分析を実行してください。</div></div></div>
    <p class="text-[10px] text-slate-500 mt-3">※ラインはCSVの記載順を①②③④として扱います。単騎ラインは除外。配当未入力・0円は割合の分母から除外します。各位置ペアごとに全車番の組み合わせを調べ、最低出現数未満も「該当数」としては集計しますがランキングには表示しません。</p>
   </div>
+  <div class="mt-6 border-t-2 border-cyan-200 pt-4" id="perLineComboLab">
+   <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h3 class="kicker border-l-4 border-fuchsia-500 pl-2">PER-LINE CAR COMBINATION LAB // 各ライン内の車番組み合わせ分析</h3><span class="discovery-chip">POSITION-SPECIFIC</span></div>
+   <p class="text-xs text-sky-800 mb-3">ライン①・②・③・④それぞれについて、そのライン内の先頭2車の車番組み合わせ（例: 1－2, 4－7 など）ごとの平均・中央値を集計します。同じ組み合わせがライン位置によって配当傾向が変わるかを比較できます。</p>
+   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end mb-3">
+    <div><label class="block text-[10px] font-bold text-fuchsia-800 mb-1">最低出現数</label><input id="perLineMinCount" class="field !py-2 text-xs" type="number" min="1" step="5" value="10"></div>
+    <div class="md:col-span-3"><button id="perLineRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">各ラインの車番組み合わせ 高低分析</button></div>
+   </div>
+   <div id="perLineResults" class="space-y-3"><div class="discovery-card text-center text-xs">CSVを読み込み、分析を実行してください。各ライン位置ごとに中央値/平均の上位3・下位3と、位置間比較を表示します。</div></div>
+  </div>
  </div>
 </section>
 
@@ -387,17 +396,6 @@ AWAITING COMMAND EXECUTION...</div>
  </div>
 </section>
 
-<section class="glass-panel p-4 sm:p-5 mb-8" id="linePairMedianLab" data-tab-panel="analysis">
- <div class="panel-content">
-  <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-cyan-500 pl-2">LINE POSITION × CAR PAIR MEDIAN // ライン位置別・車番ペア中央値</h2><span class="discovery-chip">MEDIAN PAYOUT LAB</span></div>
-  <p class="text-xs text-slate-600 mb-3">同じ1着－2着の車番ペアでも、1着車がライン①〜④のどこに属していたかで3連単配当の中央値が変わるかを比較します。例：ライン①の1-2、ライン②の1-2を別々に集計。ライン内の先頭・2番手の車番ではありません。</p>
-  <label class="block text-xs font-bold mb-2">分析CSV（brain races形式）<input id="linePairMedianCsv" type="file" accept=".csv,text/csv" class="field mt-1 text-xs"></label>
-  <div id="linePairMedianStatus" class="text-xs text-slate-600 mb-3">CSV未読込</div>
-  <div class="flex flex-wrap gap-2 items-center mb-3"><label class="text-xs">対象<select id="linePairMedianClass" class="field mt-1"><option value="7車" selected>7車立て</option><option value="ALL">全車立て</option></select></label><label class="text-xs">最低件数<select id="linePairMedianMin" class="field mt-1"><option value="1">1件</option><option value="5">5件</option><option value="10">10件</option><option value="20">20件</option><option value="30" selected>30件</option></select></label><button id="linePairMedianRun" type="button" class="touch-btn btn-cyber rounded-lg px-4 py-3 text-xs">中央値を集計</button></div>
-  <div id="linePairMedianSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3"></div>
-  <div id="linePairMedianResults" class="overflow-x-auto"><div class="discovery-card text-xs">CSVを読み込んで集計してください。</div></div>
- </div>
-</section>
 <section class="glass-panel p-4 sm:p-5 mb-8" id="venueAnalysisSection" data-tab-panel="analysis">
  <div class="panel-content">
   <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -517,7 +515,9 @@ let savedRecords=[],myChart=null,bgmAudio=null,audioUnlocked=false,editingIndex=
 function parseLineGroupsFromText(text){
  const row=String(text||'').match(/^\s*\|\s*並び予想\s*\|\s*(.+)$/m);
  if(!row)return [];
- return (row[1].match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9));
+ // 注記「（各[ ]が1ライン、左端が先頭）」などを除去してからグループを抽出
+ let content=row[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'').trim();
+ return (content.match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)).filter(arr=>arr.length>0);
 }
 function parseRosterBaseMarks(block){
  const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
@@ -627,39 +627,24 @@ function logToTerminalRaw(html){$('outputArea').insertAdjacentHTML('afterbegin',
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function persist(){localStorage.setItem('battleBankProData',JSON.stringify(savedRecords));scheduleAutoBackup();}
 function loadMarkdown(event){
- const input=event.currentTarget||$('mdFileInput');
- const file=input&&input.files&&input.files[0];
- if(!file){logToTerminal('> ファイルが選択されていません。','error');return;}
- logToTerminal(`> 読込開始: ${escapeHTML(file.name)} (${Number(file.size||0).toLocaleString()} bytes)`,'info');
+ const file=event.target.files[0];
+ if(!file)return;
  const reader=new FileReader();
- reader.onload=function(){
-  try{
-   const raw=reader.result;
-   const body=String(raw==null?'':raw).replace(/^\uFEFF/,'');
-   if(!body.trim())throw new Error('ファイルの中身が空です');
-   $('dataInput').value=body;
-   const races=parseMarkdownForBulk(body);
-   logToTerminal(`> テキスト読込完了: ${file.name}`,'success');
-   if(!races.length){
-    logToTerminal('> テキストは読み込めましたが、レース見出しを認識できません。先頭行が「# 競輪レースデータ：会場1R」の形式か確認してください。','error');
-    return;
-   }
+ reader.onload=e=>{
+  const text = e.target.result;
+  $('dataInput').value=text;
+  $('mdFileInput').value='';
+  logToTerminal(`> ファイル読込成功: ${file.name}`,"success");
+  // 一括手動入力モードを開く
+  const races = parseMarkdownForBulk(text);
+  if(races.length){
    openBulkInputModal(races);
-   logToTerminal(`> ${races.length}レースを認識しました。開催日を確認して「一括保存」を押してください。`,'success');
-  }catch(err){
-   console.error('DataMap import error:',err);
-   logToTerminal(`> 読込処理エラー: ${err&&err.message?err.message:'原因不明'} `,'error');
-  }finally{
-   input.value='';
+   logToTerminal(`> ${races.length}レースを事前登録フォームに展開しました。開催日を確認して保存してください。`,"success");
+  }else{
+   setTimeout(triggerExtract, 150);
   }
  };
- reader.onerror=function(){
-  logToTerminal('> ファイルの読み込みに失敗しました。別のファイル形式またはファイルを選び直してください。','error');
-  input.value='';
- };
- reader.onabort=function(){logToTerminal('> ファイル読み込みが中断されました。','error');input.value='';};
- try{reader.readAsText(file,'UTF-8');}
- catch(err){console.error(err);logToTerminal('> ファイルを開けませんでした。','error');input.value='';}
+ reader.readAsText(file,'UTF-8');
 }
 function triggerExtract(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: データが入力されていません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);extractAndSaveData()}
 function triggerSync(){triggerExtract()}
@@ -724,10 +709,10 @@ function extractAndSaveData(){
   const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
   const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
   let carCount=rosterRows?rosterRows.length:0;
-  if(!carCount){const lineup=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);if(lineup){const members=lineup[1].match(/\[([\d\s]+)\]/g)||[];carCount=members.reduce((n,m)=>n+m.replace(/[\[\]]/g,'').trim().split(/\s+/).filter(Boolean).length,0)}}
+  if(!carCount){const lineup=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);if(lineup){const cleaned=lineup[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'');const members=cleaned.match(/\[([\d\s]+)\]/g)||[];carCount=members.reduce((n,m)=>n+m.replace(/[\[\]]/g,'').trim().split(/\s+/).filter(Boolean).length,0)}}
   if(carCount>=5&&carCount<=9)category=carCount+"車";
  }
- let patternKey=null,line1Key=null,diffPatternKey=null,diffDisplay=null;const lines=block.match(/\[([\d\s]+)\]/g);let allDiffs=[],diffLogs=[];
+ let patternKey=null,line1Key=null,diffPatternKey=null,diffDisplay=null;const lineupRow=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);const lines=lineupRow?(lineupRow[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'').match(/\[([\d\s]+)\]/g)||[]):[];let allDiffs=[],diffLogs=[];
  const lineGroups=parseLineGroupsFromText(block),lineHeads=lineGroups.slice(0,4).map(g=>g[0]||0),baseMarks=parseRosterBaseMarks(block),lineMarks=transformLineMarks(lineGroups,baseMarks),lineMarkGroups=makeLineMarkGroups(lineGroups,lineMarks);
  for(const group of lineGroups){if(group.length>=2){line1Key=group.join('-');break}}
  if(lines)lines.forEach((lm,index)=>{const arr=lm.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number);if(index===0&&arr.length>0)patternKey=arr.join('-');if(arr.length>1){const ds=[];for(let i=0;i<arr.length-1;i++)ds.push(Math.abs(arr[i]-arr[i+1]));const sum=ds.reduce((a,b)=>a+b,0);if(sum===4){allDiffs.push(4);diffLogs.push("4(合算)")}else{allDiffs.push(...ds);diffLogs.push(ds.join('-'))}}});
@@ -1045,7 +1030,8 @@ function parseMarkdownForBulk(inputData){
     if(!carCount){
      const lineup=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);
      if(lineup){
-      const members=lineup[1].match(/\[([\d\s]+)\]/g)||[];
+      const cleaned=lineup[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'');
+      const members=cleaned.match(/\[([\d\s]+)\]/g)||[];
       carCount=members.reduce((n,m)=>n+m.replace(/[\[\]]/g,'').trim().split(/\s+/).filter(Boolean).length,0);
      }
     }
@@ -1229,7 +1215,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);$('recordSearch').addEventListener('input',renderRecordManager);$('recordStatus').addEventListener('change',renderRecordManager);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
  document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.id!=='audioToggleBtn'&&!b.disabled)playBeep(680,'sine',.045,.018);});
- updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v11.2 稼働中.":"> SYSTEM READY // v11.2 稼働中.","success");
+ updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v10.0 稼働中.":"> SYSTEM READY // v10.2 稼働中.","success");
 });
 </script>
 
@@ -1479,7 +1465,55 @@ function runMedianHeadPairs(){
  }).join('');
  out.innerHTML=rows.length?cards:'<div class="discovery-card text-xs">選択したクラスに3連単配当入力済みのレースがありません。</div>';
 }
-document.addEventListener('DOMContentLoaded',()=>{const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn'),m=$t('medianHeadRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);if(m)m.addEventListener('click',runMedianHeadPairs);});
+function runPerLineCombos(){
+ const out=$t('perLineResults');
+ if(!trickRows.length){out.innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';return;}
+ const cls=$t('trickClass')?.value||'MEN_ALL';
+ const minCount=Math.max(1,Math.floor(Number($t('perLineMinCount')?.value)||10));
+ const rows=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0);
+ const lineLabels=['ライン①','ライン②','ライン③','ライン④'];
+ const stats=lineLabels.map(()=>new Map()); // per line position, map of pairKey -> {payouts:[]}
+ const globalPairs=new Map(); // pairKey -> {positions: Map(pos -> {count,sum,payouts})}
+ rows.forEach(r=>{
+  const lines=(r.lines||[]).slice(0,4);
+  lines.forEach((line,pos)=>{
+   if(!Array.isArray(line)||line.length<2)return;
+   const a=line[0],b=line[1];
+   if(!a||!b||a===b||a<1||a>9||b<1||b>9)return;
+   const key=`${a}－${b}`;
+   if(!stats[pos].has(key))stats[pos].set(key,{key,a,b,payouts:[]});
+   stats[pos].get(key).payouts.push(r.p3);
+   if(!globalPairs.has(key))globalPairs.set(key,{key,positions:new Map()});
+   const gp=globalPairs.get(key);
+   if(!gp.positions.has(pos))gp.positions.set(pos,{count:0,sum:0,payouts:[]});
+   const p=gp.positions.get(pos);p.count++;p.sum+=r.p3;p.payouts.push(r.p3);
+  });
+ });
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const med=arr=>{if(!arr.length)return 0;const s=arr.slice().sort((x,y)=>x-y);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+ let html='';
+ lineLabels.forEach((label,pos)=>{
+  const all=[...stats[pos].values()].map(g=>({...g,count:g.payouts.length,avg:g.payouts.reduce((s,n)=>s+n,0)/g.payouts.length,med:med(g.payouts)}));
+  const ranked=all.filter(g=>g.count>=minCount);
+  const high=ranked.slice().sort((a,b)=>b.med-a.med||b.count-a.count).slice(0,3);
+  const low=ranked.slice().sort((a,b)=>a.med-b.med||b.count-a.count).slice(0,3);
+  const render=arr=>arr.length?arr.map((g,i)=>`<div class="flex items-center justify-between gap-2 border-b border-slate-100 py-1.5 last:border-0"><span class="font-bold">${i+1}. ${g.key}</span><span class="text-right"><b>${fmt(g.med)}</b><small class="block text-[10px] text-slate-500">${g.count}件 / 平均${fmt(g.avg)}</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">該当なし</div>';
+  html+=`<div class="discovery-card"><div class="flex flex-wrap justify-between items-center gap-2 mb-2"><h3 class="font-bold text-fuchsia-900">${label}</h3><span class="text-[10px] text-slate-500">組み合わせ ${ranked.length}種（最低${minCount}件）</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-amber-50 p-2"><div class="text-[11px] font-bold text-amber-800 mb-1">中央値が高い 上位3</div>${render(high)}</div><div class="rounded-lg bg-sky-50 p-2"><div class="text-[11px] font-bold text-sky-800 mb-1">中央値が低い 下位3</div>${render(low)}</div></div></div>`;
+ });
+ // Cross comparison for pairs that appear in 2+ positions
+ const multi=[...globalPairs.values()].filter(g=>g.positions.size>=2);
+ multi.sort((a,b)=>b.positions.size-a.positions.size);
+ const comp=multi.slice(0,15).map(g=>{
+  const cells=[0,1,2,3].map(pos=>{
+   const d=g.positions.get(pos);
+   return d?`<td class="p-1 text-right">${d.count}件<br>${fmt(med(d.payouts))}<br><small>avg ${fmt(d.sum/d.count)}</small></td>`:'<td class="p-1 text-center text-slate-400">—</td>';
+  }).join('');
+  return `<tr class="border-b border-slate-100"><td class="p-1 font-bold">${g.key}</td>${cells}</tr>`;
+ }).join('');
+ html+=`<div class="discovery-card mt-3"><h3 class="font-bold text-violet-900 mb-2">同じ車番ペアのライン位置間比較（2位置以上に出現）</h3><div class="overflow-x-auto"><table class="w-full text-[11px]"><thead><tr class="border-b border-violet-100 text-left"><th class="p-1">先頭2車</th><th class="p-1 text-right">①</th><th class="p-1 text-right">②</th><th class="p-1 text-right">③</th><th class="p-1 text-right">④</th></tr></thead><tbody>${comp||'<tr><td colspan="5" class="p-2 text-center text-slate-500">複数位置に出現する組み合わせがありません</td></tr>'}</tbody></table></div><p class="text-[10px] text-slate-500 mt-2">各セル：件数 / 中央値 / 平均。位置によって配当傾向が変わるかを確認できます。</p></div>`;
+ out.innerHTML=rows.length?html:'<div class="discovery-card text-xs">選択したクラスに3連単配当入力済みのレースがありません。</div>';
+}
+document.addEventListener('DOMContentLoaded',()=>{const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn'),m=$t('medianHeadRunBtn'),pl=$t('perLineRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);if(m)m.addEventListener('click',runMedianHeadPairs);if(pl)pl.addEventListener('click',runPerLineCombos);});
 })();
 </script>
 
@@ -1549,33 +1583,5 @@ if ("serviceWorker" in navigator) {
 })();
 </script>
 
-<script>
-
-// ===== LINE POSITION × FINISHING PAIR MEDIAN LAB =====
-(function(){
- const $id=id=>document.getElementById(id);let rows=[];
- function csvParse(text){
-  text=String(text||'').replace(/^\uFEFF/,'');const out=[];let row=[],cell='',q=false;
-  for(let i=0;i<text.length;i++){const c=text[i];if(q){if(c==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(c==='"')q=false;else cell+=c;}else if(c==='"')q=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()))out.push(row);row=[];cell='';}else cell+=c;}
-  if(cell.length||row.length){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()))out.push(row);}if(!out.length)return[];
-  const h=out.shift().map((x,i)=>i===0?x.replace(/^\uFEFF/,'').trim():x.trim());return out.map(a=>Object.fromEntries(h.map((k,i)=>[k,String(a[i]??'').trim()])));
- }
- function nums(s){return String(s||'').split(/[-‐‑‒–—\s>→]+/).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)}
- function lineGroups(s){return String(s||'').split('/').map(g=>g.trim()).filter(Boolean).map(g=>nums(g));}
- function median(a){const b=a.slice().sort((x,y)=>x-y),m=Math.floor(b.length/2);return b.length?(b.length%2?b[m]:(b[m-1]+b[m])/2):null;}
- function yen(v){return v==null?'—':'¥'+Math.round(v).toLocaleString('ja-JP');}
- function load(file){const status=$id('linePairMedianStatus');const reader=new FileReader();reader.onload=()=>{try{const parsed=csvParse(reader.result);if(!parsed.length)throw Error('CSVにデータ行がありません');const required=['lines','result','tri_yen'];const headers=Object.keys(parsed[0]);const missing=required.filter(k=>!headers.includes(k));if(missing.length)throw Error('必要な列がありません: '+missing.join(', '));rows=parsed.map(r=>({n:Number(r.car_count)||0,lines:lineGroups(r.lines),result:nums(r.result).slice(0,3),payout:Number(String(r.tri_yen||'').replace(/[,円]/g,''))})).filter(r=>r.lines.length&&r.result.length>=2&&Number.isFinite(r.payout)&&r.payout>0);status.textContent=`読込成功：${parsed.length.toLocaleString()}行／配当・着順・ライン有効 ${rows.length.toLocaleString()}レース`;$id('linePairMedianSummary').innerHTML='';$id('linePairMedianResults').innerHTML='<div class="discovery-card text-xs">読み込み完了。「中央値を集計」を押してください。</div>';}catch(e){rows=[];status.textContent='読込エラー：'+e.message;console.error(e);}};reader.onerror=()=>{status.textContent='ファイル読込に失敗しました。';};reader.readAsText(file,'UTF-8');}
- function run(){if(!rows.length){$id('linePairMedianStatus').textContent='先にCSVを読み込んでください。';return;}const cls=$id('linePairMedianClass').value,min=Number($id('linePairMedianMin').value)||1;const data=rows.filter(r=>cls==='ALL'||r.n===7);const stats=Array.from({length:4},()=>new Map());let used=0;
-  data.forEach(r=>{const winner=r.result[0],second=r.result[1];const pos=r.lines.slice(0,4).findIndex(g=>g.includes(winner));if(pos<0)return;const key=`${winner}-${second}`;if(!stats[pos].has(key))stats[pos].set(key,[]);stats[pos].get(key).push(r.payout);used++;});
-  const pairs=[];for(let a=1;a<=9;a++)for(let b=1;b<=9;b++)if(a!==b){const key=`${a}-${b}`;const vals=stats.map(m=>m.get(key)||[]);if(vals.some(v=>v.length))pairs.push({key,vals});}
-  const totalCounts=stats.map(m=>[...m.values()].reduce((s,a)=>s+a.length,0));$id('linePairMedianSummary').innerHTML=[['対象レース',data.length],['分析成立',used],['車番ペア',pairs.length],['最低件数',min+'件']].map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-sky-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold">${Number.isFinite(v)?v.toLocaleString():v}</div></div>`).join('');
-  const head='<thead><tr class="bg-slate-100"><th class="p-2 text-left">1着-2着</th>'+[1,2,3,4].map(i=>`<th class="p-2 text-right">ライン${'①②③④'[i-1]}<br><small>中央値／件数</small></th>`).join('')+'</tr></thead>';
-  const body=pairs.sort((a,b)=>{const av=a.vals.reduce((s,v)=>s+(v.length>=min?1:0),0),bv=b.vals.reduce((s,v)=>s+(v.length>=min?1:0),0);return bv-av||a.key.localeCompare(b.key,undefined,{numeric:true});}).map(p=>`<tr class="border-t border-slate-200"><td class="p-2 font-bold whitespace-nowrap">${p.key}</td>${p.vals.map(v=>`<td class="p-2 text-right whitespace-nowrap">${v.length>=min?`<b>${yen(median(v))}</b><small class="block text-slate-500">${v.length}件</small>`:`<span class="text-slate-400">—</span><small class="block text-slate-400">${v.length}件</small>`}</td>`).join('')}</tr>`).join('');
-  $id('linePairMedianResults').innerHTML=`<div class="text-xs text-slate-600 mb-2">同じ車番ペアを横並びで比較。中央値は3連単配当。最低件数未満も件数だけ表示します。</div><table class="w-full text-xs"><caption class="text-left font-bold py-2">ライン位置別・全車番ペア中央値</caption>${head}<tbody>${body}</tbody></table>`;
- }
- document.addEventListener('DOMContentLoaded',()=>{$id('linePairMedianCsv')?.addEventListener('change',e=>{if(e.target.files?.[0])load(e.target.files[0]);});$id('linePairMedianRun')?.addEventListener('click',run);});
-})();
-
-</script>
 </body>
 </html>
