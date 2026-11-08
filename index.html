@@ -199,13 +199,6 @@ html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-mo
 [data-tab-panel][hidden]{display:none!important}
 @media(max-width:520px){.main-tabs{gap:5px}.main-tab{font-size:10px;padding:8px 3px;min-height:50px}.main-tab .tab-sub{font-size:8px}}
 
-
-@media(max-width:640px){
- #bulkInputModal .modal-card{padding:12px!important;max-height:96dvh}
- #bulkRaceContainer{max-height:calc(96dvh - 160px)!important}
- .modal-field{padding:10px;font-size:16px}
-}
-
 </style>
 </head>
 <body>
@@ -248,7 +241,7 @@ html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-mo
   <div class="glass-panel p-4 sm:p-5">
    <div class="panel-content">
     <button id="openManualBtn" type="button" class="touch-btn btn-alert w-full py-4 px-4 mb-5 rounded-xl flex justify-between items-center text-sm tracking-widest"><span>⚡ 手動入力モード</span><span>▶</span></button>
-    <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.txt,text/plain,text/markdown,text/*"></div>
+    <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.txt,text/plain,text/markdown,text/*,*/*"></div>
     <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-4" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea>
     <div class="flex flex-col gap-3">
      <button id="extractBtn" type="button" class="touch-btn btn-cyber py-4 rounded-xl text-xs tracking-widest">📥 EXTRACT & ARCHIVE [データ抽出保存]</button>
@@ -320,7 +313,7 @@ AWAITING COMMAND EXECUTION...</div>
    </div>
   </div>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">対象</label><select id="trickClass" class="field !py-2 text-xs"><option value="MEN_ALL">男子・全車立て</option><option value="5車">男子5車</option><option value="6車">男子6車</option><option value="7車">男子7車</option><option value="8車">男子8車</option><option value="9車">男子9車</option><option value="ガールズ">ガールズのみ</option></select></div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">対象</label><select id="trickClass" class="field !py-2 text-xs"><option value="MEN_ALL">男子・全車立て</option><option value="5車">男子5車</option><option value="6車">6車</option><option value="7車">男子7車</option><option value="8車">男子8車</option><option value="9車">男子9車</option><option value="ガールズ">ガールズのみ</option></select></div>
    <div><label class="block text-[10px] font-bold text-sky-800 mb-1">配当種別</label><select id="trickPayoutType" class="field !py-2 text-xs"><option value="tri_yen">3連単</option><option value="exa_yen">2連単</option></select></div>
    <div class="flex items-end"><button id="trickRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">組み合わせ分析</button></div>
   </div>
@@ -527,9 +520,12 @@ function parseLineGroupsFromText(text){
  return (content.match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)).filter(arr=>arr.length>0);
 }
 function parseRosterBaseMarks(block){
- const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
+ const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=
+##|
+---|$)/);
  if(!section)return {};
- const rows=section[1].split(/\r?\n/).filter(x=>/^\s*\|/.test(x));
+ const rows=section[1].split(/?
+/).filter(x=>/^\s*\|/.test(x));
  if(rows.length<2)return {};
  const cells=x=>x.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(v=>v.trim());
  const header=cells(rows[0]);
@@ -703,17 +699,19 @@ function extractAndSaveData(){
   blocks.forEach(block=>{if(!block.trim())return;let venue=globalVenue,raceName="UNKNOWN";
   const heading=block.match(/^#\s*競輪レースデータ：(.+)$/m);
   if(heading){
-   const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R\b/i);
+   const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R/i);
    if(raceMatch)raceName=String(parseInt(raceMatch[1],10))+"R";
    for(const v of REAL_VENUES)if(heading[1].includes(v)){venue=v;break}
   }else{
-   const rm=block.match(/(?<!\d)(\d{1,2})\s*R\b/i);
+   const rm=block.match(/(?<!\d)(\d{1,2})\s*R/i);
    if(rm)raceName=String(parseInt(rm[1],10))+"R";
   }
   const girls=block.includes("ガールズ")||block.includes("L級");let category="9車";
  if(girls)category="ガールズ";else{
   // 出走表セクション内の車番行だけを数える（全Markdown行の「| 数字 |」を数えない）。
-  const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
+  const roster=block.match(/##\s*出走表([\s\S]*?)(?=
+##|
+---|$)/);
   const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
   let carCount=rosterRows?rosterRows.length:0;
   if(!carCount){const lineup=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);if(lineup){const cleaned=lineup[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'');const members=cleaned.match(/\[([\d\s]+)\]/g)||[];carCount=members.reduce((n,m)=>n+m.replace(/[\[\]]/g,'').trim().split(/\s+/).filter(Boolean).length,0)}}
@@ -1020,18 +1018,20 @@ function parseMarkdownForBulk(inputData){
    let venue=globalVenue, raceName="UNKNOWN";
    const heading=block.match(/^#\s*競輪レースデータ：(.+)$/m);
    if(heading){
-    const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R\b/i);
+    const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R/i);
     if(raceMatch)raceName=String(parseInt(raceMatch[1],10))+"R";
     for(const v of REAL_VENUES)if(heading[1].includes(v)){venue=v;break}
    }else{
-    const rm=block.match(/(?<!\d)(\d{1,2})\s*R\b/i);
+    const rm=block.match(/(?<!\d)(\d{1,2})\s*R/i);
     if(rm)raceName=String(parseInt(rm[1],10))+"R";
    }
    const girls=block.includes("ガールズ")||block.includes("L級");
    let category="9車";
    if(girls)category="ガールズ";
    else{
-    const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
+    const roster=block.match(/##\s*出走表([\s\S]*?)(?=
+##|
+---|$)/);
     const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
     let carCount=rosterRows?rosterRows.length:0;
     if(!carCount){
@@ -1081,11 +1081,7 @@ function openBulkInputModal(races){
    <div class="flex justify-between items-center gap-2"><div class="font-black text-lg text-sky-900">${escapeHTML(r.venue)} ${escapeHTML(r.raceName)}</div><div class="text-xs font-bold text-sky-700">${escapeHTML(r.category)}</div></div>
    ${line1Display}${headsDisplay}${marksDisplay}
    <div class="mt-2"><label class="block text-[10px] font-bold mb-1">開催日（自動取得できない場合は入力）</label><input type="date" id="bulk_date_${idx}" class="modal-field" value="${escapeHTML(r.raceDate||'')}"></div>
-   <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
-    <div><label class="block text-[10px] font-bold mb-1">着順 (例: 1-2-3)</label><input type="text" id="bulk_order_${idx}" class="modal-field text-center" placeholder="1-2-3" inputmode="numeric"></div>
-    <div><label class="block text-[10px] font-bold mb-1">2連単配当</label><input type="number" id="bulk_p2_${idx}" class="modal-field text-center" placeholder="円" inputmode="numeric"></div>
-    <div><label class="block text-[10px] font-bold mb-1">3連単配当</label><input type="number" id="bulk_p3_${idx}" class="modal-field text-center" placeholder="円" inputmode="numeric"></div>
-   </div>
+   <div class="text-[11px] text-slate-600 mt-2">着順・2連単配当・3連単配当は登録後に手動入力できます。</div>
    <input type="hidden" id="bulk_venue_${idx}" value="${escapeHTML(r.venue)}"><input type="hidden" id="bulk_race_${idx}" value="${escapeHTML(r.raceName)}">
    <input type="hidden" id="bulk_cat_${idx}" value="${escapeHTML(r.category)}"><input type="hidden" id="bulk_line1_${idx}" value="${escapeHTML(r.line1||'')}"><input type="hidden" id="bulk_lineHeads_${idx}" value="${escapeHTML(JSON.stringify(r.lineHeads||[]))}"><input type="hidden" id="bulk_lineGroups_${idx}" value="${escapeHTML(JSON.stringify(r.lineGroups||[]))}"><input type="hidden" id="bulk_baseMarks_${idx}" value="${escapeHTML(JSON.stringify(r.baseMarks||{}))}"><input type="hidden" id="bulk_lineMarks_${idx}" value="${escapeHTML(JSON.stringify(r.lineMarks||{}))}"><input type="hidden" id="bulk_lineMarkGroups_${idx}" value="${escapeHTML(JSON.stringify(r.lineMarkGroups||[]))}">`;
   container.appendChild(card);
@@ -1103,18 +1099,13 @@ function saveAllBulkRecords(){
  for(let i=0;i<cards.length;i++){
   const venue=$('bulk_venue_'+i)?.value||'不明',raceName=$('bulk_race_'+i)?.value||'UNKNOWN';
   const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||'',line1=$('bulk_line1_'+i)?.value||'',lineHeads=(()=>{try{return JSON.parse($('bulk_lineHeads_'+i)?.value||'[]')}catch(e){return []}})(),lineGroups=(()=>{try{return JSON.parse($('bulk_lineGroups_'+i)?.value||'[]')}catch(e){return []}})(),baseMarks=(()=>{try{return JSON.parse($('bulk_baseMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarks=(()=>{try{return JSON.parse($('bulk_lineMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarkGroups=(()=>{try{return JSON.parse($('bulk_lineMarkGroups_'+i)?.value||'[]')}catch(e){return []}})();
-  const orderRaw=($('bulk_order_'+i)?.value||'').trim().replace(/[,\s]+/g,'-');
-  const orderParts=orderRaw.split('-').map(x=>parseInt(x,10)).filter(n=>n>=1&&n<=9).slice(0,3);
-  const pattern=orderParts.length===3?orderParts.join('-'):'';
-  const p2=Number($('bulk_p2_'+i)?.value)||0;
-  const p3=Number($('bulk_p3_'+i)?.value)||0;
   if(raceName==='UNKNOWN'){skipped++;continue}
-  const incoming=normalizeRecord({venue,raceName,raceDate,category,line1,lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,pattern,exacta:orderParts.slice(0,2).join('-')||'',diffPattern:'',diffDisplay:'',payout:p3,payout2ren:p2,sourceType:'manual',timestamp:Date.now()});
+  const incoming=normalizeRecord({venue,raceName,raceDate,category,line1,lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,pattern:'',exacta:'',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,sourceType:'pre-registration',timestamp:Date.now()});
   const idx=savedRecords.findIndex(r=>recordKey(r)===recordKey(incoming));
   if(idx>=0){const old=savedRecords[idx];savedRecords[idx]=normalizeRecord({...old,venue,raceName,raceDate,category,line1:line1||old.line1||'',lineHeads:lineHeads.some(Boolean)?lineHeads:(old.lineHeads||[]),lineGroups:lineGroups.length?lineGroups:(old.lineGroups||[]),baseMarks:Object.keys(baseMarks).length?baseMarks:(old.baseMarks||{}),lineMarks:Object.keys(lineMarks).length?lineMarks:(old.lineMarks||{}),lineMarkGroups:lineMarkGroups.length?lineMarkGroups:(old.lineMarkGroups||[]),timestamp:old.timestamp||Date.now()});updated++;}
   else{savedRecords.push(incoming);saved++;}
  }
- if(saved||updated){persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> 事前登録完了：新規 ${saved}件／既存更新 ${updated}件／対象外 ${skipped}件。着順・配当を含めて保存しました。`,'success');closeBulkInputModal();playBeep(880,'sine',.2);}
+ if(saved||updated){persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> 事前登録完了：新規 ${saved}件／既存更新 ${updated}件／対象外 ${skipped}件。着順・配当は未入力で保存しました。`,'success');closeBulkInputModal();playBeep(880,'sine',.2);}
  else logToTerminal('> 登録対象がありませんでした。','error');
 }
 
@@ -1248,12 +1239,13 @@ function parseCSV(text){
   if(quoted){if(c==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}
   else if(c==='"')quoted=true;
   else if(c===','){row.push(cell);cell='';}
-  else if(c==='\n'){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);row=[];cell='';}
+  else if(c==='
+'){row.push(cell.replace(/$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);row=[];cell='';}
   else cell+=c;
  }
- if(cell.length||row.length){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);}
+ if(cell.length||row.length){row.push(cell.replace(/$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);}
  if(!rows.length)return [];
- const headers=rows.shift().map((h,i)=>i===0?h.replace(/^\uFEFF/,'').trim():h.trim());
+ const headers=rows.shift().map((h,i)=>i===0?h.replace(/^﻿/,'').trim():h.trim());
  return rows.map(a=>Object.fromEntries(headers.map((h,i)=>[h,(a[i]??'').trim()])));
 }
 function splitLines(value){return String(value||'').split('/').map(g=>g.trim()).filter(Boolean).map(g=>g.split(/[-‐‑‒–—\s]+/).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=1&&n<=9));}
@@ -1548,13 +1540,13 @@ if ("serviceWorker" in navigator) {
   <button id="closeBulkBtn" type="button" class="touch-btn absolute top-2 right-3 text-3xl font-black text-slate-900 w-10 h-10 z-10">×</button>
   <header class="text-center mb-3 border-b-2 border-slate-900 pb-2 mt-1">
    <h2 class="font-orbitron text-2xl sm:text-3xl font-black tracking-widest">BULK MANUAL INPUT</h2>
-   <p class="text-[10px] font-bold mt-1">FILE LOADED // ライン①抽出済み・着順配当入力</p>
+   <p class="text-[10px] font-bold mt-1">FILE LOADED // レース情報の事前登録</p>
   </header>
   <div id="bulkRaceContainer" class="flex-1 overflow-y-auto space-y-4 pr-1" style="max-height: calc(95dvh - 180px);">
    <!-- Races will be injected here -->
   </div>
   <div class="mt-3 pt-3 border-t border-slate-300 flex gap-2">
-   <button id="saveAllBulkBtn" type="button" class="touch-btn btn-alert flex-1 py-3 rounded-xl text-sm tracking-widest">SAVE ALL (着順配当込み)</button>
+   <button id="saveAllBulkBtn" type="button" class="touch-btn btn-alert flex-1 py-3 rounded-xl text-sm tracking-widest">SAVE RACE LIST</button>
    <button id="closeBulkBtn2" type="button" class="touch-btn btn-ghost py-3 px-4 rounded-xl text-sm">CLOSE</button>
   </div>
  </div>
