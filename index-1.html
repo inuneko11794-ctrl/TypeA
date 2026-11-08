@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="ja" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#007cff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BANK-KUN">
+<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v10.9</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--cyan:#00aaff;--pink:#168cff;--violet:#65c8ff;--gold:#d9f7ff;--ink:#f4fbff;--panel:rgba(255,255,255,.94)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:#10243b;font-family:'Noto Sans JP',sans-serif;background:radial-gradient(ellipse at 12% 8%,rgba(0,170,255,.22),transparent 34%),radial-gradient(ellipse at 88% 22%,rgba(22,140,255,.15),transparent 35%),radial-gradient(ellipse at 50% 100%,rgba(101,200,255,.22),transparent 42%),#f4faff;background-attachment:fixed;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.24;background-image:linear-gradient(rgba(0,125,220,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(0,125,220,.12) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,black,transparent 88%)}
+body:after{content:"";position:fixed;inset:-30%;pointer-events:none;z-index:0;background:conic-gradient(from 0deg,transparent 0 68%,rgba(0,145,255,.07),transparent 78%);animation:aurora 24s linear infinite}
+@keyframes aurora{to{transform:rotate(360deg)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 8px #00f5ff55,0 0 22px #00f5ff22}50%{box-shadow:0 0 16px #00f5ffbb,0 0 42px #168cff55}}
+@keyframes pinkPulse{0%,100%{box-shadow:0 0 8px #168cff55}50%{box-shadow:0 0 24px #168cffcc,0 0 48px #65c8ff66}}
+@keyframes shine{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes flicker{0%,94%,96%,98%,100%{opacity:1}95%,97%{opacity:.78}}
+@keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.font-orbitron{font-family:Orbitron,sans-serif}.font-mono-tech{font-family:'Share Tech Mono',monospace}
+.app-shell{width:min(1440px,100%);margin:auto;padding:clamp(12px,2.5vw,30px);position:relative;z-index:1}
+.glass-panel{background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(232,246,255,.96));border:1px solid rgba(0,145,235,.48);border-radius:22px;box-shadow:0 0 0 1px rgba(0,145,255,.08),0 12px 30px rgba(30,100,160,.13),inset 0 0 28px rgba(0,145,255,.07);position:relative;overflow:hidden}
+.glass-panel:before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(120deg,#00aaff12,transparent 35%,#168cff0a 75%,transparent)}
+.panel-content{position:relative;z-index:1}
+.neon-title{color:#07345b;text-shadow:0 0 3px #fff,0 0 10px #00aaff99,0 0 25px #008cff66;animation:flicker 7s infinite}
+.neon-cyan{color:var(--cyan);text-shadow:0 0 8px #00f5ff99}.neon-cyan{color:#0078c9;text-shadow:0 0 8px #00aaff55,0 0 18px #168cff33}
+.kicker{font:700 10px Orbitron,sans-serif;letter-spacing:.16em;color:#0879b9}
+.touch-btn{cursor:pointer;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .16s,filter .16s,box-shadow .16s}
+.touch-btn:active{transform:scale(.97);filter:brightness(1.35)}
+.btn-cyber{color:#06304d;font-weight:900;background:linear-gradient(100deg,#8beaff,#ffffff,#b8e7ff,#65c8ff);background-size:200% 100%;border:1px solid #00aaff;box-shadow:0 0 12px #00aaff77,0 0 30px #008cff33;animation:shine 4s linear infinite}
+.btn-alert{color:#07345b;font-weight:900;background:linear-gradient(110deg,#dff8ff,#8bdcff,#ffffff,#b7e8ff);background-size:200% 100%;border:1px solid #168cff;box-shadow:0 0 14px #168cff66,0 0 34px #00aaff33;animation:shine 3s linear infinite,pulseGlow 2s infinite}
+.btn-ghost{background:rgba(255,255,255,.86);border:1px solid #9bc9e8;color:#16466b}
+.field{width:100%;background:#ffffff;color:#102d49;border:1px solid #9bc9e8;border-radius:12px;padding:12px;outline:none}
+.field:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #00f5ff20,0 0 18px #00f5ff44}
+.card-matrix{background:linear-gradient(145deg,#ffffff,#eaf6ff);border:1px solid #9bcff0;border-radius:18px;box-shadow:0 8px 22px rgba(30,100,160,.12),inset 0 0 22px rgba(0,145,255,.06);color:#123653;animation:rise .35s ease both}
+.metric-number{color:#102d49;text-shadow:0 0 10px #00f5ff99}
+.scanline{height:2px;background:linear-gradient(90deg,transparent,var(--cyan),var(--pink),transparent);box-shadow:0 0 12px var(--cyan)}
+#outputArea{background:#f8fcff;color:#075b91;border:1px solid #a8d7f2;border-radius:14px;overflow:auto}
+#manualInputModal{background:rgba(225,243,255,.88);backdrop-filter:blur(14px)}
+.modal-card{background:linear-gradient(145deg,#ffffff,#edf8ff);color:#102b45;border:3px solid #168cff;box-shadow:0 0 0 2px #ffffff,0 0 35px #00aaff66,0 0 90px #168cff33}
+.modal-field{background:#fff;color:#120c2a;border:2px solid #211747;border-radius:10px;padding:12px;width:100%;font-weight:900}
+.modal-field:focus{outline:3px solid #00d9e8}
+#matrixChart{max-height:360px}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:linear-gradient(var(--cyan),var(--pink));border-radius:8px}
+@media(max-width:640px){
+ .app-shell{padding:12px 10px calc(24px + env(safe-area-inset-bottom))}
+ .glass-panel{border-radius:17px}
+ header{align-items:flex-start!important}
+ #dataCount{width:100%;justify-content:space-between;margin-top:12px}
+ .control-grid{grid-template-columns:1fr 1fr}
+ #matrixChart{max-height:280px}
+ .mobile-stack{display:flex;flex-direction:column}
+ .modal-card{padding:16px!important;border-width:2px;max-height:92dvh;overflow-y:auto}
+ .modal-card header h2{font-size:25px}
+}
+
+.discovery-card{background:linear-gradient(145deg,#fff,#eaf7ff);border:1px solid #75c9f5;border-radius:15px;padding:13px;color:#123653;box-shadow:0 7px 18px rgba(20,110,170,.10)}
+.discovery-chip{display:inline-block;border:1px solid #80c9ee;background:#e8f7ff;color:#075b91;border-radius:999px;padding:3px 8px;font-size:10px;font-weight:900}
+.discovery-meter{height:7px;border-radius:99px;background:#d9edf9;overflow:hidden}.discovery-meter>i{display:block;height:100%;background:linear-gradient(90deg,#00aaff,#168cff);border-radius:99px}
+.discovery-result{border:1px solid #a8d7f2;background:rgba(255,255,255,.92);border-radius:12px;padding:12px;margin-top:9px}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+
+/* ===== CYBER WHITE ULTRA : VISUAL UPGRADE v9.0 ===== */
+:root{--cyan:#007cff;--pink:#00b8ff;--violet:#536dff;--gold:#e2f5ff;--ink:#092744;--panel:rgba(255,255,255,.97);--deep:#071a33;--electric:#00a8ff;--ice:#eaf7ff}
+body{color:#102b46;background:radial-gradient(ellipse at 8% 4%,rgba(0,153,255,.18),transparent 30%),radial-gradient(ellipse at 92% 14%,rgba(72,105,255,.13),transparent 29%),radial-gradient(ellipse at 50% 100%,rgba(0,190,255,.12),transparent 38%),linear-gradient(135deg,#f8fcff 0%,#eaf5ff 48%,#f9fcff 100%)}
+body:before{opacity:.18;background-image:linear-gradient(rgba(0,105,210,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(0,105,210,.13) 1px,transparent 1px);background-size:28px 28px}
+body:after{background:conic-gradient(from 0deg,transparent 0 68%,rgba(0,132,255,.09),transparent 78%)}
+.app-shell{max-width:1480px}
+.app-shell>header{padding:clamp(18px,3vw,30px);margin-bottom:24px;border:1px solid rgba(91,190,255,.55)!important;border-radius:26px;background:radial-gradient(ellipse at 90% 0%,rgba(0,170,255,.23),transparent 38%),linear-gradient(115deg,#071a33 0%,#0b2d52 55%,#123c68 100%);box-shadow:0 18px 48px rgba(4,35,73,.22),inset 0 1px 0 rgba(255,255,255,.18);overflow:hidden;position:relative}
+.app-shell>header:after{content:"";position:absolute;right:-70px;top:-110px;width:330px;height:330px;border:1px solid rgba(79,198,255,.24);border-radius:50%;box-shadow:0 0 0 24px rgba(70,180,255,.035),0 0 0 52px rgba(70,180,255,.025);pointer-events:none}
+.app-shell>header>div{position:relative;z-index:1}
+.kicker{color:#8bdcff;letter-spacing:.24em;text-shadow:0 0 14px #00aaff66}
+.neon-title{color:#f5fcff;text-shadow:0 0 4px #fff,0 0 16px #00aaffaa,0 0 38px #007cff88;letter-spacing:.045em}
+.app-shell>header .text-cyan-100{color:#e7f7ff!important}.app-shell>header .text-cyan-300{color:#83dfff!important}
+.app-shell>header .border-cyan-300\/70{border-color:#58caff88!important}.app-shell>header .bg-cyan-400\/10{background:rgba(0,170,255,.13)!important}.app-shell>header .bg-cyan-300\/10{background:rgba(0,170,255,.12)!important}
+.glass-panel{background:linear-gradient(145deg,rgba(255,255,255,.99),rgba(239,249,255,.97));border:1px solid rgba(40,157,235,.42);border-radius:23px;box-shadow:0 14px 38px rgba(13,67,115,.10),0 3px 9px rgba(0,120,220,.06),inset 0 1px 0 #fff,inset 0 0 28px rgba(0,145,255,.045)}
+.glass-panel:before{background:linear-gradient(115deg,rgba(0,164,255,.055),transparent 35%,rgba(81,110,255,.035) 78%,transparent)}
+.panel-content{color:#143653}.neon-cyan{color:#0078d7;text-shadow:0 0 12px #00aaff35}
+.touch-btn{border-radius:12px;font-weight:900;letter-spacing:.025em}
+.btn-cyber{color:#fff;font-weight:900;background:linear-gradient(105deg,#006fe8,#009fff 48%,#00b9df);border:1px solid #008be9;box-shadow:0 7px 18px rgba(0,126,230,.23),inset 0 1px 0 #ffffff66;animation:none}
+.btn-alert{color:#fff;font-weight:900;background:linear-gradient(110deg,#0754c8,#007fe9 48%,#00a9d8);border:1px solid #006bd2;box-shadow:0 8px 22px rgba(0,105,220,.27),0 0 24px rgba(0,160,255,.16);animation:pulseGlow 3.2s infinite}
+.btn-ghost{background:linear-gradient(145deg,#fff,#edf7ff);border:1px solid #a8d3f1;color:#16466b;box-shadow:0 3px 10px rgba(20,90,150,.07)}
+.field{background:#fff;color:#102d49;border:1px solid #b5d5ed;border-radius:13px;box-shadow:inset 0 1px 3px rgba(10,65,110,.035)}
+.field:focus{border-color:#008cf0;box-shadow:0 0 0 3px #008cff1c,0 0 18px #008cff22}
+.card-matrix{background:linear-gradient(145deg,#fff 0%,#f1f9ff 100%);border:1px solid #c0def2;border-radius:18px;box-shadow:0 9px 24px rgba(17,83,137,.085),inset 0 1px 0 #fff;color:#123653}
+.metric-number{color:#006fc8;text-shadow:0 0 12px #00aaff33}
+.scanline{height:3px;background:linear-gradient(90deg,transparent,#00a8ff 20%,#536dff 55%,#00c5e8 80%,transparent);box-shadow:0 0 15px #008cff66}
+#outputArea{background:linear-gradient(145deg,#071a33,#0b2b4d);color:#a8eaff;border:1px solid #1679bb;border-radius:15px;box-shadow:inset 0 0 24px rgba(0,140,255,.12),0 8px 20px rgba(5,30,60,.12)}
+#manualInputModal{background:rgba(4,25,48,.62);backdrop-filter:blur(16px)}
+.modal-card{background:linear-gradient(145deg,#fff,#eff8ff);color:#102b45;border:2px solid #49baff;box-shadow:0 0 0 1px #fff,0 20px 70px rgba(0,39,86,.32),0 0 45px #008cff33}
+.modal-field{background:#fff;color:#102d49;border:1px solid #a8cde9;border-radius:11px}
+.modal-field:focus{outline:3px solid #008cff28;border-color:#008cff}
+.discovery-card{background:linear-gradient(145deg,#fff,#f0f9ff);border:1px solid #b4dcf4;border-radius:16px;padding:14px;color:#123653;box-shadow:0 8px 20px rgba(20,90,150,.08)}
+.discovery-chip{border:1px solid #a8d8f4;background:#eaf7ff;color:#075b91}.discovery-meter{background:#e1eff8}.discovery-meter>i{background:linear-gradient(90deg,#007cff,#00c6e8)}
+.discovery-result{border:1px solid #c0def2;background:rgba(255,255,255,.97);border-radius:14px;box-shadow:0 5px 15px rgba(20,90,150,.055)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(0,140,255,.28);outline-offset:2px}
+::selection{background:#bdeaff;color:#07345b}::-webkit-scrollbar-thumb{background:linear-gradient(#008cff,#536dff);border-radius:8px}
+@media(max-width:640px){.app-shell>header{border-radius:20px;padding:18px 15px}.neon-title{font-size:clamp(2rem,10vw,3rem);line-height:1.08}.glass-panel{border-radius:17px}.btn-cyber,.btn-alert,.btn-ghost{min-height:42px}}
+@media(prefers-reduced-motion:reduce){.app-shell>header:after{display:none}}
+
+
+/* ===== DYNAMIC BANK & PARTICLES ===== */
+.cyber-particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.cp { position: absolute; border-radius: 50%; animation: float-up linear infinite; }
+.cp:nth-child(1) { width: 6px; height: 6px; left: 15%; bottom: -10px; animation-duration: 12s; animation-delay: 0s; background: rgba(0, 168, 255, 0.5); box-shadow: 0 0 12px #00a8ff; }
+.cp:nth-child(2) { width: 4px; height: 4px; left: 35%; bottom: -10px; animation-duration: 9s; animation-delay: 3s; background: rgba(83, 109, 255, 0.5); box-shadow: 0 0 10px #536dff; }
+.cp:nth-child(3) { width: 8px; height: 8px; left: 55%; bottom: -10px; animation-duration: 15s; animation-delay: 1s; background: rgba(0, 184, 255, 0.5); box-shadow: 0 0 15px #00b8ff; }
+.cp:nth-child(4) { width: 3px; height: 3px; left: 75%; bottom: -10px; animation-duration: 8s; animation-delay: 5s; background: rgba(0, 245, 255, 0.5); box-shadow: 0 0 8px #00f5ff; }
+.cp:nth-child(5) { width: 5px; height: 5px; left: 90%; bottom: -10px; animation-duration: 11s; animation-delay: 2s; background: rgba(0, 168, 255, 0.5); box-shadow: 0 0 10px #00a8ff; }
+@keyframes float-up { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(-110vh) scale(0.5); opacity: 0; } }
+
+.bank-track { position: absolute; top: 0; left: 0; right: 0; height: 100%; overflow: hidden; pointer-events: none; z-index: 0; border-radius: 26px; }
+.bank-line { position: absolute; top: 25%; left: -5%; right: -5%; height: 50%; border-bottom: 2px dashed rgba(0, 168, 255, 0.2); border-top: 2px dashed rgba(0, 168, 255, 0.2); background: linear-gradient(90deg, transparent, rgba(0,168,255,0.06) 50%, transparent); border-radius: 50% / 30%; transform: skewY(-1deg); }
+.bg-racer { position: absolute; opacity: 0.65; }
+.bg-racer.right { animation: race-right linear infinite; }
+.bg-racer.left { animation: race-left linear infinite; }
+@keyframes race-right { 0% { left: -10%; transform: scaleX(-1) rotate(5deg); } 50% { transform: scaleX(-1) rotate(-2deg) translateY(-4px); } 100% { left: 110%; transform: scaleX(-1) rotate(5deg); } }
+@keyframes race-left { 0% { right: -10%; transform: scaleX(1) rotate(-5deg); } 50% { transform: scaleX(1) rotate(2deg) translateY(-4px); } 100% { right: 110%; transform: scaleX(1) rotate(-5deg); } }
+.r-1 { top: 15%; font-size: 24px; animation-duration: 7s; animation-delay: 0s; filter: drop-shadow(0 0 6px #ff0055); z-index: 3;}
+.r-2 { top: 45%; font-size: 16px; animation-duration: 11s; animation-delay: 2.5s; filter: drop-shadow(0 0 6px #00a8ff); z-index: 2;}
+.r-3 { top: 65%; font-size: 32px; animation-duration: 5.5s; animation-delay: 4s; filter: drop-shadow(0 0 6px #00ff88); z-index: 4;}
+
+.scanline { position: relative; overflow: visible !important; }
+.scanline-racer { position: absolute; top: -19px; font-size: 22px; animation: scanline-dash 3.5s infinite cubic-bezier(0.25, 0.1, 0.25, 1); filter: drop-shadow(0 0 8px #00b8ff); transform: scaleX(-1); white-space: nowrap; pointer-events: none; }
+@keyframes scanline-dash { 0% { left: -15%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { left: 105%; opacity: 0; } }
+
+
+/* ===== DEEP SEA ASCENT BACKGROUND ===== */
+body {
+    background: linear-gradient(to top, #00040a 0%, #01142b 25%, #054070 60%, #46b4ff 85%, #eaf6ff 100%) !important;
+    background-attachment: fixed !important;
+}
+/* 水面からの光（ハイライト） */
+body:before {
+    content: "" !important;
+    position: fixed !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+    background: radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.8) 0%, rgba(0, 180, 255, 0.3) 40%, transparent 80%) !important;
+    opacity: 0.9 !important;
+    mask-image: none !important;
+    -webkit-mask-image: none !important;
+    animation: none !important;
+}
+/* 深海へ沈むグリッド線 */
+body:after {
+    content: "" !important;
+    position: fixed !important;
+    inset: 0 !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important;
+    background-size: 32px 32px !important;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 100%) !important;
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%) !important;
+    animation: none !important;
+}
+
+/* 泡（這い上がる気泡）へのアップグレード */
+@keyframes bubble-up {
+    0% { transform: translateY(10vh) scale(0.8) translateX(0); opacity: 0; }
+    10% { opacity: 1; }
+    50% { transform: translateY(-45vh) scale(1.1) translateX(20px); }
+    90% { opacity: 1; }
+    100% { transform: translateY(-110vh) scale(1.3) translateX(-20px); opacity: 0; }
+}
+.cp {
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 0 15px rgba(0, 150, 255, 0.3), inset 0 0 8px rgba(255, 255, 255, 0.5) !important;
+    animation-name: bubble-up !important;
+    animation-timing-function: ease-in-out !important;
+}
+.cp:nth-child(1) { width: 14px !important; height: 14px !important; animation-duration: 9s !important; }
+.cp:nth-child(2) { width: 8px !important; height: 8px !important; animation-duration: 7s !important; }
+.cp:nth-child(3) { width: 20px !important; height: 20px !important; animation-duration: 12s !important; }
+.cp:nth-child(4) { width: 10px !important; height: 10px !important; animation-duration: 6s !important; }
+.cp:nth-child(5) { width: 16px !important; height: 16px !important; animation-duration: 10s !important; }
+
+#recordList .discovery-result{margin-top:0}
+@media(max-width:640px){#recordManager .field{min-height:44px}}
+html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-motion="reduced"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+
+/* v10.1 tab navigation */
+.main-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 22px}
+.main-tab{min-height:54px;border:1px solid rgba(0,170,255,.42);border-radius:13px;background:rgba(255,255,255,.78);color:#145078;font-weight:900;font-size:12px;letter-spacing:.04em;padding:10px 8px;transition:.18s}
+.main-tab .tab-sub{display:block;font-size:9px;font-weight:700;opacity:.68;margin-top:3px}
+.main-tab[aria-selected="true"]{background:linear-gradient(135deg,#087eb8,#07527c);border-color:#46c9ff;color:#fff;box-shadow:0 5px 18px rgba(0,126,184,.2)}
+[data-tab-panel][hidden]{display:none!important}
+@media(max-width:520px){.main-tabs{gap:5px}.main-tab{font-size:10px;padding:8px 3px;min-height:50px}.main-tab .tab-sub{font-size:8px}}
+
+</style>
+</head>
+<body>
+
+<div class="cyber-particles">
+    <div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div>
+</div>
+
+<div class="app-shell">
+<header class="flex flex-col md:flex-row justify-between items-end border-b border-cyan-300/50 pb-5 mb-6 gap-3">
+
+<div class="bank-track">
+    <div class="bank-line"></div>
+    <div class="bg-racer right r-1">🚴‍♂️</div>
+    <div class="bg-racer right r-2">🚴‍♀️</div>
+    <div class="bg-racer left r-3">🚴‍♂️</div>
+</div>
+
+ <div class="w-full">
+  <div class="kicker mb-2">PATTERN MATRIX // DATA INTELLIGENCE SYSTEM</div>
+  <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
+  <div class="flex flex-wrap items-center gap-2 mt-3">
+   <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">CYBER WHITE ULTRA v10.9</span>
+   <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
+  </div>
+ </div>
+ <div id="dataCount" class="font-mono-tech text-xl text-cyan-100 border border-cyan-300/70 bg-cyan-400/10 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ 00000 ]</span></div>
+</header>
+
+<nav class="main-tabs" role="tablist" aria-label="メインメニュー">
+ <button type="button" class="main-tab" role="tab" id="tabHome" aria-controls="dashboardPanel" aria-selected="true" data-tab-target="home">ホーム<span class="tab-sub">DATA / STATUS</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabAnalysis" aria-selected="false" data-tab-target="analysis">分析・集計<span class="tab-sub">PATTERN / TABLES</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabDatabase" aria-selected="false" data-tab-target="database">レース管理<span class="tab-sub">DATABASE</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabSettings" aria-selected="false" data-tab-target="settings">設定・音楽<span class="tab-sub">BACKUP / AUDIO</span></button>
+</nav>
+
+
+<div id="dashboardPanel" data-tab-panel="home" class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-7">
+ <section class="xl:col-span-4 flex flex-col gap-5">
+  <div class="glass-panel p-4 sm:p-5">
+   <div class="panel-content">
+    <button id="openManualBtn" type="button" class="touch-btn btn-alert w-full py-4 px-4 mb-5 rounded-xl flex justify-between items-center text-sm tracking-widest"><span>⚡ 手動入力モード</span><span>▶</span></button>
+    <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.txt,text/plain,text/markdown,text/*"></div>
+    <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-4" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea>
+    <div class="flex flex-col gap-3">
+     <button id="extractBtn" type="button" class="touch-btn btn-cyber py-4 rounded-xl text-xs tracking-widest">📥 EXTRACT & ARCHIVE [データ抽出保存]</button>
+     <button id="syncBtn" type="button" class="touch-btn btn-alert py-4 rounded-xl text-xs tracking-widest">📋 PRE-REGISTER [レース情報を事前登録]</button>
+    </div>
+   </div>
+  </div>
+  <div class="glass-panel p-4 sm:p-5">
+   <div class="panel-content">
+    <h2 class="kicker border-l-4 border-sky-500 pl-2 mb-4">SYS.COMMANDS // 制御</h2>
+    <div class="grid grid-cols-3 gap-2 mb-4 control-grid">
+     <button id="editPayoutBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">簡易修正</button>
+     <button id="analysisBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">UI再構築</button>
+     <button id="deepScanBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">7車 DEEP SCAN</button>
+    </div>
+    <div class="scanline mb-4"><div class="scanline-racer">🚴💨</div></div>
+    <div class="grid grid-cols-3 gap-2">
+     <button id="exportBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[9px]">データ書出</button>
+     <button id="importTriggerBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[9px]">データ読込</button><input type="file" id="fileInput" class="hidden" accept=".json,application/json,text/plain">
+     <button id="clearBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[9px] !text-sky-700 !border-sky-500/60">完全消去</button>
+    </div>
+   </div>
+  </div>
+ </section>
+
+ <section class="xl:col-span-8 flex flex-col gap-5">
+  <div class="glass-panel p-4 sm:p-5">
+   <div class="panel-content">
+    <div class="flex flex-wrap justify-between items-center gap-2 mb-4"><h2 class="kicker neon-cyan">PATTERN DYNAMICS // 差分パターン別 平均配当</h2><span class="text-[10px] text-sky-700 font-mono-tech border border-sky-400/60 px-3 py-1 rounded-full">● LIVE ANALYSIS</span></div>
+    <div class="bg-[#08061b] rounded-xl border border-cyan-300/30 p-2 sm:p-3" style="height:320px"><canvas id="matrixChart"></canvas></div>
+   </div>
+  </div>
+  <div class="glass-panel p-4 sm:p-5 h-52 flex flex-col relative">
+   <div class="panel-content flex flex-col flex-1 min-h-0">
+    <h2 class="kicker border-l-4 border-cyan-300 pl-2 mb-3">TERMINAL LOG // 実行履歴</h2>
+    <button id="clearLogBtn" type="button" class="touch-btn absolute top-3 right-3 text-[9px] btn-ghost px-3 py-1 rounded-lg">CLEAR</button>
+    <div id="outputArea" class="flex-1 p-3 font-mono-tech text-[11px] leading-relaxed whitespace-pre-wrap">SYSTEM BOOT SEQUENCE v9.0...
+AWAITING COMMAND EXECUTION...</div>
+   </div>
+  </div>
+ </section>
+</div>
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="discoverySection" data-tab-panel="analysis">
+ <div class="panel-content">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-sky-500 pl-2">AUTO PATTERN DISCOVERY // 自動パターン発見</h2><span class="discovery-chip">V8.1 ENGINE</span></div>
+  <p class="text-xs text-sky-800 mb-4">登録済みレースから、車番・着順ペア・差分パターンの偏りを自動探索します。時系列で古い80%を発見用、直近20%を検証用に分けます。</p>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">対象クラス</label><select id="discoveryClass" class="field !py-2 text-xs"><option value="ALL">全クラス</option><option value="7車">7車</option><option value="9車">9車</option><option value="ガールズ">ガールズ</option><option value="6車">6車</option><option value="5車">5車</option><option value="8車">8車</option></select></div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">高配当の基準（円）</label><input id="discoveryThreshold" class="field !py-2 text-xs" type="number" min="1" step="1000" value="10000"></div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">最低出現数</label><select id="discoveryMin" class="field !py-2 text-xs"><option value="5">5件</option><option value="10" selected>10件</option><option value="20">20件</option><option value="30">30件</option></select></div>
+   <div class="flex items-end"><button id="discoverBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">PATTERN SCAN 実行</button></div>
+  </div>
+  <div id="discoverySummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+  <div id="discoveryResults" class="space-y-2"><div class="discovery-card text-xs">スキャンを実行すると、出現頻度・高配当率・平均配当・直近20%での再現状況を表示します。</div></div>
+  <p class="text-[10px] text-slate-500 mt-3">※配当未入力レースは配当率の計算対象外。検証側の件数が少ないパターンは「検証データ不足」と表示します。相関は予測の保証ではありません。</p>
+ </div>
+</section>
+
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="numericTrickLab" data-tab-panel="analysis">
+ <div class="panel-content">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-cyan-500 pl-2">LINE HEAD PAIR + MARK RELATION LAB // 車番ペア・印の関係分析</h2><span class="discovery-chip">PAIR PAYOUT RANKING</span></div>
+  <p class="text-xs text-sky-800 mb-4">ライン先頭の車番ペアごとの平均配当に加え、先頭2人の印の組み合わせと、2ライン全選手の印の並びも分析します。1－4と4－1は同じ車番ペアとして集計します。</p>
+  <div class="discovery-card mb-3">
+   <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
+    <label class="text-xs font-bold">分析CSVを読み込む（brain races形式）<input id="trickCsvInput" type="file" accept=".csv,text/csv" class="field mt-1 text-xs"></label>
+    <div class="text-xs text-slate-600" id="trickCsvStatus">CSV未読込。読み込んだデータは既存DBと分離して扱います。</div>
+   </div>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">対象</label><select id="trickClass" class="field !py-2 text-xs"><option value="MEN_ALL">男子・全車立て</option><option value="5車">男子5車</option><option value="6車">男子6車</option><option value="7車">男子7車</option><option value="8車">男子8車</option><option value="9車">男子9車</option><option value="ガールズ">ガールズのみ</option></select></div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">配当種別</label><select id="trickPayoutType" class="field !py-2 text-xs"><option value="tri_yen">3連単</option><option value="exa_yen">2連単</option></select></div>
+   <div class="flex items-end"><button id="trickRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">組み合わせ分析</button></div>
+  </div>
+  <div id="trickSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+  <div id="trickResults" class="space-y-3"><div class="discovery-card text-center text-sky-700 text-xs">CSVを読み込み、分析を実行してください。</div></div>
+  <div class="mt-4"><h3 class="kicker border-l-4 border-violet-500 pl-2 mb-2">MARK RELATION LAB // 印の関係分析</h3><p class="text-[11px] text-slate-600 mb-2">ライン位置（①×②・①×③・②×③）ごとに、両ライン先頭の印の関係と2ライン全員の印並びを集計します。最低件数に満たないパターンは低配当・高配当ランキングから除外します。</p><div class="flex items-end gap-2 mb-3"><label class="text-[10px] font-bold text-violet-800 flex-1">ランキング最低出現数<select id="markPatternMinCount" class="field !py-2 text-xs mt-1"><option value="5">5件</option><option value="10" selected>10件</option><option value="20">20件</option><option value="30">30件</option><option value="50">50件</option></select></label><div class="text-[10px] text-slate-500 flex-1">件数不足の組み合わせはランキング対象外</div></div><div id="trickMarkResults" class="space-y-3"><div class="discovery-card text-xs">組み合わせ分析を実行してください。</div></div><div class="mt-4 border-t border-violet-200 pt-3"><h4 class="kicker border-l-4 border-fuchsia-500 pl-2 mb-2">CSV × LIVE JSON MARK COMPARISON // 変換印の比較</h4><p class="text-[10px] text-slate-600 mb-2">⑳・●・▲・✖・☆・★に変換したライン内の印並びを、過去CSVと直近JSONで比較します。無印という共通ラベルにはまとめません。</p><div id="trickMarkJsonCompare" class="space-y-2"><div class="discovery-card text-xs">CSV分析を実行すると比較します。</div></div></div></div>
+  <p class="text-[10px] text-slate-500 mt-3">集計対象はライン先頭車番のペアです。提示された組み合わせ条件に従い、1－2と1－3は対象外。平均配当の算出には選択した配当が入力済みのレースだけを使用し、各組み合わせの出現数も併記します。奇数・偶数の分析は行いません。</p>
+  <div class="mt-6 border-t-2 border-cyan-200 pt-4" id="lowPayoutHeadLab">
+   <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h3 class="kicker border-l-4 border-emerald-500 pl-2">LOW PAYOUT HEAD PAIR LAB // ライン先頭ペア・1万円以下分析</h3><span class="discovery-chip">UNDER THRESHOLD RATE</span></div>
+   <p class="text-xs text-sky-800 mb-3">ライン①〜④の位置を区別して、各ライン先頭車番の組み合わせを総当たりします。たとえば①×②なら「①の先頭1番－②の先頭2番」と「①の先頭2番－②の先頭1番」は別集計です。3連単配当が基準以下になる割合を比較します。</p>
+   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end mb-3">
+    <div><label class="block text-[10px] font-bold text-emerald-800 mb-1">1万円以下の基準（円）</label><input id="lowPayoutThreshold" class="field !py-2 text-xs" type="number" min="1" step="1000" value="10000"></div>
+    <div><label class="block text-[10px] font-bold text-emerald-800 mb-1">最低出現数</label><input id="lowPayoutMinCount" class="field !py-2 text-xs" type="number" min="1" step="5" value="20"></div>
+    <div class="md:col-span-2"><button id="lowPayoutRunBtn" type="button" class="touch-btn btn-cyber w-full py-2.5 rounded-xl text-xs">ライン①〜④を総当たり分析</button></div>
+   </div>
+   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end mb-3">
+    <div class="md:col-span-2"><button id="medianHeadRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">中央値で高低配当 Top/Bottom 3</button></div>
+    <div class="md:col-span-2 text-[10px] text-slate-500">各位置ペアごとに、車番組み合わせの3連単中央値で上位3・下位3を表示します。</div>
+   </div>
+   <div id="lowPayoutSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+   <div id="lowPayoutResults" class="space-y-3"><div class="discovery-card text-center text-xs">分析CSVを読み込み、総当たり分析を実行してください。</div></div>
+   <div id="medianHeadResults" class="space-y-3 mt-3"><div class="discovery-card text-center text-xs">中央値分析を実行すると、各ライン位置ペアの高低配当中央値上位・下位3が表示されます。</div></div>
+   <div class="mt-5 border-t border-emerald-200 pt-4"><h4 class="kicker border-l-4 border-cyan-500 pl-2 mb-2">CSV × LIVE JSON COMPARISON // 過去CSVと直近収集データの比較</h4><p class="text-[11px] text-slate-600 mb-2">事前登録したライン①〜④の先頭車番と、結果入力後の3連単配当を同じ条件で比較します。古いJSONでライン情報がないレースは比較対象外です。</p><div id="lowPayoutRecentCompare" class="space-y-2"><div class="discovery-card text-xs">CSV分析と直近JSONデータの両方を用意して分析を実行してください。</div></div></div>
+   <p class="text-[10px] text-slate-500 mt-3">※ラインはCSVの記載順を①②③④として扱います。単騎ラインは除外。配当未入力・0円は割合の分母から除外します。各位置ペアごとに全車番の組み合わせを調べ、最低出現数未満も「該当数」としては集計しますがランキングには表示しません。</p>
+  </div>
+  <div class="mt-6 border-t-2 border-cyan-200 pt-4" id="perLineComboLab">
+   <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h3 class="kicker border-l-4 border-fuchsia-500 pl-2">PER-LINE CAR COMBINATION LAB // 各ライン内の車番組み合わせ分析</h3><span class="discovery-chip">POSITION-SPECIFIC</span></div>
+   <p class="text-xs text-sky-800 mb-3">ライン①・②・③・④それぞれについて、そのライン内の先頭2車の車番組み合わせ（例: 1－2, 4－7 など）ごとの平均・中央値を集計します。同じ組み合わせがライン位置によって配当傾向が変わるかを比較できます。</p>
+   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end mb-3">
+    <div><label class="block text-[10px] font-bold text-fuchsia-800 mb-1">最低出現数</label><input id="perLineMinCount" class="field !py-2 text-xs" type="number" min="1" step="5" value="10"></div>
+    <div class="md:col-span-3"><button id="perLineRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">各ラインの車番組み合わせ 高低分析</button></div>
+   </div>
+   <div id="perLineResults" class="space-y-3"><div class="discovery-card text-center text-xs">CSVを読み込み、分析を実行してください。各ライン位置ごとに中央値/平均の上位3・下位3と、位置間比較を表示します。</div></div>
+  </div>
+ </div>
+</section>
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="trifectaProductMarkLab" data-tab-panel="analysis">
+ <div class="panel-content">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-fuchsia-500 pl-2">TRIFECTA PRODUCT × MARK LAB // 3連単・車番積×印相関</h2><span class="discovery-chip">RESULT ORDER ANALYSIS</span></div>
+  <p class="text-xs text-sky-800 mb-3">確定着順の1着・2着・3着の車番を掛け合わせ、その積が近いレース同士で印の並びと配当を比較します。積が小さいほど安い、といった単純比較は行いません。同じ積の範囲内で印の並びによる配当差を調べます。</p>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">積の範囲幅</label><select id="productBucketSize" class="field !py-2 text-xs"><option value="25">25刻み</option><option value="50" selected>50刻み</option><option value="100">100刻み</option></select></div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">高配当基準（円）</label><input id="productHighThreshold" class="field !py-2 text-xs" type="number" min="1" step="1000" value="10000"></div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">印パターン最低件数</label><select id="productMinCount" class="field !py-2 text-xs"><option value="2">2件</option><option value="3" selected>3件</option><option value="5">5件</option><option value="10">10件</option></select></div>
+   <div class="flex items-end"><button id="productMarkRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">積×印分析</button></div>
+  </div>
+  <div id="productMarkSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+  <div id="productMarkResults" class="space-y-3"><div class="discovery-card text-xs">CSVを読み込み、積×印分析を実行してください。</div></div>
+  <p class="text-[10px] text-slate-500 mt-3">印は確定着順順に「1着－2着－3着」で表示。ライン内の印は⑳・●・▲・✖・☆・★へ変換して集計します。単騎は元の印を保持します。対象クラスは上の「対象」設定と連動します。</p>
+ </div>
+</section>
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="line1AnalysisSection" data-tab-panel="analysis">
+ <div class="panel-content">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+   <h2 class="kicker border-l-4 border-sky-500 pl-2">LINE ① PAYOUT MATRIX // ライン①の並び別・配当比較</h2>
+   <span class="discovery-chip">ALL 6 CLASSES</span>
+  </div>
+  <p class="text-xs text-sky-800 mb-4">ライン①の並び順を完全一致で分類し、車立て別に配当差を比較します。全クラスをまとめた比較にも切り替えられます。</p>
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">対象クラス</label>
+    <select id="line1ClassFilter" class="field !py-2 text-xs">
+     <option value="ALL">全クラスを比較</option><option value="5車">5車</option><option value="6車">6車</option><option value="7車">7車</option><option value="8車">8車</option><option value="9車">9車</option><option value="ガールズ">ガールズ</option>
+    </select>
+   </div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">高配当基準（円）</label><input id="line1HighThreshold" class="field !py-2 text-xs" type="number" min="1" step="1000" value="10000"></div>
+   <div class="flex items-end"><button id="line1AnalyzeBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">LINE ① 比較実行</button></div>
+  </div>
+  <div id="line1Summary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+  <div class="overflow-x-auto rounded-xl border border-sky-200 bg-white">
+   <table class="w-full min-w-[820px] text-xs text-left">
+    <thead class="bg-sky-100 text-sky-900"><tr>
+     <th class="p-2">クラス</th><th class="p-2">ライン①の並び</th><th class="p-2 text-right">出現数</th><th class="p-2 text-right">配当入力済</th><th class="p-2 text-right">平均配当</th><th class="p-2 text-right">中央値</th><th class="p-2 text-right">最高配当</th><th class="p-2 text-right">高配当率</th>
+    </tr></thead>
+    <tbody id="line1Results" class="divide-y divide-sky-100"><tr><td colspan="8" class="p-4 text-center text-sky-700">比較を実行すると結果が表示されます。</td></tr></tbody>
+   </table>
+  </div>
+  <p class="text-[10px] text-slate-500 mt-3">※ライン①は出走表の「並び予想」で最初に記載されたラインです。配当統計は配当入力済みレースのみで計算します。並び順が異なるものは別パターンとして扱います。</p>
+ </div>
+</section>
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="venueAnalysisSection" data-tab-panel="analysis">
+ <div class="panel-content">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+   <h2 class="kicker border-l-4 border-sky-500 pl-2">VENUE PAYOUT MATRIX // 会場別・配当統計</h2>
+   <span class="discovery-chip">ALL VENUES</span>
+  </div>
+  <p class="text-xs text-sky-800 mb-4">登録されている競輪場（会場）別のレース数、平均配当、最高配当、高配当率を一覧表示します。</p>
+  <div class="overflow-x-auto rounded-xl border border-sky-200 bg-white">
+   <table class="w-full min-w-[700px] text-xs text-left">
+    <thead class="bg-sky-100 text-sky-900"><tr>
+     <th class="p-2">競輪場</th><th class="p-2 text-right">登録数</th><th class="p-2 text-right">配当入力済</th><th class="p-2 text-right">3連単 平均</th><th class="p-2 text-right">2連単 平均</th><th class="p-2 text-right">最高配当</th><th class="p-2 text-right">高配当率(&ge;1万)</th>
+    </tr></thead>
+    <tbody id="venueResults" class="divide-y divide-sky-100"><tr><td colspan="7" class="p-4 text-center text-sky-700">データがありません。</td></tr></tbody>
+   </table>
+  </div>
+ </div>
+</section>
+
+<section class="mb-8" data-tab-panel="analysis">
+ <h2 class="kicker border-l-4 border-sky-500 pl-2 mb-4">CATEGORY & PATTERN METRICS // 車番クラス別集計</h2>
+ <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3" id="categoryCards"></div>
+</section>
+<section class="glass-panel p-4 sm:p-5 mb-8" id="recordManager" data-tab-panel="database">
+ <div class="panel-content">
+  <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+   <h2 class="kicker border-l-4 border-sky-500 pl-2">RACE DATABASE // 登録レース管理</h2>
+   <div class="flex items-center gap-2"><span class="discovery-chip">SEARCH / EDIT / DELETE</span><button id="openBatchEditBtn" type="button" class="touch-btn btn-alert px-3 py-2 text-xs">未入力を一括編集</button></div>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+   <input id="recordSearch" class="field text-sm" placeholder="競輪場・開催日・レース番号で検索">
+   <select id="recordStatus" class="field text-sm">
+    <option value="all">すべてのレース</option><option value="pending">着順未入力</option>
+    <option value="result">着順入力済み</option><option value="payout">配当入力済み</option>
+    <option value="incomplete">配当未入力あり</option>
+   </select>
+   <div id="recordSummary" class="field text-sm flex items-center font-bold">登録 0件</div>
+  </div>
+  <div id="batchEditPanel" class="hidden discovery-card mb-3"><div class="flex items-center justify-between gap-2 mb-2"><b class="text-sm">未入力レース一括入力</b><button id="closeBatchEditBtn" type="button" class="touch-btn btn-ghost px-3 py-1 text-xs">閉じる</button></div><p class="text-xs text-slate-600 mb-3">着順または2連単・3連単配当が未入力のレースを表示します。空欄は既存値を変更しません。</p><div id="batchEditRows" class="space-y-3"></div><button id="saveBatchEditBtn" type="button" class="touch-btn btn-cyber w-full py-3 mt-3">表示中の内容をまとめて保存</button></div>
+  <div id="recordList" class="space-y-2"><div class="discovery-card text-xs">登録レースがここに表示されます。</div></div>
+ </div>
+</section>
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="userControlHub" data-tab-panel="settings">
+ <div class="panel-content">
+  <div class="flex flex-wrap justify-between items-center gap-2 mb-3"><h2 class="kicker border-l-4 border-cyan-500 pl-2">USER CONTROL HUB // 拡張コントロール</h2><span class="discovery-chip">BACKUP / AUDIO / QUALITY</span></div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+   <div class="discovery-card">
+    <h3 class="font-black text-sm mb-2">DATABASE SAFETY // データ保護</h3>
+    <p class="text-xs text-slate-600 mb-3">自動バックアップはこのブラウザ内に最大5世代保存します。JSONとして手動保存・復元もできます。</p>
+    <div class="grid grid-cols-2 gap-2"><button id="backupNowBtn" class="touch-btn btn-cyber py-3 rounded-lg text-xs">今すぐバックアップ</button><button id="restoreBackupBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">自動バックアップ復元</button><button id="restoreJsonBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">JSONから復元</button><button id="undoActionBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">一つ前に戻す</button><button id="downloadBackupBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">JSON保存</button></div>
+    <input type="file" id="restoreBackupFile" class="hidden" accept=".json,application/json">
+    <div id="backupStatus" class="text-[11px] text-sky-800 mt-2">バックアップ状態を確認中…</div>
+   </div>
+   <div class="discovery-card">
+    <h3 class="font-black text-sm mb-2">DATA HEALTH // データ点検</h3>
+    <p class="text-xs text-slate-600 mb-3">重複候補と着順・配当の入力漏れを検出します。検出だけを行い、データは自動削除しません。</p>
+    <div class="grid grid-cols-2 gap-2"><button id="duplicateCheckBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">重複チェック</button><button id="qualityCheckBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">入力漏れチェック</button></div>
+    <div id="healthResults" class="text-xs mt-3 text-slate-700">点検結果はここに表示されます。</div>
+   </div>
+   <div class="discovery-card">
+    <h3 class="font-black text-sm mb-2">PATTERN WATCH // 異常パターン発見</h3>
+    <p class="text-xs text-slate-600 mb-3">既存の自動パターン探索を呼び出し、高配当基準・最低出現数・検証用20%を確認します。</p>
+    <button id="anomalyScanBtn" class="touch-btn btn-alert w-full py-3 rounded-lg text-xs">高配当パターン探索を実行</button>
+    <div class="text-[10px] text-slate-500 mt-2">※探索結果は予測保証ではありません。サンプル数と検証結果を併せて確認してください。</div>
+   </div>
+   <div class="discovery-card">
+    <h3 class="font-black text-sm mb-2">SAVED SCANS // 分析条件の保存</h3>
+    <div class="flex gap-2 mb-2"><input id="scanPresetName" class="field text-xs" placeholder="条件名（例：7車・万車券）"><button id="saveScanPresetBtn" class="touch-btn btn-cyber px-3 rounded-lg text-xs whitespace-nowrap">条件保存</button></div>
+    <div id="savedScanPresets" class="space-y-2 text-xs">保存した条件はありません。</div>
+   </div>
+   <div class="discovery-card lg:col-span-2">
+    <div class="flex flex-wrap justify-between items-center gap-2 mb-2"><h3 class="font-black text-sm">PERSONAL AUDIO // 音楽プレイヤー</h3><span class="text-[10px] text-slate-500">端末内のファイルを直接再生・アップロードなし</span></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 items-end">
+     <label class="text-xs font-bold">音楽ファイル<input id="musicFileInput" type="file" accept="audio/*,video/mp4,.mp3,.m4a,.wav,.ogg,.aac,.mp4" class="field mt-1 text-xs"></label>
+     <div class="flex gap-2"><button id="musicPlayBtn" class="touch-btn btn-cyber flex-1 py-3 rounded-lg text-xs">再生</button><button id="musicStopBtn" class="touch-btn btn-ghost flex-1 py-3 rounded-lg text-xs">停止</button></div>
+     <label class="text-xs font-bold">音楽音量 <input id="musicVolume" type="range" min="0" max="100" value="45" class="w-full mt-2"></label>
+     <label class="text-xs font-bold flex items-center gap-2"><input id="musicLoop" type="checkbox" checked> リピート再生</label>
+    </div>
+    <div class="flex flex-wrap items-center gap-3 mt-2"><label class="text-xs flex items-center gap-2"><input id="sfxVolume" type="range" min="0" max="100" value="35"> 効果音音量</label><span id="musicFileName" class="text-[11px] text-slate-600">ファイル未選択</span><span id="musicState" class="text-[11px] text-sky-800">停止中</span></div>
+    <audio id="personalMusic" preload="none"></audio>
+   </div>
+   <div class="discovery-card lg:col-span-2">
+    <h3 class="font-black text-sm mb-2">APPEARANCE // 個人設定</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+     <label class="text-xs font-bold">テーマ<select id="appearanceTheme" class="field mt-1 text-xs"><option value="blue">CYBER BLUE</option><option value="violet">VIOLET</option><option value="dark">DARK</option></select></label>
+     <label class="text-xs font-bold">動き<select id="motionSetting" class="field mt-1 text-xs"><option value="normal">通常</option><option value="reduced">控えめ</option></select></label>
+     <label class="text-xs font-bold">効果音<select id="sfxSetting" class="field mt-1 text-xs"><option value="on">ON</option><option value="off">OFF</option></select></label>
+    </div>
+    <p class="text-[10px] text-slate-500 mt-2">設定はこの端末のブラウザに保存されます。他の利用者の設定には影響しません。</p>
+   </div>
+  </div>
+ </div>
+</section>
+</div>
+
+<div id="manualInputModal" class="hidden fixed inset-0 z-[1000] items-center justify-center p-3">
+ <div class="modal-card rounded-2xl w-full max-w-xl p-6 relative">
+  <button id="closeManualBtn" type="button" class="touch-btn absolute top-2 right-3 text-3xl font-black text-slate-900 w-10 h-10">×</button>
+  <header class="text-center mb-5 border-b-2 border-slate-900 pb-3 mt-2"><h2 class="font-orbitron text-3xl font-black tracking-widest">MANUAL INPUT</h2><p class="text-[10px] font-bold mt-1">ULTRA WHITE // RECORD ENTRY</p></header>
+  <div class="space-y-4 font-black">
+   <div class="flex gap-3">
+    <div class="w-1/2"><label class="block text-xs mb-1">競輪場</label><select id="manVenue" class="modal-field"></select></div>
+    <div class="w-1/2"><label class="block text-xs mb-1">レース</label><select id="manRace" class="modal-field"></select></div>
+   </div>
+   <div><label class="block text-xs mb-1">クラス（車立て）</label><select id="manClass" class="modal-field"><option value="7車">7車</option><option value="9車">9車</option><option value="ガールズ">ガールズ</option><option value="5車">5車</option><option value="6車">6車</option><option value="8車">8車</option></select></div>
+    <div><label class="block text-xs mb-1">開催日（任意）</label><input type="date" id="manDate" class="modal-field"></div>
+   <div class="border-2 border-slate-900 rounded-xl p-3 space-y-3"><h3 class="bg-slate-900 text-white inline-block px-3 py-1 text-xs">3連単 着順入力</h3><div class="flex items-center gap-2"><input type="number" id="manCar1" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="1着"><b class="text-2xl">-</b><input type="number" id="manCar2" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="2着"><b class="text-2xl">-</b><input type="number" id="manCar3" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="3着"></div><p class="text-[10px] text-slate-500 text-center">着順は未入力でもレース情報だけ保存できます。入力時は3着まで入力してください。</p></div>
+   <div class="border-2 border-cyan-600 rounded-xl p-3 space-y-3"><h3 class="bg-cyan-600 text-white inline-block px-3 py-1 text-xs">2連単 配当金額</h3><div class="flex items-center gap-2"><span class="text-xl">¥</span><input type="number" id="manPayout2ren" class="modal-field text-right text-xl" placeholder="0 (任意)"></div><p class="text-[10px] text-slate-500 text-center">2連単の着順は3連単の1着・2着から自動算出されます</p></div>
+   <div><label class="block text-xs mb-1">3連単 配当金額</label><div class="flex items-center gap-2"><span class="text-2xl">¥</span><input type="number" id="manPayout" class="modal-field text-right text-2xl" placeholder="0"></div></div>
+   <button id="manSaveBtn" type="button" class="touch-btn btn-alert w-full py-4 rounded-xl text-lg tracking-widest">SAVE RECORD</button>
+  </div>
+ </div>
+</div>
+
+<script>
+let savedRecords=[],myChart=null,bgmAudio=null,audioUnlocked=false,editingIndex=-1,sfxEnabled=true,audioCtx=null;
+function parseLineGroupsFromText(text){
+ const row=String(text||'').match(/^\s*\|\s*並び予想\s*\|\s*(.+)$/m);
+ if(!row)return [];
+ // 注記「（各[ ]が1ライン、左端が先頭）」などを除去してからグループを抽出
+ let content=row[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'').trim();
+ return (content.match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)).filter(arr=>arr.length>0);
+}
+function parseRosterBaseMarks(block){
+ const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
+ if(!section)return {};
+ const rows=section[1].split(/\r?\n/).filter(x=>/^\s*\|/.test(x));
+ if(rows.length<2)return {};
+ const cells=x=>x.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(v=>v.trim());
+ const header=cells(rows[0]);
+ let markIndex=header.findIndex(x=>/AI印|予想印|印/.test(x));
+ if(markIndex<0)return {};
+ const labelMap={'本命':'◎','◎':'◎','対抗':'◯','対':'◯','〇':'◯','○':'◯','◯':'◯','単穴':'△','穴':'△','△':'△','連下':'✕','✕':'✕','×':'✕'};
+ const out={};
+ for(const line of rows.slice(1)){
+  if(/^\s*\|\s*-+/.test(line))continue;
+  const c=cells(line),car=Number(c[0]),raw=String(c[markIndex]||'').trim();
+  if(!Number.isInteger(car)||car<1||car>9)continue;
+  out[car]=labelMap[raw]||(['◎','◯','〇','○','△','✕','×'].includes(raw)?(raw==='〇'||raw==='○'?'◯':raw==='×'?'✕':raw):'');
+ }
+ return out;
+}
+function transformLineMarks(lineGroups,baseMarks){
+ const marks={...baseMarks},pairs=[['◎','⑳'],['◯','●'],['△','▲'],['✕','✖']];
+ (lineGroups||[]).forEach(line=>{
+  if(!Array.isArray(line)||line.length<=1)return; // 単騎は元の印を保持
+  const used=new Set();
+  pairs.forEach(([base,special])=>{
+   line.forEach((car,i)=>{
+    if(marks[car]!==base)return;
+    // 隣接する無印は1つだけ対応印に変換。前側を優先し、なければ後側。
+    const before=i>0?line[i-1]:null,after=i<line.length-1?line[i+1]:null;
+    const candidate=(before&&!(marks[before]||'')&&!used.has(before))?before:((after&&!(marks[after]||'')&&!used.has(after))?after:null);
+    if(candidate){marks[candidate]=special;used.add(candidate);}
+   });
+  });
+  const remaining=line.filter(car=>!(marks[car]||''));
+  remaining.forEach((car,i)=>{marks[car]=i===0?'☆':'★';});
+ });
+ return marks;
+}
+function makeLineMarkGroups(lineGroups,marks){
+ return (lineGroups||[]).map((line,index)=>({position:index+1,cars:line.slice(),marks:line.map(car=>String(marks?.[car]||''))}));
+}
+function makeHeadPairs(lineHeads){
+ const pairs=[],labels=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+ labels.forEach(([i,j])=>{const a=Number(lineHeads?.[i])||0,b=Number(lineHeads?.[j])||0;if(a&&b&&a!==b)pairs.push({positions:[i+1,j+1],cars:[a,b],key:`${i+1}-${j+1}:${a}-${b}`});});
+ return pairs;
+}
+function enrichRecord(r){
+ const lineHeads=Array.isArray(r.lineHeads)?r.lineHeads.slice(0,4).map(Number):[];
+ const normalizedHeads=lineHeads.length?lineHeads:(r.line1?[[Number(String(r.line1).split('-')[0])||0]] .flat().slice(0,1):[]);
+ const lineGroups=Array.isArray(r.lineGroups)?r.lineGroups.map(g=>Array.isArray(g)?g.map(Number):[]):[];
+ const baseMarks=r.baseMarks&&typeof r.baseMarks==='object'?{...r.baseMarks}:{};
+ const lineMarks=r.lineMarks&&typeof r.lineMarks==='object'?{...r.lineMarks}:transformLineMarks(lineGroups,baseMarks);
+ const lineMarkGroups=Array.isArray(r.lineMarkGroups)&&r.lineMarkGroups.length?r.lineMarkGroups:makeLineMarkGroups(lineGroups,lineMarks);
+ const threshold=Number(r.payoutThreshold)||10000,payout=Number(r.payout)||0;
+ return {...r,lineHeads:normalizedHeads,headPairs:makeHeadPairs(normalizedHeads),lineGroups,baseMarks,lineMarks,lineMarkGroups,payoutThreshold:threshold,payoutUnder10000:payout>0?payout<=threshold:null};
+}
+const normalizeRecord = r => enrichRecord({...r,payout:Number(r.payout)||0,payout2ren:Number(r.payout2ren)||0});
+const REAL_VENUES=["函館","青森","いわき平","弥彦","前橋","取手","宇都宮","大宮","西武園","京王閣","立川","松戸","川崎","平塚","小田原","伊東","静岡","豊橋","名古屋","岐阜","大垣","富山","松阪","四日市","福井","奈良","向日町","和歌山","岸和田","玉野","広島","防府","高松","小松島","高知","松山","小倉","久留米","武雄","佐世保","別府","熊本","千葉"];
+const $=id=>document.getElementById(id);
+function bind(id,fn){const el=$(id);if(!el)return;el.addEventListener('click',e=>{e.preventDefault();fn()})}
+function toggleAudioSystem(){
+ sfxEnabled=!sfxEnabled;
+ const status=$('audioStatus'),label=$('audioToggleBtn')?.lastElementChild;
+ if(status)status.classList.toggle('bg-cyan-300',sfxEnabled),status.classList.toggle('bg-pink-500',!sfxEnabled);
+ if(label)label.textContent=`SFX [${sfxEnabled?'ON':'OFF'}]`;
+ if(sfxEnabled)playBeep(760,'sine',.09,.035);
+ logToTerminal(`> 効果音 ${sfxEnabled?'ON':'OFF'}`,'info');
+}
+function playBeep(freq=700,type='sine',duration=.08,vol=.035){
+ if(!sfxEnabled)return;
+ try{
+  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
+  if(!audioCtx)audioCtx=new Ctx();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
+  const userSfxVolume=Number($('sfxVolume')?.value??35)/35;gain.gain.setValueAtTime(Math.max(.001,vol*userSfxVolume),audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+  osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+duration);
+ }catch(e){console.warn('SFX unavailable',e)}
+}
+function initManualSelects(){REAL_VENUES.forEach(v=>$('manVenue').add(new Option(v,v)));for(let i=1;i<=12;i++)$('manRace').add(new Option(i+'R',i+'R'))}
+function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');playBeep(600,'square',.1)}
+function closeManualModal(){$('manualInputModal').classList.add('hidden');$('manualInputModal').classList.remove('flex');editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD'}
+function saveManualData(){
+ const venue=$('manVenue').value,race=$('manRace').value,category=$('manClass').value,raceDate=$('manDate').value||'';
+ const vals=['manCar1','manCar2','manCar3'].map(id=>$(id).value.trim()),nums=vals.map(v=>v===''?NaN:parseInt(v,10));
+ const [c1,c2,c3]=nums,anyResult=vals.some(v=>v!==''),has3ren=nums.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(nums).size===3;
+ if(anyResult&&!has3ren){alert('着順を入力する場合は、1着・2着・3着を重複なく入力してください。');return}
+ const payout=$('manPayout').value.trim()===''?0:Math.max(0,parseInt($('manPayout').value,10)||0);
+ const payout2ren=$('manPayout2ren').value.trim()===''?0:Math.max(0,parseInt($('manPayout2ren').value,10)||0);
+ let patternKey='',diffPatternKey='',diffDisplay='',exacta='';
+ if(has3ren){const d1=Math.abs(c1-c2),d2=Math.abs(c2-c3);diffPatternKey=`${d1}-${d2}`;diffDisplay=diffPatternKey;if(d1+d2===4){diffPatternKey='4';diffDisplay='4(合算)'}patternKey=`${c1}-${c2}-${c3}`;exacta=`${c1}-${c2}`;}
+ takeUndoSnapshot(editingIndex>=0?'手動編集':'手動登録');
+ const rec={venue,raceName:race,raceDate,category,pattern:patternKey,diffPattern:diffPatternKey,diffDisplay,exacta,payout,payout2ren,timestamp:Date.now(),sourceType:has3ren?'manual-result':'manual'};
+ let targetIndex=editingIndex;if(targetIndex<0)targetIndex=savedRecords.findIndex(r=>recordKey(r)===recordKey(rec));
+ if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]=normalizeRecord({...old,...rec,line1:old.line1||'',lineHeads:old.lineHeads||[]});logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,'success');}
+ else{savedRecords.push(normalizeRecord(rec));logToTerminal(`> [手動登録] ${venue} ${race} を保存しました。`,'success');}
+ editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD';
+ persist();updateCountDisplay();runAnalysis();renderRecordManager();
+ ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');closeManualModal();
+}
+
+function logToTerminal(msg,type="info"){const out=$('outputArea'),time=new Date().toLocaleTimeString('ja-JP',{hour12:false});const color=type==="error"?"#ff6b9d":type==="success"?"#087ac0":"#8dfaff";out.insertAdjacentHTML('afterbegin',`<div><span style="color:#6b8da7">[${time}]</span> <span style="color:${color}">${escapeHTML(msg)}</span></div>`)}
+function logToTerminalRaw(html){$('outputArea').insertAdjacentHTML('afterbegin',html)}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function persist(){localStorage.setItem('battleBankProData',JSON.stringify(savedRecords));scheduleAutoBackup();}
+function loadMarkdown(event){
+ const file=event.target.files[0];
+ if(!file)return;
+ const reader=new FileReader();
+ reader.onload=e=>{
+  const text = e.target.result;
+  $('dataInput').value=text;
+  $('mdFileInput').value='';
+  logToTerminal(`> ファイル読込成功: ${file.name}`,"success");
+  // 一括手動入力モードを開く
+  const races = parseMarkdownForBulk(text);
+  if(races.length){
+   openBulkInputModal(races);
+   logToTerminal(`> ${races.length}レースを事前登録フォームに展開しました。開催日を確認して保存してください。`,"success");
+  }else{
+   setTimeout(triggerExtract, 150);
+  }
+ };
+ reader.readAsText(file,'UTF-8');
+}
+function triggerExtract(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: データが入力されていません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);extractAndSaveData()}
+function triggerSync(){triggerExtract()}
+
+function checkHighPayoutRisk(category, line1, diffPattern){
+  const threshold = 10000;
+  const minSamples = 5;
+  const highRateThreshold = 25; // %
+  const results = [];
+  // Check line1 pattern
+  if(line1){
+    const same = savedRecords.filter(r => (r.category||'9車') === category && String(r.line1||'').replace(/\s+/g,'') === line1.replace(/\s+/g,'') && Number(r.payout) > 0);
+    if(same.length >= minSamples){
+      const high = same.filter(r => r.payout >= threshold).length;
+      const rate = (high / same.length * 100);
+      if(rate >= highRateThreshold){
+        results.push({type:'ライン①', key:line1, rate:rate.toFixed(1), count:same.length, high});
+      }
+    }
+  }
+  // Check diff pattern
+  if(diffPattern && diffPattern !== '1-1'){
+    const same = savedRecords.filter(r => (r.category||'9車') === category && r.diffPattern === diffPattern && Number(r.payout) > 0);
+    if(same.length >= minSamples){
+      const high = same.filter(r => r.payout >= threshold).length;
+      const rate = (high / same.length * 100);
+      if(rate >= highRateThreshold){
+        results.push({type:'差分', key:diffPattern, rate:rate.toFixed(1), count:same.length, high});
+      }
+    }
+  }
+  return results;
+}
+
+function extractAndSaveData(){
+  const inputData=$('dataInput').value;let extractedCount=0,globalVenue="不明";
+  // Markdownのレース見出しごとに分割。10Rなどの複数桁番号を保持する。
+  const headingPattern=/^#\s*競輪レースデータ：.*$/gm;
+  const headingMatches=[...inputData.matchAll(headingPattern)];
+  let blocks=[];
+  if(headingMatches.length){
+   blocks=headingMatches.map((m,i)=>inputData.slice(m.index,i+1<headingMatches.length?headingMatches[i+1].index:inputData.length));
+  }else{
+   blocks=inputData.split(/(?=^\s*(?:\d{1,2}R|レース名))/m);
+   if(!blocks.length)blocks=[inputData];
+  }
+  const firstHeading=inputData.match(/^#\s*競輪レースデータ：(.+)$/m);
+  if(firstHeading){for(const v of REAL_VENUES)if(firstHeading[1].includes(v)){globalVenue=v;break}}
+  blocks.forEach(block=>{if(!block.trim())return;let venue=globalVenue,raceName="UNKNOWN";
+  const heading=block.match(/^#\s*競輪レースデータ：(.+)$/m);
+  if(heading){
+   const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R\b/i);
+   if(raceMatch)raceName=String(parseInt(raceMatch[1],10))+"R";
+   for(const v of REAL_VENUES)if(heading[1].includes(v)){venue=v;break}
+  }else{
+   const rm=block.match(/(?<!\d)(\d{1,2})\s*R\b/i);
+   if(rm)raceName=String(parseInt(rm[1],10))+"R";
+  }
+  const girls=block.includes("ガールズ")||block.includes("L級");let category="9車";
+ if(girls)category="ガールズ";else{
+  // 出走表セクション内の車番行だけを数える（全Markdown行の「| 数字 |」を数えない）。
+  const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
+  const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
+  let carCount=rosterRows?rosterRows.length:0;
+  if(!carCount){const lineup=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);if(lineup){const cleaned=lineup[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'');const members=cleaned.match(/\[([\d\s]+)\]/g)||[];carCount=members.reduce((n,m)=>n+m.replace(/[\[\]]/g,'').trim().split(/\s+/).filter(Boolean).length,0)}}
+  if(carCount>=5&&carCount<=9)category=carCount+"車";
+ }
+ let patternKey=null,line1Key=null,diffPatternKey=null,diffDisplay=null;const lineupRow=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);const lines=lineupRow?(lineupRow[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'').match(/\[([\d\s]+)\]/g)||[]):[];let allDiffs=[],diffLogs=[];
+ const lineGroups=parseLineGroupsFromText(block),lineHeads=lineGroups.slice(0,4).map(g=>g[0]||0),baseMarks=parseRosterBaseMarks(block),lineMarks=transformLineMarks(lineGroups,baseMarks),lineMarkGroups=makeLineMarkGroups(lineGroups,lineMarks);
+ for(const group of lineGroups){if(group.length>=2){line1Key=group.join('-');break}}
+ if(lines)lines.forEach((lm,index)=>{const arr=lm.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number);if(index===0&&arr.length>0)patternKey=arr.join('-');if(arr.length>1){const ds=[];for(let i=0;i<arr.length-1;i++)ds.push(Math.abs(arr[i]-arr[i+1]));const sum=ds.reduce((a,b)=>a+b,0);if(sum===4){allDiffs.push(4);diffLogs.push("4(合算)")}else{allDiffs.push(...ds);diffLogs.push(ds.join('-'))}}});
+ if(!line1Key)line1Key=patternKey;
+ if(allDiffs.length){diffPatternKey=allDiffs.join('-');diffDisplay=diffLogs.join(' / ')}
+ if(raceName!=="UNKNOWN"&&(line1Key||block.includes("選手"))){const raceDate=extractRaceDate(block)||extractRaceDate(inputData);const exists=savedRecords.find(r=>r.venue===venue&&r.raceName===raceName&&(r.raceDate||'')===raceDate);if(!exists){savedRecords.push(normalizeRecord({venue,raceName,raceDate,category,pattern:'',line1:line1Key||'',lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,sourceType:'pre-registration',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,timestamp:Date.now()}));extractedCount++}else{let changed=false;if(line1Key&&exists.line1!==line1Key){exists.line1=line1Key;changed=true}if(lineHeads.some(Boolean)){exists.lineHeads=lineHeads;exists.lineGroups=lineGroups;exists.baseMarks=baseMarks;exists.lineMarks=lineMarks;exists.lineMarkGroups=lineMarkGroups;Object.assign(exists,normalizeRecord(exists));changed=true}if(exists.category!==category){exists.category=category;changed=true}if(changed)extractedCount++}}
+ });
+ if(extractedCount){
+  persist();$('dataInput').value='';updateCountDisplay();runAnalysis();
+  logToTerminal(`> 成功: [${globalVenue}] 新規 ${extractedCount} レースをDBに格納しました。`,"success");
+  // 要注意チェック
+  const warnings = [];
+  savedRecords.slice(-extractedCount).forEach(r => {
+    const risks = checkHighPayoutRisk(r.category, r.line1, r.diffPattern);
+    risks.forEach(rk => {
+      warnings.push(`⚠️ 要注意 [${r.venue||''} ${r.raceName}] ${rk.type}「${rk.key}」 万車率 ${rk.rate}% (${rk.high}/${rk.count}件)`);
+    });
+  });
+  if(warnings.length){
+    logToTerminal('--- 万車要注意パターン検出 ---', 'error');
+    warnings.forEach(w => logToTerminal(w, 'error'));
+  }
+  playBeep(880,'sine',.15);
+}else{logToTerminal("> 警告: 解析可能なデータが検知されませんでした。","error");playBeep(220,'sawtooth',.15)}
+}
+function deepScan7Car(){const data=savedRecords.filter(r=>r.category==="7車");if(!data.length){logToTerminal("> エラー: 7車立てのデータがありません。","error");return}const synced=data.filter(r=>r.payout>0),max=synced.length?Math.max(...synced.map(r=>r.payout)):0,map={};synced.forEach(r=>{const dp=r.diffPattern||'N/A';if(!map[dp])map[dp]={count:0,payouts:[]};map[dp].count++;map[dp].payouts.push(r.payout)});let html=`<div style="color:#087ac0;font-weight:bold">--- [ 7-CAR DIFF PATTERN SCAN ] ---</div><div>対象7車: ${data.length}件 (同期済: ${synced.length}件) | 最高: ¥${max.toLocaleString()}</div>`;Object.entries(map).sort((a,b)=>b[1].count-a[1].count).forEach(([dp,d])=>{const avg=Math.round(d.payouts.reduce((a,b)=>a+b,0)/d.payouts.length);html+=`<div>▪ 差分 [ ${escapeHTML(dp)} ] : ${d.count}回 | 平均: ¥${avg.toLocaleString()}</div>`});logToTerminalRaw(html)}
+function analyzeVenuePayouts(){
+ const venueMap = new Map();
+ savedRecords.forEach(r=>{
+  const v = r.venue || '不明';
+  if(!venueMap.has(v)) venueMap.set(v, {total:0, payouts:[], payouts2ren:[]});
+  const g = venueMap.get(v);
+  g.total++;
+  const p3 = Number(r.payout) || 0;
+  const p2 = Number(r.payout2ren) || 0;
+  if(p3 > 0) g.payouts.push(p3);
+  if(p2 > 0) g.payouts2ren.push(p2);
+ });
+ 
+ const rows = [...venueMap.entries()].map(([venue, d])=>{
+  const paid = d.payouts.length;
+  const avg3 = paid ? Math.round(d.payouts.reduce((s,n)=>s+n,0)/paid) : 0;
+  const avg2 = d.payouts2ren.length ? Math.round(d.payouts2ren.reduce((s,n)=>s+n,0)/d.payouts2ren.length) : 0;
+  const max = paid ? Math.max(...d.payouts) : 0;
+  const high = paid ? d.payouts.filter(n=>n>=10000).length : 0;
+  const rate = paid ? (high / paid * 100).toFixed(1) + '%' : '—';
+  return {venue, total: d.total, paid, avg3, avg2, max, rate};
+ }).sort((a,b)=>b.paid-a.paid || b.total-a.total || a.venue.localeCompare(b.venue,'ja'));
+ 
+ if(!rows.length){
+  $('venueResults').innerHTML='<tr><td colspan="7" class="p-4 text-center text-sky-700">データがありません。</td></tr>';
+  return;
+ }
+ 
+ $('venueResults').innerHTML = rows.map(r=>`
+  <tr class="hover:bg-sky-50">
+   <td class="p-2 font-bold text-sky-900">${escapeHTML(r.venue)}</td>
+   <td class="p-2 text-right">${r.total}</td>
+   <td class="p-2 text-right">${r.paid}</td>
+   <td class="p-2 text-right font-bold">${r.avg3 ? '¥'+r.avg3.toLocaleString() : '—'}</td>
+   <td class="p-2 text-right text-sky-700">${r.avg2 ? '¥'+r.avg2.toLocaleString() : '—'}</td>
+   <td class="p-2 text-right">${r.max ? '¥'+r.max.toLocaleString() : '—'}</td>
+   <td class="p-2 text-right font-bold text-sky-800">${r.rate}</td>
+  </tr>
+ `).join('');
+}
+function runAnalysis(){
+ const categories=["5車","6車","7車","8車","9車","ガールズ"],stats={},diffStats={};
+ categories.forEach(c=>stats[c]={count:0,payouts:[],payouts2ren:[]});
+ savedRecords.forEach(r=>{
+  const cat=r.category||"9車";
+  if(!stats[cat])stats[cat]={count:0,payouts:[],payouts2ren:[]};
+  stats[cat].count++;
+  const p3=Number(r.payout)||0;
+  const p2=Number(r.payout2ren)||0;
+  if(p3>0)stats[cat].payouts.push(p3);
+  if(p2>0)stats[cat].payouts2ren.push(p2);
+
+  const dp=r.diffPattern||"標準";
+  if(!diffStats[dp])diffStats[dp]={count:0,payouts:[],payouts2ren:[]};
+  diffStats[dp].count++;
+  if(p3>0)diffStats[dp].payouts.push(p3);
+  if(p2>0)diffStats[dp].payouts2ren.push(p2);
+ });
+ $('categoryCards').innerHTML=categories.map(c=>{const d=stats[c],avg=d.payouts.length?Math.round(d.payouts.reduce((a,b)=>a+b,0)/d.payouts.length):0,max=d.payouts.length?Math.max(...d.payouts):0;
+ const avg2 = d.payouts2ren.length ? Math.round(d.payouts2ren.reduce((a,b)=>a+b,0)/d.payouts2ren.length) : 0;
+ return `<div class="card-matrix p-3 sm:p-4"><div class="flex justify-between items-start mb-3"><div><div class="kicker text-[9px]">CLASS</div><div class="font-black text-lg">${c}</div></div><div class="text-right"><div class="text-[8px] text-sky-800">SYNCED</div><div class="font-mono-tech text-sm neon-cyan">${d.payouts.length}件</div></div></div><div class="grid grid-cols-2 gap-2 mb-3"><div class="bg-cyan-300/10 border border-cyan-300/20 rounded-lg p-2 text-center"><div class="text-[8px] text-cyan-200">LOGGED</div><div class="font-mono-tech metric-number">${d.count}</div></div><div class="bg-sky-100 border border-sky-200 rounded-lg p-2 text-center"><div class="text-[8px] text-sky-700">3連MAX</div><div class="font-mono-tech text-xs neon-cyan">${max?'¥'+max.toLocaleString():'-'}</div></div></div><div class="border-t border-white/10 pt-2 space-y-1"><div class="flex justify-between text-[9px]"><span class="text-sky-800">3連単 平均:</span><span class="font-mono-tech font-bold">${avg?'¥'+avg.toLocaleString():'---'}</span></div><div class="flex justify-between text-[9px]"><span class="text-sky-800">2連単 平均:</span><span class="font-mono-tech font-bold text-sky-700">${avg2?'¥'+avg2.toLocaleString():'---'}</span></div></div></div>`
+}).join("");
+ const sorted=Object.entries(diffStats).sort((a,b)=>b[1].count-a[1].count).slice(0,8),
+ labels=sorted.map(x=>'差分: '+x[0]),
+ counts=sorted.map(x=>x[1].count),
+ avgs=sorted.map(x=>x[1].payouts.length?Math.round(x[1].payouts.reduce((a,b)=>a+b,0)/x[1].payouts.length):0),
+ avgs2=sorted.map(x=>x[1].payouts2ren.length?Math.round(x[1].payouts2ren.reduce((a,b)=>a+b,0)/x[1].payouts2ren.length):0);
+ const ctx=$('matrixChart').getContext('2d');if(myChart)myChart.destroy();
+ myChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[
+  {label:'発生件数',data:counts,backgroundColor:'rgba(0,145,235,.55)',borderColor:'#008fe0',borderWidth:1.5,yAxisID:'y',borderRadius:6,order:3},
+  {label:'3連単 平均配当',data:avgs,type:'line',borderColor:'#168cff',backgroundColor:'rgba(22,140,255,.08)',borderWidth:2.5,fill:false,pointBackgroundColor:'#fff',pointBorderColor:'#168cff',pointBorderWidth:2,pointRadius:4,yAxisID:'y1',tension:.25,order:1},
+  {label:'2連単 平均配当',data:avgs2,type:'line',borderColor:'#00b8ff',backgroundColor:'rgba(0,184,255,.08)',borderWidth:2.5,borderDash:[4,4],fill:false,pointBackgroundColor:'#fff',pointBorderColor:'#00b8ff',pointBorderWidth:2,pointRadius:4,yAxisID:'y1',tension:.25,order:2}
+ ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{color:'#315875',font:{family:"'Share Tech Mono', monospace",size:10}}},y:{ticks:{color:'#00f5ff'},grid:{color:'rgba(40,120,170,.13)'}},y1:{position:'right',grid:{display:false},ticks:{color:'#087ac0'}}},plugins:{legend:{position:'top',labels:{color:'#174365',font:{family:'Orbitron',size:9},boxWidth:10,usePointStyle:true}}}}})
+ analyzeLine1Payouts();
+ analyzeVenuePayouts();
+}
+function analyzeLine1Payouts(){
+ const filter=$('line1ClassFilter')?.value||'ALL';
+ const threshold=Math.max(1,parseInt($('line1HighThreshold')?.value,10)||10000);
+ const classes=['5車','6車','7車','8車','9車','ガールズ'];
+ const records=savedRecords.filter(r=>classes.includes(r.category||'9車')&&(filter==='ALL'||(r.category||'9車')===filter)&&String(r.line1||'').trim());
+ const groups=new Map();
+ records.forEach(r=>{
+  const category=r.category||'9車',line=String(r.line1).trim().replace(/\s+/g,'');
+  const key=category+'::'+line;
+  if(!groups.has(key))groups.set(key,{category,line,total:0,payouts:[]});
+  const g=groups.get(key);g.total++;
+  const payout=Number(r.payout)||0;if(payout>0)g.payouts.push(payout);
+ });
+ const allPayouts=records.map(r=>Number(r.payout)||0).filter(n=>n>0);
+ const totalPaid=allPayouts.length;
+ const avg=arr=>arr.length?Math.round(arr.reduce((s,n)=>s+n,0)/arr.length):0;
+ const median=arr=>{if(!arr.length)return 0;const a=[...arr].sort((x,y)=>x-y),m=Math.floor(a.length/2);return a.length%2?a[m]:Math.round((a[m-1]+a[m])/2)};
+ const summary=[
+  ['対象レース',records.length+'件'],
+  ['配当入力済',totalPaid+'件'],
+  ['ライン①パターン',groups.size+'種類'],
+  ['高配当基準','¥'+threshold.toLocaleString()]
+ ];
+ $('line1Summary').innerHTML=summary.map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-sky-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold text-sky-900">${v}</div></div>`).join('');
+ const rows=[...groups.values()].sort((a,b)=>{
+  const aa=a.payouts.length?avg(a.payouts):-1,bb=b.payouts.length?avg(b.payouts):-1;
+  return bb-aa||b.total-a.total||a.category.localeCompare(b.category,'ja')||a.line.localeCompare(b.line,'ja');
+ });
+ if(!rows.length){
+  $('line1Results').innerHTML='<tr><td colspan="8" class="p-4 text-center text-sky-700">ライン①の並びデータがありません。出走表Markdownを再取り込みしてください。</td></tr>';
+  return;
+ }
+ $('line1Results').innerHTML=rows.map(g=>{
+  const paid=g.payouts.length,high=paid?g.payouts.filter(n=>n>=threshold).length:0,rate=paid?(high/paid*100).toFixed(1)+'%':'—';
+  const highRate = paid && (high/paid*100) >= 25;
+  const mark = highRate ? ' <span class="text-red-500 font-black">⚠️</span>' : '';
+  return `<tr class="hover:bg-sky-50 ${highRate?'bg-red-50':''}"><td class="p-2 font-bold whitespace-nowrap">${escapeHTML(g.category)}</td><td class="p-2 font-mono-tech font-bold text-sky-900 whitespace-nowrap">${escapeHTML(g.line)}${mark}</td><td class="p-2 text-right">${g.total}</td><td class="p-2 text-right">${paid}</td><td class="p-2 text-right font-bold">${paid?'¥'+avg(g.payouts).toLocaleString():'—'}</td><td class="p-2 text-right">${paid?'¥'+median(g.payouts).toLocaleString():'—'}</td><td class="p-2 text-right">${paid?'¥'+Math.max(...g.payouts).toLocaleString():'—'}</td><td class="p-2 text-right font-bold text-sky-800">${rate}</td></tr>`;
+ }).join('');
+}
+function discoverPatterns(){
+ const cls=$('discoveryClass').value,threshold=Math.max(1,parseInt($('discoveryThreshold').value,10)||10000),minCount=Math.max(2,parseInt($('discoveryMin').value,10)||10);
+ let data=savedRecords.filter(r=>(cls==='ALL'||(r.category||'9車')===cls)&&Number(r.payout)>0);
+ data=data.map((r,i)=>({...r,_order:Number(r.timestamp)||i,_payout:Number(r.payout)})).sort((a,b)=>a._order-b._order);
+ const totalRecords=savedRecords.filter(r=>cls==='ALL'||(r.category||'9車')===cls).length;
+ const split=Math.floor(data.length*.8),train=data.slice(0,split),valid=data.slice(split);
+ const validationBaseline=valid.length?valid.filter(r=>r._payout>=threshold).length/valid.length*100:0;
+ const trainBaseline=train.length?train.filter(r=>r._payout>=threshold).length/train.length*100:0;
+ const overallBaseline=data.length?data.filter(r=>r._payout>=threshold).length/data.length*100:0;
+ const summary=[['対象レース',totalRecords+'件'],['配当入力済',data.length+'件'],['発見用 80%',train.length+'件'],['検証用 20%',valid.length+'件']];
+ $('discoverySummary').innerHTML=summary.map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-sky-700 font-bold">${k}</div><div class="font-mono-tech text-xl font-bold text-sky-900">${v}</div></div>`).join('');
+ if(train.length<5){$('discoveryResults').innerHTML='<div class="discovery-card text-sm">発見用データ(80%)が5件以上必要です。</div>';return}
+ const specs=[
+  ['1着車番',r=>`1着=${String(r.pattern||'').split('-')[0]||'?'}`],
+  ['2着車番',r=>`2着=${String(r.pattern||'').split('-')[1]||'?'}`],
+  ['3着車番',r=>`3着=${String(r.pattern||'').split('-')[2]||'?'}`],
+  ['1-2着ペア',r=>{const a=String(r.pattern||'').split('-');return a.length>=2?`1-2着=${a[0]}→${a[1]}`:'不明'}],
+  ['差分パターン',r=>`差分=${r.diffPattern||'不明'}`],
+  ['クラス＋1-2着',r=>{const a=String(r.pattern||'').split('-');return a.length>=2?`${r.category||'9車'}｜${a[0]}→${a[1]}`:'不明'}],
+  ['クラス＋差分',r=>`${r.category||'9車'}｜差分=${r.diffPattern||'不明'}`],
+  ['1-2着＋差分',r=>{const a=String(r.pattern||'').split('-');return a.length>=2?`${a[0]}→${a[1]}｜差分=${r.diffPattern||'不明'}`:'不明'}]
+ ];
+ const groups=new Map();
+ // 候補パターンの抽出は発見用80%(train)のみを使用する
+ specs.forEach(([kind,keyFn])=>train.forEach(r=>{
+  const key=keyFn(r);if(key.includes('?')||key.includes('不明'))return;
+  const id=kind+'::'+key;
+  if(!groups.has(id))groups.set(id,{kind,key,trainRows:[],validRows:[]});
+  groups.get(id).trainRows.push(r);
+ }));
+ // 検証用20%(valid)データから該当パターンの発生状況を紐付ける
+ valid.forEach(r=>{
+  specs.forEach(([kind,keyFn])=>{
+   const key=keyFn(r);if(key.includes('?')||key.includes('不明'))return;
+   const id=kind+'::'+key;
+   if(groups.has(id)){
+    groups.get(id).validRows.push(r);
+   }
+  });
+ });
+ const candidates=[];
+ groups.forEach(g=>{
+  const tr=g.trainRows,va=g.validRows;
+  if(tr.length<minCount)return; // 発見側での出現数が最低条件を満たすもののみ候補に
+  const high=arr=>arr.filter(r=>r._payout>=threshold).length;
+  const avg=arr=>arr.length?arr.reduce((s,r)=>s+r._payout,0)/arr.length:0;
+  const trainRate=tr.length?high(tr)/tr.length*100:0;
+  const validRate=va.length?high(va)/va.length*100:null;
+  const totalCount=tr.length+va.length;
+  const totalHigh=high(tr)+high(va);
+  candidates.push({
+   ...g,
+   count:totalCount,
+   highCount:totalHigh,
+   rate:trainRate, // 発見用の高配当率を基準とする
+   avg:avg([...tr,...va]),
+   trainCount:tr.length,
+   validCount:va.length,
+   trainRate,
+   validRate,
+   validHigh:high(va),
+   lift:trainBaseline>0?trainRate/trainBaseline:0
+  });
+ });
+ // 修正: 検証用20%(valid)の成績（validRate）を候補の順位付けや選択に一切使わず、発見用80%(train)の成績（trainRate / lift / trainCount）のみで順位を決定する（20%を完全に独立した最終検証データとして維持）
+ candidates.sort((a,b)=>{return b.lift-a.lift||b.trainRate-a.trainRate||b.trainCount-a.trainCount});
+ const top=candidates.slice(0,25);
+ if(!top.length){$('discoveryResults').innerHTML='<div class="discovery-card text-sm">指定した最低出現数を満たすパターンがありません。最低出現数を下げるか、データを追加してください。</div>';return}
+ $('discoveryResults').innerHTML=`<div class="flex flex-wrap items-center justify-between gap-2 text-xs mb-2"><b class="text-sky-900">検出パターン ${candidates.length}件 / 表示 ${top.length}件</b><span class="discovery-chip">発見用基準(80%) ${trainBaseline.toFixed(1)}%</span></div>`+top.map((g,i)=>{
+  const rate=g.trainRate.toFixed(1),valid=g.validRate===null?'—':g.validRate.toFixed(1)+'%',train=g.trainRate.toFixed(1)+'%';
+  const quality=g.validCount>=2?(g.validRate>=validationBaseline?'検証側でも全体基準以上':'検証側は全体基準未満'):'検証データ不足';
+  const lift=g.lift?g.lift.toFixed(2)+'倍':'—';
+  return `<div class="discovery-result"><div class="flex flex-wrap justify-between gap-2 items-start"><div><span class="discovery-chip">#${i+1} ${escapeHTML(g.kind)}</span><div class="font-black text-sm mt-2 text-slate-900">${escapeHTML(g.key)}</div></div><div class="text-right"><div class="text-[9px] text-sky-700">発見用高配当率</div><div class="font-mono-tech text-2xl font-black text-sky-800">${rate}%</div></div></div><div class="grid grid-cols-2 md:grid-cols-5 gap-2 mt-3 text-center"><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">発見用件数</div><b>${g.trainCount}件</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">検証用件数</div><b>${g.validCount}件</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">平均配当</div><b>¥${Math.round(g.avg).toLocaleString()}</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">発見用(80%)</div><b>${train}</b></div><div class="bg-sky-50 rounded-lg p-2"><div class="text-[9px] text-slate-500">検証用(20%)</div><b>${valid}</b></div></div><div class="flex flex-wrap justify-between gap-2 mt-2 text-[10px]"><span class="text-sky-800">全体基準比：${lift}</span><b class="${g.validCount>=2&&g.validRate>=validationBaseline?'text-sky-700':'text-slate-500'}">${quality}</b></div><div class="discovery-meter mt-2"><i style="width:${Math.max(0,Math.min(100,g.trainRate))}%"></i></div></div>`;
+ }).join('');
+ logToTerminal(`> 自動探索完了（発見用80%分離済）: ${candidates.length}パターン検出。高配当基準 ¥${threshold.toLocaleString()}。`,'success');
+}
+
+function showPayoutEditor(){
+ if(!savedRecords.length){
+  openManualModal();
+  logToTerminal("> レコードがありません。新規の手動入力モードを開きました。");
+  return;
+ }
+ // 優先1: 3連単は入力済み(payout > 0)だが、2連単が未入力(payout2ren === 0 または未設定)のレース
+ let targetIdx = savedRecords.map((r, i) => ({r, i})).reverse().find(x => {
+  const p3 = Number(x.r.payout) || 0;
+  const p2 = Number(x.r.payout2ren) || 0;
+  return p3 > 0 && p2 === 0;
+ })?.i;
+ 
+ // 優先2: 3連単も2連単も未入力のレース
+ if(targetIdx === undefined){
+  targetIdx = savedRecords.map((r, i) => ({r, i})).reverse().find(x => {
+   const p3 = Number(x.r.payout) || 0;
+   const p2 = Number(x.r.payout2ren) || 0;
+   return p3 === 0 || p2 === 0;
+  })?.i;
+ }
+ 
+ if(targetIdx === undefined){
+  targetIdx = savedRecords.length - 1;
+ }
+ openEditModal(targetIdx);
+ logToTerminal(`> レコード（${savedRecords[targetIdx].venue} ${savedRecords[targetIdx].raceName}）を手動入力モード（簡易修正）で開きました。`, "success");
+}
+function openEditModal(idx){
+ if(idx<0||idx>=savedRecords.length)return;
+ editingIndex=idx;
+ const r=savedRecords[idx];
+ // Fill modal
+ $('manVenue').value=r.venue||REAL_VENUES[0];
+ $('manRace').value=r.raceName||'1R';
+ $('manClass').value=r.category||'7車';
+ $('manDate').value=r.raceDate||'';
+ const parts=(r.pattern||'').split('-');
+ if(parts.length>=3){$('manCar1').value=parts[0];$('manCar2').value=parts[1];$('manCar3').value=parts[2];}
+ else{$('manCar1').value='';$('manCar2').value='';$('manCar3').value='';}
+ $('manPayout').value=r.payout>0?r.payout:'';
+ $('manPayout2ren').value=r.payout2ren>0?r.payout2ren:'';
+ $('manSaveBtn').textContent='UPDATE RECORD';
+ openManualModal();
+}
+function savePayouts(){takeUndoSnapshot('簡易修正');savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}Object.assign(r,normalizeRecord(r));});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
+function exportData(){if(!savedRecords.length){logToTerminal("> 書き出すデータがありません。","error");return}const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='battleBank_pro_db.json';a.click();URL.revokeObjectURL(url);logToTerminal("> エクスポート完了。","success")}
+function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();takeUndoSnapshot('データ読込');savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();logToTerminal(`> 復元成功: ${data.length}件のデータを読み込みました。`,"success")}catch(err){logToTerminal("> エラー: JSONファイルの形式が不正です。","error")} $('fileInput').value=''};reader.readAsText(file,'UTF-8')}
+function clearData(){if(confirm("データベースを初期化しますか？")){takeUndoSnapshot('データベース初期化');savedRecords=[];localStorage.removeItem('battleBankProData');updateCountDisplay();runAnalysis();logToTerminal("> DBパージ完了。","success")}}
+function updateCountDisplay(){const n=savedRecords.length.toString().padStart(5,'0');$('dataCount').innerHTML=`<span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ ${n} ]</span>`;renderRecordManager();}
+
+// ===== BULK MANUAL INPUT =====
+function extractRaceDate(text){
+ const patterns=[
+  /(?:開催日|開催年月日|日付|開催日程)[^\d]*(20\d{2})[年\/-](\d{1,2})[月\/-](\d{1,2})日?/,
+  /(20\d{2})[年\/-](\d{1,2})[月\/-](\d{1,2})日?/
+ ];
+ for(const re of patterns){const m=String(text||'').match(re);if(m)return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;}
+ return '';
+}
+function recordKey(r){return [String(r.venue||'').trim(),String(r.raceDate||'').trim(),String(r.raceName||'').trim()].join('|');}
+function hasValidResult(r){const p=String(r.pattern||'').split('-').map(Number);return p.length===3&&p.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(p).size===3;}
+function parseMarkdownForBulk(inputData){
+  const races = [];
+  const headingPattern=/^#\s*競輪レースデータ：.*$/gm;
+  const headingMatches=[...inputData.matchAll(headingPattern)];
+  let blocks=[];
+  if(headingMatches.length){
+   blocks=headingMatches.map((m,i)=>inputData.slice(m.index,i+1<headingMatches.length?headingMatches[i+1].index:inputData.length));
+  }else{
+   blocks=inputData.split(/(?=^\s*(?:\d{1,2}R|レース名))/m);
+   if(!blocks.length)blocks=[inputData];
+  }
+  let globalVenue="不明";
+  const firstHeading=inputData.match(/^#\s*競輪レースデータ：(.+)$/m);
+  if(firstHeading){for(const v of REAL_VENUES)if(firstHeading[1].includes(v)){globalVenue=v;break}}
+  
+  blocks.forEach(block=>{
+   if(!block.trim())return;
+   let venue=globalVenue, raceName="UNKNOWN";
+   const heading=block.match(/^#\s*競輪レースデータ：(.+)$/m);
+   if(heading){
+    const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R\b/i);
+    if(raceMatch)raceName=String(parseInt(raceMatch[1],10))+"R";
+    for(const v of REAL_VENUES)if(heading[1].includes(v)){venue=v;break}
+   }else{
+    const rm=block.match(/(?<!\d)(\d{1,2})\s*R\b/i);
+    if(rm)raceName=String(parseInt(rm[1],10))+"R";
+   }
+   const girls=block.includes("ガールズ")||block.includes("L級");
+   let category="9車";
+   if(girls)category="ガールズ";
+   else{
+    const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
+    const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
+    let carCount=rosterRows?rosterRows.length:0;
+    if(!carCount){
+     const lineup=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);
+     if(lineup){
+      const cleaned=lineup[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'');
+      const members=cleaned.match(/\[([\d\s]+)\]/g)||[];
+      carCount=members.reduce((n,m)=>n+m.replace(/[\[\]]/g,'').trim().split(/\s+/).filter(Boolean).length,0);
+     }
+    }
+    if(carCount>=5&&carCount<=9)category=carCount+"車";
+   }
+   // ライン位置を保持して①〜④の先頭車番をJSONに保存
+   const lineGroups=parseLineGroupsFromText(block),lineHeads=lineGroups.slice(0,4).map(g=>g[0]||0),baseMarks=parseRosterBaseMarks(block),lineMarks=transformLineMarks(lineGroups,baseMarks),lineMarkGroups=makeLineMarkGroups(lineGroups,lineMarks);
+   let line1Key=null;for(const g of lineGroups){if(g.length>=2){line1Key=g.join('-');break}}
+   
+   if(raceName !== "UNKNOWN"){
+    races.push({
+     venue,
+     raceName,
+     category,
+     raceDate: extractRaceDate(block) || extractRaceDate(inputData),
+     line1: line1Key || '',
+     lineHeads,
+     lineGroups,
+     baseMarks,
+     lineMarks,
+     lineMarkGroups,
+     rawBlock: block.substring(0, 300)
+    });
+   }
+  });
+  // Sort by race number
+  races.sort((a,b) => {
+   const na = parseInt(a.raceName) || 0, nb = parseInt(b.raceName) || 0;
+   return na - nb;
+  });
+  return races;
+}
+
+function openBulkInputModal(races){
+ const container=$('bulkRaceContainer');container.innerHTML='';
+ races.forEach((r,idx)=>{
+  const card=document.createElement('div');card.className='border-2 border-cyan-500 rounded-xl p-3 bg-white/90';
+  const line1Display=r.line1?`<div class="text-[10px] text-sky-600 mt-1">ライン①: <b>${escapeHTML(r.line1)}</b></div>`:'';const headsDisplay=(r.lineHeads||[]).length?`<div class="text-[10px] text-cyan-700 mt-1">先頭車番①〜④: <b>${escapeHTML(r.lineHeads.join(' / '))}</b></div>`:'';const marksDisplay=(r.lineMarkGroups||[]).length?`<div class="text-[10px] text-violet-700 mt-1">変換後の印: <b>${r.lineMarkGroups.map(g=>(g.marks||[]).map(m=>m||'—').join('-')).map(escapeHTML).join(' / ')}</b></div>`:'';
+  card.innerHTML=`
+   <div class="flex justify-between items-center gap-2"><div class="font-black text-lg text-sky-900">${escapeHTML(r.venue)} ${escapeHTML(r.raceName)}</div><div class="text-xs font-bold text-sky-700">${escapeHTML(r.category)}</div></div>
+   ${line1Display}${headsDisplay}${marksDisplay}
+   <div class="mt-2"><label class="block text-[10px] font-bold mb-1">開催日（自動取得できない場合は入力）</label><input type="date" id="bulk_date_${idx}" class="modal-field" value="${escapeHTML(r.raceDate||'')}"></div>
+   <div class="text-[11px] text-slate-600 mt-2">着順・2連単配当・3連単配当は登録後に手動入力できます。</div>
+   <input type="hidden" id="bulk_venue_${idx}" value="${escapeHTML(r.venue)}"><input type="hidden" id="bulk_race_${idx}" value="${escapeHTML(r.raceName)}">
+   <input type="hidden" id="bulk_cat_${idx}" value="${escapeHTML(r.category)}"><input type="hidden" id="bulk_line1_${idx}" value="${escapeHTML(r.line1||'')}"><input type="hidden" id="bulk_lineHeads_${idx}" value="${escapeHTML(JSON.stringify(r.lineHeads||[]))}"><input type="hidden" id="bulk_lineGroups_${idx}" value="${escapeHTML(JSON.stringify(r.lineGroups||[]))}"><input type="hidden" id="bulk_baseMarks_${idx}" value="${escapeHTML(JSON.stringify(r.baseMarks||{}))}"><input type="hidden" id="bulk_lineMarks_${idx}" value="${escapeHTML(JSON.stringify(r.lineMarks||{}))}"><input type="hidden" id="bulk_lineMarkGroups_${idx}" value="${escapeHTML(JSON.stringify(r.lineMarkGroups||[]))}">`;
+  container.appendChild(card);
+ });
+ $('bulkInputModal').classList.remove('hidden');$('bulkInputModal').classList.add('flex');
+}
+function closeBulkInputModal(){
+  $('bulkInputModal').classList.add('hidden');
+  $('bulkInputModal').classList.remove('flex');
+}
+
+function saveAllBulkRecords(){
+ takeUndoSnapshot('DataMap事前登録');
+ const cards=$('bulkRaceContainer').children;let saved=0,updated=0,skipped=0;
+ for(let i=0;i<cards.length;i++){
+  const venue=$('bulk_venue_'+i)?.value||'不明',raceName=$('bulk_race_'+i)?.value||'UNKNOWN';
+  const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||'',line1=$('bulk_line1_'+i)?.value||'',lineHeads=(()=>{try{return JSON.parse($('bulk_lineHeads_'+i)?.value||'[]')}catch(e){return []}})(),lineGroups=(()=>{try{return JSON.parse($('bulk_lineGroups_'+i)?.value||'[]')}catch(e){return []}})(),baseMarks=(()=>{try{return JSON.parse($('bulk_baseMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarks=(()=>{try{return JSON.parse($('bulk_lineMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarkGroups=(()=>{try{return JSON.parse($('bulk_lineMarkGroups_'+i)?.value||'[]')}catch(e){return []}})();
+  if(raceName==='UNKNOWN'){skipped++;continue}
+  const incoming=normalizeRecord({venue,raceName,raceDate,category,line1,lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,pattern:'',exacta:'',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,sourceType:'pre-registration',timestamp:Date.now()});
+  const idx=savedRecords.findIndex(r=>recordKey(r)===recordKey(incoming));
+  if(idx>=0){const old=savedRecords[idx];savedRecords[idx]=normalizeRecord({...old,venue,raceName,raceDate,category,line1:line1||old.line1||'',lineHeads:lineHeads.some(Boolean)?lineHeads:(old.lineHeads||[]),lineGroups:lineGroups.length?lineGroups:(old.lineGroups||[]),baseMarks:Object.keys(baseMarks).length?baseMarks:(old.baseMarks||{}),lineMarks:Object.keys(lineMarks).length?lineMarks:(old.lineMarks||{}),lineMarkGroups:lineMarkGroups.length?lineMarkGroups:(old.lineMarkGroups||[]),timestamp:old.timestamp||Date.now()});updated++;}
+  else{savedRecords.push(incoming);saved++;}
+ }
+ if(saved||updated){persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> 事前登録完了：新規 ${saved}件／既存更新 ${updated}件／対象外 ${skipped}件。着順・配当は未入力で保存しました。`,'success');closeBulkInputModal();playBeep(880,'sine',.2);}
+ else logToTerminal('> 登録対象がありませんでした。','error');
+}
+
+function renderRecordManager(){
+ const host=$('recordList');if(!host)return;
+ const query=($('recordSearch')?.value||'').trim().toLowerCase(),status=$('recordStatus')?.value||'all';
+ const counts={all:savedRecords.length,pending:0,result:0,payout:0,incomplete:0};
+ savedRecords.forEach(r=>{const result=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;if(!result)counts.pending++;else counts.result++;if(p3>0||p2>0)counts.payout++;if(p3===0||p2===0)counts.incomplete++;});
+ $('recordSummary').textContent=`登録 ${counts.all}件 ／ 着順未入力 ${counts.pending}件 ／ 配当入力済 ${counts.payout}件`;
+ const filtered=savedRecords.map((r,i)=>({...r,_idx:i})).filter(r=>{
+  const text=[r.venue,r.raceDate,r.raceName,r.category,r.pattern,r.line1].join(' ').toLowerCase();if(query&&!text.includes(query))return false;
+  const result=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;
+  if(status==='pending'&&result)return false;if(status==='result'&&!result)return false;if(status==='payout'&&p3===0&&p2===0)return false;if(status==='incomplete'&&p3>0&&p2>0)return false;return true;
+ }).sort((a,b)=>(b.raceDate||'').localeCompare(a.raceDate||'')||String(a.venue).localeCompare(String(b.venue),'ja')||(parseInt(a.raceName)||0)-(parseInt(b.raceName)||0));
+ if(!filtered.length){host.innerHTML='<div class="discovery-card text-xs">該当するレースはありません。</div>';return;}
+ host.innerHTML=filtered.slice(0,250).map(r=>{const done=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;return `<div class="discovery-result flex flex-col sm:flex-row sm:items-center justify-between gap-2"><div class="min-w-0"><div class="font-black text-sm text-sky-950">${escapeHTML(r.venue||'不明')} ${escapeHTML(r.raceName||'')}</div><div class="text-[10px] text-slate-600">${escapeHTML(r.raceDate||'開催日未設定')} ・ ${escapeHTML(r.category||'')}</div><div class="text-xs mt-1 font-bold">${done?`着順 ${escapeHTML(r.pattern)}`:'着順未入力'} <span class="text-slate-500 font-normal">／ 2単 ${p2?`¥${p2.toLocaleString()}`:'未入力'} ／ 3単 ${p3?`¥${p3.toLocaleString()}`:'未入力'}</span></div></div><div class="flex gap-2 shrink-0"><button type="button" class="touch-btn btn-cyber px-3 py-2 text-xs" onclick="openEditModal(${r._idx})">編集</button><button type="button" class="touch-btn btn-ghost px-3 py-2 text-xs" onclick="deleteRecord(${r._idx})">削除</button></div></div>`;}).join('')+(filtered.length>250?'<div class="text-xs text-slate-500 text-center">表示は先頭250件までです。検索で絞り込んでください。</div>':'');
+}
+function openBatchEdit(){
+ const panel=$('batchEditPanel'),host=$('batchEditRows');if(!panel||!host)return;
+ const rows=savedRecords.map((r,i)=>({r,i})).filter(({r})=>!hasValidResult(r)||(Number(r.payout)||0)===0||(Number(r.payout2ren)||0)===0);
+ if(!rows.length){host.innerHTML='<div class="text-sm font-bold">未入力のレースはありません。</div>';panel.classList.remove('hidden');return;}
+ host.innerHTML=rows.map(({r,i})=>{const pat=(r.pattern||'').split('-');return `<div class="bg-white border border-slate-300 rounded-lg p-3" data-batch-index="${i}"><div class="font-black text-sm mb-2">${escapeHTML(r.venue||'不明')} ${escapeHTML(r.raceName||'')} <span class="text-xs font-normal text-slate-500">${escapeHTML(r.raceDate||'開催日未設定')} / ${escapeHTML(r.category||'')}</span></div><div class="grid grid-cols-3 gap-2 mb-2"><input class="field text-center" type="number" min="1" max="9" placeholder="1着" data-field="c1" value="${pat[0]||''}"><input class="field text-center" type="number" min="1" max="9" placeholder="2着" data-field="c2" value="${pat[1]||''}"><input class="field text-center" type="number" min="1" max="9" placeholder="3着" data-field="c3" value="${pat[2]||''}"></div><div class="grid grid-cols-2 gap-2"><label class="text-xs">2連単配当<input class="field mt-1" type="number" min="0" placeholder="未入力" data-field="p2" value="${Number(r.payout2ren)||''}"></label><label class="text-xs">3連単配当<input class="field mt-1" type="number" min="0" placeholder="未入力" data-field="p3" value="${Number(r.payout)||''}"></label></div></div>`}).join('');
+ panel.classList.remove('hidden');playBeep(620,'triangle',.08);
+}
+function saveBatchEdit(){
+ takeUndoSnapshot('一括編集');
+ const cards=[...$('batchEditRows').querySelectorAll('[data-batch-index]')];let updated=0;
+ for(const card of cards){const idx=Number(card.dataset.batchIndex),r=savedRecords[idx];if(!r)continue;const val=k=>card.querySelector(`[data-field="${k}"]`)?.value.trim()??'';
+  const a=val('c1'),b=val('c2'),c=val('c3'),any=[a,b,c].some(x=>x!==''),nums=[a,b,c].map(Number);
+  if(any&&!(a!==''&&b!==''&&c!==''&&nums.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(nums).size===3)){alert(`${r.venue||''} ${r.raceName||''}：着順は1〜3着を重複なく入力してください。`);return;}
+  if(any)r.pattern=nums.join('-');
+  const p2=val('p2'),p3=val('p3');if(p2!=='')r.payout2ren=Math.max(0,Number(p2)||0);if(p3!=='')r.payout=Math.max(0,Number(p3)||0);Object.assign(r,normalizeRecord(r));
+  updated++;
+ }
+ persist();updateCountDisplay();runAnalysis();renderRecordManager();$('batchEditPanel').classList.add('hidden');logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
+}
+function deleteRecord(idx){const r=savedRecords[idx];if(!r)return;if(!confirm(`${r.venue||'不明'} ${r.raceName||''}（${r.raceDate||'開催日未設定'}）を削除しますか？`))return;takeUndoSnapshot('レース削除');savedRecords.splice(idx,1);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal('> レース記録を1件削除しました。','success');}
+
+
+// ===== V10 USER CONTROL HUB =====
+let undoSnapshots=[];
+let musicObjectUrl='';
+let backupDbPromise=null;
+function takeUndoSnapshot(label='操作'){
+ try{undoSnapshots.push({label,records:JSON.parse(JSON.stringify(savedRecords)),at:Date.now()});if(undoSnapshots.length>12)undoSnapshots.shift();}catch(e){console.warn('undo snapshot failed',e)}
+}
+function undoLastAction(){
+ const snap=undoSnapshots.pop();if(!snap){alert('取り消せる操作がありません。');return;}
+ savedRecords=snap.records;persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> 取り消し：${snap.label} を復元しました。`,'success');
+}
+function openBackupDB(){
+ if(backupDbPromise)return backupDbPromise;
+ backupDbPromise=new Promise((resolve,reject)=>{
+  if(!('indexedDB' in window)){reject(Error('IndexedDB unavailable'));return;}
+  const req=indexedDB.open('BattleBankKunBackup',1);
+  req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('snapshots'))db.createObjectStore('snapshots',{keyPath:'id'});};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+ });return backupDbPromise;
+}
+async function writeBackup(label='自動バックアップ'){
+ try{
+  const db=await openBackupDB(),tx=db.transaction('snapshots','readwrite'),store=tx.objectStore('snapshots');
+  store.put({id:Date.now(),label,records:JSON.parse(JSON.stringify(savedRecords)),count:savedRecords.length});
+  await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});
+  const read=db.transaction('snapshots','readonly').objectStore('snapshots').getAll();
+  const all=await new Promise((res,rej)=>{read.onsuccess=()=>res(read.result||[]);read.onerror=()=>rej(read.error);});
+  all.sort((a,b)=>b.id-a.id).slice(5).forEach(x=>{const t=db.transaction('snapshots','readwrite');t.objectStore('snapshots').delete(x.id)});
+  const status=$('backupStatus');if(status)status.textContent=`自動バックアップ保存済み：${new Date().toLocaleString('ja-JP')} ／ ${savedRecords.length}件`;
+ }catch(e){const status=$('backupStatus');if(status)status.textContent='自動バックアップを利用できません。JSON保存を使用してください。';console.warn(e)}
+}
+let backupTimer=null;
+function scheduleAutoBackup(){clearTimeout(backupTimer);backupTimer=setTimeout(()=>writeBackup('自動バックアップ'),1200);}
+async function listBackups(){
+ try{const db=await openBackupDB(),req=db.transaction('snapshots','readonly').objectStore('snapshots').getAll();const arr=await new Promise((res,rej)=>{req.onsuccess=()=>res(req.result||[]);req.onerror=()=>rej(req.error)});return arr.sort((a,b)=>b.id-a.id)}catch(e){return []}
+}
+async function restoreLatestBackup(){
+ const backups=await listBackups();if(!backups.length){alert('復元できるバックアップがありません。');return;}
+ const b=backups[0];if(!confirm(`${new Date(b.id).toLocaleString('ja-JP')} のバックアップ（${b.count}件）に復元しますか？現在のデータは復元前に保存します。`))return;
+ takeUndoSnapshot('バックアップ復元前');savedRecords=(b.records||[]).map(normalizeRecord);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal('> バックアップから復元しました。','success');
+}
+function downloadJsonBackup(){const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`battle-bank-kun-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function restoreJsonBackup(event){const f=event.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(!Array.isArray(data))throw Error('not array');if(!confirm(`${data.length}件のデータで現在のDBを置き換えますか？`))return;takeUndoSnapshot('JSON復元前');savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> JSON復元完了：${savedRecords.length}件`,'success');}catch(e){alert('JSONの形式を確認してください。')}finally{event.target.value=''}};reader.readAsText(f,'UTF-8');}
+function runDuplicateCheck(){
+ const map=new Map();savedRecords.forEach((r,i)=>{const k=recordKey(r);if(!map.has(k))map.set(k,[]);map.get(k).push(i)});
+ const dup=[...map.entries()].filter(([,v])=>v.length>1);const host=$('healthResults');
+ host.innerHTML=dup.length?`<b class="text-rose-700">重複候補 ${dup.length}グループ</b><div class="mt-2 space-y-1">${dup.slice(0,15).map(([k,v])=>`<div class="border-t pt-1">${escapeHTML(k.replaceAll('|',' / '))}：${v.length}件</div>`).join('')}</div><div class="text-[10px] mt-2 text-slate-500">自動削除はしていません。日付未設定データは同一開催場・レース番号でまとまる可能性があります。</div>`:'<b class="text-sky-800">重複候補は見つかりませんでした。</b>';
+}
+function runQualityCheck(){
+ let noResult=0,noP2=0,noP3=0,badResult=0,noDate=0,noLine=0;
+ savedRecords.forEach(r=>{const p=String(r.pattern||'').split('-').map(Number);if(!hasValidResult(r)){noResult++;if(r.pattern&&!p.every(n=>Number.isInteger(n)&&n>=1&&n<=9))badResult++;}if(!(Number(r.payout2ren)>0))noP2++;if(!(Number(r.payout)>0))noP3++;if(!r.raceDate)noDate++;if(!String(r.line1||'').trim())noLine++;});
+ $('healthResults').innerHTML=`<b class="text-sky-900">登録 ${savedRecords.length}件の点検結果</b><div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">${[['着順未入力',noResult],['着順形式不正',badResult],['2連単配当未入力',noP2],['3連単配当未入力',noP3],['開催日未設定',noDate],['ライン①未登録',noLine]].map(([k,v])=>`<div class="bg-white rounded-lg p-2"><div class="text-[10px] text-slate-500">${k}</div><b class="text-lg">${v}</b></div>`).join('')}</div>`;
+}
+function getScanSettings(){return {category:$('discoveryClass').value,threshold:Number($('discoveryThreshold').value)||10000,min:Number($('discoveryMin').value)||10};}
+function renderScanPresets(){const host=$('savedScanPresets');const arr=JSON.parse(localStorage.getItem('battleBankScanPresets')||'[]');if(!arr.length){host.textContent='保存した条件はありません。';return;}host.innerHTML=arr.map((x,i)=>`<div class="flex justify-between items-center gap-2 bg-white rounded-lg p-2"><button class="text-left flex-1 font-bold" data-load-preset="${i}">${escapeHTML(x.name)} <span class="font-normal text-slate-500">${escapeHTML(x.category)} / ¥${Number(x.threshold).toLocaleString()} / ${x.min}件</span></button><button class="text-rose-600 px-2" data-delete-preset="${i}">削除</button></div>`).join('');}
+function saveScanPreset(){const name=$('scanPresetName').value.trim();if(!name){alert('条件名を入力してください。');return;}const s=getScanSettings(),arr=JSON.parse(localStorage.getItem('battleBankScanPresets')||'[]');arr.unshift({name,...s});localStorage.setItem('battleBankScanPresets',JSON.stringify(arr.slice(0,20)));$('scanPresetName').value='';renderScanPresets();}
+function applySavedPreset(i){const x=JSON.parse(localStorage.getItem('battleBankScanPresets')||'[]')[i];if(!x)return;$('discoveryClass').value=x.category;$('discoveryThreshold').value=x.threshold;$('discoveryMin').value=String(x.min);discoverPatterns();document.getElementById('discoverySection').scrollIntoView({behavior:'smooth'});}
+function setAppearance(){const theme=$('appearanceTheme').value;document.documentElement.dataset.bbtheme=theme;document.documentElement.dataset.motion=$('motionSetting').value;document.body.style.filter=theme==='violet'?'hue-rotate(35deg)':theme==='dark'?'brightness(.82) saturate(.9)':'';localStorage.setItem('battleBankAppearance',JSON.stringify({theme,motion:$('motionSetting').value,sfx:$('sfxSetting').value}));sfxEnabled=$('sfxSetting').value==='on';const label=$('audioToggleBtn')?.lastElementChild;if(label)label.textContent=`SFX [${sfxEnabled?'ON':'OFF'}]`;}
+function initUserSettings(){try{const x=JSON.parse(localStorage.getItem('battleBankAppearance')||'{}');if(x.theme)$('appearanceTheme').value=x.theme;if(x.motion)$('motionSetting').value=x.motion;if(x.sfx)$('sfxSetting').value=x.sfx;}catch(e){}setAppearance();const vol=localStorage.getItem('battleBankMusicVolume');if(vol!==null)$('musicVolume').value=vol;const sfxVol=localStorage.getItem('battleBankSfxVolume');if(sfxVol!==null)$('sfxVolume').value=sfxVol;renderScanPresets();}
+function loadMusicFile(event){const f=event.target.files?.[0];if(!f)return;const audio=$('personalMusic');if(musicObjectUrl)URL.revokeObjectURL(musicObjectUrl);musicObjectUrl=URL.createObjectURL(f);audio.src=musicObjectUrl;audio.loop=$('musicLoop').checked;audio.volume=Number($('musicVolume').value)/100;$('musicFileName').textContent=f.name;$('musicState').textContent='再生準備完了';}
+async function playPersonalMusic(){const a=$('personalMusic');if(!a.src){alert('先に音楽ファイルを選択してください。');return;}try{await a.play();$('musicState').textContent='再生中';}catch(e){$('musicState').textContent='再生できません。形式を確認してください。';}}
+function stopPersonalMusic(){const a=$('personalMusic');a.pause();a.currentTime=0;$('musicState').textContent='停止中';}
+function bindUserHub(){
+ bind('backupNowBtn',()=>writeBackup('手動バックアップ'));bind('restoreBackupBtn',restoreLatestBackup);bind('restoreJsonBtn',()=>$('restoreBackupFile').click());bind('undoActionBtn',undoLastAction);bind('downloadBackupBtn',downloadJsonBackup);
+ bind('duplicateCheckBtn',runDuplicateCheck);bind('qualityCheckBtn',runQualityCheck);bind('anomalyScanBtn',()=>{discoverPatterns();$('discoverySection').scrollIntoView({behavior:'smooth'});});bind('saveScanPresetBtn',saveScanPreset);
+ $('savedScanPresets').addEventListener('click',e=>{const l=e.target.closest('[data-load-preset]'),d=e.target.closest('[data-delete-preset]');if(l)applySavedPreset(Number(l.dataset.loadPreset));if(d){const a=JSON.parse(localStorage.getItem('battleBankScanPresets')||'[]');a.splice(Number(d.dataset.deletePreset),1);localStorage.setItem('battleBankScanPresets',JSON.stringify(a));renderScanPresets();}});
+ $('restoreBackupFile').addEventListener('change',restoreJsonBackup);$('musicFileInput').addEventListener('change',loadMusicFile);bind('musicPlayBtn',playPersonalMusic);bind('musicStopBtn',stopPersonalMusic);
+ $('musicVolume').addEventListener('input',e=>{const v=Number(e.target.value)/100;$('personalMusic').volume=v;localStorage.setItem('battleBankMusicVolume',e.target.value)});$('musicLoop').addEventListener('change',e=>$('personalMusic').loop=e.target.checked);
+ $('sfxVolume').addEventListener('input',e=>{localStorage.setItem('battleBankSfxVolume',e.target.value)});$('appearanceTheme').addEventListener('change',setAppearance);$('motionSetting').addEventListener('change',setAppearance);$('sfxSetting').addEventListener('change',setAppearance);
+ $('personalMusic').addEventListener('ended',()=>{$('musicState').textContent=$('personalMusic').loop?'再生中':'再生終了'});
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+ bindUserHub();initUserSettings();writeBackup('起動時バックアップ');bind('openBatchEditBtn',openBatchEdit);bind('closeBatchEditBtn',()=>$('batchEditPanel').classList.add('hidden'));bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('trickClass')?.addEventListener('change',renderMarkJsonComparison);$('lowPayoutThreshold')?.addEventListener('change',renderMarkJsonComparison);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);
+ $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);$('recordSearch').addEventListener('input',renderRecordManager);$('recordStatus').addEventListener('change',renderRecordManager);initManualSelects();
+ try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
+ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.id!=='audioToggleBtn'&&!b.disabled)playBeep(680,'sine',.045,.018);});
+ updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v10.0 稼働中.":"> SYSTEM READY // v10.2 稼働中.","success");
+});
+</script>
+
+<script>
+(function(){
+'use strict';
+let trickRows=[];
+const $t=id=>document.getElementById(id);
+const markMap={honmei:'◎',taikou:'◯',tanana:'△',renge:'✕'};
+function parseCSV(text){
+ const rows=[];let row=[],cell='',quoted=false;
+ for(let i=0;i<text.length;i++){
+  const c=text[i];
+  if(quoted){if(c==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}
+  else if(c==='"')quoted=true;
+  else if(c===','){row.push(cell);cell='';}
+  else if(c==='\n'){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);row=[];cell='';}
+  else cell+=c;
+ }
+ if(cell.length||row.length){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);}
+ if(!rows.length)return [];
+ const headers=rows.shift().map((h,i)=>i===0?h.replace(/^\uFEFF/,'').trim():h.trim());
+ return rows.map(a=>Object.fromEntries(headers.map((h,i)=>[h,(a[i]??'').trim()])));
+}
+function splitLines(value){return String(value||'').split('/').map(g=>g.trim()).filter(Boolean).map(g=>g.split(/[-‐‑‒–—\s]+/).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=1&&n<=9));}
+function makeRace(row){
+ const girls=String(row.dai||'').toUpperCase()==='G'||String(row.gl||'').startsWith('G')||/ガールズ|L級/.test(String(row.race_class||''));
+ const n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
+ const category=girls?'ガールズ':(n>=5&&n<=9?`${n}車`:'不明');
+ const lines=splitLines(row.lines);
+ if(!lines.length||!lines.some(g=>g.length>=2))return null; // 全員単騎だけ除外
+ const marks={};Object.entries(markMap).forEach(([key,sym])=>{const n=Number(row[key]);if(n>=1&&n<=9)marks[n]=sym;});
+ const result=String(row.result||'').split(/[-\s>→]+/).map(Number).filter(n=>n>=1&&n<=9).slice(0,3);
+ return {date:String(row.date||row.raceDate||''),category,lines,marks,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0,result,rawLine:lines.map(g=>g.join('-')).join('/')};
+}
+function makeRace(row){
+ const girls=String(row.dai||'').toUpperCase()==='G'||String(row.gl||'').toUpperCase().startsWith('G')||/ガールズ|L級/.test(String(row.race_class||''));
+ const n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
+ const category=girls?'ガールズ':(n>=5&&n<=9?`${n}車`:'不明');
+ const lines=splitLines(row.lines);
+ if(!lines.length||!lines.some(g=>g.length>=2))return null; // 全員単騎だけ除外
+ const marks={};for(let car=1;car<=9;car++){const v=String(row['mark_'+car]||'').trim();if(v)marks[car]=v;}if(!Object.keys(marks).length){Object.entries(markMap).forEach(([key,sym])=>{const car=Number(row[key]);if(car>=1&&car<=9)marks[car]=sym;});Object.assign(marks,transformLineMarks(lines,marks));}
+ const result=String(row.result||'').split(/[-\s>→]+/).map(Number).filter(n=>n>=1&&n<=9).slice(0,3);
+ return {date:String(row.date||row.raceDate||''),category,lines,heads:lines.map(g=>g[0]).filter(n=>n>=1&&n<=9),marks,lineMarks:marks,result,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0};
+}
+// 指定された組み合わせ条件。車番の順序は区別しない。
+function allowedHeadPair(a,b){if(a===b)return false;const x=Math.min(a,b),y=Math.max(a,b);return !(x===1&&(y===2||y===3));}
+function pairKey(a,b){return [a,b].sort((x,y)=>x-y).join('－');}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function loadCSV(file){const reader=new FileReader();reader.onload=()=>{try{const rows=parseCSV(String(reader.result||''));const mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));$t('trickCsvStatus').textContent=`読込成功：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース（全員単騎・分類不明を除外）`;$t('trickSummary').innerHTML='';$t('trickResults').innerHTML='<div class="discovery-card text-center text-sky-700 text-xs">読み込み完了。組み合わせ分析を実行してください。</div>'; }catch(e){$t('trickCsvStatus').textContent='CSV読込エラー：列名・文字コードを確認してください。';console.error(e);}};reader.onerror=()=>{$t('trickCsvStatus').textContent='ファイルを読み込めませんでした。';};reader.readAsText(file,'UTF-8');}
+function renderMarkJsonComparison(){
+ const host=$t('trickMarkJsonCompare');if(!host)return;
+ if(!trickRows.length){host.innerHTML='<div class="discovery-card text-xs">CSVを読み込んでください。</div>';return;}
+ const cls=$t('trickClass')?.value||'MEN_ALL',threshold=Number($t('lowPayoutThreshold')?.value)||10000;
+ const csv=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0);
+ const live=savedRecords.filter(r=>(cls==='MEN_ALL'?(r.category||'9車')!=='ガールズ':(r.category||'9車')===cls)&&Number(r.payout)>0&&Array.isArray(r.lineGroups)&&r.lineGroups.length>=2&&r.lineMarks);
+ const collect=(rows,isLive)=>{
+  const map=new Map();
+  rows.forEach(r=>{
+   const groups=isLive?r.lineGroups:r.lines,marks=isLive?r.lineMarks:(r.lineMarks||r.marks||{}),payout=Number(isLive?r.payout:r.p3)||0;
+   if(!Array.isArray(groups)||!payout)return;
+   for(let i=0;i<groups.length;i++)for(let j=i+1;j<groups.length;j++){
+    const a=groups[i]||[],b=groups[j]||[];if(a.length<2||b.length<2)continue;
+    const sig=`${i+1}×${j+1}｜${a.map(n=>marks[n]||'').join('－')} ／ ${b.map(n=>marks[n]||'').join('－')}`;
+    if(!map.has(sig))map.set(sig,{sig,count:0,under:0,sum:0});const z=map.get(sig);z.count++;z.sum+=payout;if(payout<=threshold)z.under++;
+   }
+  });return map;
+ };
+ const cm=collect(csv,false),lm=collect(live,true),rows=[];
+ for(const [sig,c] of cm){const l=lm.get(sig);if(!l)continue;rows.push({sig,cCount:c.count,lCount:l.count,cRate:c.under/c.count*100,lRate:l.under/l.count*100,cAvg:c.sum/c.count,lAvg:l.sum/l.count,diff:(l.under/l.count-c.under/c.count)*100});}
+ rows.sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff));
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const body=rows.slice(0,30).map(x=>`<div class="discovery-card"><div class="text-[11px] font-bold text-violet-900 mb-2">${esc(x.sig)}</div><div class="grid grid-cols-2 gap-2 text-[10px]"><div><b>過去CSV</b><br>${x.cCount.toLocaleString()}件／1万円以下 ${(x.cRate).toFixed(1)}%<br>平均 ${fmt(x.cAvg)}</div><div><b>直近JSON</b><br>${x.lCount.toLocaleString()}件／1万円以下 ${(x.lRate).toFixed(1)}%<br>平均 ${fmt(x.lAvg)}</div></div><div class="mt-2 text-[11px] font-bold ${x.diff>=0?'text-rose-700':'text-sky-800'}">1万円以下率の差：${x.diff>=0?'+':''}${x.diff.toFixed(1)}ポイント</div></div>`).join('');
+ host.innerHTML=`<div class="grid grid-cols-2 gap-2 mb-2"><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">CSV対象</div><div class="font-mono-tech text-lg font-bold">${csv.length.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">JSON対象</div><div class="font-mono-tech text-lg font-bold">${live.length.toLocaleString()}件</div></div></div>${body||'<div class="discovery-card text-xs">同じ印並びで比較できるデータがまだありません。直近JSONに結果配当を入力すると比較対象になります。</div>'}`;
+}
+function runTrick(){
+ if(!trickRows.length){$t('trickResults').innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';return;}
+ const cls=$t('trickClass').value,type=$t('trickPayoutType').value;
+ const allData=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls));
+ const payoutRows=allData.map(r=>({...r,payout:type==='tri_yen'?r.p3:r.p2})).filter(r=>Number.isFinite(r.payout)&&r.payout>0);
+ const stats=new Map(), positionMarkStats=new Map();
+ payoutRows.forEach(r=>{
+  const heads=[...new Set(r.heads)];
+  for(let i=0;i<heads.length;i++)for(let j=i+1;j<heads.length;j++){
+   const a=heads[i],b=heads[j];if(!allowedHeadPair(a,b))continue;
+   const key=pairKey(a,b),lo=Math.min(a,b),hi=Math.max(a,b);
+   if(!stats.has(key))stats.set(key,{pair:key,a:lo,b:hi,count:0,sum:0,min:Infinity,max:0});
+   const g=stats.get(key);g.count++;g.sum+=r.payout;g.min=Math.min(g.min,r.payout);g.max=Math.max(g.max,r.payout);
+  }
+  const markOf=n=>r.marks[n]||'';
+  const posPairs=[[0,1,'ライン① × ②'],[0,2,'ライン① × ③'],[1,2,'ライン② × ③']];
+  posPairs.forEach(([pi,pj,label])=>{
+   const lineA=r.lines[pi],lineB=r.lines[pj];
+   if(!lineA||!lineB||lineA.length<2||lineB.length<2)return;
+   const posKey=`${pi}-${pj}`;
+   if(!positionMarkStats.has(posKey))positionMarkStats.set(posKey,{label,head:new Map(),lines:new Map()});
+   const ms=positionMarkStats.get(posKey);
+   const headSig=`${lineA[0]}番:${markOf(lineA[0])||'—'} × ${lineB[0]}番:${markOf(lineB[0])||'—'}`;
+   const lineSig=`${lineA.map(markOf).join('－')} ／ ${lineB.map(markOf).join('－')}`;
+   for(const [map,sig] of [[ms.head,headSig],[ms.lines,lineSig]]){
+    if(!map.has(sig))map.set(sig,{sig,count:0,sum:0});
+    const z=map.get(sig);z.count++;z.sum+=r.payout;
+   }
+  });
+ });
+ const pairs=[...stats.values()].map(g=>({...g,avg:g.sum/g.count}));
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const summary=[['対象レース',allData.length.toLocaleString()],['配当入力済',payoutRows.length.toLocaleString()],['集計ペア数',pairs.length.toLocaleString()],['配当種別',type==='tri_yen'?'3連単':'2車単']];
+ $t('trickSummary').innerHTML=summary.map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-sky-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold text-sky-900">${v}</div></div>`).join('');
+ let html='';
+ for(let car=1;car<=9;car++){
+  const related=pairs.filter(g=>g.a===car||g.b===car);
+  const cheap=related.slice().sort((a,b)=>a.avg-b.avg||b.count-a.count).slice(0,3);
+  const expensive=related.slice().sort((a,b)=>b.avg-a.avg||b.count-a.count).slice(0,3);
+  const render=(arr,empty)=>arr.length?arr.map((g,i)=>`<div class="flex items-center justify-between gap-2 border-b border-sky-100 py-1.5 last:border-0"><span class="font-bold text-slate-800">${i+1}. ${g.pair}</span><span class="text-right"><b class="text-sky-900">${fmt(g.avg)}</b><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):`<div class="py-2 text-[11px] text-slate-500">${empty}</div>`;
+  html+=`<div class="discovery-card"><div class="flex items-center justify-between mb-2"><h3 class="font-bold text-sky-900">車番 ${car} を含む組み合わせ</h3><span class="text-[10px] text-slate-500">${related.length}ペア</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-sky-50 p-2"><div class="text-[11px] font-bold text-sky-800 mb-1">平均配当が安い 3組</div>${render(cheap,'該当する組み合わせなし')}</div><div class="rounded-lg bg-amber-50 p-2"><div class="text-[11px] font-bold text-amber-800 mb-1">平均配当が高い 3組</div>${render(expensive,'該当する組み合わせなし')}</div></div></div>`;
+ }
+ $t('trickResults').innerHTML=html;
+ const minMarkCount=Math.max(1,Number($t('markPatternMinCount')?.value)||10);
+ const markFmt=(arr)=>arr.length?arr.map((g,i)=>`<div class="flex items-start justify-between gap-2 border-b border-violet-100 py-1.5 last:border-0"><span class="text-[11px] font-semibold text-slate-700">${i+1}. ${esc(g.sig)}</span><span class="shrink-0 text-right"><b class="text-slate-900">${fmt(g.avg)}</b><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">最低件数を満たすパターンなし</div>';
+ const markCards=[];
+ for(const [posKey,ms] of positionMarkStats){
+  const renderSide=(map,low)=>{const arr=[...map.values()].filter(x=>x.count>=minMarkCount).map(x=>({...x,avg:x.sum/x.count}));arr.sort((a,b)=>low?(a.avg-b.avg||b.count-a.count):(b.avg-a.avg||b.count-a.count));return markFmt(arr.slice(0,3));};
+  markCards.push(`<div class="discovery-card"><h4 class="font-bold text-violet-900 mb-2">${ms.label}</h4><div class="grid grid-cols-1 lg:grid-cols-2 gap-3"><section class="rounded-lg bg-violet-50 p-2"><div class="font-bold text-[11px] text-violet-900 mb-1">両ライン先頭2人の印の関係</div><div class="text-[10px] text-slate-500 mb-1">先頭車番の印をライン順に比較</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.head,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.head,false)}</div></div></section><section class="rounded-lg bg-slate-50 p-2"><div class="font-bold text-[11px] text-slate-800 mb-1">2ライン全員の印の並び</div><div class="text-[10px] text-slate-500 mb-1">各ライン内の順番を保持</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.lines,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.lines,false)}</div></div></section></div><div class="text-[10px] text-slate-500 mt-2">最低出現数：${minMarkCount}件以上</div></div>`);
+ }
+ $t('trickMarkResults').innerHTML=markCards.length?markCards.join(''):'<div class="discovery-card text-xs">印の組み合わせデータがありません。</div>';
+ renderMarkJsonComparison();
+}
+function runLowPayoutHeadPairs(){
+ const out=$t('lowPayoutResults'),summary=$t('lowPayoutSummary');
+ if(!trickRows.length){out.innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';summary.innerHTML='';return;}
+ const cls=$t('trickClass').value;
+ const threshold=Math.max(1,Number($t('lowPayoutThreshold').value)||10000);
+ const minCount=Math.max(1,Math.floor(Number($t('lowPayoutMinCount').value)||20));
+ const rows=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0);
+ const positions=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+ const labels=['ライン① × ②','ライン① × ③','ライン① × ④','ライン② × ③','ライン② × ④','ライン③ × ④'];
+ const stats=positions.map(()=>new Map());
+ let eligible=0,used=0;
+ rows.forEach(r=>{
+  // 単騎を除き、先頭車番が明確なラインだけを分析対象にする
+  const lines=(r.lines||[]).slice(0,4).map(g=>Array.isArray(g)&&g.length>=2&&Number.isInteger(g[0])&&g[0]>=1&&g[0]<=9?g:null);
+  if(lines.filter(Boolean).length<2)return;
+  eligible++;
+  positions.forEach(([i,j],idx)=>{
+   const a=lines[i]?.[0],b=lines[j]?.[0];
+   if(!a||!b||a===b)return;
+   const key=`${a}－${b}`;
+   if(!stats[idx].has(key))stats[idx].set(key,{key,a,b,count:0,under:0,over:0,sum:0,min:Infinity,max:0});
+   const g=stats[idx].get(key);g.count++;g.sum+=r.p3;g.min=Math.min(g.min,r.p3);g.max=Math.max(g.max,r.p3);
+   if(r.p3<=threshold)g.under++;else g.over++;
+   used++;
+  });
+ });
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const summaryData=[['対象クラス',cls==='MEN_ALL'?'男子・全車立て':cls],['配当入力済',rows.length.toLocaleString()+'件'],['ラインペア対象',eligible.toLocaleString()+'R／'+used.toLocaleString()+'件'],['基準以下',fmt(threshold)]];
+ summary.innerHTML=summaryData.map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-emerald-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold text-emerald-900">${v}</div></div>`).join('');
+ const cards=stats.map((map,idx)=>{
+  const all=[...map.values()].map(g=>({...g,rate:g.under/g.count*100,avg:g.sum/g.count}));
+  const ranked=all.filter(g=>g.count>=minCount).sort((a,b)=>b.rate-a.rate||b.count-a.count||a.avg-b.avg);
+  const top=ranked.slice(0,20);
+  const table=top.length?`<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr class="text-left border-b border-emerald-200"><th class="p-2">先頭車番</th><th class="p-2 text-right">出現数</th><th class="p-2 text-right">1万円以下</th><th class="p-2 text-right">割合</th><th class="p-2 text-right">平均配当</th></tr></thead><tbody>${top.map(g=>`<tr class="border-b border-slate-100"><td class="p-2 font-bold">${g.key}</td><td class="p-2 text-right">${g.count.toLocaleString()}件</td><td class="p-2 text-right">${g.under.toLocaleString()}件</td><td class="p-2 text-right font-black text-emerald-800">${g.rate.toFixed(1)}%</td><td class="p-2 text-right">${fmt(g.avg)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="text-xs text-slate-500 py-3">最低出現数を満たす組み合わせがありません。</div>';
+  return `<div class="discovery-card"><div class="flex flex-wrap justify-between items-center gap-2 mb-2"><h3 class="font-bold text-emerald-900">${labels[idx]}</h3><span class="text-[10px] text-slate-500">組み合わせ ${all.length}種／${all.reduce((n,g)=>n+g.count,0).toLocaleString()}件</span></div>${table}</div>`;
+ }).join('');
+ out.innerHTML=rows.length?cards:'<div class="discovery-card text-xs">選択したクラスに3連単配当入力済みのレースがありません。</div>';
+ renderRecentHeadPairComparison(cls,threshold,minCount,stats,labels);
+}
+function renderRecentHeadPairComparison(cls,threshold,minCount,csvStats,labels){
+ const host=$t('lowPayoutRecentCompare');if(!host)return;
+ const live=savedRecords.filter(r=>(cls==='MEN_ALL'?(r.category||'9車')!=='ガールズ':(r.category||'9車')===cls)&&Number(r.payout)>0&&Array.isArray(r.lineHeads)&&r.lineHeads.length>=2);
+ const positions=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]],maps=positions.map(()=>new Map());
+ live.forEach(r=>{const heads=r.lineHeads||[];positions.forEach(([i,j],idx)=>{const a=Number(heads[i])||0,b=Number(heads[j])||0;if(!a||!b||a===b)return;const key=`${a}－${b}`;if(!maps[idx].has(key))maps[idx].set(key,{count:0,under:0,sum:0});const g=maps[idx].get(key);g.count++;g.sum+=Number(r.payout);if(Number(r.payout)<=threshold)g.under++;});});
+ const names=labels||['ライン① × ②','ライン① × ③','ライン① × ④','ライン② × ③','ライン② × ④','ライン③ × ④'];
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP');let html='';
+ positions.forEach((pos,idx)=>{const all=new Set([...(csvStats[idx]?.keys()||[]),...(maps[idx]?.keys()||[])]);const rows=[...all].map(key=>{const c=csvStats[idx]?.get(key)||{count:0,under:0,sum:0};const l=maps[idx].get(key)||{count:0,under:0,sum:0};return {key,c,l,cr:c.count?c.under/c.count*100:null,lr:l.count?l.under/l.count*100:null,d:c.count&&l.count?(l.under/l.count-c.under/c.count)*100:null};}).filter(x=>x.c.count||x.l.count).sort((a,b)=>(Math.abs(b.d??-999)-Math.abs(a.d??-999))||b.l.count-a.l.count).slice(0,30);
+  html+=`<div class="discovery-card"><div class="font-bold text-cyan-900 mb-2">${names[idx]}</div><div class="overflow-x-auto"><table class="w-full text-[11px]"><thead><tr class="border-b border-cyan-100 text-left"><th class="p-1">先頭ペア</th><th class="p-1 text-right">CSV 件数</th><th class="p-1 text-right">CSV率</th><th class="p-1 text-right">直近件数</th><th class="p-1 text-right">直近率</th><th class="p-1 text-right">差</th></tr></thead><tbody>${rows.map(x=>`<tr class="border-b border-slate-100"><td class="p-1 font-bold">${x.key}</td><td class="p-1 text-right">${fmt(x.c.count)}</td><td class="p-1 text-right">${x.cr===null?'—':x.cr.toFixed(1)+'%'}</td><td class="p-1 text-right">${fmt(x.l.count)}</td><td class="p-1 text-right">${x.lr===null?'—':x.lr.toFixed(1)+'%'}</td><td class="p-1 text-right font-bold">${x.d===null?'—':(x.d>0?'+':'')+x.d.toFixed(1)+'pt'}</td></tr>`).join('')}</tbody></table></div></div>`;
+ });
+ host.innerHTML=`<div class="grid grid-cols-2 gap-2 mb-2"><div class="discovery-card"><div class="text-[9px] text-cyan-700 font-bold">直近JSON・配当入力済</div><div class="font-mono-tech text-lg font-bold">${live.length.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-cyan-700 font-bold">ライン情報あり</div><div class="font-mono-tech text-lg font-bold">${live.filter(r=>r.lineHeads?.some(Boolean)).length.toLocaleString()}件</div></div></div>${html||'<div class="discovery-card text-xs">比較できる組み合わせがありません。</div>'}`;
+}
+
+function runProductMarkLab(){
+ const out=$t('productMarkResults'),summary=$t('productMarkSummary');
+ if(!trickRows.length){out.innerHTML='<div class="discovery-card text-center">先に上の分析CSVを読み込んでください。</div>';summary.innerHTML='';return;}
+ const cls=$t('trickClass').value,size=Number($t('productBucketSize').value)||50,threshold=Number($t('productHighThreshold').value)||10000,minCount=Number($t('productMinCount').value)||3;
+ const source=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.result?.length===3&&r.p3>0);
+ const buckets=new Map();let valid=0;
+ for(const r of source){
+  const [a,b,c]=r.result,product=a*b*c;if(!Number.isFinite(product)||product<=0)continue;
+  const start=Math.floor((product-1)/size)*size+1,end=start+size-1,key=`${start}－${end}`;
+  const sig=[a,b,c].map(n=>r.marks[n]||'').join('－');
+  if(!buckets.has(key))buckets.set(key,{start,end,total:0,sum:0,high:0,patterns:new Map(),products:new Set()});
+  const g=buckets.get(key);g.total++;g.sum+=r.p3;if(r.p3>=threshold)g.high++;g.products.add(product);valid++;
+  if(!g.patterns.has(sig))g.patterns.set(sig,{sig,count:0,sum:0,high:0,products:new Set()});
+  const p=g.patterns.get(sig);p.count++;p.sum+=r.p3;if(r.p3>=threshold)p.high++;p.products.add(product);
+ }
+ const groups=[...buckets.values()].sort((a,b)=>a.start-b.start);
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const avgDiff=g=>{const p=[...g.patterns.values()].filter(x=>x.count>=minCount);if(p.length<2)return 0;const av=p.map(x=>x.sum/x.count);return Math.max(...av)-Math.min(...av);};
+ const ranked=groups.filter(g=>[...g.patterns.values()].filter(x=>x.count>=minCount).length>=2).sort((a,b)=>avgDiff(b)-avgDiff(a));
+ summary.innerHTML=[['3連単対象',valid.toLocaleString()+'件'],['積の範囲',groups.length.toLocaleString()+'区分'],['印比較可能',ranked.length.toLocaleString()+'区分'],['高配当基準',fmt(threshold)]].map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-sky-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold text-sky-900">${v}</div></div>`).join('');
+ if(!valid){out.innerHTML='<div class="discovery-card text-xs">対象クラスに、着順3車番と3連単配当がそろったデータがありません。</div>';return;}
+ const renderPatterns=(arr)=>arr.length?arr.map((p,i)=>`<div class="flex items-start justify-between gap-2 border-b border-slate-200 py-1.5 last:border-0"><span class="text-[11px] font-semibold text-slate-700">${i+1}. ${esc(p.sig)}<small class="block text-[10px] text-slate-500">積値 ${[...p.products].sort((a,b)=>a-b).join(', ')}</small></span><span class="shrink-0 text-right"><b class="text-slate-900">${fmt(p.sum/p.count)}</b><small class="block text-[10px] text-slate-500">${p.count}件／高配当 ${p.high}件 (${(p.high/p.count*100).toFixed(1)}%)</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">最低件数を満たす印パターンが2種類未満です。</div>';
+ const display=ranked.slice(0,20);
+ let html='';
+ for(const g of display){
+  const pats=[...g.patterns.values()].filter(p=>p.count>=minCount).map(p=>({...p,avg:p.sum/p.count}));
+  const low=pats.slice().sort((a,b)=>a.avg-b.avg||b.count-a.count).slice(0,3),high=pats.slice().sort((a,b)=>b.avg-a.avg||b.count-a.count).slice(0,3);
+  const avg=g.sum/g.total;
+  html+=`<div class="discovery-card"><div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h3 class="font-bold text-fuchsia-900">車番積 ${g.start}～${g.end}</h3><span class="text-[10px] text-slate-500">${g.total}レース／平均 ${fmt(avg)}／高配当率 ${(g.high/g.total*100).toFixed(1)}%</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-sky-50 p-2"><div class="text-[11px] font-bold text-sky-800 mb-1">この積範囲で平均配当が低い印 3種</div>${renderPatterns(low)}</div><div class="rounded-lg bg-amber-50 p-2"><div class="text-[11px] font-bold text-amber-800 mb-1">この積範囲で平均配当が高い印 3種</div>${renderPatterns(high)}</div></div></div>`;
+ }
+ out.innerHTML=html||'<div class="discovery-card text-xs">最低件数を満たす印パターンが2種類以上ある積範囲がありません。範囲幅を広げるか、最低件数を下げてください。</div>';
+}
+function median(arr){
+ if(!arr.length)return 0;
+ const s=arr.slice().sort((a,b)=>a-b);
+ const mid=Math.floor(s.length/2);
+ return s.length%2?s[mid]:(s[mid-1]+s[mid])/2;
+}
+function runMedianHeadPairs(){
+ const out=$t('medianHeadResults');
+ if(!trickRows.length){out.innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';return;}
+ const cls=$t('trickClass')?.value||'MEN_ALL';
+ const minCount=Math.max(1,Math.floor(Number($t('lowPayoutMinCount')?.value)||10));
+ const rows=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0);
+ const positions=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+ const labels=['ライン① × ②','ライン① × ③','ライン① × ④','ライン② × ③','ライン② × ④','ライン③ × ④'];
+ const stats=positions.map(()=>new Map());
+ rows.forEach(r=>{
+  const lines=(r.lines||[]).slice(0,4).map(g=>Array.isArray(g)&&g.length>=2&&Number.isInteger(g[0])&&g[0]>=1&&g[0]<=9?g:null);
+  if(lines.filter(Boolean).length<2)return;
+  positions.forEach(([i,j],idx)=>{
+   const a=lines[i]?.[0],b=lines[j]?.[0];
+   if(!a||!b||a===b)return;
+   const key=`${a}－${b}`;
+   if(!stats[idx].has(key))stats[idx].set(key,{key,a,b,payouts:[]});
+   stats[idx].get(key).payouts.push(r.p3);
+  });
+ });
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const cards=stats.map((map,idx)=>{
+  const all=[...map.values()].map(g=>({...g,count:g.payouts.length,med:median(g.payouts),avg:g.payouts.reduce((s,n)=>s+n,0)/g.payouts.length}));
+  const ranked=all.filter(g=>g.count>=minCount);
+  const high=ranked.slice().sort((a,b)=>b.med-a.med||b.count-a.count).slice(0,3);
+  const low=ranked.slice().sort((a,b)=>a.med-b.med||b.count-a.count).slice(0,3);
+  const render=(arr,label)=>arr.length?arr.map((g,i)=>`<div class="flex items-center justify-between gap-2 border-b border-slate-100 py-1.5 last:border-0"><span class="font-bold">${i+1}. ${g.key}</span><span class="text-right"><b>${fmt(g.med)}</b><small class="block text-[10px] text-slate-500">${g.count}件 / 平均${fmt(g.avg)}</small></span></div>`).join(''):`<div class="text-[11px] text-slate-500 py-2">${label}</div>`;
+  return `<div class="discovery-card"><div class="flex flex-wrap justify-between items-center gap-2 mb-2"><h3 class="font-bold text-emerald-900">${labels[idx]}</h3><span class="text-[10px] text-slate-500">組み合わせ ${ranked.length}種（最低${minCount}件）</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-amber-50 p-2"><div class="text-[11px] font-bold text-amber-800 mb-1">中央値が高い 上位3</div>${render(high,'該当なし')}</div><div class="rounded-lg bg-sky-50 p-2"><div class="text-[11px] font-bold text-sky-800 mb-1">中央値が低い 下位3</div>${render(low,'該当なし')}</div></div></div>`;
+ }).join('');
+ out.innerHTML=rows.length?cards:'<div class="discovery-card text-xs">選択したクラスに3連単配当入力済みのレースがありません。</div>';
+}
+function runPerLineCombos(){
+ const out=$t('perLineResults');
+ if(!trickRows.length){out.innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';return;}
+ const cls=$t('trickClass')?.value||'MEN_ALL';
+ const minCount=Math.max(1,Math.floor(Number($t('perLineMinCount')?.value)||10));
+ const rows=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0);
+ const lineLabels=['ライン①','ライン②','ライン③','ライン④'];
+ const stats=lineLabels.map(()=>new Map()); // per line position, map of pairKey -> {payouts:[]}
+ const globalPairs=new Map(); // pairKey -> {positions: Map(pos -> {count,sum,payouts})}
+ rows.forEach(r=>{
+  const lines=(r.lines||[]).slice(0,4);
+  lines.forEach((line,pos)=>{
+   if(!Array.isArray(line)||line.length<2)return;
+   const a=line[0],b=line[1];
+   if(!a||!b||a===b||a<1||a>9||b<1||b>9)return;
+   const key=`${a}－${b}`;
+   if(!stats[pos].has(key))stats[pos].set(key,{key,a,b,payouts:[]});
+   stats[pos].get(key).payouts.push(r.p3);
+   if(!globalPairs.has(key))globalPairs.set(key,{key,positions:new Map()});
+   const gp=globalPairs.get(key);
+   if(!gp.positions.has(pos))gp.positions.set(pos,{count:0,sum:0,payouts:[]});
+   const p=gp.positions.get(pos);p.count++;p.sum+=r.p3;p.payouts.push(r.p3);
+  });
+ });
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const med=arr=>{if(!arr.length)return 0;const s=arr.slice().sort((x,y)=>x-y);const m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+ let html='';
+ lineLabels.forEach((label,pos)=>{
+  const all=[...stats[pos].values()].map(g=>({...g,count:g.payouts.length,avg:g.payouts.reduce((s,n)=>s+n,0)/g.payouts.length,med:med(g.payouts)}));
+  const ranked=all.filter(g=>g.count>=minCount);
+  const high=ranked.slice().sort((a,b)=>b.med-a.med||b.count-a.count).slice(0,3);
+  const low=ranked.slice().sort((a,b)=>a.med-b.med||b.count-a.count).slice(0,3);
+  const render=arr=>arr.length?arr.map((g,i)=>`<div class="flex items-center justify-between gap-2 border-b border-slate-100 py-1.5 last:border-0"><span class="font-bold">${i+1}. ${g.key}</span><span class="text-right"><b>${fmt(g.med)}</b><small class="block text-[10px] text-slate-500">${g.count}件 / 平均${fmt(g.avg)}</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">該当なし</div>';
+  html+=`<div class="discovery-card"><div class="flex flex-wrap justify-between items-center gap-2 mb-2"><h3 class="font-bold text-fuchsia-900">${label}</h3><span class="text-[10px] text-slate-500">組み合わせ ${ranked.length}種（最低${minCount}件）</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-amber-50 p-2"><div class="text-[11px] font-bold text-amber-800 mb-1">中央値が高い 上位3</div>${render(high)}</div><div class="rounded-lg bg-sky-50 p-2"><div class="text-[11px] font-bold text-sky-800 mb-1">中央値が低い 下位3</div>${render(low)}</div></div></div>`;
+ });
+ // Cross comparison for pairs that appear in 2+ positions
+ const multi=[...globalPairs.values()].filter(g=>g.positions.size>=2);
+ multi.sort((a,b)=>b.positions.size-a.positions.size);
+ const comp=multi.slice(0,15).map(g=>{
+  const cells=[0,1,2,3].map(pos=>{
+   const d=g.positions.get(pos);
+   return d?`<td class="p-1 text-right">${d.count}件<br>${fmt(med(d.payouts))}<br><small>avg ${fmt(d.sum/d.count)}</small></td>`:'<td class="p-1 text-center text-slate-400">—</td>';
+  }).join('');
+  return `<tr class="border-b border-slate-100"><td class="p-1 font-bold">${g.key}</td>${cells}</tr>`;
+ }).join('');
+ html+=`<div class="discovery-card mt-3"><h3 class="font-bold text-violet-900 mb-2">同じ車番ペアのライン位置間比較（2位置以上に出現）</h3><div class="overflow-x-auto"><table class="w-full text-[11px]"><thead><tr class="border-b border-violet-100 text-left"><th class="p-1">先頭2車</th><th class="p-1 text-right">①</th><th class="p-1 text-right">②</th><th class="p-1 text-right">③</th><th class="p-1 text-right">④</th></tr></thead><tbody>${comp||'<tr><td colspan="5" class="p-2 text-center text-slate-500">複数位置に出現する組み合わせがありません</td></tr>'}</tbody></table></div><p class="text-[10px] text-slate-500 mt-2">各セル：件数 / 中央値 / 平均。位置によって配当傾向が変わるかを確認できます。</p></div>`;
+ out.innerHTML=rows.length?html:'<div class="discovery-card text-xs">選択したクラスに3連単配当入力済みのレースがありません。</div>';
+}
+document.addEventListener('DOMContentLoaded',()=>{const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn'),m=$t('medianHeadRunBtn'),pl=$t('perLineRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);if(m)m.addEventListener('click',runMedianHeadPairs);if(pl)pl.addEventListener('click',runPerLineCombos);});
+})();
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then((reg) => console.log("SW registered:", reg.scope))
+      .catch((err) => console.log("SW registration failed:", err));
+  });
+}
+</script>
+
+<div id="bulkInputModal" class="hidden fixed inset-0 z-[1000] items-center justify-center p-2 sm:p-4">
+ <div class="modal-card rounded-2xl w-full max-w-2xl max-h-[95dvh] flex flex-col p-4 sm:p-6 relative">
+  <button id="closeBulkBtn" type="button" class="touch-btn absolute top-2 right-3 text-3xl font-black text-slate-900 w-10 h-10 z-10">×</button>
+  <header class="text-center mb-3 border-b-2 border-slate-900 pb-2 mt-1">
+   <h2 class="font-orbitron text-2xl sm:text-3xl font-black tracking-widest">BULK MANUAL INPUT</h2>
+   <p class="text-[10px] font-bold mt-1">FILE LOADED // レース情報の事前登録</p>
+  </header>
+  <div id="bulkRaceContainer" class="flex-1 overflow-y-auto space-y-4 pr-1" style="max-height: calc(95dvh - 180px);">
+   <!-- Races will be injected here -->
+  </div>
+  <div class="mt-3 pt-3 border-t border-slate-300 flex gap-2">
+   <button id="saveAllBulkBtn" type="button" class="touch-btn btn-alert flex-1 py-3 rounded-xl text-sm tracking-widest">SAVE RACE LIST</button>
+   <button id="closeBulkBtn2" type="button" class="touch-btn btn-ghost py-3 px-4 rounded-xl text-sm">CLOSE</button>
+  </div>
+ </div>
+</div>
+
+
+<script>
+(function(){
+ const tabs=[...document.querySelectorAll('[data-tab-target]')];
+ const panels=[...document.querySelectorAll('[data-tab-panel]')];
+ function activateTab(name,save=true){
+   tabs.forEach(btn=>{
+     const active=btn.dataset.tabTarget===name;
+     btn.setAttribute('aria-selected',active?'true':'false');
+     btn.tabIndex=active?0:-1;
+   });
+   panels.forEach(panel=>{
+     panel.hidden=panel.dataset.tabPanel!==name;
+   });
+   if(save){try{localStorage.setItem('bbk_active_tab',name)}catch(e){}}
+   window.scrollTo({top:0,behavior:'smooth'});
+ }
+ tabs.forEach((btn,index)=>{
+   btn.addEventListener('click',()=>activateTab(btn.dataset.tabTarget));
+   btn.addEventListener('keydown',e=>{
+     if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key))return;
+     e.preventDefault();
+     let next=index;
+     if(e.key==='ArrowRight')next=(index+1)%tabs.length;
+     if(e.key==='ArrowLeft')next=(index-1+tabs.length)%tabs.length;
+     if(e.key==='Home')next=0;
+     if(e.key==='End')next=tabs.length-1;
+     tabs[next].focus();activateTab(tabs[next].dataset.tabTarget);
+   });
+ });
+ let initial='home';
+ try{
+   const saved=localStorage.getItem('bbk_active_tab');
+   if(tabs.some(t=>t.dataset.tabTarget===saved))initial=saved;
+ }catch(e){}
+ activateTab(initial,false);
+})();
+</script>
+
+</body>
+</html>
