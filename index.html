@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BANK-KUN">
-<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v9.0</title>
+<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v10.1</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -187,6 +187,18 @@ body:after {
 .cp:nth-child(4) { width: 10px !important; height: 10px !important; animation-duration: 6s !important; }
 .cp:nth-child(5) { width: 16px !important; height: 16px !important; animation-duration: 10s !important; }
 
+#recordList .discovery-result{margin-top:0}
+@media(max-width:640px){#recordManager .field{min-height:44px}}
+html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-motion="reduced"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+
+/* v10.1 tab navigation */
+.main-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 22px}
+.main-tab{min-height:54px;border:1px solid rgba(0,170,255,.42);border-radius:13px;background:rgba(255,255,255,.78);color:#145078;font-weight:900;font-size:12px;letter-spacing:.04em;padding:10px 8px;transition:.18s}
+.main-tab .tab-sub{display:block;font-size:9px;font-weight:700;opacity:.68;margin-top:3px}
+.main-tab[aria-selected="true"]{background:linear-gradient(135deg,#087eb8,#07527c);border-color:#46c9ff;color:#fff;box-shadow:0 5px 18px rgba(0,126,184,.2)}
+[data-tab-panel][hidden]{display:none!important}
+@media(max-width:520px){.main-tabs{gap:5px}.main-tab{font-size:10px;padding:8px 3px;min-height:50px}.main-tab .tab-sub{font-size:8px}}
+
 </style>
 </head>
 <body>
@@ -209,14 +221,22 @@ body:after {
   <div class="kicker mb-2">PATTERN MATRIX // DATA INTELLIGENCE SYSTEM</div>
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
-   <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">CYBER WHITE ULTRA v9.0</span>
-   <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-pink-500"></span><span>AUDIO_SYS [OFF]</span></button>
+   <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">CYBER WHITE ULTRA v10.1</span>
+   <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
  <div id="dataCount" class="font-mono-tech text-xl text-cyan-100 border border-cyan-300/70 bg-cyan-400/10 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ 00000 ]</span></div>
 </header>
 
-<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-7">
+<nav class="main-tabs" role="tablist" aria-label="メインメニュー">
+ <button type="button" class="main-tab" role="tab" id="tabHome" aria-controls="dashboardPanel" aria-selected="true" data-tab-target="home">ホーム<span class="tab-sub">DATA / STATUS</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabAnalysis" aria-selected="false" data-tab-target="analysis">分析・集計<span class="tab-sub">PATTERN / TABLES</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabDatabase" aria-selected="false" data-tab-target="database">レース管理<span class="tab-sub">DATABASE</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabSettings" aria-selected="false" data-tab-target="settings">設定・音楽<span class="tab-sub">BACKUP / AUDIO</span></button>
+</nav>
+
+
+<div id="dashboardPanel" data-tab-panel="home" class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-7">
  <section class="xl:col-span-4 flex flex-col gap-5">
   <div class="glass-panel p-4 sm:p-5">
    <div class="panel-content">
@@ -225,7 +245,7 @@ body:after {
     <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-4" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea>
     <div class="flex flex-col gap-3">
      <button id="extractBtn" type="button" class="touch-btn btn-cyber py-4 rounded-xl text-xs tracking-widest">📥 EXTRACT & ARCHIVE [データ抽出保存]</button>
-     <button id="syncBtn" type="button" class="touch-btn btn-alert py-4 rounded-xl text-xs tracking-widest">⚠️ SYNC PAYOUT [配当金自動同期]</button>
+     <button id="syncBtn" type="button" class="touch-btn btn-alert py-4 rounded-xl text-xs tracking-widest">📋 PRE-REGISTER [レース情報を事前登録]</button>
     </div>
    </div>
   </div>
@@ -265,7 +285,7 @@ AWAITING COMMAND EXECUTION...</div>
  </section>
 </div>
 
-<section class="glass-panel p-4 sm:p-5 mb-8" id="discoverySection">
+<section class="glass-panel p-4 sm:p-5 mb-8" id="discoverySection" data-tab-panel="analysis">
  <div class="panel-content">
   <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-sky-500 pl-2">AUTO PATTERN DISCOVERY // 自動パターン発見</h2><span class="discovery-chip">V8.1 ENGINE</span></div>
   <p class="text-xs text-sky-800 mb-4">登録済みレースから、車番・着順ペア・差分パターンの偏りを自動探索します。時系列で古い80%を発見用、直近20%を検証用に分けます。</p>
@@ -281,7 +301,30 @@ AWAITING COMMAND EXECUTION...</div>
  </div>
 </section>
 
-<section class="glass-panel p-4 sm:p-5 mb-8" id="line1AnalysisSection">
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="numericTrickLab" data-tab-panel="analysis">
+ <div class="panel-content">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-cyan-500 pl-2">LINE HEAD PAIR + MARK RELATION LAB // 車番ペア・印の関係分析</h2><span class="discovery-chip">PAIR PAYOUT RANKING</span></div>
+  <p class="text-xs text-sky-800 mb-4">ライン先頭の車番ペアごとの平均配当に加え、先頭2人の印の組み合わせと、2ライン全選手の印の並びも分析します。1－4と4－1は同じ車番ペアとして集計します。</p>
+  <div class="discovery-card mb-3">
+   <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
+    <label class="text-xs font-bold">分析CSVを読み込む（brain races形式）<input id="trickCsvInput" type="file" accept=".csv,text/csv" class="field mt-1 text-xs"></label>
+    <div class="text-xs text-slate-600" id="trickCsvStatus">CSV未読込。読み込んだデータは既存DBと分離して扱います。</div>
+   </div>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">対象</label><select id="trickClass" class="field !py-2 text-xs"><option value="MEN_ALL">男子・全車立て</option><option value="5車">男子5車</option><option value="6車">男子6車</option><option value="7車">男子7車</option><option value="8車">男子8車</option><option value="9車">男子9車</option><option value="ガールズ">ガールズのみ</option></select></div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">配当種別</label><select id="trickPayoutType" class="field !py-2 text-xs"><option value="tri_yen">3連単</option><option value="exa_yen">2連単</option></select></div>
+   <div class="flex items-end"><button id="trickRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">組み合わせ分析</button></div>
+  </div>
+  <div id="trickSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+  <div id="trickResults" class="space-y-3"><div class="discovery-card text-center text-sky-700 text-xs">CSVを読み込み、分析を実行してください。</div></div>
+  <div class="mt-4"><h3 class="kicker border-l-4 border-violet-500 pl-2 mb-2">MARK RELATION LAB // 印の関係分析</h3><p class="text-[11px] text-slate-600 mb-2">各車番ペアについて、先頭2人の印の組み合わせと、該当する2ライン全員の印の並びを別々に集計。平均配当が低い・高い各3パターンと出現数を表示します。</p><div id="trickMarkResults" class="space-y-3"><div class="discovery-card text-xs">組み合わせ分析を実行してください。</div></div></div>
+  <p class="text-[10px] text-slate-500 mt-3">集計対象はライン先頭車番のペアです。提示された組み合わせ条件に従い、1－2と1－3は対象外。平均配当の算出には選択した配当が入力済みのレースだけを使用し、各組み合わせの出現数も併記します。奇数・偶数の分析は行いません。</p>
+ </div>
+</section>
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="line1AnalysisSection" data-tab-panel="analysis">
  <div class="panel-content">
   <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
    <h2 class="kicker border-l-4 border-sky-500 pl-2">LINE ① PAYOUT MATRIX // ライン①の並び別・配当比較</h2>
@@ -310,7 +353,7 @@ AWAITING COMMAND EXECUTION...</div>
  </div>
 </section>
 
-<section class="glass-panel p-4 sm:p-5 mb-8" id="venueAnalysisSection">
+<section class="glass-panel p-4 sm:p-5 mb-8" id="venueAnalysisSection" data-tab-panel="analysis">
  <div class="panel-content">
   <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
    <h2 class="kicker border-l-4 border-sky-500 pl-2">VENUE PAYOUT MATRIX // 会場別・配当統計</h2>
@@ -328,9 +371,80 @@ AWAITING COMMAND EXECUTION...</div>
  </div>
 </section>
 
-<section class="mb-8">
+<section class="mb-8" data-tab-panel="analysis">
  <h2 class="kicker border-l-4 border-sky-500 pl-2 mb-4">CATEGORY & PATTERN METRICS // 車番クラス別集計</h2>
  <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3" id="categoryCards"></div>
+</section>
+<section class="glass-panel p-4 sm:p-5 mb-8" id="recordManager" data-tab-panel="database">
+ <div class="panel-content">
+  <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+   <h2 class="kicker border-l-4 border-sky-500 pl-2">RACE DATABASE // 登録レース管理</h2>
+   <div class="flex items-center gap-2"><span class="discovery-chip">SEARCH / EDIT / DELETE</span><button id="openBatchEditBtn" type="button" class="touch-btn btn-alert px-3 py-2 text-xs">未入力を一括編集</button></div>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+   <input id="recordSearch" class="field text-sm" placeholder="競輪場・開催日・レース番号で検索">
+   <select id="recordStatus" class="field text-sm">
+    <option value="all">すべてのレース</option><option value="pending">着順未入力</option>
+    <option value="result">着順入力済み</option><option value="payout">配当入力済み</option>
+    <option value="incomplete">配当未入力あり</option>
+   </select>
+   <div id="recordSummary" class="field text-sm flex items-center font-bold">登録 0件</div>
+  </div>
+  <div id="batchEditPanel" class="hidden discovery-card mb-3"><div class="flex items-center justify-between gap-2 mb-2"><b class="text-sm">未入力レース一括入力</b><button id="closeBatchEditBtn" type="button" class="touch-btn btn-ghost px-3 py-1 text-xs">閉じる</button></div><p class="text-xs text-slate-600 mb-3">着順または2連単・3連単配当が未入力のレースを表示します。空欄は既存値を変更しません。</p><div id="batchEditRows" class="space-y-3"></div><button id="saveBatchEditBtn" type="button" class="touch-btn btn-cyber w-full py-3 mt-3">表示中の内容をまとめて保存</button></div>
+  <div id="recordList" class="space-y-2"><div class="discovery-card text-xs">登録レースがここに表示されます。</div></div>
+ </div>
+</section>
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="userControlHub" data-tab-panel="settings">
+ <div class="panel-content">
+  <div class="flex flex-wrap justify-between items-center gap-2 mb-3"><h2 class="kicker border-l-4 border-cyan-500 pl-2">USER CONTROL HUB // 拡張コントロール</h2><span class="discovery-chip">BACKUP / AUDIO / QUALITY</span></div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+   <div class="discovery-card">
+    <h3 class="font-black text-sm mb-2">DATABASE SAFETY // データ保護</h3>
+    <p class="text-xs text-slate-600 mb-3">自動バックアップはこのブラウザ内に最大5世代保存します。JSONとして手動保存・復元もできます。</p>
+    <div class="grid grid-cols-2 gap-2"><button id="backupNowBtn" class="touch-btn btn-cyber py-3 rounded-lg text-xs">今すぐバックアップ</button><button id="restoreBackupBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">自動バックアップ復元</button><button id="restoreJsonBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">JSONから復元</button><button id="undoActionBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">一つ前に戻す</button><button id="downloadBackupBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">JSON保存</button></div>
+    <input type="file" id="restoreBackupFile" class="hidden" accept=".json,application/json">
+    <div id="backupStatus" class="text-[11px] text-sky-800 mt-2">バックアップ状態を確認中…</div>
+   </div>
+   <div class="discovery-card">
+    <h3 class="font-black text-sm mb-2">DATA HEALTH // データ点検</h3>
+    <p class="text-xs text-slate-600 mb-3">重複候補と着順・配当の入力漏れを検出します。検出だけを行い、データは自動削除しません。</p>
+    <div class="grid grid-cols-2 gap-2"><button id="duplicateCheckBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">重複チェック</button><button id="qualityCheckBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">入力漏れチェック</button></div>
+    <div id="healthResults" class="text-xs mt-3 text-slate-700">点検結果はここに表示されます。</div>
+   </div>
+   <div class="discovery-card">
+    <h3 class="font-black text-sm mb-2">PATTERN WATCH // 異常パターン発見</h3>
+    <p class="text-xs text-slate-600 mb-3">既存の自動パターン探索を呼び出し、高配当基準・最低出現数・検証用20%を確認します。</p>
+    <button id="anomalyScanBtn" class="touch-btn btn-alert w-full py-3 rounded-lg text-xs">高配当パターン探索を実行</button>
+    <div class="text-[10px] text-slate-500 mt-2">※探索結果は予測保証ではありません。サンプル数と検証結果を併せて確認してください。</div>
+   </div>
+   <div class="discovery-card">
+    <h3 class="font-black text-sm mb-2">SAVED SCANS // 分析条件の保存</h3>
+    <div class="flex gap-2 mb-2"><input id="scanPresetName" class="field text-xs" placeholder="条件名（例：7車・万車券）"><button id="saveScanPresetBtn" class="touch-btn btn-cyber px-3 rounded-lg text-xs whitespace-nowrap">条件保存</button></div>
+    <div id="savedScanPresets" class="space-y-2 text-xs">保存した条件はありません。</div>
+   </div>
+   <div class="discovery-card lg:col-span-2">
+    <div class="flex flex-wrap justify-between items-center gap-2 mb-2"><h3 class="font-black text-sm">PERSONAL AUDIO // 音楽プレイヤー</h3><span class="text-[10px] text-slate-500">端末内のファイルを直接再生・アップロードなし</span></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 items-end">
+     <label class="text-xs font-bold">音楽ファイル<input id="musicFileInput" type="file" accept="audio/*,video/mp4,.mp3,.m4a,.wav,.ogg,.aac,.mp4" class="field mt-1 text-xs"></label>
+     <div class="flex gap-2"><button id="musicPlayBtn" class="touch-btn btn-cyber flex-1 py-3 rounded-lg text-xs">再生</button><button id="musicStopBtn" class="touch-btn btn-ghost flex-1 py-3 rounded-lg text-xs">停止</button></div>
+     <label class="text-xs font-bold">音楽音量 <input id="musicVolume" type="range" min="0" max="100" value="45" class="w-full mt-2"></label>
+     <label class="text-xs font-bold flex items-center gap-2"><input id="musicLoop" type="checkbox" checked> リピート再生</label>
+    </div>
+    <div class="flex flex-wrap items-center gap-3 mt-2"><label class="text-xs flex items-center gap-2"><input id="sfxVolume" type="range" min="0" max="100" value="35"> 効果音音量</label><span id="musicFileName" class="text-[11px] text-slate-600">ファイル未選択</span><span id="musicState" class="text-[11px] text-sky-800">停止中</span></div>
+    <audio id="personalMusic" preload="none"></audio>
+   </div>
+   <div class="discovery-card lg:col-span-2">
+    <h3 class="font-black text-sm mb-2">APPEARANCE // 個人設定</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+     <label class="text-xs font-bold">テーマ<select id="appearanceTheme" class="field mt-1 text-xs"><option value="blue">CYBER BLUE</option><option value="violet">VIOLET</option><option value="dark">DARK</option></select></label>
+     <label class="text-xs font-bold">動き<select id="motionSetting" class="field mt-1 text-xs"><option value="normal">通常</option><option value="reduced">控えめ</option></select></label>
+     <label class="text-xs font-bold">効果音<select id="sfxSetting" class="field mt-1 text-xs"><option value="on">ON</option><option value="off">OFF</option></select></label>
+    </div>
+    <p class="text-[10px] text-slate-500 mt-2">設定はこの端末のブラウザに保存されます。他の利用者の設定には影響しません。</p>
+   </div>
+  </div>
+ </div>
 </section>
 </div>
 
@@ -344,7 +458,8 @@ AWAITING COMMAND EXECUTION...</div>
     <div class="w-1/2"><label class="block text-xs mb-1">レース</label><select id="manRace" class="modal-field"></select></div>
    </div>
    <div><label class="block text-xs mb-1">クラス（車立て）</label><select id="manClass" class="modal-field"><option value="7車">7車</option><option value="9車">9車</option><option value="ガールズ">ガールズ</option><option value="5車">5車</option><option value="6車">6車</option><option value="8車">8車</option></select></div>
-   <div class="border-2 border-slate-900 rounded-xl p-3 space-y-3"><h3 class="bg-slate-900 text-white inline-block px-3 py-1 text-xs">3連単 着順入力</h3><div class="flex items-center gap-2"><input type="number" id="manCar1" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="1着"><b class="text-2xl">-</b><input type="number" id="manCar2" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="2着"><b class="text-2xl">-</b><input type="number" id="manCar3" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="3着"></div><p class="text-[10px] text-slate-500 text-center">着順から差分(DIFF)パターンを自動計算（任意）</p></div>
+    <div><label class="block text-xs mb-1">開催日（任意）</label><input type="date" id="manDate" class="modal-field"></div>
+   <div class="border-2 border-slate-900 rounded-xl p-3 space-y-3"><h3 class="bg-slate-900 text-white inline-block px-3 py-1 text-xs">3連単 着順入力</h3><div class="flex items-center gap-2"><input type="number" id="manCar1" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="1着"><b class="text-2xl">-</b><input type="number" id="manCar2" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="2着"><b class="text-2xl">-</b><input type="number" id="manCar3" min="1" max="9" class="modal-field text-center text-2xl w-1/3" placeholder="3着"></div><p class="text-[10px] text-slate-500 text-center">着順は未入力でもレース情報だけ保存できます。入力時は3着まで入力してください。</p></div>
    <div class="border-2 border-cyan-600 rounded-xl p-3 space-y-3"><h3 class="bg-cyan-600 text-white inline-block px-3 py-1 text-xs">2連単 配当金額</h3><div class="flex items-center gap-2"><span class="text-xl">¥</span><input type="number" id="manPayout2ren" class="modal-field text-right text-xl" placeholder="0 (任意)"></div><p class="text-[10px] text-slate-500 text-center">2連単の着順は3連単の1着・2着から自動算出されます</p></div>
    <div><label class="block text-xs mb-1">3連単 配当金額</label><div class="flex items-center gap-2"><span class="text-2xl">¥</span><input type="number" id="manPayout" class="modal-field text-right text-2xl" placeholder="0"></div></div>
    <button id="manSaveBtn" type="button" class="touch-btn btn-alert w-full py-4 rounded-xl text-lg tracking-widest">SAVE RECORD</button>
@@ -353,7 +468,7 @@ AWAITING COMMAND EXECUTION...</div>
 </div>
 
 <script>
-let savedRecords=[],myChart=null,bgmAudio=null,audioUnlocked=false,editingIndex=-1;
+let savedRecords=[],myChart=null,bgmAudio=null,audioUnlocked=false,editingIndex=-1,sfxEnabled=true,audioCtx=null;
 const normalizeRecord = r => ({
     ...r,
     payout: Number(r.payout) || 0,
@@ -363,80 +478,52 @@ const REAL_VENUES=["函館","青森","いわき平","弥彦","前橋","取手","
 const $=id=>document.getElementById(id);
 function bind(id,fn){const el=$(id);if(!el)return;el.addEventListener('click',e=>{e.preventDefault();fn()})}
 function toggleAudioSystem(){
- try{
-  if(!bgmAudio){
-   bgmAudio=new Audio('100倍ドパガキの狂気.mp3');
-   bgmAudio.loop=true;
-   bgmAudio.volume=0.3;
-   bgmAudio.addEventListener('error', () => {
-    logToTerminal("> BGMファイルが見つかりません。同じフォルダに '100倍ドパガキの狂気.mp3' を置いてください。","error");
-   });
-  }
-  if(!audioUnlocked){
-   const playPromise = bgmAudio.play();
-   if(playPromise !== undefined){
-    playPromise.then(() => {
-     audioUnlocked=true;
-     $('audioToggleBtn').innerHTML='<span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>AUDIO_SYS [ON]</span>';
-     logToTerminal("> BGM再生開始: 100倍ドパガキの狂気","success");
-    }).catch(e => {
-     logToTerminal("> BGM再生エラー（自動再生制限の可能性）。もう一度ボタンを押してください。またはMP3ファイルを確認。","error");
-     console.log(e);
-    });
-   }
-  }else{
-   bgmAudio.pause();
-   audioUnlocked=false;
-   const status = $('audioStatus');
-   if(status) status.classList.replace('bg-cyan-300','bg-pink-500');
-   const btn = $('audioToggleBtn');
-   if(btn && btn.lastElementChild) btn.lastElementChild.textContent='AUDIO_SYS [OFF]';
-   logToTerminal("> BGM停止。","info");
-  }
- }catch(e){
-  console.log(e);
-  logToTerminal("> オーディオシステムエラー。","error");
- }
+ sfxEnabled=!sfxEnabled;
+ const status=$('audioStatus'),label=$('audioToggleBtn')?.lastElementChild;
+ if(status)status.classList.toggle('bg-cyan-300',sfxEnabled),status.classList.toggle('bg-pink-500',!sfxEnabled);
+ if(label)label.textContent=`SFX [${sfxEnabled?'ON':'OFF'}]`;
+ if(sfxEnabled)playBeep(760,'sine',.09,.035);
+ logToTerminal(`> 効果音 ${sfxEnabled?'ON':'OFF'}`,'info');
 }
-function playBeep(freq,type,duration,vol=.03){/* Synth beep disabled to prioritize BGM. Can be mixed in future. */ }
+function playBeep(freq=700,type='sine',duration=.08,vol=.035){
+ if(!sfxEnabled)return;
+ try{
+  const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
+  if(!audioCtx)audioCtx=new Ctx();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
+  const userSfxVolume=Number($('sfxVolume')?.value??35)/35;gain.gain.setValueAtTime(Math.max(.001,vol*userSfxVolume),audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+  osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+duration);
+ }catch(e){console.warn('SFX unavailable',e)}
+}
 function initManualSelects(){REAL_VENUES.forEach(v=>$('manVenue').add(new Option(v,v)));for(let i=1;i<=12;i++)$('manRace').add(new Option(i+'R',i+'R'))}
 function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');playBeep(600,'square',.1)}
-function closeManualModal(){$('manualInputModal').classList.add('hidden');$('manualInputModal').classList.remove('flex')}
+function closeManualModal(){$('manualInputModal').classList.add('hidden');$('manualInputModal').classList.remove('flex');editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD'}
 function saveManualData(){
- const venue=$('manVenue').value,race=$('manRace').value,category=$('manClass').value;
- const c1=parseInt($('manCar1').value,10),c2=parseInt($('manCar2').value,10),c3=parseInt($('manCar3').value,10);
- const payout=parseInt($('manPayout').value,10)||0;
- const payout2ren=parseInt($('manPayout2ren').value,10)||0;
- const has3ren = [c1,c2,c3].every(n=>Number.isInteger(n)&&n>=1&&n<=9) && new Set([c1,c2,c3]).size===3;
- if(!has3ren){alert("3連単の着順を正しく入力してください。");return}
+ const venue=$('manVenue').value,race=$('manRace').value,category=$('manClass').value,raceDate=$('manDate').value||'';
+ const vals=['manCar1','manCar2','manCar3'].map(id=>$(id).value.trim()),nums=vals.map(v=>v===''?NaN:parseInt(v,10));
+ const [c1,c2,c3]=nums,anyResult=vals.some(v=>v!==''),has3ren=nums.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(nums).size===3;
+ if(anyResult&&!has3ren){alert('着順を入力する場合は、1着・2着・3着を重複なく入力してください。');return}
+ const payout=$('manPayout').value.trim()===''?0:Math.max(0,parseInt($('manPayout').value,10)||0);
+ const payout2ren=$('manPayout2ren').value.trim()===''?0:Math.max(0,parseInt($('manPayout2ren').value,10)||0);
  let patternKey='',diffPatternKey='',diffDisplay='',exacta='';
- if(has3ren){
-  const d1=Math.abs(c1-c2),d2=Math.abs(c2-c3);
-  diffPatternKey=`${d1}-${d2}`;diffDisplay=diffPatternKey;
-  if(d1+d2===4){diffPatternKey='4';diffDisplay='4(合算)'}
-  patternKey=`${c1}-${c2}-${c3}`;
-  exacta=`${c1}-${c2}`;
- }
- const rec={venue,raceName:race,category,pattern:patternKey,diffPattern:diffPatternKey||'1-1',diffDisplay,exacta,payout,payout2ren,timestamp:Date.now(),sourceType:'manual'};
- if(editingIndex>=0 && editingIndex<savedRecords.length){
-  // Update existing
-  Object.assign(savedRecords[editingIndex], rec);
-  logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,"success");
-  editingIndex=-1;
-  $('manSaveBtn').textContent='SAVE RECORD';
- }else{
-  savedRecords.push(rec);
-  logToTerminal(`> [手動入力] ${venue} ${race} を追加しました。`,"success");
- }
- persist();updateCountDisplay();runAnalysis();
- playBeep(880,'sine',.2);
- ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');
- closeManualModal();
+ if(has3ren){const d1=Math.abs(c1-c2),d2=Math.abs(c2-c3);diffPatternKey=`${d1}-${d2}`;diffDisplay=diffPatternKey;if(d1+d2===4){diffPatternKey='4';diffDisplay='4(合算)'}patternKey=`${c1}-${c2}-${c3}`;exacta=`${c1}-${c2}`;}
+ takeUndoSnapshot(editingIndex>=0?'手動編集':'手動登録');
+ const rec={venue,raceName:race,raceDate,category,pattern:patternKey,diffPattern:diffPatternKey,diffDisplay,exacta,payout,payout2ren,timestamp:Date.now(),sourceType:has3ren?'manual-result':'manual'};
+ let targetIndex=editingIndex;if(targetIndex<0)targetIndex=savedRecords.findIndex(r=>recordKey(r)===recordKey(rec));
+ if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]={...old,...rec,line1:old.line1||''};logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,'success');}
+ else{savedRecords.push(rec);logToTerminal(`> [手動登録] ${venue} ${race} を保存しました。`,'success');}
+ editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD';
+ persist();updateCountDisplay();runAnalysis();renderRecordManager();
+ ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');closeManualModal();
 }
+
 function logToTerminal(msg,type="info"){const out=$('outputArea'),time=new Date().toLocaleTimeString('ja-JP',{hour12:false});const color=type==="error"?"#ff6b9d":type==="success"?"#087ac0":"#8dfaff";out.insertAdjacentHTML('afterbegin',`<div><span style="color:#6b8da7">[${time}]</span> <span style="color:${color}">${escapeHTML(msg)}</span></div>`)}
 function logToTerminalRaw(html){$('outputArea').insertAdjacentHTML('afterbegin',html)}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function persist(){localStorage.setItem('battleBankProData',JSON.stringify(savedRecords))}
+function persist(){localStorage.setItem('battleBankProData',JSON.stringify(savedRecords));scheduleAutoBackup();}
 function loadMarkdown(event){
  const file=event.target.files[0];
  if(!file)return;
@@ -450,7 +537,7 @@ function loadMarkdown(event){
   const races = parseMarkdownForBulk(text);
   if(races.length){
    openBulkInputModal(races);
-   logToTerminal(`> ${races.length}レースを手動入力フォームに展開しました。縦スクロールで1R〜12Rを入力してください。`,"success");
+   logToTerminal(`> ${races.length}レースを事前登録フォームに展開しました。開催日を確認して保存してください。`,"success");
   }else{
    setTimeout(triggerExtract, 150);
   }
@@ -458,7 +545,7 @@ function loadMarkdown(event){
  reader.readAsText(file,'UTF-8');
 }
 function triggerExtract(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: データが入力されていません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);extractAndSaveData()}
-function triggerSync(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: バッファに配当データがありません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);applyResults()}
+function triggerSync(){triggerExtract()}
 
 function checkHighPayoutRisk(category, line1, diffPattern){
   const threshold = 10000;
@@ -536,7 +623,7 @@ function extractAndSaveData(){
  if(lines)lines.forEach((lm,index)=>{const arr=lm.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number);if(index===0&&arr.length>0)patternKey=arr.join('-');if(arr.length>1){const ds=[];for(let i=0;i<arr.length-1;i++)ds.push(Math.abs(arr[i]-arr[i+1]));const sum=ds.reduce((a,b)=>a+b,0);if(sum===4){allDiffs.push(4);diffLogs.push("4(合算)")}else{allDiffs.push(...ds);diffLogs.push(ds.join('-'))}}});
  if(!line1Key)line1Key=patternKey;
  if(allDiffs.length){diffPatternKey=allDiffs.join('-');diffDisplay=diffLogs.join(' / ')}
- if(raceName!=="UNKNOWN"&&(line1Key||patternKey||diffPatternKey||block.includes("選手"))){const exists=savedRecords.find(r=>r.venue===venue&&r.raceName===raceName&&r.pattern===patternKey);if(!exists){savedRecords.push({venue,raceName,category,pattern:patternKey||'1-2-3',line1:line1Key||'',sourceType:'extracted',diffPattern:diffPatternKey||'1-1',diffDisplay,payout:0,payout2ren:0,timestamp:Date.now()});extractedCount++}else if(exists.pattern===patternKey){let changed=false;if(line1Key&&exists.line1!==line1Key){exists.line1=line1Key;changed=true}if(exists.category!==category){exists.category=category;changed=true}if(changed)extractedCount++}}
+ if(raceName!=="UNKNOWN"&&(line1Key||block.includes("選手"))){const raceDate=extractRaceDate(block)||extractRaceDate(inputData);const exists=savedRecords.find(r=>r.venue===venue&&r.raceName===raceName&&(r.raceDate||'')===raceDate);if(!exists){savedRecords.push({venue,raceName,raceDate,category,pattern:'',line1:line1Key||'',sourceType:'pre-registration',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,timestamp:Date.now()});extractedCount++}else{let changed=false;if(line1Key&&exists.line1!==line1Key){exists.line1=line1Key;changed=true}if(exists.category!==category){exists.category=category;changed=true}if(changed)extractedCount++}}
  });
  if(extractedCount){
   persist();$('dataInput').value='';updateCountDisplay();runAnalysis();
@@ -555,92 +642,6 @@ function extractAndSaveData(){
   }
   playBeep(880,'sine',.15);
 }else{logToTerminal("> 警告: 解析可能なデータが検知されませんでした。","error");playBeep(220,'sawtooth',.15)}
-}
-function applyResults(){
- const text=$('dataInput').value;let updated=0;
- savedRecords.forEach((rec, idx)=>{
-  const r = normalizeRecord(rec);
-  const p3 = Number(r.payout) || 0;
-  const p2 = Number(r.payout2ren) || 0;
-  
-  if(r.raceName && (p3 === 0 || p2 === 0)){
-   // 競輪場名(r.venue)とレース名(r.raceName)の両方を照合して該当ブロック/箇所を探す
-   let targetArea = "";
-   const venue = r.venue || "";
-   const race = r.raceName || "";
-   
-   // 方法1: 「競輪場 + レース名」または「レース名 + 競輪場」が近くに出現する位置を探す
-   let matchIdx = -1;
-   if(venue && venue !== "不明"){
-    // 競輪場名とレース名が両方含まれる付近を探す
-    const vIdx = text.indexOf(venue);
-    if(vIdx !== -1){
-     // 競輪場名以降からレース名を探す、またはレース名以降から競輪場名を探す
-     let rIdx = text.indexOf(race, vIdx);
-     if(rIdx !== -1 && rIdx - vIdx < 500){
-      matchIdx = rIdx;
-     } else {
-      // 逆にレース名から探す
-      let searchPos = 0;
-      while((searchPos = text.indexOf(race, searchPos)) !== -1){
-       // 直近500文字以内にvenueが含まれているか確認
-       const sub = text.substring(Math.max(0, searchPos - 300), searchPos + 100);
-       if(sub.includes(venue)){
-        matchIdx = searchPos;
-        break;
-       }
-       searchPos += race.length;
-      }
-     }
-    }
-   }
-   
-   // 競輪場名が見つからないか一致しない場合でも、レース名のみでフォールバック（ただし他の競輪場名が直近に混ざっていない場合）
-   if(matchIdx === -1){
-    matchIdx = text.indexOf(race);
-   }
-   
-   if(matchIdx !== -1){
-    const area = text.substring(matchIdx, matchIdx + 350);
-    
-    // 3連単が未入力なら3連単だけ同期（入力済みの場合は上書きしない）
-    if(p3 === 0){
-     const m3 = area.match(/3連単.*?(\d{1,3}(?:,\d{3})*|\d+)\s*円/) || area.match(/配当.*?(\d{1,3}(?:,\d{3})*|\d+)円/);
-     if(m3){
-      const money = parseInt(m3[1].replace(/,/g,''), 10);
-      if(money > 0){
-       savedRecords[idx].payout = money;
-       updated++;
-      }
-     }
-    }
-    
-    // 2連単が未入力なら2連単だけ同期（入力済みの場合は上書きしない）
-    if(p2 === 0){
-     const m2 = area.match(/2連単.*?(\d{1,3}(?:,\d{3})*|\d+)\s*円/) || area.match(/車番連勝単勝式.*?(\d{1,3}(?:,\d{3})*|\d+)\s*円/);
-     if(m2){
-      const money2 = parseInt(m2[1].replace(/,/g,''), 10);
-      if(money2 > 0){
-       savedRecords[idx].payout2ren = money2;
-       updated++;
-      }
-     }
-    }
-   }
-  }
- });
- if(updated){
-  savedRecords = savedRecords.map(normalizeRecord);
-  persist();
-  $('dataInput').value='';
-  updateCountDisplay();
-  runAnalysis();
-  logToTerminal(`> 配当同期成功（競輪場＆レース照合）: ${updated} 項目更新。`, "success");
-  playBeep(880, 'sine', .15);
- }else{
-  logToTerminal("> 警告: 一致する未入力の配当データが見つかりませんでした（競輪場・レース名をご確認ください）。", "error");
-  playBeep(220, 'sawtooth', .15);
- }
 }
 function deepScan7Car(){const data=savedRecords.filter(r=>r.category==="7車");if(!data.length){logToTerminal("> エラー: 7車立てのデータがありません。","error");return}const synced=data.filter(r=>r.payout>0),max=synced.length?Math.max(...synced.map(r=>r.payout)):0,map={};synced.forEach(r=>{const dp=r.diffPattern||'N/A';if(!map[dp])map[dp]={count:0,payouts:[]};map[dp].count++;map[dp].payouts.push(r.payout)});let html=`<div style="color:#087ac0;font-weight:bold">--- [ 7-CAR DIFF PATTERN SCAN ] ---</div><div>対象7車: ${data.length}件 (同期済: ${synced.length}件) | 最高: ¥${max.toLocaleString()}</div>`;Object.entries(map).sort((a,b)=>b[1].count-a[1].count).forEach(([dp,d])=>{const avg=Math.round(d.payouts.reduce((a,b)=>a+b,0)/d.payouts.length);html+=`<div>▪ 差分 [ ${escapeHTML(dp)} ] : ${d.count}回 | 平均: ¥${avg.toLocaleString()}</div>`});logToTerminalRaw(html)}
 function analyzeVenuePayouts(){
@@ -871,6 +872,7 @@ function openEditModal(idx){
  $('manVenue').value=r.venue||REAL_VENUES[0];
  $('manRace').value=r.raceName||'1R';
  $('manClass').value=r.category||'7車';
+ $('manDate').value=r.raceDate||'';
  const parts=(r.pattern||'').split('-');
  if(parts.length>=3){$('manCar1').value=parts[0];$('manCar2').value=parts[1];$('manCar3').value=parts[2];}
  else{$('manCar1').value='';$('manCar2').value='';$('manCar3').value='';}
@@ -879,13 +881,23 @@ function openEditModal(idx){
  $('manSaveBtn').textContent='UPDATE RECORD';
  openManualModal();
 }
-function savePayouts(){savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
+function savePayouts(){takeUndoSnapshot('簡易修正');savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
 function exportData(){if(!savedRecords.length){logToTerminal("> 書き出すデータがありません。","error");return}const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='battleBank_pro_db.json';a.click();URL.revokeObjectURL(url);logToTerminal("> エクスポート完了。","success")}
-function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();logToTerminal(`> 復元成功: ${data.length}件のデータを読み込みました。`,"success")}catch(err){logToTerminal("> エラー: JSONファイルの形式が不正です。","error")} $('fileInput').value=''};reader.readAsText(file,'UTF-8')}
-function clearData(){if(confirm("データベースを初期化しますか？")){savedRecords=[];localStorage.removeItem('battleBankProData');updateCountDisplay();runAnalysis();logToTerminal("> DBパージ完了。","success")}}
-function updateCountDisplay(){const n=savedRecords.length.toString().padStart(5,'0');$('dataCount').innerHTML=`<span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ ${n} ]</span>`}
+function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();takeUndoSnapshot('データ読込');savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();logToTerminal(`> 復元成功: ${data.length}件のデータを読み込みました。`,"success")}catch(err){logToTerminal("> エラー: JSONファイルの形式が不正です。","error")} $('fileInput').value=''};reader.readAsText(file,'UTF-8')}
+function clearData(){if(confirm("データベースを初期化しますか？")){takeUndoSnapshot('データベース初期化');savedRecords=[];localStorage.removeItem('battleBankProData');updateCountDisplay();runAnalysis();logToTerminal("> DBパージ完了。","success")}}
+function updateCountDisplay(){const n=savedRecords.length.toString().padStart(5,'0');$('dataCount').innerHTML=`<span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ ${n} ]</span>`;renderRecordManager();}
 
 // ===== BULK MANUAL INPUT =====
+function extractRaceDate(text){
+ const patterns=[
+  /(?:開催日|開催年月日|日付|開催日程)[^\d]*(20\d{2})[年\/-](\d{1,2})[月\/-](\d{1,2})日?/,
+  /(20\d{2})[年\/-](\d{1,2})[月\/-](\d{1,2})日?/
+ ];
+ for(const re of patterns){const m=String(text||'').match(re);if(m)return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;}
+ return '';
+}
+function recordKey(r){return [String(r.venue||'').trim(),String(r.raceDate||'').trim(),String(r.raceName||'').trim()].join('|');}
+function hasValidResult(r){const p=String(r.pattern||'').split('-').map(Number);return p.length===3&&p.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(p).size===3;}
 function parseMarkdownForBulk(inputData){
   const races = [];
   const headingPattern=/^#\s*競輪レースデータ：.*$/gm;
@@ -948,6 +960,7 @@ function parseMarkdownForBulk(inputData){
      venue,
      raceName,
      category,
+     raceDate: extractRaceDate(block) || extractRaceDate(inputData),
      line1: line1Key || '',
      rawBlock: block.substring(0, 300)
     });
@@ -962,102 +975,253 @@ function parseMarkdownForBulk(inputData){
 }
 
 function openBulkInputModal(races){
-  const container = $('bulkRaceContainer');
-  container.innerHTML = '';
-  races.forEach((r, idx) => {
-   const card = document.createElement('div');
-   card.className = 'border-2 border-cyan-500 rounded-xl p-3 bg-white/90';
-   const line1Display = r.line1 ? `<div class="text-[10px] text-sky-600 mb-1">ライン①: <span class="font-mono-tech font-bold">${escapeHTML(r.line1)}</span></div>` : '';
-   card.innerHTML = `
-    <div class="flex justify-between items-center mb-1">
-     <div class="font-black text-lg text-sky-900">${escapeHTML(r.venue)} ${escapeHTML(r.raceName)}</div>
-     <div class="text-xs font-bold text-sky-700">${escapeHTML(r.category)}</div>
-    </div>
-    ${line1Display}
-    <div class="grid grid-cols-3 gap-2 mb-2">
-     <div><label class="text-[10px] font-bold">1着</label><input type="number" id="bulk_c1_${idx}" min="1" max="9" class="modal-field text-center text-xl" placeholder="1"></div>
-     <div><label class="text-[10px] font-bold">2着</label><input type="number" id="bulk_c2_${idx}" min="1" max="9" class="modal-field text-center text-xl" placeholder="2"></div>
-     <div><label class="text-[10px] font-bold">3着</label><input type="number" id="bulk_c3_${idx}" min="1" max="9" class="modal-field text-center text-xl" placeholder="3"></div>
-    </div>
-    <div class="grid grid-cols-2 gap-2">
-     <div><label class="text-[10px] font-bold">2連単配当</label><div class="flex items-center gap-1"><span class="text-sm">¥</span><input type="number" id="bulk_p2_${idx}" class="modal-field text-right" placeholder="0"></div></div>
-     <div><label class="text-[10px] font-bold">3連単配当</label><div class="flex items-center gap-1"><span class="text-sm">¥</span><input type="number" id="bulk_p3_${idx}" class="modal-field text-right" placeholder="0"></div></div>
-    </div>
-    <input type="hidden" id="bulk_venue_${idx}" value="${escapeHTML(r.venue)}">
-    <input type="hidden" id="bulk_race_${idx}" value="${escapeHTML(r.raceName)}">
-    <input type="hidden" id="bulk_cat_${idx}" value="${escapeHTML(r.category)}">
-    <input type="hidden" id="bulk_line1_${idx}" value="${escapeHTML(r.line1 || '')}">
-   `;
-   container.appendChild(card);
-  });
-  $('bulkInputModal').classList.remove('hidden');
-  $('bulkInputModal').classList.add('flex');
+ const container=$('bulkRaceContainer');container.innerHTML='';
+ races.forEach((r,idx)=>{
+  const card=document.createElement('div');card.className='border-2 border-cyan-500 rounded-xl p-3 bg-white/90';
+  const line1Display=r.line1?`<div class="text-[10px] text-sky-600 mt-1">ライン①: <b>${escapeHTML(r.line1)}</b></div>`:'';
+  card.innerHTML=`
+   <div class="flex justify-between items-center gap-2"><div class="font-black text-lg text-sky-900">${escapeHTML(r.venue)} ${escapeHTML(r.raceName)}</div><div class="text-xs font-bold text-sky-700">${escapeHTML(r.category)}</div></div>
+   ${line1Display}
+   <div class="mt-2"><label class="block text-[10px] font-bold mb-1">開催日（自動取得できない場合は入力）</label><input type="date" id="bulk_date_${idx}" class="modal-field" value="${escapeHTML(r.raceDate||'')}"></div>
+   <div class="text-[11px] text-slate-600 mt-2">着順・2連単配当・3連単配当は登録後に手動入力できます。</div>
+   <input type="hidden" id="bulk_venue_${idx}" value="${escapeHTML(r.venue)}"><input type="hidden" id="bulk_race_${idx}" value="${escapeHTML(r.raceName)}">
+   <input type="hidden" id="bulk_cat_${idx}" value="${escapeHTML(r.category)}"><input type="hidden" id="bulk_line1_${idx}" value="${escapeHTML(r.line1||'')}">`;
+  container.appendChild(card);
+ });
+ $('bulkInputModal').classList.remove('hidden');$('bulkInputModal').classList.add('flex');
 }
-
 function closeBulkInputModal(){
   $('bulkInputModal').classList.add('hidden');
   $('bulkInputModal').classList.remove('flex');
 }
 
 function saveAllBulkRecords(){
-  const container = $('bulkRaceContainer');
-  const cards = container.children;
-  let saved = 0;
-  for(let i=0; i<cards.length; i++){
-   const c1 = parseInt($('bulk_c1_'+i)?.value, 10);
-   const c2 = parseInt($('bulk_c2_'+i)?.value, 10);
-   const c3 = parseInt($('bulk_c3_'+i)?.value, 10);
-   const p3 = parseInt($('bulk_p3_'+i)?.value, 10) || 0;
-   const p2 = parseInt($('bulk_p2_'+i)?.value, 10) || 0;
-   const venue = $('bulk_venue_'+i)?.value || '不明';
-   const raceName = $('bulk_race_'+i)?.value || 'UNKNOWN';
-   const category = $('bulk_cat_'+i)?.value || '9車';
-   
-   const has3ren = [c1,c2,c3].every(n=>Number.isInteger(n)&&n>=1&&n<=9) && new Set([c1,c2,c3]).size===3;
-   if(!has3ren && p3===0 && p2===0) continue; // skip empty
-   
-   if(!has3ren){
-    alert(`${venue} ${raceName} の3連単着順が正しくありません。スキップします。`);
-    continue;
-   }
-   
-   const d1=Math.abs(c1-c2), d2=Math.abs(c2-c3);
-   let diffPatternKey=`${d1}-${d2}`, diffDisplay=diffPatternKey;
-   if(d1+d2===4){diffPatternKey='4'; diffDisplay='4(合算)'}
-   const patternKey=`${c1}-${c2}-${c3}`;
-   const exacta=`${c1}-${c2}`;
-   
-   const line1 = $('bulk_line1_'+i)?.value || '';
-   const rec={venue, raceName, category, pattern:patternKey, line1: line1, diffPattern:diffPatternKey, diffDisplay, exacta, payout:p3, payout2ren:p2, timestamp:Date.now(), sourceType:'bulk-manual'};
-   
-   // Check if already exists, update or add
-   const existsIdx = savedRecords.findIndex(r=>r.venue===venue && r.raceName===raceName);
-   if(existsIdx>=0){
-    Object.assign(savedRecords[existsIdx], rec);
-   }else{
-    savedRecords.push(rec);
-   }
-   saved++;
-  }
-  if(saved){
-   persist();
-   updateCountDisplay();
-   runAnalysis();
-   logToTerminal(`> 一括保存成功: ${saved} レースをDBに追加/更新しました。`,"success");
-   closeBulkInputModal();
-   playBeep(880,'sine',.2);
-  }else{
-   logToTerminal("> 保存対象のレースがありませんでした。","error");
-  }
+ takeUndoSnapshot('DataMap事前登録');
+ const cards=$('bulkRaceContainer').children;let saved=0,updated=0,skipped=0;
+ for(let i=0;i<cards.length;i++){
+  const venue=$('bulk_venue_'+i)?.value||'不明',raceName=$('bulk_race_'+i)?.value||'UNKNOWN';
+  const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||'',line1=$('bulk_line1_'+i)?.value||'';
+  if(raceName==='UNKNOWN'){skipped++;continue}
+  const incoming={venue,raceName,raceDate,category,line1,pattern:'',exacta:'',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,sourceType:'pre-registration',timestamp:Date.now()};
+  const idx=savedRecords.findIndex(r=>recordKey(r)===recordKey(incoming));
+  if(idx>=0){const old=savedRecords[idx];savedRecords[idx]={...old,venue,raceName,raceDate,category,line1:line1||old.line1||'',timestamp:old.timestamp||Date.now()};updated++;}
+  else{savedRecords.push(incoming);saved++;}
+ }
+ if(saved||updated){persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> 事前登録完了：新規 ${saved}件／既存更新 ${updated}件／対象外 ${skipped}件。着順・配当は未入力で保存しました。`,'success');closeBulkInputModal();playBeep(880,'sine',.2);}
+ else logToTerminal('> 登録対象がありませんでした。','error');
+}
+
+function renderRecordManager(){
+ const host=$('recordList');if(!host)return;
+ const query=($('recordSearch')?.value||'').trim().toLowerCase(),status=$('recordStatus')?.value||'all';
+ const counts={all:savedRecords.length,pending:0,result:0,payout:0,incomplete:0};
+ savedRecords.forEach(r=>{const result=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;if(!result)counts.pending++;else counts.result++;if(p3>0||p2>0)counts.payout++;if(p3===0||p2===0)counts.incomplete++;});
+ $('recordSummary').textContent=`登録 ${counts.all}件 ／ 着順未入力 ${counts.pending}件 ／ 配当入力済 ${counts.payout}件`;
+ const filtered=savedRecords.map((r,i)=>({...r,_idx:i})).filter(r=>{
+  const text=[r.venue,r.raceDate,r.raceName,r.category,r.pattern,r.line1].join(' ').toLowerCase();if(query&&!text.includes(query))return false;
+  const result=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;
+  if(status==='pending'&&result)return false;if(status==='result'&&!result)return false;if(status==='payout'&&p3===0&&p2===0)return false;if(status==='incomplete'&&p3>0&&p2>0)return false;return true;
+ }).sort((a,b)=>(b.raceDate||'').localeCompare(a.raceDate||'')||String(a.venue).localeCompare(String(b.venue),'ja')||(parseInt(a.raceName)||0)-(parseInt(b.raceName)||0));
+ if(!filtered.length){host.innerHTML='<div class="discovery-card text-xs">該当するレースはありません。</div>';return;}
+ host.innerHTML=filtered.slice(0,250).map(r=>{const done=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;return `<div class="discovery-result flex flex-col sm:flex-row sm:items-center justify-between gap-2"><div class="min-w-0"><div class="font-black text-sm text-sky-950">${escapeHTML(r.venue||'不明')} ${escapeHTML(r.raceName||'')}</div><div class="text-[10px] text-slate-600">${escapeHTML(r.raceDate||'開催日未設定')} ・ ${escapeHTML(r.category||'')}</div><div class="text-xs mt-1 font-bold">${done?`着順 ${escapeHTML(r.pattern)}`:'着順未入力'} <span class="text-slate-500 font-normal">／ 2単 ${p2?`¥${p2.toLocaleString()}`:'未入力'} ／ 3単 ${p3?`¥${p3.toLocaleString()}`:'未入力'}</span></div></div><div class="flex gap-2 shrink-0"><button type="button" class="touch-btn btn-cyber px-3 py-2 text-xs" onclick="openEditModal(${r._idx})">編集</button><button type="button" class="touch-btn btn-ghost px-3 py-2 text-xs" onclick="deleteRecord(${r._idx})">削除</button></div></div>`;}).join('')+(filtered.length>250?'<div class="text-xs text-slate-500 text-center">表示は先頭250件までです。検索で絞り込んでください。</div>':'');
+}
+function openBatchEdit(){
+ const panel=$('batchEditPanel'),host=$('batchEditRows');if(!panel||!host)return;
+ const rows=savedRecords.map((r,i)=>({r,i})).filter(({r})=>!hasValidResult(r)||(Number(r.payout)||0)===0||(Number(r.payout2ren)||0)===0);
+ if(!rows.length){host.innerHTML='<div class="text-sm font-bold">未入力のレースはありません。</div>';panel.classList.remove('hidden');return;}
+ host.innerHTML=rows.map(({r,i})=>{const pat=(r.pattern||'').split('-');return `<div class="bg-white border border-slate-300 rounded-lg p-3" data-batch-index="${i}"><div class="font-black text-sm mb-2">${escapeHTML(r.venue||'不明')} ${escapeHTML(r.raceName||'')} <span class="text-xs font-normal text-slate-500">${escapeHTML(r.raceDate||'開催日未設定')} / ${escapeHTML(r.category||'')}</span></div><div class="grid grid-cols-3 gap-2 mb-2"><input class="field text-center" type="number" min="1" max="9" placeholder="1着" data-field="c1" value="${pat[0]||''}"><input class="field text-center" type="number" min="1" max="9" placeholder="2着" data-field="c2" value="${pat[1]||''}"><input class="field text-center" type="number" min="1" max="9" placeholder="3着" data-field="c3" value="${pat[2]||''}"></div><div class="grid grid-cols-2 gap-2"><label class="text-xs">2連単配当<input class="field mt-1" type="number" min="0" placeholder="未入力" data-field="p2" value="${Number(r.payout2ren)||''}"></label><label class="text-xs">3連単配当<input class="field mt-1" type="number" min="0" placeholder="未入力" data-field="p3" value="${Number(r.payout)||''}"></label></div></div>`}).join('');
+ panel.classList.remove('hidden');playBeep(620,'triangle',.08);
+}
+function saveBatchEdit(){
+ takeUndoSnapshot('一括編集');
+ const cards=[...$('batchEditRows').querySelectorAll('[data-batch-index]')];let updated=0;
+ for(const card of cards){const idx=Number(card.dataset.batchIndex),r=savedRecords[idx];if(!r)continue;const val=k=>card.querySelector(`[data-field="${k}"]`)?.value.trim()??'';
+  const a=val('c1'),b=val('c2'),c=val('c3'),any=[a,b,c].some(x=>x!==''),nums=[a,b,c].map(Number);
+  if(any&&!(a!==''&&b!==''&&c!==''&&nums.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(nums).size===3)){alert(`${r.venue||''} ${r.raceName||''}：着順は1〜3着を重複なく入力してください。`);return;}
+  if(any)r.pattern=nums.join('-');
+  const p2=val('p2'),p3=val('p3');if(p2!=='')r.payout2ren=Math.max(0,Number(p2)||0);if(p3!=='')r.payout=Math.max(0,Number(p3)||0);
+  updated++;
+ }
+ persist();updateCountDisplay();runAnalysis();renderRecordManager();$('batchEditPanel').classList.add('hidden');logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
+}
+function deleteRecord(idx){const r=savedRecords[idx];if(!r)return;if(!confirm(`${r.venue||'不明'} ${r.raceName||''}（${r.raceDate||'開催日未設定'}）を削除しますか？`))return;takeUndoSnapshot('レース削除');savedRecords.splice(idx,1);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal('> レース記録を1件削除しました。','success');}
+
+
+// ===== V10 USER CONTROL HUB =====
+let undoSnapshots=[];
+let musicObjectUrl='';
+let backupDbPromise=null;
+function takeUndoSnapshot(label='操作'){
+ try{undoSnapshots.push({label,records:JSON.parse(JSON.stringify(savedRecords)),at:Date.now()});if(undoSnapshots.length>12)undoSnapshots.shift();}catch(e){console.warn('undo snapshot failed',e)}
+}
+function undoLastAction(){
+ const snap=undoSnapshots.pop();if(!snap){alert('取り消せる操作がありません。');return;}
+ savedRecords=snap.records;persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> 取り消し：${snap.label} を復元しました。`,'success');
+}
+function openBackupDB(){
+ if(backupDbPromise)return backupDbPromise;
+ backupDbPromise=new Promise((resolve,reject)=>{
+  if(!('indexedDB' in window)){reject(Error('IndexedDB unavailable'));return;}
+  const req=indexedDB.open('BattleBankKunBackup',1);
+  req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains('snapshots'))db.createObjectStore('snapshots',{keyPath:'id'});};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+ });return backupDbPromise;
+}
+async function writeBackup(label='自動バックアップ'){
+ try{
+  const db=await openBackupDB(),tx=db.transaction('snapshots','readwrite'),store=tx.objectStore('snapshots');
+  store.put({id:Date.now(),label,records:JSON.parse(JSON.stringify(savedRecords)),count:savedRecords.length});
+  await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});
+  const read=db.transaction('snapshots','readonly').objectStore('snapshots').getAll();
+  const all=await new Promise((res,rej)=>{read.onsuccess=()=>res(read.result||[]);read.onerror=()=>rej(read.error);});
+  all.sort((a,b)=>b.id-a.id).slice(5).forEach(x=>{const t=db.transaction('snapshots','readwrite');t.objectStore('snapshots').delete(x.id)});
+  const status=$('backupStatus');if(status)status.textContent=`自動バックアップ保存済み：${new Date().toLocaleString('ja-JP')} ／ ${savedRecords.length}件`;
+ }catch(e){const status=$('backupStatus');if(status)status.textContent='自動バックアップを利用できません。JSON保存を使用してください。';console.warn(e)}
+}
+let backupTimer=null;
+function scheduleAutoBackup(){clearTimeout(backupTimer);backupTimer=setTimeout(()=>writeBackup('自動バックアップ'),1200);}
+async function listBackups(){
+ try{const db=await openBackupDB(),req=db.transaction('snapshots','readonly').objectStore('snapshots').getAll();const arr=await new Promise((res,rej)=>{req.onsuccess=()=>res(req.result||[]);req.onerror=()=>rej(req.error)});return arr.sort((a,b)=>b.id-a.id)}catch(e){return []}
+}
+async function restoreLatestBackup(){
+ const backups=await listBackups();if(!backups.length){alert('復元できるバックアップがありません。');return;}
+ const b=backups[0];if(!confirm(`${new Date(b.id).toLocaleString('ja-JP')} のバックアップ（${b.count}件）に復元しますか？現在のデータは復元前に保存します。`))return;
+ takeUndoSnapshot('バックアップ復元前');savedRecords=(b.records||[]).map(normalizeRecord);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal('> バックアップから復元しました。','success');
+}
+function downloadJsonBackup(){const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`battle-bank-kun-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function restoreJsonBackup(event){const f=event.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(!Array.isArray(data))throw Error('not array');if(!confirm(`${data.length}件のデータで現在のDBを置き換えますか？`))return;takeUndoSnapshot('JSON復元前');savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> JSON復元完了：${savedRecords.length}件`,'success');}catch(e){alert('JSONの形式を確認してください。')}finally{event.target.value=''}};reader.readAsText(f,'UTF-8');}
+function runDuplicateCheck(){
+ const map=new Map();savedRecords.forEach((r,i)=>{const k=recordKey(r);if(!map.has(k))map.set(k,[]);map.get(k).push(i)});
+ const dup=[...map.entries()].filter(([,v])=>v.length>1);const host=$('healthResults');
+ host.innerHTML=dup.length?`<b class="text-rose-700">重複候補 ${dup.length}グループ</b><div class="mt-2 space-y-1">${dup.slice(0,15).map(([k,v])=>`<div class="border-t pt-1">${escapeHTML(k.replaceAll('|',' / '))}：${v.length}件</div>`).join('')}</div><div class="text-[10px] mt-2 text-slate-500">自動削除はしていません。日付未設定データは同一開催場・レース番号でまとまる可能性があります。</div>`:'<b class="text-sky-800">重複候補は見つかりませんでした。</b>';
+}
+function runQualityCheck(){
+ let noResult=0,noP2=0,noP3=0,badResult=0,noDate=0,noLine=0;
+ savedRecords.forEach(r=>{const p=String(r.pattern||'').split('-').map(Number);if(!hasValidResult(r)){noResult++;if(r.pattern&&!p.every(n=>Number.isInteger(n)&&n>=1&&n<=9))badResult++;}if(!(Number(r.payout2ren)>0))noP2++;if(!(Number(r.payout)>0))noP3++;if(!r.raceDate)noDate++;if(!String(r.line1||'').trim())noLine++;});
+ $('healthResults').innerHTML=`<b class="text-sky-900">登録 ${savedRecords.length}件の点検結果</b><div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">${[['着順未入力',noResult],['着順形式不正',badResult],['2連単配当未入力',noP2],['3連単配当未入力',noP3],['開催日未設定',noDate],['ライン①未登録',noLine]].map(([k,v])=>`<div class="bg-white rounded-lg p-2"><div class="text-[10px] text-slate-500">${k}</div><b class="text-lg">${v}</b></div>`).join('')}</div>`;
+}
+function getScanSettings(){return {category:$('discoveryClass').value,threshold:Number($('discoveryThreshold').value)||10000,min:Number($('discoveryMin').value)||10};}
+function renderScanPresets(){const host=$('savedScanPresets');const arr=JSON.parse(localStorage.getItem('battleBankScanPresets')||'[]');if(!arr.length){host.textContent='保存した条件はありません。';return;}host.innerHTML=arr.map((x,i)=>`<div class="flex justify-between items-center gap-2 bg-white rounded-lg p-2"><button class="text-left flex-1 font-bold" data-load-preset="${i}">${escapeHTML(x.name)} <span class="font-normal text-slate-500">${escapeHTML(x.category)} / ¥${Number(x.threshold).toLocaleString()} / ${x.min}件</span></button><button class="text-rose-600 px-2" data-delete-preset="${i}">削除</button></div>`).join('');}
+function saveScanPreset(){const name=$('scanPresetName').value.trim();if(!name){alert('条件名を入力してください。');return;}const s=getScanSettings(),arr=JSON.parse(localStorage.getItem('battleBankScanPresets')||'[]');arr.unshift({name,...s});localStorage.setItem('battleBankScanPresets',JSON.stringify(arr.slice(0,20)));$('scanPresetName').value='';renderScanPresets();}
+function applySavedPreset(i){const x=JSON.parse(localStorage.getItem('battleBankScanPresets')||'[]')[i];if(!x)return;$('discoveryClass').value=x.category;$('discoveryThreshold').value=x.threshold;$('discoveryMin').value=String(x.min);discoverPatterns();document.getElementById('discoverySection').scrollIntoView({behavior:'smooth'});}
+function setAppearance(){const theme=$('appearanceTheme').value;document.documentElement.dataset.bbtheme=theme;document.documentElement.dataset.motion=$('motionSetting').value;document.body.style.filter=theme==='violet'?'hue-rotate(35deg)':theme==='dark'?'brightness(.82) saturate(.9)':'';localStorage.setItem('battleBankAppearance',JSON.stringify({theme,motion:$('motionSetting').value,sfx:$('sfxSetting').value}));sfxEnabled=$('sfxSetting').value==='on';const label=$('audioToggleBtn')?.lastElementChild;if(label)label.textContent=`SFX [${sfxEnabled?'ON':'OFF'}]`;}
+function initUserSettings(){try{const x=JSON.parse(localStorage.getItem('battleBankAppearance')||'{}');if(x.theme)$('appearanceTheme').value=x.theme;if(x.motion)$('motionSetting').value=x.motion;if(x.sfx)$('sfxSetting').value=x.sfx;}catch(e){}setAppearance();const vol=localStorage.getItem('battleBankMusicVolume');if(vol!==null)$('musicVolume').value=vol;const sfxVol=localStorage.getItem('battleBankSfxVolume');if(sfxVol!==null)$('sfxVolume').value=sfxVol;renderScanPresets();}
+function loadMusicFile(event){const f=event.target.files?.[0];if(!f)return;const audio=$('personalMusic');if(musicObjectUrl)URL.revokeObjectURL(musicObjectUrl);musicObjectUrl=URL.createObjectURL(f);audio.src=musicObjectUrl;audio.loop=$('musicLoop').checked;audio.volume=Number($('musicVolume').value)/100;$('musicFileName').textContent=f.name;$('musicState').textContent='再生準備完了';}
+async function playPersonalMusic(){const a=$('personalMusic');if(!a.src){alert('先に音楽ファイルを選択してください。');return;}try{await a.play();$('musicState').textContent='再生中';}catch(e){$('musicState').textContent='再生できません。形式を確認してください。';}}
+function stopPersonalMusic(){const a=$('personalMusic');a.pause();a.currentTime=0;$('musicState').textContent='停止中';}
+function bindUserHub(){
+ bind('backupNowBtn',()=>writeBackup('手動バックアップ'));bind('restoreBackupBtn',restoreLatestBackup);bind('restoreJsonBtn',()=>$('restoreBackupFile').click());bind('undoActionBtn',undoLastAction);bind('downloadBackupBtn',downloadJsonBackup);
+ bind('duplicateCheckBtn',runDuplicateCheck);bind('qualityCheckBtn',runQualityCheck);bind('anomalyScanBtn',()=>{discoverPatterns();$('discoverySection').scrollIntoView({behavior:'smooth'});});bind('saveScanPresetBtn',saveScanPreset);
+ $('savedScanPresets').addEventListener('click',e=>{const l=e.target.closest('[data-load-preset]'),d=e.target.closest('[data-delete-preset]');if(l)applySavedPreset(Number(l.dataset.loadPreset));if(d){const a=JSON.parse(localStorage.getItem('battleBankScanPresets')||'[]');a.splice(Number(d.dataset.deletePreset),1);localStorage.setItem('battleBankScanPresets',JSON.stringify(a));renderScanPresets();}});
+ $('restoreBackupFile').addEventListener('change',restoreJsonBackup);$('musicFileInput').addEventListener('change',loadMusicFile);bind('musicPlayBtn',playPersonalMusic);bind('musicStopBtn',stopPersonalMusic);
+ $('musicVolume').addEventListener('input',e=>{const v=Number(e.target.value)/100;$('personalMusic').volume=v;localStorage.setItem('battleBankMusicVolume',e.target.value)});$('musicLoop').addEventListener('change',e=>$('personalMusic').loop=e.target.checked);
+ $('sfxVolume').addEventListener('input',e=>{localStorage.setItem('battleBankSfxVolume',e.target.value)});$('appearanceTheme').addEventListener('change',setAppearance);$('motionSetting').addEventListener('change',setAppearance);$('sfxSetting').addEventListener('change',setAppearance);
+ $('personalMusic').addEventListener('ended',()=>{$('musicState').textContent=$('personalMusic').loop?'再生中':'再生終了'});
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
- bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);
- $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);initManualSelects();
+ bindUserHub();initUserSettings();writeBackup('起動時バックアップ');bind('openBatchEditBtn',openBatchEdit);bind('closeBatchEditBtn',()=>$('batchEditPanel').classList.add('hidden'));bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);
+ $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);$('recordSearch').addEventListener('input',renderRecordManager);$('recordStatus').addEventListener('change',renderRecordManager);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
- updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v9.0 稼働中.":"> SYSTEM READY // v9.0 稼働中.","success");
+ document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.id!=='audioToggleBtn'&&!b.disabled)playBeep(680,'sine',.045,.018);});
+ updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v10.0 稼働中.":"> SYSTEM READY // v10.2 稼働中.","success");
 });
 </script>
+
+<script>
+(function(){
+'use strict';
+let trickRows=[];
+const $t=id=>document.getElementById(id);
+const markMap={honmei:'◎',taikou:'◯',tanana:'△',renge:'✕'};
+function parseCSV(text){
+ const rows=[];let row=[],cell='',quoted=false;
+ for(let i=0;i<text.length;i++){
+  const c=text[i];
+  if(quoted){if(c==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}
+  else if(c==='"')quoted=true;
+  else if(c===','){row.push(cell);cell='';}
+  else if(c==='\n'){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);row=[];cell='';}
+  else cell+=c;
+ }
+ if(cell.length||row.length){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);}
+ if(!rows.length)return [];
+ const headers=rows.shift().map((h,i)=>i===0?h.replace(/^\uFEFF/,'').trim():h.trim());
+ return rows.map(a=>Object.fromEntries(headers.map((h,i)=>[h,(a[i]??'').trim()])));
+}
+function splitLines(value){return String(value||'').split('/').map(g=>g.trim()).filter(Boolean).map(g=>g.split(/[-‐‑‒–—\s]+/).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=1&&n<=9));}
+function makeRace(row){
+ const girls=String(row.dai||'').toUpperCase()==='G'||String(row.gl||'').startsWith('G')||/ガールズ|L級/.test(String(row.race_class||''));
+ const n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
+ const category=girls?'ガールズ':(n>=5&&n<=9?`${n}車`:'不明');
+ const lines=splitLines(row.lines);
+ if(!lines.length||!lines.some(g=>g.length>=2))return null; // 全員単騎だけ除外
+ const marks={};Object.entries(markMap).forEach(([key,sym])=>{const n=Number(row[key]);if(n>=1&&n<=9)marks[n]=sym;});
+ const result=String(row.result||'').split(/[-\s>→]+/).map(Number).filter(n=>n>=1&&n<=9).slice(0,3);
+ return {date:String(row.date||row.raceDate||''),category,lines,marks,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0,result,rawLine:lines.map(g=>g.join('-')).join('/')};
+}
+function makeRace(row){
+ const girls=String(row.dai||'').toUpperCase()==='G'||String(row.gl||'').toUpperCase().startsWith('G')||/ガールズ|L級/.test(String(row.race_class||''));
+ const n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
+ const category=girls?'ガールズ':(n>=5&&n<=9?`${n}車`:'不明');
+ const lines=splitLines(row.lines);
+ if(!lines.length||!lines.some(g=>g.length>=2))return null; // 全員単騎だけ除外
+ const marks={};Object.entries(markMap).forEach(([key,sym])=>{const car=Number(row[key]);if(car>=1&&car<=9)marks[car]=sym;});
+ return {date:String(row.date||row.raceDate||''),category,lines,heads:lines.map(g=>g[0]).filter(n=>n>=1&&n<=9),marks,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0};
+}
+// 指定された組み合わせ条件。車番の順序は区別しない。
+function allowedHeadPair(a,b){if(a===b)return false;const x=Math.min(a,b),y=Math.max(a,b);return !(x===1&&(y===2||y===3));}
+function pairKey(a,b){return [a,b].sort((x,y)=>x-y).join('－');}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function loadCSV(file){const reader=new FileReader();reader.onload=()=>{try{const rows=parseCSV(String(reader.result||''));const mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));$t('trickCsvStatus').textContent=`読込成功：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース（全員単騎・分類不明を除外）`;$t('trickSummary').innerHTML='';$t('trickResults').innerHTML='<div class="discovery-card text-center text-sky-700 text-xs">読み込み完了。組み合わせ分析を実行してください。</div>'; }catch(e){$t('trickCsvStatus').textContent='CSV読込エラー：列名・文字コードを確認してください。';console.error(e);}};reader.onerror=()=>{$t('trickCsvStatus').textContent='ファイルを読み込めませんでした。';};reader.readAsText(file,'UTF-8');}
+function runTrick(){
+ if(!trickRows.length){$t('trickResults').innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';return;}
+ const cls=$t('trickClass').value,type=$t('trickPayoutType').value;
+ const allData=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls));
+ const payoutRows=allData.map(r=>({...r,payout:type==='tri_yen'?r.p3:r.p2})).filter(r=>Number.isFinite(r.payout)&&r.payout>0);
+ const stats=new Map(), markStats=new Map();
+ payoutRows.forEach(r=>{
+  const heads=[...new Set(r.heads)];
+  for(let i=0;i<heads.length;i++)for(let j=i+1;j<heads.length;j++){
+   const a=heads[i],b=heads[j];if(!allowedHeadPair(a,b))continue;
+   const key=pairKey(a,b), lo=Math.min(a,b), hi=Math.max(a,b);
+   if(!stats.has(key))stats.set(key,{pair:key,a:lo,b:hi,count:0,sum:0,min:Infinity,max:0});
+   const g=stats.get(key);g.count++;g.sum+=r.payout;g.min=Math.min(g.min,r.payout);g.max=Math.max(g.max,r.payout);
+   const lineA=r.lines.find(line=>line[0]===lo),lineB=r.lines.find(line=>line[0]===hi);
+   if(!lineA||!lineB)continue;
+   const markOf=n=>r.marks[n]||'無';
+   const headSig=`${lo}番:${markOf(lo)} × ${hi}番:${markOf(hi)}`;
+   const lineSig=`${lo}番[${lineA.map(markOf).join('－')}] ／ ${hi}番[${lineB.map(markOf).join('－')}]`;
+   if(!markStats.has(key))markStats.set(key,{head:new Map(),lines:new Map()});
+   const ms=markStats.get(key);
+   for(const [map,sig] of [[ms.head,headSig],[ms.lines,lineSig]]){if(!map.has(sig))map.set(sig,{sig,count:0,sum:0});const z=map.get(sig);z.count++;z.sum+=r.payout;}
+  }
+ });
+ const pairs=[...stats.values()].map(g=>({...g,avg:g.sum/g.count}));
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const summary=[['対象レース',allData.length.toLocaleString()],['配当入力済',payoutRows.length.toLocaleString()],['集計ペア数',pairs.length.toLocaleString()],['配当種別',type==='tri_yen'?'3連単':'2車単']];
+ $t('trickSummary').innerHTML=summary.map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-sky-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold text-sky-900">${v}</div></div>`).join('');
+ let html='';
+ for(let car=1;car<=9;car++){
+  const related=pairs.filter(g=>g.a===car||g.b===car);
+  const cheap=related.slice().sort((a,b)=>a.avg-b.avg||b.count-a.count).slice(0,3);
+  const expensive=related.slice().sort((a,b)=>b.avg-a.avg||b.count-a.count).slice(0,3);
+  const render=(arr,empty)=>arr.length?arr.map((g,i)=>`<div class="flex items-center justify-between gap-2 border-b border-sky-100 py-1.5 last:border-0"><span class="font-bold text-slate-800">${i+1}. ${g.pair}</span><span class="text-right"><b class="text-sky-900">${fmt(g.avg)}</b><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):`<div class="py-2 text-[11px] text-slate-500">${empty}</div>`;
+  html+=`<div class="discovery-card"><div class="flex items-center justify-between mb-2"><h3 class="font-bold text-sky-900">車番 ${car} を含む組み合わせ</h3><span class="text-[10px] text-slate-500">${related.length}ペア</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-sky-50 p-2"><div class="text-[11px] font-bold text-sky-800 mb-1">平均配当が安い 3組</div>${render(cheap,'該当する組み合わせなし')}</div><div class="rounded-lg bg-amber-50 p-2"><div class="text-[11px] font-bold text-amber-800 mb-1">平均配当が高い 3組</div>${render(expensive,'該当する組み合わせなし')}</div></div></div>`;
+ }
+ $t('trickResults').innerHTML=html;
+ const markFmt=(arr)=>arr.length?arr.map((g,i)=>`<div class="flex items-start justify-between gap-2 border-b border-violet-100 py-1.5 last:border-0"><span class="text-[11px] font-semibold text-slate-700">${i+1}. ${esc(g.sig)}</span><span class="shrink-0 text-right"><b class="text-slate-900">${fmt(g.avg)}</b><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">該当なし</div>';
+ const markCards=[];
+ for(const [key,ms] of markStats){
+  const renderSide=(map,low)=>{const arr=[...map.values()].filter(x=>x.count>=2).map(x=>({...x,avg:x.sum/x.count}));arr.sort((a,b)=>low?(a.avg-b.avg||b.count-a.count):(b.avg-a.avg||b.count-a.count));return markFmt(arr.slice(0,3));};
+  markCards.push(`<div class="discovery-card"><h4 class="font-bold text-violet-900 mb-2">車番ペア ${key}</h4><div class="grid grid-cols-1 lg:grid-cols-2 gap-3"><section class="rounded-lg bg-violet-50 p-2"><div class="font-bold text-[11px] text-violet-900 mb-1">先頭2人の印の関係</div><div class="text-[10px] text-slate-500 mb-1">${key.split('－')[0]}番の印 × ${key.split('－')[1]}番の印</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.head,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.head,false)}</div></div></section><section class="rounded-lg bg-slate-50 p-2"><div class="font-bold text-[11px] text-slate-800 mb-1">2ライン全員の印の並び</div><div class="text-[10px] text-slate-500 mb-1">ライン内の順番を保持して集計</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.lines,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.lines,false)}</div></div></section></div></div>`);
+ }
+ $t('trickMarkResults').innerHTML=markCards.length?markCards.join(''):'<div class="discovery-card text-xs">印の組み合わせデータがありません。</div>';
+}
+document.addEventListener('DOMContentLoaded',()=>{const f=$t('trickCsvInput'),b=$t('trickRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);});
+})();
+</script>
+
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -1073,17 +1237,56 @@ if ("serviceWorker" in navigator) {
   <button id="closeBulkBtn" type="button" class="touch-btn absolute top-2 right-3 text-3xl font-black text-slate-900 w-10 h-10 z-10">×</button>
   <header class="text-center mb-3 border-b-2 border-slate-900 pb-2 mt-1">
    <h2 class="font-orbitron text-2xl sm:text-3xl font-black tracking-widest">BULK MANUAL INPUT</h2>
-   <p class="text-[10px] font-bold mt-1">FILE LOADED // 1R〜12R 一括入力</p>
+   <p class="text-[10px] font-bold mt-1">FILE LOADED // レース情報の事前登録</p>
   </header>
   <div id="bulkRaceContainer" class="flex-1 overflow-y-auto space-y-4 pr-1" style="max-height: calc(95dvh - 180px);">
    <!-- Races will be injected here -->
   </div>
   <div class="mt-3 pt-3 border-t border-slate-300 flex gap-2">
-   <button id="saveAllBulkBtn" type="button" class="touch-btn btn-alert flex-1 py-3 rounded-xl text-sm tracking-widest">SAVE ALL RECORDS</button>
+   <button id="saveAllBulkBtn" type="button" class="touch-btn btn-alert flex-1 py-3 rounded-xl text-sm tracking-widest">SAVE RACE LIST</button>
    <button id="closeBulkBtn2" type="button" class="touch-btn btn-ghost py-3 px-4 rounded-xl text-sm">CLOSE</button>
   </div>
  </div>
 </div>
+
+
+<script>
+(function(){
+ const tabs=[...document.querySelectorAll('[data-tab-target]')];
+ const panels=[...document.querySelectorAll('[data-tab-panel]')];
+ function activateTab(name,save=true){
+   tabs.forEach(btn=>{
+     const active=btn.dataset.tabTarget===name;
+     btn.setAttribute('aria-selected',active?'true':'false');
+     btn.tabIndex=active?0:-1;
+   });
+   panels.forEach(panel=>{
+     panel.hidden=panel.dataset.tabPanel!==name;
+   });
+   if(save){try{localStorage.setItem('bbk_active_tab',name)}catch(e){}}
+   window.scrollTo({top:0,behavior:'smooth'});
+ }
+ tabs.forEach((btn,index)=>{
+   btn.addEventListener('click',()=>activateTab(btn.dataset.tabTarget));
+   btn.addEventListener('keydown',e=>{
+     if(!['ArrowRight','ArrowLeft','Home','End'].includes(e.key))return;
+     e.preventDefault();
+     let next=index;
+     if(e.key==='ArrowRight')next=(index+1)%tabs.length;
+     if(e.key==='ArrowLeft')next=(index-1+tabs.length)%tabs.length;
+     if(e.key==='Home')next=0;
+     if(e.key==='End')next=tabs.length-1;
+     tabs[next].focus();activateTab(tabs[next].dataset.tabTarget);
+   });
+ });
+ let initial='home';
+ try{
+   const saved=localStorage.getItem('bbk_active_tab');
+   if(tabs.some(t=>t.dataset.tabTarget===saved))initial=saved;
+ }catch(e){}
+ activateTab(initial,false);
+})();
+</script>
 
 </body>
 </html>
