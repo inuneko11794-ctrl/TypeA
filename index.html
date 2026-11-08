@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BANK-KUN">
-<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v10.1</title>
+<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v10.9</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -221,7 +221,7 @@ html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-mo
   <div class="kicker mb-2">PATTERN MATRIX // DATA INTELLIGENCE SYSTEM</div>
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
-   <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">CYBER WHITE ULTRA v10.1</span>
+   <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">CYBER WHITE ULTRA v10.9</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -319,8 +319,37 @@ AWAITING COMMAND EXECUTION...</div>
   </div>
   <div id="trickSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
   <div id="trickResults" class="space-y-3"><div class="discovery-card text-center text-sky-700 text-xs">CSVを読み込み、分析を実行してください。</div></div>
-  <div class="mt-4"><h3 class="kicker border-l-4 border-violet-500 pl-2 mb-2">MARK RELATION LAB // 印の関係分析</h3><p class="text-[11px] text-slate-600 mb-2">各車番ペアについて、先頭2人の印の組み合わせと、該当する2ライン全員の印の並びを別々に集計。平均配当が低い・高い各3パターンと出現数を表示します。</p><div id="trickMarkResults" class="space-y-3"><div class="discovery-card text-xs">組み合わせ分析を実行してください。</div></div></div>
+  <div class="mt-4"><h3 class="kicker border-l-4 border-violet-500 pl-2 mb-2">MARK RELATION LAB // 印の関係分析</h3><p class="text-[11px] text-slate-600 mb-2">ライン位置（①×②・①×③・②×③）ごとに、両ライン先頭の印の関係と2ライン全員の印並びを集計します。最低件数に満たないパターンは低配当・高配当ランキングから除外します。</p><div class="flex items-end gap-2 mb-3"><label class="text-[10px] font-bold text-violet-800 flex-1">ランキング最低出現数<select id="markPatternMinCount" class="field !py-2 text-xs mt-1"><option value="5">5件</option><option value="10" selected>10件</option><option value="20">20件</option><option value="30">30件</option><option value="50">50件</option></select></label><div class="text-[10px] text-slate-500 flex-1">件数不足の組み合わせはランキング対象外</div></div><div id="trickMarkResults" class="space-y-3"><div class="discovery-card text-xs">組み合わせ分析を実行してください。</div></div><div class="mt-4 border-t border-violet-200 pt-3"><h4 class="kicker border-l-4 border-fuchsia-500 pl-2 mb-2">CSV × LIVE JSON MARK COMPARISON // 変換印の比較</h4><p class="text-[10px] text-slate-600 mb-2">⑳・●・▲・✖・☆・★に変換したライン内の印並びを、過去CSVと直近JSONで比較します。無印という共通ラベルにはまとめません。</p><div id="trickMarkJsonCompare" class="space-y-2"><div class="discovery-card text-xs">CSV分析を実行すると比較します。</div></div></div></div>
   <p class="text-[10px] text-slate-500 mt-3">集計対象はライン先頭車番のペアです。提示された組み合わせ条件に従い、1－2と1－3は対象外。平均配当の算出には選択した配当が入力済みのレースだけを使用し、各組み合わせの出現数も併記します。奇数・偶数の分析は行いません。</p>
+  <div class="mt-6 border-t-2 border-cyan-200 pt-4" id="lowPayoutHeadLab">
+   <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h3 class="kicker border-l-4 border-emerald-500 pl-2">LOW PAYOUT HEAD PAIR LAB // ライン先頭ペア・1万円以下分析</h3><span class="discovery-chip">UNDER THRESHOLD RATE</span></div>
+   <p class="text-xs text-sky-800 mb-3">ライン①〜④の位置を区別して、各ライン先頭車番の組み合わせを総当たりします。たとえば①×②なら「①の先頭1番－②の先頭2番」と「①の先頭2番－②の先頭1番」は別集計です。3連単配当が基準以下になる割合を比較します。</p>
+   <div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end mb-3">
+    <div><label class="block text-[10px] font-bold text-emerald-800 mb-1">1万円以下の基準（円）</label><input id="lowPayoutThreshold" class="field !py-2 text-xs" type="number" min="1" step="1000" value="10000"></div>
+    <div><label class="block text-[10px] font-bold text-emerald-800 mb-1">最低出現数</label><input id="lowPayoutMinCount" class="field !py-2 text-xs" type="number" min="1" step="5" value="20"></div>
+    <div class="md:col-span-2"><button id="lowPayoutRunBtn" type="button" class="touch-btn btn-cyber w-full py-2.5 rounded-xl text-xs">ライン①〜④を総当たり分析</button></div>
+   </div>
+   <div id="lowPayoutSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+   <div id="lowPayoutResults" class="space-y-3"><div class="discovery-card text-center text-xs">分析CSVを読み込み、総当たり分析を実行してください。</div></div>
+   <div class="mt-5 border-t border-emerald-200 pt-4"><h4 class="kicker border-l-4 border-cyan-500 pl-2 mb-2">CSV × LIVE JSON COMPARISON // 過去CSVと直近収集データの比較</h4><p class="text-[11px] text-slate-600 mb-2">事前登録したライン①〜④の先頭車番と、結果入力後の3連単配当を同じ条件で比較します。古いJSONでライン情報がないレースは比較対象外です。</p><div id="lowPayoutRecentCompare" class="space-y-2"><div class="discovery-card text-xs">CSV分析と直近JSONデータの両方を用意して分析を実行してください。</div></div></div>
+   <p class="text-[10px] text-slate-500 mt-3">※ラインはCSVの記載順を①②③④として扱います。単騎ラインは除外。配当未入力・0円は割合の分母から除外します。各位置ペアごとに全車番の組み合わせを調べ、最低出現数未満も「該当数」としては集計しますがランキングには表示しません。</p>
+  </div>
+ </div>
+</section>
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="trifectaProductMarkLab" data-tab-panel="analysis">
+ <div class="panel-content">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-fuchsia-500 pl-2">TRIFECTA PRODUCT × MARK LAB // 3連単・車番積×印相関</h2><span class="discovery-chip">RESULT ORDER ANALYSIS</span></div>
+  <p class="text-xs text-sky-800 mb-3">確定着順の1着・2着・3着の車番を掛け合わせ、その積が近いレース同士で印の並びと配当を比較します。積が小さいほど安い、といった単純比較は行いません。同じ積の範囲内で印の並びによる配当差を調べます。</p>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">積の範囲幅</label><select id="productBucketSize" class="field !py-2 text-xs"><option value="25">25刻み</option><option value="50" selected>50刻み</option><option value="100">100刻み</option></select></div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">高配当基準（円）</label><input id="productHighThreshold" class="field !py-2 text-xs" type="number" min="1" step="1000" value="10000"></div>
+   <div><label class="block text-[10px] font-bold text-sky-800 mb-1">印パターン最低件数</label><select id="productMinCount" class="field !py-2 text-xs"><option value="2">2件</option><option value="3" selected>3件</option><option value="5">5件</option><option value="10">10件</option></select></div>
+   <div class="flex items-end"><button id="productMarkRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">積×印分析</button></div>
+  </div>
+  <div id="productMarkSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+  <div id="productMarkResults" class="space-y-3"><div class="discovery-card text-xs">CSVを読み込み、積×印分析を実行してください。</div></div>
+  <p class="text-[10px] text-slate-500 mt-3">印は確定着順順に「1着－2着－3着」で表示。ライン内の印は⑳・●・▲・✖・☆・★へ変換して集計します。単騎は元の印を保持します。対象クラスは上の「対象」設定と連動します。</p>
  </div>
 </section>
 
@@ -469,11 +498,68 @@ AWAITING COMMAND EXECUTION...</div>
 
 <script>
 let savedRecords=[],myChart=null,bgmAudio=null,audioUnlocked=false,editingIndex=-1,sfxEnabled=true,audioCtx=null;
-const normalizeRecord = r => ({
-    ...r,
-    payout: Number(r.payout) || 0,
-    payout2ren: Number(r.payout2ren) || 0
-});
+function parseLineGroupsFromText(text){
+ const row=String(text||'').match(/^\s*\|\s*並び予想\s*\|\s*(.+)$/m);
+ if(!row)return [];
+ return (row[1].match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9));
+}
+function parseRosterBaseMarks(block){
+ const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
+ if(!section)return {};
+ const rows=section[1].split(/\r?\n/).filter(x=>/^\s*\|/.test(x));
+ if(rows.length<2)return {};
+ const cells=x=>x.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(v=>v.trim());
+ const header=cells(rows[0]);
+ let markIndex=header.findIndex(x=>/AI印|予想印|印/.test(x));
+ if(markIndex<0)return {};
+ const labelMap={'本命':'◎','◎':'◎','対抗':'◯','対':'◯','〇':'◯','○':'◯','◯':'◯','単穴':'△','穴':'△','△':'△','連下':'✕','✕':'✕','×':'✕'};
+ const out={};
+ for(const line of rows.slice(1)){
+  if(/^\s*\|\s*-+/.test(line))continue;
+  const c=cells(line),car=Number(c[0]),raw=String(c[markIndex]||'').trim();
+  if(!Number.isInteger(car)||car<1||car>9)continue;
+  out[car]=labelMap[raw]||(['◎','◯','〇','○','△','✕','×'].includes(raw)?(raw==='〇'||raw==='○'?'◯':raw==='×'?'✕':raw):'');
+ }
+ return out;
+}
+function transformLineMarks(lineGroups,baseMarks){
+ const marks={...baseMarks},pairs=[['◎','⑳'],['◯','●'],['△','▲'],['✕','✖']];
+ (lineGroups||[]).forEach(line=>{
+  if(!Array.isArray(line)||line.length<=1)return; // 単騎は元の印を保持
+  const used=new Set();
+  pairs.forEach(([base,special])=>{
+   line.forEach((car,i)=>{
+    if(marks[car]!==base)return;
+    // 隣接する無印は1つだけ対応印に変換。前側を優先し、なければ後側。
+    const before=i>0?line[i-1]:null,after=i<line.length-1?line[i+1]:null;
+    const candidate=(before&&!(marks[before]||'')&&!used.has(before))?before:((after&&!(marks[after]||'')&&!used.has(after))?after:null);
+    if(candidate){marks[candidate]=special;used.add(candidate);}
+   });
+  });
+  const remaining=line.filter(car=>!(marks[car]||''));
+  remaining.forEach((car,i)=>{marks[car]=i===0?'☆':'★';});
+ });
+ return marks;
+}
+function makeLineMarkGroups(lineGroups,marks){
+ return (lineGroups||[]).map((line,index)=>({position:index+1,cars:line.slice(),marks:line.map(car=>String(marks?.[car]||''))}));
+}
+function makeHeadPairs(lineHeads){
+ const pairs=[],labels=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+ labels.forEach(([i,j])=>{const a=Number(lineHeads?.[i])||0,b=Number(lineHeads?.[j])||0;if(a&&b&&a!==b)pairs.push({positions:[i+1,j+1],cars:[a,b],key:`${i+1}-${j+1}:${a}-${b}`});});
+ return pairs;
+}
+function enrichRecord(r){
+ const lineHeads=Array.isArray(r.lineHeads)?r.lineHeads.slice(0,4).map(Number):[];
+ const normalizedHeads=lineHeads.length?lineHeads:(r.line1?[[Number(String(r.line1).split('-')[0])||0]] .flat().slice(0,1):[]);
+ const lineGroups=Array.isArray(r.lineGroups)?r.lineGroups.map(g=>Array.isArray(g)?g.map(Number):[]):[];
+ const baseMarks=r.baseMarks&&typeof r.baseMarks==='object'?{...r.baseMarks}:{};
+ const lineMarks=r.lineMarks&&typeof r.lineMarks==='object'?{...r.lineMarks}:transformLineMarks(lineGroups,baseMarks);
+ const lineMarkGroups=Array.isArray(r.lineMarkGroups)&&r.lineMarkGroups.length?r.lineMarkGroups:makeLineMarkGroups(lineGroups,lineMarks);
+ const threshold=Number(r.payoutThreshold)||10000,payout=Number(r.payout)||0;
+ return {...r,lineHeads:normalizedHeads,headPairs:makeHeadPairs(normalizedHeads),lineGroups,baseMarks,lineMarks,lineMarkGroups,payoutThreshold:threshold,payoutUnder10000:payout>0?payout<=threshold:null};
+}
+const normalizeRecord = r => enrichRecord({...r,payout:Number(r.payout)||0,payout2ren:Number(r.payout2ren)||0});
 const REAL_VENUES=["函館","青森","いわき平","弥彦","前橋","取手","宇都宮","大宮","西武園","京王閣","立川","松戸","川崎","平塚","小田原","伊東","静岡","豊橋","名古屋","岐阜","大垣","富山","松阪","四日市","福井","奈良","向日町","和歌山","岸和田","玉野","広島","防府","高松","小松島","高知","松山","小倉","久留米","武雄","佐世保","別府","熊本","千葉"];
 const $=id=>document.getElementById(id);
 function bind(id,fn){const el=$(id);if(!el)return;el.addEventListener('click',e=>{e.preventDefault();fn()})}
@@ -513,8 +599,8 @@ function saveManualData(){
  takeUndoSnapshot(editingIndex>=0?'手動編集':'手動登録');
  const rec={venue,raceName:race,raceDate,category,pattern:patternKey,diffPattern:diffPatternKey,diffDisplay,exacta,payout,payout2ren,timestamp:Date.now(),sourceType:has3ren?'manual-result':'manual'};
  let targetIndex=editingIndex;if(targetIndex<0)targetIndex=savedRecords.findIndex(r=>recordKey(r)===recordKey(rec));
- if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]={...old,...rec,line1:old.line1||''};logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,'success');}
- else{savedRecords.push(rec);logToTerminal(`> [手動登録] ${venue} ${race} を保存しました。`,'success');}
+ if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]=normalizeRecord({...old,...rec,line1:old.line1||'',lineHeads:old.lineHeads||[]});logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,'success');}
+ else{savedRecords.push(normalizeRecord(rec));logToTerminal(`> [手動登録] ${venue} ${race} を保存しました。`,'success');}
  editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD';
  persist();updateCountDisplay();runAnalysis();renderRecordManager();
  ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');closeManualModal();
@@ -611,19 +697,12 @@ function extractAndSaveData(){
   if(carCount>=5&&carCount<=9)category=carCount+"車";
  }
  let patternKey=null,line1Key=null,diffPatternKey=null,diffDisplay=null;const lines=block.match(/\[([\d\s]+)\]/g);let allDiffs=[],diffLogs=[];
- const lineupRow=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);
- if(lineupRow){
-  // 単騎（1人だけ）はラインに含めない。2人以上の最初のグループをライン①とする
-  const groups=lineupRow[1].match(/\[([\d\s]+)\]/g)||[];
-  for(const g of groups){
-   const nums=g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>n>=1&&n<=9);
-   if(nums.length>=2){line1Key=nums.join('-');break}
-  }
- }
+ const lineGroups=parseLineGroupsFromText(block),lineHeads=lineGroups.slice(0,4).map(g=>g[0]||0),baseMarks=parseRosterBaseMarks(block),lineMarks=transformLineMarks(lineGroups,baseMarks),lineMarkGroups=makeLineMarkGroups(lineGroups,lineMarks);
+ for(const group of lineGroups){if(group.length>=2){line1Key=group.join('-');break}}
  if(lines)lines.forEach((lm,index)=>{const arr=lm.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number);if(index===0&&arr.length>0)patternKey=arr.join('-');if(arr.length>1){const ds=[];for(let i=0;i<arr.length-1;i++)ds.push(Math.abs(arr[i]-arr[i+1]));const sum=ds.reduce((a,b)=>a+b,0);if(sum===4){allDiffs.push(4);diffLogs.push("4(合算)")}else{allDiffs.push(...ds);diffLogs.push(ds.join('-'))}}});
  if(!line1Key)line1Key=patternKey;
  if(allDiffs.length){diffPatternKey=allDiffs.join('-');diffDisplay=diffLogs.join(' / ')}
- if(raceName!=="UNKNOWN"&&(line1Key||block.includes("選手"))){const raceDate=extractRaceDate(block)||extractRaceDate(inputData);const exists=savedRecords.find(r=>r.venue===venue&&r.raceName===raceName&&(r.raceDate||'')===raceDate);if(!exists){savedRecords.push({venue,raceName,raceDate,category,pattern:'',line1:line1Key||'',sourceType:'pre-registration',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,timestamp:Date.now()});extractedCount++}else{let changed=false;if(line1Key&&exists.line1!==line1Key){exists.line1=line1Key;changed=true}if(exists.category!==category){exists.category=category;changed=true}if(changed)extractedCount++}}
+ if(raceName!=="UNKNOWN"&&(line1Key||block.includes("選手"))){const raceDate=extractRaceDate(block)||extractRaceDate(inputData);const exists=savedRecords.find(r=>r.venue===venue&&r.raceName===raceName&&(r.raceDate||'')===raceDate);if(!exists){savedRecords.push(normalizeRecord({venue,raceName,raceDate,category,pattern:'',line1:line1Key||'',lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,sourceType:'pre-registration',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,timestamp:Date.now()}));extractedCount++}else{let changed=false;if(line1Key&&exists.line1!==line1Key){exists.line1=line1Key;changed=true}if(lineHeads.some(Boolean)){exists.lineHeads=lineHeads;exists.lineGroups=lineGroups;exists.baseMarks=baseMarks;exists.lineMarks=lineMarks;exists.lineMarkGroups=lineMarkGroups;Object.assign(exists,normalizeRecord(exists));changed=true}if(exists.category!==category){exists.category=category;changed=true}if(changed)extractedCount++}}
  });
  if(extractedCount){
   persist();$('dataInput').value='';updateCountDisplay();runAnalysis();
@@ -881,7 +960,7 @@ function openEditModal(idx){
  $('manSaveBtn').textContent='UPDATE RECORD';
  openManualModal();
 }
-function savePayouts(){takeUndoSnapshot('簡易修正');savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
+function savePayouts(){takeUndoSnapshot('簡易修正');savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}Object.assign(r,normalizeRecord(r));});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
 function exportData(){if(!savedRecords.length){logToTerminal("> 書き出すデータがありません。","error");return}const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='battleBank_pro_db.json';a.click();URL.revokeObjectURL(url);logToTerminal("> エクスポート完了。","success")}
 function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();takeUndoSnapshot('データ読込');savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();logToTerminal(`> 復元成功: ${data.length}件のデータを読み込みました。`,"success")}catch(err){logToTerminal("> エラー: JSONファイルの形式が不正です。","error")} $('fileInput').value=''};reader.readAsText(file,'UTF-8')}
 function clearData(){if(confirm("データベースを初期化しますか？")){takeUndoSnapshot('データベース初期化');savedRecords=[];localStorage.removeItem('battleBankProData');updateCountDisplay();runAnalysis();logToTerminal("> DBパージ完了。","success")}}
@@ -941,19 +1020,9 @@ function parseMarkdownForBulk(inputData){
     }
     if(carCount>=5&&carCount<=9)category=carCount+"車";
    }
-   // Extract line1 from 並び予想 (same logic as extractAndSaveData)
-   let line1Key = null;
-   const lineupRow = block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);
-   if(lineupRow){
-    const groups = lineupRow[1].match(/\[([\d\s]+)\]/g) || [];
-    for(const g of groups){
-     const nums = g.replace(/[\[\]]/g, '').trim().split(/\s+/).map(Number).filter(n => n >= 1 && n <= 9);
-     if(nums.length >= 2){
-      line1Key = nums.join('-');
-      break;
-     }
-    }
-   }
+   // ライン位置を保持して①〜④の先頭車番をJSONに保存
+   const lineGroups=parseLineGroupsFromText(block),lineHeads=lineGroups.slice(0,4).map(g=>g[0]||0),baseMarks=parseRosterBaseMarks(block),lineMarks=transformLineMarks(lineGroups,baseMarks),lineMarkGroups=makeLineMarkGroups(lineGroups,lineMarks);
+   let line1Key=null;for(const g of lineGroups){if(g.length>=2){line1Key=g.join('-');break}}
    
    if(raceName !== "UNKNOWN"){
     races.push({
@@ -962,6 +1031,11 @@ function parseMarkdownForBulk(inputData){
      category,
      raceDate: extractRaceDate(block) || extractRaceDate(inputData),
      line1: line1Key || '',
+     lineHeads,
+     lineGroups,
+     baseMarks,
+     lineMarks,
+     lineMarkGroups,
      rawBlock: block.substring(0, 300)
     });
    }
@@ -978,14 +1052,14 @@ function openBulkInputModal(races){
  const container=$('bulkRaceContainer');container.innerHTML='';
  races.forEach((r,idx)=>{
   const card=document.createElement('div');card.className='border-2 border-cyan-500 rounded-xl p-3 bg-white/90';
-  const line1Display=r.line1?`<div class="text-[10px] text-sky-600 mt-1">ライン①: <b>${escapeHTML(r.line1)}</b></div>`:'';
+  const line1Display=r.line1?`<div class="text-[10px] text-sky-600 mt-1">ライン①: <b>${escapeHTML(r.line1)}</b></div>`:'';const headsDisplay=(r.lineHeads||[]).length?`<div class="text-[10px] text-cyan-700 mt-1">先頭車番①〜④: <b>${escapeHTML(r.lineHeads.join(' / '))}</b></div>`:'';const marksDisplay=(r.lineMarkGroups||[]).length?`<div class="text-[10px] text-violet-700 mt-1">変換後の印: <b>${r.lineMarkGroups.map(g=>(g.marks||[]).map(m=>m||'—').join('-')).map(escapeHTML).join(' / ')}</b></div>`:'';
   card.innerHTML=`
    <div class="flex justify-between items-center gap-2"><div class="font-black text-lg text-sky-900">${escapeHTML(r.venue)} ${escapeHTML(r.raceName)}</div><div class="text-xs font-bold text-sky-700">${escapeHTML(r.category)}</div></div>
-   ${line1Display}
+   ${line1Display}${headsDisplay}${marksDisplay}
    <div class="mt-2"><label class="block text-[10px] font-bold mb-1">開催日（自動取得できない場合は入力）</label><input type="date" id="bulk_date_${idx}" class="modal-field" value="${escapeHTML(r.raceDate||'')}"></div>
    <div class="text-[11px] text-slate-600 mt-2">着順・2連単配当・3連単配当は登録後に手動入力できます。</div>
    <input type="hidden" id="bulk_venue_${idx}" value="${escapeHTML(r.venue)}"><input type="hidden" id="bulk_race_${idx}" value="${escapeHTML(r.raceName)}">
-   <input type="hidden" id="bulk_cat_${idx}" value="${escapeHTML(r.category)}"><input type="hidden" id="bulk_line1_${idx}" value="${escapeHTML(r.line1||'')}">`;
+   <input type="hidden" id="bulk_cat_${idx}" value="${escapeHTML(r.category)}"><input type="hidden" id="bulk_line1_${idx}" value="${escapeHTML(r.line1||'')}"><input type="hidden" id="bulk_lineHeads_${idx}" value="${escapeHTML(JSON.stringify(r.lineHeads||[]))}"><input type="hidden" id="bulk_lineGroups_${idx}" value="${escapeHTML(JSON.stringify(r.lineGroups||[]))}"><input type="hidden" id="bulk_baseMarks_${idx}" value="${escapeHTML(JSON.stringify(r.baseMarks||{}))}"><input type="hidden" id="bulk_lineMarks_${idx}" value="${escapeHTML(JSON.stringify(r.lineMarks||{}))}"><input type="hidden" id="bulk_lineMarkGroups_${idx}" value="${escapeHTML(JSON.stringify(r.lineMarkGroups||[]))}">`;
   container.appendChild(card);
  });
  $('bulkInputModal').classList.remove('hidden');$('bulkInputModal').classList.add('flex');
@@ -1000,11 +1074,11 @@ function saveAllBulkRecords(){
  const cards=$('bulkRaceContainer').children;let saved=0,updated=0,skipped=0;
  for(let i=0;i<cards.length;i++){
   const venue=$('bulk_venue_'+i)?.value||'不明',raceName=$('bulk_race_'+i)?.value||'UNKNOWN';
-  const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||'',line1=$('bulk_line1_'+i)?.value||'';
+  const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||'',line1=$('bulk_line1_'+i)?.value||'',lineHeads=(()=>{try{return JSON.parse($('bulk_lineHeads_'+i)?.value||'[]')}catch(e){return []}})(),lineGroups=(()=>{try{return JSON.parse($('bulk_lineGroups_'+i)?.value||'[]')}catch(e){return []}})(),baseMarks=(()=>{try{return JSON.parse($('bulk_baseMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarks=(()=>{try{return JSON.parse($('bulk_lineMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarkGroups=(()=>{try{return JSON.parse($('bulk_lineMarkGroups_'+i)?.value||'[]')}catch(e){return []}})();
   if(raceName==='UNKNOWN'){skipped++;continue}
-  const incoming={venue,raceName,raceDate,category,line1,pattern:'',exacta:'',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,sourceType:'pre-registration',timestamp:Date.now()};
+  const incoming=normalizeRecord({venue,raceName,raceDate,category,line1,lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,pattern:'',exacta:'',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,sourceType:'pre-registration',timestamp:Date.now()});
   const idx=savedRecords.findIndex(r=>recordKey(r)===recordKey(incoming));
-  if(idx>=0){const old=savedRecords[idx];savedRecords[idx]={...old,venue,raceName,raceDate,category,line1:line1||old.line1||'',timestamp:old.timestamp||Date.now()};updated++;}
+  if(idx>=0){const old=savedRecords[idx];savedRecords[idx]=normalizeRecord({...old,venue,raceName,raceDate,category,line1:line1||old.line1||'',lineHeads:lineHeads.some(Boolean)?lineHeads:(old.lineHeads||[]),lineGroups:lineGroups.length?lineGroups:(old.lineGroups||[]),baseMarks:Object.keys(baseMarks).length?baseMarks:(old.baseMarks||{}),lineMarks:Object.keys(lineMarks).length?lineMarks:(old.lineMarks||{}),lineMarkGroups:lineMarkGroups.length?lineMarkGroups:(old.lineMarkGroups||[]),timestamp:old.timestamp||Date.now()});updated++;}
   else{savedRecords.push(incoming);saved++;}
  }
  if(saved||updated){persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> 事前登録完了：新規 ${saved}件／既存更新 ${updated}件／対象外 ${skipped}件。着順・配当は未入力で保存しました。`,'success');closeBulkInputModal();playBeep(880,'sine',.2);}
@@ -1039,7 +1113,7 @@ function saveBatchEdit(){
   const a=val('c1'),b=val('c2'),c=val('c3'),any=[a,b,c].some(x=>x!==''),nums=[a,b,c].map(Number);
   if(any&&!(a!==''&&b!==''&&c!==''&&nums.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(nums).size===3)){alert(`${r.venue||''} ${r.raceName||''}：着順は1〜3着を重複なく入力してください。`);return;}
   if(any)r.pattern=nums.join('-');
-  const p2=val('p2'),p3=val('p3');if(p2!=='')r.payout2ren=Math.max(0,Number(p2)||0);if(p3!=='')r.payout=Math.max(0,Number(p3)||0);
+  const p2=val('p2'),p3=val('p3');if(p2!=='')r.payout2ren=Math.max(0,Number(p2)||0);if(p3!=='')r.payout=Math.max(0,Number(p3)||0);Object.assign(r,normalizeRecord(r));
   updated++;
  }
  persist();updateCountDisplay();runAnalysis();renderRecordManager();$('batchEditPanel').classList.add('hidden');logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
@@ -1120,7 +1194,7 @@ function bindUserHub(){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
- bindUserHub();initUserSettings();writeBackup('起動時バックアップ');bind('openBatchEditBtn',openBatchEdit);bind('closeBatchEditBtn',()=>$('batchEditPanel').classList.add('hidden'));bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);
+ bindUserHub();initUserSettings();writeBackup('起動時バックアップ');bind('openBatchEditBtn',openBatchEdit);bind('closeBatchEditBtn',()=>$('batchEditPanel').classList.add('hidden'));bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('trickClass')?.addEventListener('change',renderMarkJsonComparison);$('lowPayoutThreshold')?.addEventListener('change',renderMarkJsonComparison);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);
  $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);$('recordSearch').addEventListener('input',renderRecordManager);$('recordStatus').addEventListener('change',renderRecordManager);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
  document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.id!=='audioToggleBtn'&&!b.disabled)playBeep(680,'sine',.045,.018);});
@@ -1166,36 +1240,69 @@ function makeRace(row){
  const category=girls?'ガールズ':(n>=5&&n<=9?`${n}車`:'不明');
  const lines=splitLines(row.lines);
  if(!lines.length||!lines.some(g=>g.length>=2))return null; // 全員単騎だけ除外
- const marks={};Object.entries(markMap).forEach(([key,sym])=>{const car=Number(row[key]);if(car>=1&&car<=9)marks[car]=sym;});
- return {date:String(row.date||row.raceDate||''),category,lines,heads:lines.map(g=>g[0]).filter(n=>n>=1&&n<=9),marks,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0};
+ const marks={};for(let car=1;car<=9;car++){const v=String(row['mark_'+car]||'').trim();if(v)marks[car]=v;}if(!Object.keys(marks).length){Object.entries(markMap).forEach(([key,sym])=>{const car=Number(row[key]);if(car>=1&&car<=9)marks[car]=sym;});Object.assign(marks,transformLineMarks(lines,marks));}
+ const result=String(row.result||'').split(/[-\s>→]+/).map(Number).filter(n=>n>=1&&n<=9).slice(0,3);
+ return {date:String(row.date||row.raceDate||''),category,lines,heads:lines.map(g=>g[0]).filter(n=>n>=1&&n<=9),marks,lineMarks:marks,result,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0};
 }
 // 指定された組み合わせ条件。車番の順序は区別しない。
 function allowedHeadPair(a,b){if(a===b)return false;const x=Math.min(a,b),y=Math.max(a,b);return !(x===1&&(y===2||y===3));}
 function pairKey(a,b){return [a,b].sort((x,y)=>x-y).join('－');}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function loadCSV(file){const reader=new FileReader();reader.onload=()=>{try{const rows=parseCSV(String(reader.result||''));const mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));$t('trickCsvStatus').textContent=`読込成功：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース（全員単騎・分類不明を除外）`;$t('trickSummary').innerHTML='';$t('trickResults').innerHTML='<div class="discovery-card text-center text-sky-700 text-xs">読み込み完了。組み合わせ分析を実行してください。</div>'; }catch(e){$t('trickCsvStatus').textContent='CSV読込エラー：列名・文字コードを確認してください。';console.error(e);}};reader.onerror=()=>{$t('trickCsvStatus').textContent='ファイルを読み込めませんでした。';};reader.readAsText(file,'UTF-8');}
+function renderMarkJsonComparison(){
+ const host=$t('trickMarkJsonCompare');if(!host)return;
+ if(!trickRows.length){host.innerHTML='<div class="discovery-card text-xs">CSVを読み込んでください。</div>';return;}
+ const cls=$t('trickClass')?.value||'MEN_ALL',threshold=Number($t('lowPayoutThreshold')?.value)||10000;
+ const csv=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0);
+ const live=savedRecords.filter(r=>(cls==='MEN_ALL'?(r.category||'9車')!=='ガールズ':(r.category||'9車')===cls)&&Number(r.payout)>0&&Array.isArray(r.lineGroups)&&r.lineGroups.length>=2&&r.lineMarks);
+ const collect=(rows,isLive)=>{
+  const map=new Map();
+  rows.forEach(r=>{
+   const groups=isLive?r.lineGroups:r.lines,marks=isLive?r.lineMarks:(r.lineMarks||r.marks||{}),payout=Number(isLive?r.payout:r.p3)||0;
+   if(!Array.isArray(groups)||!payout)return;
+   for(let i=0;i<groups.length;i++)for(let j=i+1;j<groups.length;j++){
+    const a=groups[i]||[],b=groups[j]||[];if(a.length<2||b.length<2)continue;
+    const sig=`${i+1}×${j+1}｜${a.map(n=>marks[n]||'').join('－')} ／ ${b.map(n=>marks[n]||'').join('－')}`;
+    if(!map.has(sig))map.set(sig,{sig,count:0,under:0,sum:0});const z=map.get(sig);z.count++;z.sum+=payout;if(payout<=threshold)z.under++;
+   }
+  });return map;
+ };
+ const cm=collect(csv,false),lm=collect(live,true),rows=[];
+ for(const [sig,c] of cm){const l=lm.get(sig);if(!l)continue;rows.push({sig,cCount:c.count,lCount:l.count,cRate:c.under/c.count*100,lRate:l.under/l.count*100,cAvg:c.sum/c.count,lAvg:l.sum/l.count,diff:(l.under/l.count-c.under/c.count)*100});}
+ rows.sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff));
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const body=rows.slice(0,30).map(x=>`<div class="discovery-card"><div class="text-[11px] font-bold text-violet-900 mb-2">${esc(x.sig)}</div><div class="grid grid-cols-2 gap-2 text-[10px]"><div><b>過去CSV</b><br>${x.cCount.toLocaleString()}件／1万円以下 ${(x.cRate).toFixed(1)}%<br>平均 ${fmt(x.cAvg)}</div><div><b>直近JSON</b><br>${x.lCount.toLocaleString()}件／1万円以下 ${(x.lRate).toFixed(1)}%<br>平均 ${fmt(x.lAvg)}</div></div><div class="mt-2 text-[11px] font-bold ${x.diff>=0?'text-rose-700':'text-sky-800'}">1万円以下率の差：${x.diff>=0?'+':''}${x.diff.toFixed(1)}ポイント</div></div>`).join('');
+ host.innerHTML=`<div class="grid grid-cols-2 gap-2 mb-2"><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">CSV対象</div><div class="font-mono-tech text-lg font-bold">${csv.length.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">JSON対象</div><div class="font-mono-tech text-lg font-bold">${live.length.toLocaleString()}件</div></div></div>${body||'<div class="discovery-card text-xs">同じ印並びで比較できるデータがまだありません。直近JSONに結果配当を入力すると比較対象になります。</div>'}`;
+}
 function runTrick(){
  if(!trickRows.length){$t('trickResults').innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';return;}
  const cls=$t('trickClass').value,type=$t('trickPayoutType').value;
  const allData=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls));
  const payoutRows=allData.map(r=>({...r,payout:type==='tri_yen'?r.p3:r.p2})).filter(r=>Number.isFinite(r.payout)&&r.payout>0);
- const stats=new Map(), markStats=new Map();
+ const stats=new Map(), positionMarkStats=new Map();
  payoutRows.forEach(r=>{
   const heads=[...new Set(r.heads)];
   for(let i=0;i<heads.length;i++)for(let j=i+1;j<heads.length;j++){
    const a=heads[i],b=heads[j];if(!allowedHeadPair(a,b))continue;
-   const key=pairKey(a,b), lo=Math.min(a,b), hi=Math.max(a,b);
+   const key=pairKey(a,b),lo=Math.min(a,b),hi=Math.max(a,b);
    if(!stats.has(key))stats.set(key,{pair:key,a:lo,b:hi,count:0,sum:0,min:Infinity,max:0});
    const g=stats.get(key);g.count++;g.sum+=r.payout;g.min=Math.min(g.min,r.payout);g.max=Math.max(g.max,r.payout);
-   const lineA=r.lines.find(line=>line[0]===lo),lineB=r.lines.find(line=>line[0]===hi);
-   if(!lineA||!lineB)continue;
-   const markOf=n=>r.marks[n]||'無';
-   const headSig=`${lo}番:${markOf(lo)} × ${hi}番:${markOf(hi)}`;
-   const lineSig=`${lo}番[${lineA.map(markOf).join('－')}] ／ ${hi}番[${lineB.map(markOf).join('－')}]`;
-   if(!markStats.has(key))markStats.set(key,{head:new Map(),lines:new Map()});
-   const ms=markStats.get(key);
-   for(const [map,sig] of [[ms.head,headSig],[ms.lines,lineSig]]){if(!map.has(sig))map.set(sig,{sig,count:0,sum:0});const z=map.get(sig);z.count++;z.sum+=r.payout;}
   }
+  const markOf=n=>r.marks[n]||'';
+  const posPairs=[[0,1,'ライン① × ②'],[0,2,'ライン① × ③'],[1,2,'ライン② × ③']];
+  posPairs.forEach(([pi,pj,label])=>{
+   const lineA=r.lines[pi],lineB=r.lines[pj];
+   if(!lineA||!lineB||lineA.length<2||lineB.length<2)return;
+   const posKey=`${pi}-${pj}`;
+   if(!positionMarkStats.has(posKey))positionMarkStats.set(posKey,{label,head:new Map(),lines:new Map()});
+   const ms=positionMarkStats.get(posKey);
+   const headSig=`${lineA[0]}番:${markOf(lineA[0])||'—'} × ${lineB[0]}番:${markOf(lineB[0])||'—'}`;
+   const lineSig=`${lineA.map(markOf).join('－')} ／ ${lineB.map(markOf).join('－')}`;
+   for(const [map,sig] of [[ms.head,headSig],[ms.lines,lineSig]]){
+    if(!map.has(sig))map.set(sig,{sig,count:0,sum:0});
+    const z=map.get(sig);z.count++;z.sum+=r.payout;
+   }
+  });
  });
  const pairs=[...stats.values()].map(g=>({...g,avg:g.sum/g.count}));
  const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
@@ -1210,15 +1317,101 @@ function runTrick(){
   html+=`<div class="discovery-card"><div class="flex items-center justify-between mb-2"><h3 class="font-bold text-sky-900">車番 ${car} を含む組み合わせ</h3><span class="text-[10px] text-slate-500">${related.length}ペア</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-sky-50 p-2"><div class="text-[11px] font-bold text-sky-800 mb-1">平均配当が安い 3組</div>${render(cheap,'該当する組み合わせなし')}</div><div class="rounded-lg bg-amber-50 p-2"><div class="text-[11px] font-bold text-amber-800 mb-1">平均配当が高い 3組</div>${render(expensive,'該当する組み合わせなし')}</div></div></div>`;
  }
  $t('trickResults').innerHTML=html;
- const markFmt=(arr)=>arr.length?arr.map((g,i)=>`<div class="flex items-start justify-between gap-2 border-b border-violet-100 py-1.5 last:border-0"><span class="text-[11px] font-semibold text-slate-700">${i+1}. ${esc(g.sig)}</span><span class="shrink-0 text-right"><b class="text-slate-900">${fmt(g.avg)}</b><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">該当なし</div>';
+ const minMarkCount=Math.max(1,Number($t('markPatternMinCount')?.value)||10);
+ const markFmt=(arr)=>arr.length?arr.map((g,i)=>`<div class="flex items-start justify-between gap-2 border-b border-violet-100 py-1.5 last:border-0"><span class="text-[11px] font-semibold text-slate-700">${i+1}. ${esc(g.sig)}</span><span class="shrink-0 text-right"><b class="text-slate-900">${fmt(g.avg)}</b><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">最低件数を満たすパターンなし</div>';
  const markCards=[];
- for(const [key,ms] of markStats){
-  const renderSide=(map,low)=>{const arr=[...map.values()].filter(x=>x.count>=2).map(x=>({...x,avg:x.sum/x.count}));arr.sort((a,b)=>low?(a.avg-b.avg||b.count-a.count):(b.avg-a.avg||b.count-a.count));return markFmt(arr.slice(0,3));};
-  markCards.push(`<div class="discovery-card"><h4 class="font-bold text-violet-900 mb-2">車番ペア ${key}</h4><div class="grid grid-cols-1 lg:grid-cols-2 gap-3"><section class="rounded-lg bg-violet-50 p-2"><div class="font-bold text-[11px] text-violet-900 mb-1">先頭2人の印の関係</div><div class="text-[10px] text-slate-500 mb-1">${key.split('－')[0]}番の印 × ${key.split('－')[1]}番の印</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.head,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.head,false)}</div></div></section><section class="rounded-lg bg-slate-50 p-2"><div class="font-bold text-[11px] text-slate-800 mb-1">2ライン全員の印の並び</div><div class="text-[10px] text-slate-500 mb-1">ライン内の順番を保持して集計</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.lines,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.lines,false)}</div></div></section></div></div>`);
+ for(const [posKey,ms] of positionMarkStats){
+  const renderSide=(map,low)=>{const arr=[...map.values()].filter(x=>x.count>=minMarkCount).map(x=>({...x,avg:x.sum/x.count}));arr.sort((a,b)=>low?(a.avg-b.avg||b.count-a.count):(b.avg-a.avg||b.count-a.count));return markFmt(arr.slice(0,3));};
+  markCards.push(`<div class="discovery-card"><h4 class="font-bold text-violet-900 mb-2">${ms.label}</h4><div class="grid grid-cols-1 lg:grid-cols-2 gap-3"><section class="rounded-lg bg-violet-50 p-2"><div class="font-bold text-[11px] text-violet-900 mb-1">両ライン先頭2人の印の関係</div><div class="text-[10px] text-slate-500 mb-1">先頭車番の印をライン順に比較</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.head,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.head,false)}</div></div></section><section class="rounded-lg bg-slate-50 p-2"><div class="font-bold text-[11px] text-slate-800 mb-1">2ライン全員の印の並び</div><div class="text-[10px] text-slate-500 mb-1">各ライン内の順番を保持</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.lines,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.lines,false)}</div></div></section></div><div class="text-[10px] text-slate-500 mt-2">最低出現数：${minMarkCount}件以上</div></div>`);
  }
  $t('trickMarkResults').innerHTML=markCards.length?markCards.join(''):'<div class="discovery-card text-xs">印の組み合わせデータがありません。</div>';
+ renderMarkJsonComparison();
 }
-document.addEventListener('DOMContentLoaded',()=>{const f=$t('trickCsvInput'),b=$t('trickRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);});
+function runLowPayoutHeadPairs(){
+ const out=$t('lowPayoutResults'),summary=$t('lowPayoutSummary');
+ if(!trickRows.length){out.innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';summary.innerHTML='';return;}
+ const cls=$t('trickClass').value;
+ const threshold=Math.max(1,Number($t('lowPayoutThreshold').value)||10000);
+ const minCount=Math.max(1,Math.floor(Number($t('lowPayoutMinCount').value)||20));
+ const rows=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0);
+ const positions=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+ const labels=['ライン① × ②','ライン① × ③','ライン① × ④','ライン② × ③','ライン② × ④','ライン③ × ④'];
+ const stats=positions.map(()=>new Map());
+ let eligible=0,used=0;
+ rows.forEach(r=>{
+  // 単騎を除き、先頭車番が明確なラインだけを分析対象にする
+  const lines=(r.lines||[]).slice(0,4).map(g=>Array.isArray(g)&&g.length>=2&&Number.isInteger(g[0])&&g[0]>=1&&g[0]<=9?g:null);
+  if(lines.filter(Boolean).length<2)return;
+  eligible++;
+  positions.forEach(([i,j],idx)=>{
+   const a=lines[i]?.[0],b=lines[j]?.[0];
+   if(!a||!b||a===b)return;
+   const key=`${a}－${b}`;
+   if(!stats[idx].has(key))stats[idx].set(key,{key,a,b,count:0,under:0,over:0,sum:0,min:Infinity,max:0});
+   const g=stats[idx].get(key);g.count++;g.sum+=r.p3;g.min=Math.min(g.min,r.p3);g.max=Math.max(g.max,r.p3);
+   if(r.p3<=threshold)g.under++;else g.over++;
+   used++;
+  });
+ });
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const summaryData=[['対象クラス',cls==='MEN_ALL'?'男子・全車立て':cls],['配当入力済',rows.length.toLocaleString()+'件'],['ラインペア対象',eligible.toLocaleString()+'R／'+used.toLocaleString()+'件'],['基準以下',fmt(threshold)]];
+ summary.innerHTML=summaryData.map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-emerald-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold text-emerald-900">${v}</div></div>`).join('');
+ const cards=stats.map((map,idx)=>{
+  const all=[...map.values()].map(g=>({...g,rate:g.under/g.count*100,avg:g.sum/g.count}));
+  const ranked=all.filter(g=>g.count>=minCount).sort((a,b)=>b.rate-a.rate||b.count-a.count||a.avg-b.avg);
+  const top=ranked.slice(0,20);
+  const table=top.length?`<div class="overflow-x-auto"><table class="w-full text-xs"><thead><tr class="text-left border-b border-emerald-200"><th class="p-2">先頭車番</th><th class="p-2 text-right">出現数</th><th class="p-2 text-right">1万円以下</th><th class="p-2 text-right">割合</th><th class="p-2 text-right">平均配当</th></tr></thead><tbody>${top.map(g=>`<tr class="border-b border-slate-100"><td class="p-2 font-bold">${g.key}</td><td class="p-2 text-right">${g.count.toLocaleString()}件</td><td class="p-2 text-right">${g.under.toLocaleString()}件</td><td class="p-2 text-right font-black text-emerald-800">${g.rate.toFixed(1)}%</td><td class="p-2 text-right">${fmt(g.avg)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="text-xs text-slate-500 py-3">最低出現数を満たす組み合わせがありません。</div>';
+  return `<div class="discovery-card"><div class="flex flex-wrap justify-between items-center gap-2 mb-2"><h3 class="font-bold text-emerald-900">${labels[idx]}</h3><span class="text-[10px] text-slate-500">組み合わせ ${all.length}種／${all.reduce((n,g)=>n+g.count,0).toLocaleString()}件</span></div>${table}</div>`;
+ }).join('');
+ out.innerHTML=rows.length?cards:'<div class="discovery-card text-xs">選択したクラスに3連単配当入力済みのレースがありません。</div>';
+ renderRecentHeadPairComparison(cls,threshold,minCount,stats,labels);
+}
+function renderRecentHeadPairComparison(cls,threshold,minCount,csvStats,labels){
+ const host=$t('lowPayoutRecentCompare');if(!host)return;
+ const live=savedRecords.filter(r=>(cls==='MEN_ALL'?(r.category||'9車')!=='ガールズ':(r.category||'9車')===cls)&&Number(r.payout)>0&&Array.isArray(r.lineHeads)&&r.lineHeads.length>=2);
+ const positions=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]],maps=positions.map(()=>new Map());
+ live.forEach(r=>{const heads=r.lineHeads||[];positions.forEach(([i,j],idx)=>{const a=Number(heads[i])||0,b=Number(heads[j])||0;if(!a||!b||a===b)return;const key=`${a}－${b}`;if(!maps[idx].has(key))maps[idx].set(key,{count:0,under:0,sum:0});const g=maps[idx].get(key);g.count++;g.sum+=Number(r.payout);if(Number(r.payout)<=threshold)g.under++;});});
+ const names=labels||['ライン① × ②','ライン① × ③','ライン① × ④','ライン② × ③','ライン② × ④','ライン③ × ④'];
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP');let html='';
+ positions.forEach((pos,idx)=>{const all=new Set([...(csvStats[idx]?.keys()||[]),...(maps[idx]?.keys()||[])]);const rows=[...all].map(key=>{const c=csvStats[idx]?.get(key)||{count:0,under:0,sum:0};const l=maps[idx].get(key)||{count:0,under:0,sum:0};return {key,c,l,cr:c.count?c.under/c.count*100:null,lr:l.count?l.under/l.count*100:null,d:c.count&&l.count?(l.under/l.count-c.under/c.count)*100:null};}).filter(x=>x.c.count||x.l.count).sort((a,b)=>(Math.abs(b.d??-999)-Math.abs(a.d??-999))||b.l.count-a.l.count).slice(0,30);
+  html+=`<div class="discovery-card"><div class="font-bold text-cyan-900 mb-2">${names[idx]}</div><div class="overflow-x-auto"><table class="w-full text-[11px]"><thead><tr class="border-b border-cyan-100 text-left"><th class="p-1">先頭ペア</th><th class="p-1 text-right">CSV 件数</th><th class="p-1 text-right">CSV率</th><th class="p-1 text-right">直近件数</th><th class="p-1 text-right">直近率</th><th class="p-1 text-right">差</th></tr></thead><tbody>${rows.map(x=>`<tr class="border-b border-slate-100"><td class="p-1 font-bold">${x.key}</td><td class="p-1 text-right">${fmt(x.c.count)}</td><td class="p-1 text-right">${x.cr===null?'—':x.cr.toFixed(1)+'%'}</td><td class="p-1 text-right">${fmt(x.l.count)}</td><td class="p-1 text-right">${x.lr===null?'—':x.lr.toFixed(1)+'%'}</td><td class="p-1 text-right font-bold">${x.d===null?'—':(x.d>0?'+':'')+x.d.toFixed(1)+'pt'}</td></tr>`).join('')}</tbody></table></div></div>`;
+ });
+ host.innerHTML=`<div class="grid grid-cols-2 gap-2 mb-2"><div class="discovery-card"><div class="text-[9px] text-cyan-700 font-bold">直近JSON・配当入力済</div><div class="font-mono-tech text-lg font-bold">${live.length.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-cyan-700 font-bold">ライン情報あり</div><div class="font-mono-tech text-lg font-bold">${live.filter(r=>r.lineHeads?.some(Boolean)).length.toLocaleString()}件</div></div></div>${html||'<div class="discovery-card text-xs">比較できる組み合わせがありません。</div>'}`;
+}
+
+function runProductMarkLab(){
+ const out=$t('productMarkResults'),summary=$t('productMarkSummary');
+ if(!trickRows.length){out.innerHTML='<div class="discovery-card text-center">先に上の分析CSVを読み込んでください。</div>';summary.innerHTML='';return;}
+ const cls=$t('trickClass').value,size=Number($t('productBucketSize').value)||50,threshold=Number($t('productHighThreshold').value)||10000,minCount=Number($t('productMinCount').value)||3;
+ const source=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.result?.length===3&&r.p3>0);
+ const buckets=new Map();let valid=0;
+ for(const r of source){
+  const [a,b,c]=r.result,product=a*b*c;if(!Number.isFinite(product)||product<=0)continue;
+  const start=Math.floor((product-1)/size)*size+1,end=start+size-1,key=`${start}－${end}`;
+  const sig=[a,b,c].map(n=>r.marks[n]||'').join('－');
+  if(!buckets.has(key))buckets.set(key,{start,end,total:0,sum:0,high:0,patterns:new Map(),products:new Set()});
+  const g=buckets.get(key);g.total++;g.sum+=r.p3;if(r.p3>=threshold)g.high++;g.products.add(product);valid++;
+  if(!g.patterns.has(sig))g.patterns.set(sig,{sig,count:0,sum:0,high:0,products:new Set()});
+  const p=g.patterns.get(sig);p.count++;p.sum+=r.p3;if(r.p3>=threshold)p.high++;p.products.add(product);
+ }
+ const groups=[...buckets.values()].sort((a,b)=>a.start-b.start);
+ const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const avgDiff=g=>{const p=[...g.patterns.values()].filter(x=>x.count>=minCount);if(p.length<2)return 0;const av=p.map(x=>x.sum/x.count);return Math.max(...av)-Math.min(...av);};
+ const ranked=groups.filter(g=>[...g.patterns.values()].filter(x=>x.count>=minCount).length>=2).sort((a,b)=>avgDiff(b)-avgDiff(a));
+ summary.innerHTML=[['3連単対象',valid.toLocaleString()+'件'],['積の範囲',groups.length.toLocaleString()+'区分'],['印比較可能',ranked.length.toLocaleString()+'区分'],['高配当基準',fmt(threshold)]].map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-sky-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold text-sky-900">${v}</div></div>`).join('');
+ if(!valid){out.innerHTML='<div class="discovery-card text-xs">対象クラスに、着順3車番と3連単配当がそろったデータがありません。</div>';return;}
+ const renderPatterns=(arr)=>arr.length?arr.map((p,i)=>`<div class="flex items-start justify-between gap-2 border-b border-slate-200 py-1.5 last:border-0"><span class="text-[11px] font-semibold text-slate-700">${i+1}. ${esc(p.sig)}<small class="block text-[10px] text-slate-500">積値 ${[...p.products].sort((a,b)=>a-b).join(', ')}</small></span><span class="shrink-0 text-right"><b class="text-slate-900">${fmt(p.sum/p.count)}</b><small class="block text-[10px] text-slate-500">${p.count}件／高配当 ${p.high}件 (${(p.high/p.count*100).toFixed(1)}%)</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">最低件数を満たす印パターンが2種類未満です。</div>';
+ const display=ranked.slice(0,20);
+ let html='';
+ for(const g of display){
+  const pats=[...g.patterns.values()].filter(p=>p.count>=minCount).map(p=>({...p,avg:p.sum/p.count}));
+  const low=pats.slice().sort((a,b)=>a.avg-b.avg||b.count-a.count).slice(0,3),high=pats.slice().sort((a,b)=>b.avg-a.avg||b.count-a.count).slice(0,3);
+  const avg=g.sum/g.total;
+  html+=`<div class="discovery-card"><div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h3 class="font-bold text-fuchsia-900">車番積 ${g.start}～${g.end}</h3><span class="text-[10px] text-slate-500">${g.total}レース／平均 ${fmt(avg)}／高配当率 ${(g.high/g.total*100).toFixed(1)}%</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-sky-50 p-2"><div class="text-[11px] font-bold text-sky-800 mb-1">この積範囲で平均配当が低い印 3種</div>${renderPatterns(low)}</div><div class="rounded-lg bg-amber-50 p-2"><div class="text-[11px] font-bold text-amber-800 mb-1">この積範囲で平均配当が高い印 3種</div>${renderPatterns(high)}</div></div></div>`;
+ }
+ out.innerHTML=html||'<div class="discovery-card text-xs">最低件数を満たす印パターンが2種類以上ある積範囲がありません。範囲幅を広げるか、最低件数を下げてください。</div>';
+}
+document.addEventListener('DOMContentLoaded',()=>{const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);});
 })();
 </script>
 
