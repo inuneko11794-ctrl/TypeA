@@ -530,8 +530,10 @@ function parseLineGroupsFromText(text){
  const row=String(text||'').match(/^\s*\|\s*並び予想\s*\|\s*(.+)$/m);
  if(!row)return [];
  // 注記「（各[ ]が1ライン、左端が先頭）」などを除去してからグループを抽出
+ // 単騎（1車のみのグループ）はラインに含めない
  let content=row[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'').trim();
- return (content.match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)).filter(arr=>arr.length>0);
+ const rawGroups=(content.match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)).filter(arr=>arr.length>0);
+ return rawGroups.filter(arr=>arr.length>=2);
 }
 function parseRosterBaseMarks(block){
  const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
@@ -580,9 +582,10 @@ function makeHeadPairs(lineHeads){
  return pairs;
 }
 function enrichRecord(r){
- const lineHeads=Array.isArray(r.lineHeads)?r.lineHeads.slice(0,4).map(Number):[];
- const normalizedHeads=lineHeads.length?lineHeads:(r.line1?[[Number(String(r.line1).split('-')[0])||0]] .flat().slice(0,1):[]);
- const lineGroups=Array.isArray(r.lineGroups)?r.lineGroups.map(g=>Array.isArray(g)?g.map(Number):[]):[];
+ const lineGroups=Array.isArray(r.lineGroups)?r.lineGroups.map(g=>Array.isArray(g)?g.map(Number):[]).filter(g=>g.length>=2):[];
+ const lineHeadsFromGroups=lineGroups.slice(0,4).map(g=>g[0]||0);
+ const lineHeads=lineHeadsFromGroups.some(Boolean)?lineHeadsFromGroups:(Array.isArray(r.lineHeads)?r.lineHeads.slice(0,4).map(Number):[]);
+ const normalizedHeads=lineHeads.length?lineHeads:(r.line1?[[Number(String(r.line1).split('-')[0])||0]].flat().slice(0,1):[]);
  const baseMarks=r.baseMarks&&typeof r.baseMarks==='object'?{...r.baseMarks}:{};
  const lineMarks=r.lineMarks&&typeof r.lineMarks==='object'?{...r.lineMarks}:transformLineMarks(lineGroups,baseMarks);
  const lineMarkGroups=Array.isArray(r.lineMarkGroups)&&r.lineMarkGroups.length?r.lineMarkGroups:makeLineMarkGroups(lineGroups,lineMarks);
@@ -590,6 +593,118 @@ function enrichRecord(r){
  return {...r,lineHeads:normalizedHeads,headPairs:makeHeadPairs(normalizedHeads),lineGroups,baseMarks,lineMarks,lineMarkGroups,payoutThreshold:threshold,payoutUnder10000:payout>0?payout<=threshold:null};
 }
 const normalizeRecord = r => enrichRecord({...r,payout:Number(r.payout)||0,payout2ren:Number(r.payout2ren)||0});
+
+// ===== SCORING & RECOMMENDATION SYSTEM =====
+const SCORE_KEY = 'bbkScoringV1';
+const DEFAULT_MARK_SCORES = {'◎':120,'◯':90,'△':65,'✕':40,'⑳':100,'●':75,'▲':55,'✖':30,'☆':50,'★':35,'':15};
+function loadScores(){
+  try{return JSON.parse(localStorage.getItem(SCORE_KEY)||'{}')}catch(e){return {}}
+}
+function saveScores(s){try{localStorage.setItem(SCORE_KEY,JSON.stringify(s))}catch(e){}}
+function getMarkScore(mark){
+  const scores=loadScores();
+  const base=DEFAULT_MARK_SCORES[mark]||DEFAULT_MARK_SCORES['']||15;
+  const hist=scores.marks?.[mark];
+  if(hist && hist.trials>=5){
+    const rate=hist.hits/hist.trials;
+    return Math.round(base * (0.7 + rate*0.6)); // 70-130% of base
+  }
+  return base;
+}
+function scoreCar(car, race){
+  const marks=race.lineMarks||race.baseMarks||{};
+  const mark=String(marks[car]||'');
+  let score=getMarkScore(mark);
+  // Line position bonus
+  const groups=race.lineGroups||[];
+  for(let i=0;i<groups.length;i++){
+    const g=groups[i];
+    const pos=g.indexOf(Number(car));
+    if(pos===0) score+=35; // head
+    else if(pos===1) score+=18;
+    else if(pos===2) score+=8;
+    if(pos>=0) break;
+  }
+  // Historical car score
+  const scores=loadScores();
+  const carHist=scores.cars?.[car];
+  if(carHist && carHist.trials>=8){
+    const rate=carHist.hits/carHist.trials;
+    score=Math.round(score*(0.85+rate*0.3));
+  }
+  return score;
+}
+function generateRecommendations(race){
+  const cars=[];
+  for(let c=1;c<=9;c++) if(race.baseMarks?.[c]||race.lineMarks?.[c]||true) cars.push(c);
+  const scored=cars.map(c=>({car:c,score:scoreCar(c,race)})).sort((a,b)=>b.score-a.score||a.car-b.car);
+  if(!scored.length) return {tan:[],exacta:[],trifecta:[]};
+  const top=scored.slice(0,8);
+  // 単勝2点
+  const tan=top.slice(0,2).map(x=>x.car);
+  // 2連単4点 (top combinations)
+  const exacta=[];
+  for(let i=0;i<Math.min(4,top.length);i++){
+    for(let j=0;j<Math.min(4,top.length);j++){
+      if(i!==j && exacta.length<4) exacta.push(`${top[i].car}-${top[j].car}`);
+    }
+  }
+  // 3連単15点: 頭2車固定 + フォーメーション
+  const heads=top.slice(0,2).map(x=>x.car);
+  const others=top.slice(2,7).map(x=>x.car);
+  const trifecta=[];
+  for(const h of heads){
+    for(const a of others){
+      for(const b of others){
+        if(a!==b && a!==h && b!==h && trifecta.length<15){
+          trifecta.push(`${h}-${a}-${b}`);
+        }
+      }
+    }
+  }
+  // fill if needed
+  while(trifecta.length<15 && top.length>=3){
+    const c=top[trifecta.length%top.length].car;
+    const d=top[(trifecta.length+1)%top.length].car;
+    const e=top[(trifecta.length+2)%top.length].car;
+    if(new Set([c,d,e]).size===3) trifecta.push(`${c}-${d}-${e}`);
+    else break;
+  }
+  return {tan, exacta:exacta.slice(0,4), trifecta:trifecta.slice(0,15)};
+}
+function updateScoresFromResult(record){
+  if(!hasValidResult(record)) return;
+  const [p1,p2,p3]=String(record.pattern).split('-').map(Number);
+  const scores=loadScores();
+  if(!scores.marks) scores.marks={};
+  if(!scores.cars) scores.cars={};
+  const marks=record.lineMarks||record.baseMarks||{};
+  // Update mark scores for 1st place
+  const m1=String(marks[p1]||'');
+  if(!scores.marks[m1]) scores.marks[m1]={hits:0,trials:0};
+  scores.marks[m1].trials++;
+  scores.marks[m1].hits++; // hit if it was 1st
+  // Other marks that appeared but didn't win: slight trial
+  Object.entries(marks).forEach(([car,m])=>{
+    const mc=Number(car);
+    if(mc===p1) return;
+    const key=String(m||'');
+    if(!scores.marks[key]) scores.marks[key]={hits:0,trials:0};
+    scores.marks[key].trials++;
+    // no hit
+  });
+  // Car scores
+  [p1,p2,p3].forEach((c,i)=>{
+    if(!scores.cars[c]) scores.cars[c]={hits:0,trials:0};
+    scores.cars[c].trials++;
+    if(i===0) scores.cars[c].hits++;
+  });
+  scores.updated=Date.now();
+  saveScores(scores);
+  logToTerminal(`> 採点更新: 1着${p1}(印${m1||'—'}) のスコアを反映`,'info');
+}
+// ===========================================
+
 const REAL_VENUES=["函館","青森","いわき平","弥彦","前橋","取手","宇都宮","大宮","西武園","京王閣","立川","松戸","川崎","平塚","小田原","伊東","静岡","豊橋","名古屋","岐阜","大垣","富山","松阪","四日市","福井","奈良","向日町","和歌山","岸和田","玉野","広島","防府","高松","小松島","高知","松山","小倉","久留米","武雄","佐世保","別府","熊本","千葉"];
 const $=id=>document.getElementById(id);
 function bind(id,fn){const el=$(id);if(!el)return;el.addEventListener('click',e=>{e.preventDefault();fn()})}
@@ -629,8 +744,8 @@ function saveManualData(){
  takeUndoSnapshot(editingIndex>=0?'手動編集':'手動登録');
  const rec={venue,raceName:race,raceDate,category,pattern:patternKey,diffPattern:diffPatternKey,diffDisplay,exacta,payout,payout2ren,timestamp:Date.now(),sourceType:has3ren?'manual-result':'manual'};
  let targetIndex=editingIndex;if(targetIndex<0)targetIndex=savedRecords.findIndex(r=>recordKey(r)===recordKey(rec));
- if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]=normalizeRecord({...old,...rec,line1:old.line1||'',lineHeads:old.lineHeads||[]});logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,'success');}
- else{savedRecords.push(normalizeRecord(rec));logToTerminal(`> [手動登録] ${venue} ${race} を保存しました。`,'success');}
+ if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]=normalizeRecord({...old,...rec,line1:old.line1||'',lineHeads:old.lineHeads||[]});logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,'success'); if(has3ren) updateScoresFromResult(savedRecords[targetIndex]);}
+ else{savedRecords.push(normalizeRecord(rec));logToTerminal(`> [手動登録] ${venue} ${race} を保存しました。`,'success'); if(has3ren) updateScoresFromResult(savedRecords[savedRecords.length-1]);}
  editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD';
  persist();updateCountDisplay();runAnalysis();renderRecordManager();
  ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');closeManualModal();
@@ -1134,9 +1249,17 @@ function openBulkInputModal(races){
  races.forEach((r,idx)=>{
   const card=document.createElement('div');card.className='border-2 border-cyan-500 rounded-xl p-3 bg-white/90';
   const line1Display=r.line1?`<div class="text-[10px] text-sky-600 mt-1">ライン①: <b>${escapeHTML(r.line1)}</b></div>`:'';const headsDisplay=(r.lineHeads||[]).length?`<div class="text-[10px] text-cyan-700 mt-1">先頭車番①〜④: <b>${escapeHTML(r.lineHeads.join(' / '))}</b></div>`:'';const marksDisplay=(r.lineMarkGroups||[]).length?`<div class="text-[10px] text-violet-700 mt-1">変換後の印: <b>${r.lineMarkGroups.map(g=>(g.marks||[]).map(m=>m||'—').join('-')).map(escapeHTML).join(' / ')}</b></div>`:'';
+  const recs=generateRecommendations(r);
+  const recHtml=recs.tan.length?`<div class="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-[10px]">
+    <div class="font-bold text-amber-900 mb-1">📊 オススメ買い目（採点連動）</div>
+    <div>単勝2点: <b>${recs.tan.join(' / ')}</b></div>
+    <div>2連単4点: <b>${recs.exacta.join(' / ')}</b></div>
+    <div>3連単15点（頭2固定）: <b class="text-[9px]">${recs.trifecta.slice(0,8).join(' / ')}${recs.trifecta.length>8?' ...':''}</b></div>
+   </div>`:'';
   card.innerHTML=`
    <div class="flex justify-between items-center gap-2"><div class="font-black text-lg text-sky-900">${escapeHTML(r.venue)} ${escapeHTML(r.raceName)}</div><div class="text-xs font-bold text-sky-700">${escapeHTML(r.category)}</div></div>
    ${line1Display}${headsDisplay}${marksDisplay}
+   ${recHtml}
    <div class="mt-2"><label class="block text-[10px] font-bold mb-1">開催日（自動取得できない場合は入力）</label><input type="date" id="bulk_date_${idx}" class="modal-field" value="${escapeHTML(r.raceDate||'')}"></div>
    <div class="text-[11px] text-slate-600 mt-2">着順・2連単配当・3連単配当は登録後に手動入力できます。</div>
    <input type="hidden" id="bulk_venue_${idx}" value="${escapeHTML(r.venue)}"><input type="hidden" id="bulk_race_${idx}" value="${escapeHTML(r.raceName)}">
@@ -1195,6 +1318,7 @@ function saveBatchEdit(){
   if(any&&!(a!==''&&b!==''&&c!==''&&nums.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(nums).size===3)){alert(`${r.venue||''} ${r.raceName||''}：着順は1〜3着を重複なく入力してください。`);return;}
   if(any)r.pattern=nums.join('-');
   const p2=val('p2'),p3=val('p3');if(p2!=='')r.payout2ren=Math.max(0,Number(p2)||0);if(p3!=='')r.payout=Math.max(0,Number(p3)||0);Object.assign(r,normalizeRecord(r));
+  if(hasValidResult(r)) updateScoresFromResult(r);
   updated++;
  }
  persist();updateCountDisplay();runAnalysis();renderRecordManager();$('batchEditPanel').classList.add('hidden');logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
