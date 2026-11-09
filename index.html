@@ -348,6 +348,19 @@ AWAITING COMMAND EXECUTION...</div>
     <div class="md:col-span-3"><button id="perLineRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">各ラインの車番組み合わせ 高低分析</button></div>
    </div>
    <div id="perLineResults" class="space-y-3"><div class="discovery-card text-center text-xs">CSVを読み込み、分析を実行してください。各ライン位置ごとに中央値/平均の上位3・下位3と、位置間比較を表示します。</div></div>
+   <div class="mt-5 border-t-2 border-violet-200 pt-4" id="lineSequenceMatrix">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h3 class="kicker border-l-4 border-violet-500 pl-2">LINE POSITION MATRIX ①②③④ // ライン先頭・全並びパターン</h3><span class="discovery-chip">ORDERED LINE PATTERN</span></div>
+    <p class="text-xs text-sky-800 mb-3">単騎を除いた後のライン①②③④について、先頭車番の並びとライン全体の並びを別々に集計します。①1・②4・③7と、①4・②1・③7は別パターンです。平均だけでなく中央値、高配当率、低配当率も比較します。</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 items-end mb-3">
+     <div><label class="block text-[10px] font-bold text-violet-800 mb-1">高配当基準（円）</label><input id="lineMatrixHigh" class="field !py-2 text-xs" type="number" min="1" step="1000" value="10000"></div>
+     <div><label class="block text-[10px] font-bold text-violet-800 mb-1">低配当基準（円）</label><input id="lineMatrixLow" class="field !py-2 text-xs" type="number" min="1" step="100" value="2000"></div>
+     <div><label class="block text-[10px] font-bold text-violet-800 mb-1">最低出現数</label><input id="lineMatrixMin" class="field !py-2 text-xs" type="number" min="1" step="5" value="10"></div>
+     <div><button id="lineMatrixRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">ライン並びパターン分析</button></div>
+    </div>
+    <div id="lineMatrixSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+    <div id="lineMatrixResults" class="space-y-3"><div class="discovery-card text-xs">CSVを読み込んで分析を実行してください。ライン先頭の組み合わせと、後ろの車番まで含めた全並びをそれぞれ調べます。</div></div>
+    <p class="text-[10px] text-slate-500 mt-3">※単騎はライン数・位置番号・パターンのすべてから除外。2車以上のラインだけをCSV記載順に①②③④へ割り当てます。配当0円・未入力は率の分母に含めません。最低出現数未満のパターンは参考表示のみです。</p>
+   </div>
   </div>
  </div>
 </section>
@@ -1296,8 +1309,8 @@ function makeRace(row){
  const girls=String(row.dai||'').toUpperCase()==='G'||String(row.gl||'').startsWith('G')||/ガールズ|L級/.test(String(row.race_class||''));
  const n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
  const category=girls?'ガールズ':(n>=5&&n<=9?`${n}車`:'不明');
- const lines=splitLines(row.lines);
- if(!lines.length||!lines.some(g=>g.length>=2))return null; // 全員単騎だけ除外
+ const lines=splitLines(row.lines).filter(g=>g.length>=2); // 単騎はライン位置①②③④に含めない
+ if(!lines.length)return null;
  const marks={};Object.entries(markMap).forEach(([key,sym])=>{const n=Number(row[key]);if(n>=1&&n<=9)marks[n]=sym;});
  const result=String(row.result||'').split(/[-\s>→]+/).map(Number).filter(n=>n>=1&&n<=9).slice(0,3);
  return {date:String(row.date||row.raceDate||''),category,lines,marks,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0,result,rawLine:lines.map(g=>g.join('-')).join('/')};
@@ -1306,8 +1319,8 @@ function makeRace(row){
  const girls=String(row.dai||'').toUpperCase()==='G'||String(row.gl||'').toUpperCase().startsWith('G')||/ガールズ|L級/.test(String(row.race_class||''));
  const n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
  const category=girls?'ガールズ':(n>=5&&n<=9?`${n}車`:'不明');
- const lines=splitLines(row.lines);
- if(!lines.length||!lines.some(g=>g.length>=2))return null; // 全員単騎だけ除外
+ const lines=splitLines(row.lines).filter(g=>g.length>=2); // 単騎はライン位置①②③④に含めない
+ if(!lines.length)return null;
  const marks={};for(let car=1;car<=9;car++){const v=String(row['mark_'+car]||'').trim();if(v)marks[car]=v;}if(!Object.keys(marks).length){Object.entries(markMap).forEach(([key,sym])=>{const car=Number(row[key]);if(car>=1&&car<=9)marks[car]=sym;});Object.assign(marks,transformLineMarks(lines,marks));}
  const result=String(row.result||'').split(/[-\s>→]+/).map(Number).filter(n=>n>=1&&n<=9).slice(0,3);
  return {date:String(row.date||row.raceDate||''),category,lines,heads:lines.map(g=>g[0]).filter(n=>n>=1&&n<=9),marks,lineMarks:marks,result,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0};
@@ -1564,7 +1577,40 @@ function runPerLineCombos(){
  html+=`<div class="discovery-card mt-3"><h3 class="font-bold text-violet-900 mb-2">同じ車番ペアのライン位置間比較（2位置以上に出現）</h3><div class="overflow-x-auto"><table class="w-full text-[11px]"><thead><tr class="border-b border-violet-100 text-left"><th class="p-1">先頭2車</th><th class="p-1 text-right">①</th><th class="p-1 text-right">②</th><th class="p-1 text-right">③</th><th class="p-1 text-right">④</th></tr></thead><tbody>${comp||'<tr><td colspan="5" class="p-2 text-center text-slate-500">複数位置に出現する組み合わせがありません</td></tr>'}</tbody></table></div><p class="text-[10px] text-slate-500 mt-2">各セル：件数 / 中央値 / 平均。位置によって配当傾向が変わるかを確認できます。</p></div>`;
  out.innerHTML=rows.length?html:'<div class="discovery-card text-xs">選択したクラスに3連単配当入力済みのレースがありません。</div>';
 }
-document.addEventListener('DOMContentLoaded',()=>{const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn'),m=$t('medianHeadRunBtn'),pl=$t('perLineRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);if(m)m.addEventListener('click',runMedianHeadPairs);if(pl)pl.addEventListener('click',runPerLineCombos);});
+function runLinePositionMatrix(){
+ const out=$t('lineMatrixResults'),summary=$t('lineMatrixSummary');
+ if(!trickRows.length){out.innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';return;}
+ const cls=$t('trickClass')?.value||'MEN_ALL';
+ const minCount=Math.max(1,Math.floor(Number($t('lineMatrixMin')?.value)||10));
+ const high=Math.max(1,Number($t('lineMatrixHigh')?.value)||10000);
+ const low=Math.max(1,Number($t('lineMatrixLow')?.value)||2000);
+ const rows=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0&&Array.isArray(r.lines));
+ const headMap=new Map(),fullMap=new Map();let eligible=0,with2=0;
+ const add=(map,key,lines,payout)=>{if(!map.has(key))map.set(key,{key,lines,count:0,sum:0,payouts:[],high:0,low:0});const g=map.get(key);g.count++;g.sum+=payout;g.payouts.push(payout);if(payout>=high)g.high++;if(payout<=low)g.low++;};
+ rows.forEach(r=>{
+  // ここで再度単騎を除外し、除外後の順番を①②③④として扱う
+  const lines=(r.lines||[]).filter(g=>Array.isArray(g)&&g.length>=2).slice(0,4);
+  if(lines.length<2)return;eligible++;
+  const heads=lines.map(g=>g[0]);
+  const headKey=heads.map((n,i)=>`①②③④`[i]+n).join('・');
+  const fullKey=lines.map((g,i)=>`①②③④`[i]+g.join('-')).join(' ／ ');
+  add(headMap,headKey,lines,r.p3);add(fullMap,fullKey,lines,r.p3);
+  with2++;
+ });
+ const med=a=>{const x=a.slice().sort((m,n)=>m-n),k=Math.floor(x.length/2);return x.length%2?x[k]:(x[k-1]+x[k])/2;};
+ const yen=n=>Math.round(n).toLocaleString('ja-JP')+'円';
+ const render=(map,label)=>{
+  const all=[...map.values()].map(g=>({...g,avg:g.sum/g.count,median:med(g.payouts),highRate:g.high/g.count*100,lowRate:g.low/g.count*100}));
+  const ranked=all.filter(g=>g.count>=minCount).sort((a,b)=>b.highRate-a.highRate||b.median-a.median||b.count-a.count);
+  const lowRank=all.filter(g=>g.count>=minCount).sort((a,b)=>b.lowRate-a.lowRate||a.median-b.median||b.count-a.count);
+  const rowHtml=(g,i)=>`<div class="grid grid-cols-1 sm:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))] gap-1 border-b border-slate-100 py-2 text-[10px]"><div class="font-bold text-slate-800">${i+1}. ${esc(g.key)}<small class="block text-slate-500">${g.count}件</small></div><div>中央値<br><b>${yen(g.median)}</b></div><div>平均<br><b>${yen(g.avg)}</b></div><div>高配当率<br><b>${g.highRate.toFixed(1)}%</b><small class="block text-slate-500">${g.high}件</small></div><div>低配当率<br><b>${g.lowRate.toFixed(1)}%</b><small class="block text-slate-500">${g.low}件</small></div></div>`;
+  const panel=(arr,title,desc)=>`<div class="discovery-card"><h4 class="font-bold text-violet-900 mb-1">${title}</h4><p class="text-[10px] text-slate-500 mb-2">${desc}</p>${arr.length?arr.slice(0,15).map(rowHtml).join(''):'<div class="text-[11px] text-slate-500 py-2">最低出現数を満たすパターンがありません。</div>'}</div>`;
+  return `<div class="mb-4"><div class="flex flex-wrap justify-between gap-2 mb-2"><h4 class="kicker">${label}</h4><span class="text-[10px] text-slate-500">全${all.length}パターン／基準${minCount}件以上 ${ranked.length}種</span></div><div class="grid grid-cols-1 xl:grid-cols-2 gap-3">${panel(ranked.slice(0,15),'高配当率が高いパターン','高配当基準以上の割合を優先。中央値・平均も併記。')}${panel(lowRank.slice(0,15),'低配当率が高いパターン','低配当基準以下の割合を優先。中央値・平均も併記。')}</div></div>`;
+ };
+ summary.innerHTML=`<div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">配当入力済み・対象</div><div class="font-mono-tech text-lg font-bold">${rows.length.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">2ライン以上</div><div class="font-mono-tech text-lg font-bold">${eligible.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">高配当基準</div><div class="font-mono-tech text-lg font-bold">${yen(high)}</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">低配当基準</div><div class="font-mono-tech text-lg font-bold">${yen(low)}</div></div>`;
+ out.innerHTML=eligible?render(headMap,'①②③④ LINE HEAD TUPLE // 先頭車番の並び')+render(fullMap,'FULL LINE SEQUENCE // ライン全体の並び'):'<div class="discovery-card text-xs">単騎を除外した後、2ライン以上ある配当入力済みレースがありません。</div>';
+}
+document.addEventListener('DOMContentLoaded',()=>{const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn'),m=$t('medianHeadRunBtn'),pl=$t('perLineRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);if(m)m.addEventListener('click',runMedianHeadPairs);if(pl)pl.addEventListener('click',runPerLineCombos);const lm=$t('lineMatrixRunBtn');if(lm)lm.addEventListener('click',runLinePositionMatrix);});
 })();
 </script>
 
