@@ -520,12 +520,9 @@ function parseLineGroupsFromText(text){
  return (content.match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)).filter(arr=>arr.length>0);
 }
 function parseRosterBaseMarks(block){
- const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=
-##|
----|$)/);
+ const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=##|---|$)/);
  if(!section)return {};
- const rows=section[1].split(/?
-/).filter(x=>/^\s*\|/.test(x));
+ const rows=section[1].split(/\r?\n/).filter(x=>/^\s*\|/.test(x));
  if(rows.length<2)return {};
  const cells=x=>x.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(v=>v.trim());
  const header=cells(rows[0]);
@@ -1240,10 +1237,12 @@ function parseCSV(text){
   else if(c==='"')quoted=true;
   else if(c===','){row.push(cell);cell='';}
   else if(c==='
-'){row.push(cell.replace(/$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);row=[];cell='';}
+'){row.push(cell.replace(/
+$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);row=[];cell='';}
   else cell+=c;
  }
- if(cell.length||row.length){row.push(cell.replace(/$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);}
+ if(cell.length||row.length){row.push(cell.replace(/
+$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);}
  if(!rows.length)return [];
  const headers=rows.shift().map((h,i)=>i===0?h.replace(/^﻿/,'').trim():h.trim());
  return rows.map(a=>Object.fromEntries(headers.map((h,i)=>[h,(a[i]??'').trim()])));
