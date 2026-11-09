@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BANK-KUN">
-<title>BATTLE BANK-KUN | ARRIVAL COSMIC v11.9</title>
+<title>BATTLE BANK-KUN | CYBER WHITE ULTRA v11.7</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -69,14 +69,6 @@ body:after{content:"";position:fixed;inset:-30%;pointer-events:none;z-index:0;ba
 .discovery-result{border:1px solid #a8d7f2;background:rgba(255,255,255,.92);border-radius:12px;padding:12px;margin-top:9px}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 
-/* ===== COSMIC ARRIVAL BACKDROP v11.9 ===== */
-body{background:radial-gradient(ellipse at 15% 8%,rgba(0,126,255,.24),transparent 32%),radial-gradient(ellipse at 88% 18%,rgba(105,65,255,.20),transparent 34%),radial-gradient(ellipse at 50% 100%,rgba(0,210,255,.13),transparent 42%),linear-gradient(145deg,#061329 0%,#091d3b 48%,#07142c 100%);background-attachment:fixed}
-body:before{opacity:.28;background-image:radial-gradient(1px 1px at 20px 30px,#fff 99%,transparent),radial-gradient(1px 1px at 90px 80px,#8bdcff 99%,transparent),radial-gradient(2px 2px at 160px 140px,#fff 99%,transparent),linear-gradient(rgba(0,145,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,145,255,.07) 1px,transparent 1px);background-size:190px 180px,220px 200px,280px 240px,36px 36px,36px 36px}
-body:after{background:conic-gradient(from 0deg,transparent 0 68%,rgba(0,175,255,.11),transparent 78%)}
-.bet-recommend{border-radius:13px;padding:10px;border:1px solid rgba(90,190,255,.45);background:linear-gradient(145deg,#071b35,#0b2a4c);color:#eaf8ff;box-shadow:inset 0 0 20px rgba(0,150,255,.10)}
-.bet-recommend .bet-row{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid rgba(140,210,255,.16);font-size:12px}
-.bet-recommend .bet-row:last-child{border-bottom:0}.bet-recommend .bet-score{color:#8be7ff;font:700 11px 'Share Tech Mono',monospace;white-space:nowrap}
-.bet-recommend .bet-title{font-weight:900;font-size:12px;margin-bottom:5px}.bet-recommend .bet-note{font-size:10px;color:#9fc5e4;margin-top:7px;line-height:1.5}
 /* ===== CYBER WHITE ULTRA : VISUAL UPGRADE v9.0 ===== */
 :root{--cyan:#007cff;--pink:#00b8ff;--violet:#536dff;--gold:#e2f5ff;--ink:#092744;--panel:rgba(255,255,255,.97);--deep:#071a33;--electric:#00a8ff;--ice:#eaf7ff}
 body{color:#102b46;background:radial-gradient(ellipse at 8% 4%,rgba(0,153,255,.18),transparent 30%),radial-gradient(ellipse at 92% 14%,rgba(72,105,255,.13),transparent 29%),radial-gradient(ellipse at 50% 100%,rgba(0,190,255,.12),transparent 38%),linear-gradient(135deg,#f8fcff 0%,#eaf5ff 48%,#f9fcff 100%)}
@@ -966,37 +958,9 @@ function renderArrivalDashboard(batch){
   const overlap=top.filter(x=>lineTop.some(l=>l.line===x.line));
   const overlapHtml=overlap.length?`<div class="mt-2 rounded-lg bg-amber-50 border border-amber-200 p-2"><b class="text-[11px] text-amber-900">CAR × LINE CONVERGENCE // 注目が重なる箇所</b><div class="text-xs text-amber-900 mt-1">${overlap.map(x=>`${x.car}番（ライン${x.line}・${x.role}）`).join(' / ')}：車番評価上位とライン評価上位が重複。別々の指標が同じ箇所を指しています。</div></div>`:'';
   const links=a.links.slice(0,3).map(x=>`<div class="text-[10px] py-1">車番 ${x.a}－${x.b}：同時3着内の上振れ +${(x.lift*100).toFixed(1)}pt（${x.n.toLocaleString()}比較）${x.same?'・同ライン':'・別ライン'}</div>`).join('')||'<div class="text-[10px] text-slate-500">過去データ上、強い連動ペアは検出されませんでした。</div>';
-  // Fixed-size recommendations. Scores rank combinations; they are not calibrated hit probabilities.
-  const byNum=new Map(a.candidates.map(x=>[x.car,x]));
-  const winPicks=a.candidates.slice().sort((x,y)=>y.first-x.first||y.top3-x.top3).slice(0,2);
-  const pairPicks=[];
-  for(const x of a.candidates)for(const y of a.candidates){
-   if(x.car===y.car)continue;
-   const adjacent=x.line===y.line && (x.role==='先頭'&&y.role==='番手');
-   const sameLine=x.line===y.line;
-   const synergy=adjacent?1.055:(sameLine?1.025:1);
-   pairPicks.push({cars:[x.car,y.car],score:x.first*y.second*synergy,reason:adjacent?'同ライン先頭→番手':sameLine?'同ライン':'別ライン'});
-  }
-  pairPicks.sort((x,y)=>y.score-x.score);
-  const exacta=pairPicks.slice(0,4);
-  const triPicks=[];
-  for(const x of a.candidates)for(const y of a.candidates)for(const z of a.candidates){
-   if(x.car===y.car||x.car===z.car||y.car===z.car)continue;
-   let synergy=1,reason='車番別評価';
-   if(x.line===y.line&&x.role==='先頭'&&y.role==='番手'){synergy*=1.055;reason='先頭→番手連動';}
-   if(y.line===z.line)synergy*=1.02;
-   if(x.line===z.line)synergy*=1.01;
-   triPicks.push({cars:[x.car,y.car,z.car],score:x.first*y.second*z.top3*synergy,reason});
-  }
-  triPicks.sort((x,y)=>y.score-x.score);
-  const trifecta=triPicks.slice(0,12);
-  const pctScore=(v,max)=>max>0?(v/max*100).toFixed(1)+'pt':'—';
-  const winMax=winPicks[0]?.first||0, pairMax=exacta[0]?.score||0, triMax=trifecta[0]?.score||0;
-  const renderRows=(arr,max)=>arr.map((x,i)=>`<div class="bet-row"><b>${i+1}. ${x.cars?x.cars.join(' → '):x.car+'番'}</b><span class="bet-score">評価 ${pctScore(x.score??x.first,max)}</span></div>`).join('');
-  const recommendationHtml=`<div class="mt-3 grid grid-cols-1 lg:grid-cols-3 gap-2"><section class="bet-recommend"><div class="bet-title text-emerald-300">① おすすめ単勝 2点</div>${renderRows(winPicks.map(x=>({...x,cars:[x.car],score:x.first})),winMax)}<div class="bet-note">1着推定率の上位2車。車番評価を基準に選出。</div></section><section class="bet-recommend"><div class="bet-title text-sky-300">② おすすめ2連単 4点</div>${renderRows(exacta,pairMax)}<div class="bet-note">1着×2着評価。ライン先頭→番手の連動を小幅反映。</div></section><section class="bet-recommend"><div class="bet-title text-violet-300">③ おすすめ3連単 12点</div>${renderRows(trifecta,triMax)}<div class="bet-note">1着×2着×3着内評価。重複車番を除き上位12通り。</div></section></div>`;
-  return `<div class="discovery-card"><div class="flex flex-wrap items-center justify-between gap-2 mb-2"><b class="text-emerald-900">${escapeHTML(r.venue||'開催場不明')} ${escapeHTML(r.raceName||'レース')}</b><span class="discovery-chip">ARRIVAL SCAN</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-emerald-50 p-2"><b class="text-[11px] text-emerald-900">車番の注目候補</b>${carHtml}</div><div class="rounded-lg bg-sky-50 p-2"><b class="text-[11px] text-sky-900">ラインの注目候補</b>${lineHtml}</div></div>${overlapHtml}${recommendationHtml}<div class="mt-2 rounded-lg bg-violet-50 border border-violet-100 p-2"><b class="text-[11px] text-violet-900">GRAPH LINK // 車番連動ネットワーク</b>${links}<div class="text-[10px] text-violet-800 mt-1">連動ログリフト指数：${a.bits.toFixed(3)} bit</div></div></div>`;
+  return `<div class="discovery-card"><div class="flex flex-wrap items-center justify-between gap-2 mb-2"><b class="text-emerald-900">${escapeHTML(r.venue||'開催場不明')} ${escapeHTML(r.raceName||'レース')}</b><span class="discovery-chip">ARRIVAL SCAN</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-emerald-50 p-2"><b class="text-[11px] text-emerald-900">車番の注目候補</b>${carHtml}</div><div class="rounded-lg bg-sky-50 p-2"><b class="text-[11px] text-sky-900">ラインの注目候補</b>${lineHtml}</div></div>${overlapHtml}<div class="mt-2 rounded-lg bg-violet-50 border border-violet-100 p-2"><b class="text-[11px] text-violet-900">GRAPH LINK // 車番連動ネットワーク</b>${links}<div class="text-[10px] text-violet-800 mt-1">連動ログリフト指数：${a.bits.toFixed(3)} bit</div></div></div>`;
  }).join('');
- math.textContent='買い目の評価点は候補内の相対順位であり、的中確率ではありません。単勝は1着推定率、2連単は1着×2着評価、3連単は1着×2着×3着内評価にライン連動補正を加えて選出。計算：各特徴の着順率をBeta-Binomial平滑化（事前強度24）し、車番・ライン位置・役割・印とその交互作用を重み付き統合。ライン評価は過去の実際のライン単位の着内・1着率を、ライン位置と人数別にBeta平滑化。車番ペアは同ライン／別ラインを分けて比較。表示値は過去条件付き推定であり、的中確率の保証ではありません。';
+ math.textContent='計算：各特徴の着順率をBeta-Binomial平滑化（事前強度24）し、車番・ライン位置・役割・印とその交互作用を重み付き統合。ライン評価は過去の実際のライン単位の着内・1着率を、ライン位置と人数別にBeta平滑化。車番ペアは同ライン／別ラインを分けて比較。表示値は過去条件付き推定であり、的中確率の保証ではありません。';
 }
 
 function extractAndSaveData(){
