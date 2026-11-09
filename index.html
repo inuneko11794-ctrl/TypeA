@@ -241,7 +241,8 @@ html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-mo
   <div class="glass-panel p-4 sm:p-5">
    <div class="panel-content">
     <button id="openManualBtn" type="button" class="touch-btn btn-alert w-full py-4 px-4 mb-5 rounded-xl flex justify-between items-center text-sm tracking-widest"><span>⚡ 手動入力モード</span><span>▶</span></button>
-    <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.txt,text/plain,text/markdown,text/*,*/*"></div>
+    <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.markdown,.txt,text/plain,text/markdown,text/*,*/*" onchange="loadMarkdown(event)" oninput="loadMarkdown(event)">
+    <p id="mdUploadStatus" role="status" aria-live="polite" class="text-[10px] text-slate-500 mt-2">Markdown / TXT ファイルを選択できます。</p></div>
     <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-4" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea>
     <div class="flex flex-col gap-3">
      <button id="extractBtn" type="button" class="touch-btn btn-cyber py-4 rounded-xl text-xs tracking-widest">📥 EXTRACT & ARCHIVE [データ抽出保存]</button>
@@ -520,7 +521,7 @@ function parseLineGroupsFromText(text){
  return (content.match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)).filter(arr=>arr.length>0);
 }
 function parseRosterBaseMarks(block){
- const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=##|---|$)/);
+ const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
  if(!section)return {};
  const rows=section[1].split(/\r?\n/).filter(x=>/^\s*\|/.test(x));
  if(rows.length<2)return {};
@@ -626,26 +627,76 @@ function logToTerminal(msg,type="info"){const out=$('outputArea'),time=new Date(
 function logToTerminalRaw(html){$('outputArea').insertAdjacentHTML('afterbegin',html)}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function persist(){localStorage.setItem('battleBankProData',JSON.stringify(savedRecords));scheduleAutoBackup();}
-function loadMarkdown(event){
- const file=event.target.files[0];
- if(!file)return;
- const reader=new FileReader();
- reader.onload=e=>{
-  const text = e.target.result;
-  $('dataInput').value=text;
-  $('mdFileInput').value='';
-  logToTerminal(`> ファイル読込成功: ${file.name}`,"success");
-  // 一括手動入力モードを開く
-  const races = parseMarkdownForBulk(text);
-  if(races.length){
-   openBulkInputModal(races);
-   logToTerminal(`> ${races.length}レースを事前登録フォームに展開しました。開催日を確認して保存してください。`,"success");
-  }else{
-   setTimeout(triggerExtract, 150);
-  }
- };
- reader.readAsText(file,'UTF-8');
+let mdReadInProgress=false;
+let mdLastReadToken='';
+function setMarkdownStatus(message,isError=false){
+ const el=$('mdUploadStatus');
+ if(el){el.textContent=message;el.style.color=isError?'#be123c':'#0369a1';}
 }
+function loadMarkdown(event){
+ const input=(event&&event.target&&event.target.id==='mdFileInput')?event.target:$('mdFileInput');
+ const file=input&&input.files&&input.files.length?input.files[0]:null;
+ if(!file){setMarkdownStatus('ファイルが選択されていません。',true);return;}
+ const token=[file.name,file.size,file.lastModified].join('|');
+ if(mdReadInProgress||input.dataset.reading==='1')return;
+ if(input.dataset.lastRead===token && !input.files.length)return;
+ mdReadInProgress=true;input.dataset.reading='1';
+ setMarkdownStatus(`読み込み中：${file.name}`);
+ logToTerminal(`> ファイル選択を検知: ${file.name}（${file.size.toLocaleString()} bytes）`,'info');
+ const finish=()=>{mdReadInProgress=false;input.dataset.reading='0';};
+ const fail=(message)=>{
+  setMarkdownStatus(message,true);
+  logToTerminal(`> Markdown読込エラー: ${message}`,'error');
+  finish();
+  try{input.value='';}catch(e){}
+ };
+ const processText=(raw)=>{
+  try{
+   const text=String(raw||'').replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n');
+   if(!text.trim())throw new Error('ファイルは選択されましたが、中身が空でした。');
+   $('dataInput').value=text;
+   input.dataset.lastRead=token;
+   setMarkdownStatus(`読み込み完了：${file.name} ／ ${text.length.toLocaleString()}文字`);
+   logToTerminal(`> ファイル読込成功: ${file.name}（${text.length.toLocaleString()}文字）`,'success');
+   const races=parseMarkdownForBulk(text);
+   if(races.length){
+    openBulkInputModal(races);
+    setMarkdownStatus(`解析完了：${races.length}レースを検出しました。開催日を確認して保存してください。`);
+    logToTerminal(`> ${races.length}レースを事前登録フォームに展開しました。開催日を確認して保存してください。`,'success');
+   }else{
+    setMarkdownStatus('テキストは読み込みましたが、レース見出しを検出できません。',true);
+    logToTerminal('> レース見出しを検出できません。テキストは入力欄に読み込み済みです。','error');
+   }
+  }catch(err){
+   console.error('Markdown import failed',err);
+   fail(`解析中にエラー：${err&&err.message?err.message:String(err)}`);
+   return;
+  }
+  finish();
+  // Android のファイル選択画面から戻った後も同じファイルを再選択できるようにする
+  try{input.value='';}catch(e){}
+ };
+ try{
+  if(typeof FileReader==='undefined')throw new Error('このブラウザではファイル読み込み機能を利用できません。Chromeで開いてください。');
+  const reader=new FileReader();
+  reader.onload=()=>processText(reader.result);
+  reader.onerror=()=>fail('ファイルの読み取りに失敗しました。ファイルを端末内に保存してから再選択してください。');
+  reader.onabort=()=>fail('ファイルの読み取りが中断されました。');
+  reader.readAsText(file,'UTF-8');
+ }catch(err){fail(`読み込み開始に失敗：${err&&err.message?err.message:String(err)}`);}
+}
+// Android Chrome でファイルピッカーから戻った際、change が届かない端末向けの保険
+window.addEventListener('focus',()=>{
+ const input=$('mdFileInput');
+ if(!input||!input.files||!input.files.length||mdReadInProgress)return;
+ setTimeout(()=>{if(input.files&&input.files.length&&!mdReadInProgress)loadMarkdown({target:input});},350);
+});
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState!=='visible')return;
+ const input=$('mdFileInput');
+ if(!input||!input.files||!input.files.length||mdReadInProgress)return;
+ setTimeout(()=>{if(input.files&&input.files.length&&!mdReadInProgress)loadMarkdown({target:input});},350);
+});
 function triggerExtract(){if(!$('dataInput').value.trim()){logToTerminal("> エラー: データが入力されていません。","error");playBeep(220,'sawtooth',.1);return}playBeep(200,'sawtooth',.15);extractAndSaveData()}
 function triggerSync(){triggerExtract()}
 
@@ -696,19 +747,17 @@ function extractAndSaveData(){
   blocks.forEach(block=>{if(!block.trim())return;let venue=globalVenue,raceName="UNKNOWN";
   const heading=block.match(/^#\s*競輪レースデータ：(.+)$/m);
   if(heading){
-   const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R/i);
+   const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R\b/i);
    if(raceMatch)raceName=String(parseInt(raceMatch[1],10))+"R";
    for(const v of REAL_VENUES)if(heading[1].includes(v)){venue=v;break}
   }else{
-   const rm=block.match(/(?<!\d)(\d{1,2})\s*R/i);
+   const rm=block.match(/(?<!\d)(\d{1,2})\s*R\b/i);
    if(rm)raceName=String(parseInt(rm[1],10))+"R";
   }
   const girls=block.includes("ガールズ")||block.includes("L級");let category="9車";
  if(girls)category="ガールズ";else{
   // 出走表セクション内の車番行だけを数える（全Markdown行の「| 数字 |」を数えない）。
-  const roster=block.match(/##\s*出走表([\s\S]*?)(?=
-##|
----|$)/);
+  const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
   const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
   let carCount=rosterRows?rosterRows.length:0;
   if(!carCount){const lineup=block.match(/^\|\s*並び予想\s*\|\s*(.+)$/m);if(lineup){const cleaned=lineup[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'');const members=cleaned.match(/\[([\d\s]+)\]/g)||[];carCount=members.reduce((n,m)=>n+m.replace(/[\[\]]/g,'').trim().split(/\s+/).filter(Boolean).length,0)}}
@@ -1015,20 +1064,18 @@ function parseMarkdownForBulk(inputData){
    let venue=globalVenue, raceName="UNKNOWN";
    const heading=block.match(/^#\s*競輪レースデータ：(.+)$/m);
    if(heading){
-    const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R/i);
+    const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R\b/i);
     if(raceMatch)raceName=String(parseInt(raceMatch[1],10))+"R";
     for(const v of REAL_VENUES)if(heading[1].includes(v)){venue=v;break}
    }else{
-    const rm=block.match(/(?<!\d)(\d{1,2})\s*R/i);
+    const rm=block.match(/(?<!\d)(\d{1,2})\s*R\b/i);
     if(rm)raceName=String(parseInt(rm[1],10))+"R";
    }
    const girls=block.includes("ガールズ")||block.includes("L級");
    let category="9車";
    if(girls)category="ガールズ";
    else{
-    const roster=block.match(/##\s*出走表([\s\S]*?)(?=
-##|
----|$)/);
+    const roster=block.match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
     const rosterRows=roster?roster[1].match(/^\|\s*[1-9]\s*\|/gm):null;
     let carCount=rosterRows?rosterRows.length:0;
     if(!carCount){
@@ -1236,13 +1283,10 @@ function parseCSV(text){
   if(quoted){if(c==='"'&&text[i+1]==='"'){cell+='"';i++;}else if(c==='"')quoted=false;else cell+=c;}
   else if(c==='"')quoted=true;
   else if(c===','){row.push(cell);cell='';}
-  else if(c==='
-'){row.push(cell.replace(/
-$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);row=[];cell='';}
+  else if(c==='\n'){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);row=[];cell='';}
   else cell+=c;
  }
- if(cell.length||row.length){row.push(cell.replace(/
-$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);}
+ if(cell.length||row.length){row.push(cell.replace(/\r$/,''));if(row.some(v=>v.trim()!==''))rows.push(row);}
  if(!rows.length)return [];
  const headers=rows.shift().map((h,i)=>i===0?h.replace(/^﻿/,'').trim():h.trim());
  return rows.map(a=>Object.fromEntries(headers.map((h,i)=>[h,(a[i]??'').trim()])));
