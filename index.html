@@ -530,10 +530,8 @@ function parseLineGroupsFromText(text){
  const row=String(text||'').match(/^\s*\|\s*並び予想\s*\|\s*(.+)$/m);
  if(!row)return [];
  // 注記「（各[ ]が1ライン、左端が先頭）」などを除去してからグループを抽出
- // 単騎（1車のみのグループ）はラインに含めない
  let content=row[1].replace(/（[^）]*）/g,'').replace(/\([^)]*\)/g,'').trim();
- const rawGroups=(content.match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)).filter(arr=>arr.length>0);
- return rawGroups.filter(arr=>arr.length>=2);
+ return (content.match(/\[([\d\s]+)\]/g)||[]).map(g=>g.replace(/[\[\]]/g,'').trim().split(/\s+/).map(Number).filter(n=>Number.isInteger(n)&&n>=1&&n<=9)).filter(arr=>arr.length>0);
 }
 function parseRosterBaseMarks(block){
  const section=String(block||'').match(/##\s*出走表([\s\S]*?)(?=\n##|\n---|$)/);
@@ -582,10 +580,9 @@ function makeHeadPairs(lineHeads){
  return pairs;
 }
 function enrichRecord(r){
- const lineGroups=Array.isArray(r.lineGroups)?r.lineGroups.map(g=>Array.isArray(g)?g.map(Number):[]).filter(g=>g.length>=2):[];
- const lineHeadsFromGroups=lineGroups.slice(0,4).map(g=>g[0]||0);
- const lineHeads=lineHeadsFromGroups.some(Boolean)?lineHeadsFromGroups:(Array.isArray(r.lineHeads)?r.lineHeads.slice(0,4).map(Number):[]);
- const normalizedHeads=lineHeads.length?lineHeads:(r.line1?[[Number(String(r.line1).split('-')[0])||0]].flat().slice(0,1):[]);
+ const lineHeads=Array.isArray(r.lineHeads)?r.lineHeads.slice(0,4).map(Number):[];
+ const normalizedHeads=lineHeads.length?lineHeads:(r.line1?[[Number(String(r.line1).split('-')[0])||0]] .flat().slice(0,1):[]);
+ const lineGroups=Array.isArray(r.lineGroups)?r.lineGroups.map(g=>Array.isArray(g)?g.map(Number):[]):[];
  const baseMarks=r.baseMarks&&typeof r.baseMarks==='object'?{...r.baseMarks}:{};
  const lineMarks=r.lineMarks&&typeof r.lineMarks==='object'?{...r.lineMarks}:transformLineMarks(lineGroups,baseMarks);
  const lineMarkGroups=Array.isArray(r.lineMarkGroups)&&r.lineMarkGroups.length?r.lineMarkGroups:makeLineMarkGroups(lineGroups,lineMarks);
@@ -597,78 +594,46 @@ const normalizeRecord = r => enrichRecord({...r,payout:Number(r.payout)||0,payou
 // ===== SCORING & RECOMMENDATION SYSTEM =====
 const SCORE_KEY = 'bbkScoringV1';
 const DEFAULT_MARK_SCORES = {'◎':120,'◯':90,'△':65,'✕':40,'⑳':100,'●':75,'▲':55,'✖':30,'☆':50,'★':35,'':15};
-function loadScores(){
-  try{return JSON.parse(localStorage.getItem(SCORE_KEY)||'{}')}catch(e){return {}}
-}
+function loadScores(){try{return JSON.parse(localStorage.getItem(SCORE_KEY)||'{}')}catch(e){return {}}}
 function saveScores(s){try{localStorage.setItem(SCORE_KEY,JSON.stringify(s))}catch(e){}}
 function getMarkScore(mark){
   const scores=loadScores();
-  const base=DEFAULT_MARK_SCORES[mark]||DEFAULT_MARK_SCORES['']||15;
+  const base=DEFAULT_MARK_SCORES[mark]||15;
   const hist=scores.marks?.[mark];
-  if(hist && hist.trials>=5){
-    const rate=hist.hits/hist.trials;
-    return Math.round(base * (0.7 + rate*0.6)); // 70-130% of base
-  }
+  if(hist && hist.trials>=5) return Math.round(base*(0.7+(hist.hits/hist.trials)*0.6));
   return base;
 }
 function scoreCar(car, race){
   const marks=race.lineMarks||race.baseMarks||{};
-  const mark=String(marks[car]||'');
-  let score=getMarkScore(mark);
-  // Line position bonus
+  let score=getMarkScore(String(marks[car]||''));
   const groups=race.lineGroups||[];
-  for(let i=0;i<groups.length;i++){
-    const g=groups[i];
+  for(const g of groups){
     const pos=g.indexOf(Number(car));
-    if(pos===0) score+=35; // head
+    if(pos===0) score+=35;
     else if(pos===1) score+=18;
     else if(pos===2) score+=8;
     if(pos>=0) break;
   }
-  // Historical car score
   const scores=loadScores();
   const carHist=scores.cars?.[car];
-  if(carHist && carHist.trials>=8){
-    const rate=carHist.hits/carHist.trials;
-    score=Math.round(score*(0.85+rate*0.3));
-  }
+  if(carHist && carHist.trials>=8) score=Math.round(score*(0.85+(carHist.hits/carHist.trials)*0.3));
   return score;
 }
 function generateRecommendations(race){
-  const cars=[];
-  for(let c=1;c<=9;c++) if(race.baseMarks?.[c]||race.lineMarks?.[c]||true) cars.push(c);
+  const cars=[]; for(let c=1;c<=9;c++) cars.push(c);
   const scored=cars.map(c=>({car:c,score:scoreCar(c,race)})).sort((a,b)=>b.score-a.score||a.car-b.car);
   if(!scored.length) return {tan:[],exacta:[],trifecta:[]};
   const top=scored.slice(0,8);
-  // 単勝2点
   const tan=top.slice(0,2).map(x=>x.car);
-  // 2連単4点 (top combinations)
   const exacta=[];
-  for(let i=0;i<Math.min(4,top.length);i++){
-    for(let j=0;j<Math.min(4,top.length);j++){
-      if(i!==j && exacta.length<4) exacta.push(`${top[i].car}-${top[j].car}`);
-    }
-  }
-  // 3連単15点: 頭2車固定 + フォーメーション
+  for(let i=0;i<Math.min(4,top.length);i++) for(let j=0;j<Math.min(4,top.length);j++) if(i!==j && exacta.length<4) exacta.push(`${top[i].car}-${top[j].car}`);
   const heads=top.slice(0,2).map(x=>x.car);
   const others=top.slice(2,7).map(x=>x.car);
   const trifecta=[];
-  for(const h of heads){
-    for(const a of others){
-      for(const b of others){
-        if(a!==b && a!==h && b!==h && trifecta.length<15){
-          trifecta.push(`${h}-${a}-${b}`);
-        }
-      }
-    }
-  }
-  // fill if needed
+  for(const h of heads) for(const a of others) for(const b of others) if(a!==b && a!==h && b!==h && trifecta.length<15) trifecta.push(`${h}-${a}-${b}`);
   while(trifecta.length<15 && top.length>=3){
-    const c=top[trifecta.length%top.length].car;
-    const d=top[(trifecta.length+1)%top.length].car;
-    const e=top[(trifecta.length+2)%top.length].car;
-    if(new Set([c,d,e]).size===3) trifecta.push(`${c}-${d}-${e}`);
-    else break;
+    const c=top[trifecta.length%top.length].car, d=top[(trifecta.length+1)%top.length].car, e=top[(trifecta.length+2)%top.length].car;
+    if(new Set([c,d,e]).size===3) trifecta.push(`${c}-${d}-${e}`); else break;
   }
   return {tan, exacta:exacta.slice(0,4), trifecta:trifecta.slice(0,15)};
 }
@@ -676,31 +641,14 @@ function updateScoresFromResult(record){
   if(!hasValidResult(record)) return;
   const [p1,p2,p3]=String(record.pattern).split('-').map(Number);
   const scores=loadScores();
-  if(!scores.marks) scores.marks={};
-  if(!scores.cars) scores.cars={};
+  if(!scores.marks) scores.marks={}; if(!scores.cars) scores.cars={};
   const marks=record.lineMarks||record.baseMarks||{};
-  // Update mark scores for 1st place
   const m1=String(marks[p1]||'');
   if(!scores.marks[m1]) scores.marks[m1]={hits:0,trials:0};
-  scores.marks[m1].trials++;
-  scores.marks[m1].hits++; // hit if it was 1st
-  // Other marks that appeared but didn't win: slight trial
-  Object.entries(marks).forEach(([car,m])=>{
-    const mc=Number(car);
-    if(mc===p1) return;
-    const key=String(m||'');
-    if(!scores.marks[key]) scores.marks[key]={hits:0,trials:0};
-    scores.marks[key].trials++;
-    // no hit
-  });
-  // Car scores
-  [p1,p2,p3].forEach((c,i)=>{
-    if(!scores.cars[c]) scores.cars[c]={hits:0,trials:0};
-    scores.cars[c].trials++;
-    if(i===0) scores.cars[c].hits++;
-  });
-  scores.updated=Date.now();
-  saveScores(scores);
+  scores.marks[m1].trials++; scores.marks[m1].hits++;
+  Object.entries(marks).forEach(([car,m])=>{ if(Number(car)===p1) return; const key=String(m||''); if(!scores.marks[key]) scores.marks[key]={hits:0,trials:0}; scores.marks[key].trials++; });
+  [p1,p2,p3].forEach((c,i)=>{ if(!scores.cars[c]) scores.cars[c]={hits:0,trials:0}; scores.cars[c].trials++; if(i===0) scores.cars[c].hits++; });
+  scores.updated=Date.now(); saveScores(scores);
   logToTerminal(`> 採点更新: 1着${p1}(印${m1||'—'}) のスコアを反映`,'info');
 }
 // ===========================================
@@ -744,8 +692,8 @@ function saveManualData(){
  takeUndoSnapshot(editingIndex>=0?'手動編集':'手動登録');
  const rec={venue,raceName:race,raceDate,category,pattern:patternKey,diffPattern:diffPatternKey,diffDisplay,exacta,payout,payout2ren,timestamp:Date.now(),sourceType:has3ren?'manual-result':'manual'};
  let targetIndex=editingIndex;if(targetIndex<0)targetIndex=savedRecords.findIndex(r=>recordKey(r)===recordKey(rec));
- if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]=normalizeRecord({...old,...rec,line1:old.line1||'',lineHeads:old.lineHeads||[]});logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,'success'); if(has3ren) updateScoresFromResult(savedRecords[targetIndex]);}
- else{savedRecords.push(normalizeRecord(rec));logToTerminal(`> [手動登録] ${venue} ${race} を保存しました。`,'success'); if(has3ren) updateScoresFromResult(savedRecords[savedRecords.length-1]);}
+ if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]=normalizeRecord({...old,...rec,line1:old.line1||'',lineHeads:old.lineHeads||[]});logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,'success');}
+ else{savedRecords.push(normalizeRecord(rec));logToTerminal(`> [手動登録] ${venue} ${race} を保存しました。`,'success');}
  editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD';
  persist();updateCountDisplay();runAnalysis();renderRecordManager();
  ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');closeManualModal();
@@ -1250,11 +1198,13 @@ function openBulkInputModal(races){
   const card=document.createElement('div');card.className='border-2 border-cyan-500 rounded-xl p-3 bg-white/90';
   const line1Display=r.line1?`<div class="text-[10px] text-sky-600 mt-1">ライン①: <b>${escapeHTML(r.line1)}</b></div>`:'';const headsDisplay=(r.lineHeads||[]).length?`<div class="text-[10px] text-cyan-700 mt-1">先頭車番①〜④: <b>${escapeHTML(r.lineHeads.join(' / '))}</b></div>`:'';const marksDisplay=(r.lineMarkGroups||[]).length?`<div class="text-[10px] text-violet-700 mt-1">変換後の印: <b>${r.lineMarkGroups.map(g=>(g.marks||[]).map(m=>m||'—').join('-')).map(escapeHTML).join(' / ')}</b></div>`:'';
   const recs=generateRecommendations(r);
+  const triHtml=recs.trifecta.length?`<div class="mt-1 max-h-20 overflow-y-auto text-[9px] leading-tight bg-white/70 p-1 rounded">${recs.trifecta.map(t=>`<span class="inline-block mr-1 mb-0.5 px-1 py-0.5 bg-amber-100 rounded">${escapeHTML(t)}</span>`).join('')}</div>`:'';
   const recHtml=recs.tan.length?`<div class="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-[10px]">
     <div class="font-bold text-amber-900 mb-1">📊 オススメ買い目（採点連動）</div>
     <div>単勝2点: <b>${recs.tan.join(' / ')}</b></div>
     <div>2連単4点: <b>${recs.exacta.join(' / ')}</b></div>
-    <div>3連単15点（頭2固定）: <b class="text-[9px]">${recs.trifecta.slice(0,8).join(' / ')}${recs.trifecta.length>8?' ...':''}</b></div>
+    <div class="mt-1">3連単15点（頭2固定）:</div>
+    ${triHtml}
    </div>`:'';
   card.innerHTML=`
    <div class="flex justify-between items-center gap-2"><div class="font-black text-lg text-sky-900">${escapeHTML(r.venue)} ${escapeHTML(r.raceName)}</div><div class="text-xs font-bold text-sky-700">${escapeHTML(r.category)}</div></div>
@@ -1267,11 +1217,33 @@ function openBulkInputModal(races){
   container.appendChild(card);
  });
  $('bulkInputModal').classList.remove('hidden');$('bulkInputModal').classList.add('flex');
+ if(typeof forceBindClose==='function') forceBindClose();
 }
 function closeBulkInputModal(){
-  $('bulkInputModal').classList.add('hidden');
-  $('bulkInputModal').classList.remove('flex');
+  const modal=$('bulkInputModal');
+  if(!modal)return;
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
 }
+// 背景クリックとESCで確実に閉じる
+document.addEventListener('click',e=>{
+  const modal=$('bulkInputModal');
+  if(!modal||modal.classList.contains('hidden'))return;
+  if(e.target===modal) closeBulkInputModal();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  const modal=$('bulkInputModal');
+  if(modal&&!modal.classList.contains('hidden')) closeBulkInputModal();
+});
+// ボタンを強制バインド（open時にも再バインド）
+function forceBindClose(){
+  const close=()=>closeBulkInputModal();
+  const b1=$('closeBulkBtn'), b2=$('closeBulkBtn2');
+  if(b1){b1.onclick=close; b1.style.pointerEvents='auto';}
+  if(b2){b2.onclick=close; b2.style.pointerEvents='auto';}
+}
+setTimeout(forceBindClose, 500);
 
 function saveAllBulkRecords(){
  takeUndoSnapshot('DataMap事前登録');
@@ -1318,7 +1290,6 @@ function saveBatchEdit(){
   if(any&&!(a!==''&&b!==''&&c!==''&&nums.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(nums).size===3)){alert(`${r.venue||''} ${r.raceName||''}：着順は1〜3着を重複なく入力してください。`);return;}
   if(any)r.pattern=nums.join('-');
   const p2=val('p2'),p3=val('p3');if(p2!=='')r.payout2ren=Math.max(0,Number(p2)||0);if(p3!=='')r.payout=Math.max(0,Number(p3)||0);Object.assign(r,normalizeRecord(r));
-  if(hasValidResult(r)) updateScoresFromResult(r);
   updated++;
  }
  persist();updateCountDisplay();runAnalysis();renderRecordManager();$('batchEditPanel').classList.add('hidden');logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
@@ -1748,19 +1719,19 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 
-<div id="bulkInputModal" class="hidden fixed inset-0 z-[1000] items-center justify-center p-2 sm:p-4">
- <div class="modal-card rounded-2xl w-full max-w-2xl max-h-[95dvh] flex flex-col p-4 sm:p-6 relative">
-  <button id="closeBulkBtn" type="button" class="touch-btn absolute top-2 right-3 text-3xl font-black text-slate-900 w-10 h-10 z-10">×</button>
+<div id="bulkInputModal" class="hidden fixed inset-0 z-[1000] items-center justify-center p-2 sm:p-4" style="pointer-events:auto;">
+ <div class="modal-card rounded-2xl w-full max-w-2xl max-h-[95dvh] flex flex-col p-4 sm:p-6 relative" style="pointer-events:auto;">
+  <button id="closeBulkBtn" type="button" class="touch-btn absolute top-2 right-3 text-3xl font-black text-slate-900 w-12 h-12 z-20 flex items-center justify-center" style="pointer-events:auto;">×</button>
   <header class="text-center mb-3 border-b-2 border-slate-900 pb-2 mt-1">
    <h2 class="font-orbitron text-2xl sm:text-3xl font-black tracking-widest">BULK MANUAL INPUT</h2>
-   <p class="text-[10px] font-bold mt-1">FILE LOADED // レース情報の事前登録</p>
+   <p class="text-[10px] font-bold mt-1">FILE LOADED // 内容を確認してから保存</p>
   </header>
   <div id="bulkRaceContainer" class="flex-1 overflow-y-auto space-y-4 pr-1" style="max-height: calc(95dvh - 180px);">
    <!-- Races will be injected here -->
   </div>
-  <div class="mt-3 pt-3 border-t border-slate-300 flex gap-2">
-   <button id="saveAllBulkBtn" type="button" class="touch-btn btn-alert flex-1 py-3 rounded-xl text-sm tracking-widest">SAVE RACE LIST</button>
-   <button id="closeBulkBtn2" type="button" class="touch-btn btn-ghost py-3 px-4 rounded-xl text-sm">CLOSE</button>
+  <div class="mt-3 pt-3 border-t border-slate-300 flex gap-2 shrink-0">
+   <button id="saveAllBulkBtn" type="button" class="touch-btn btn-alert flex-1 py-3 rounded-xl text-sm tracking-widest" style="min-height:48px;pointer-events:auto;">SAVE RACE LIST</button>
+   <button id="closeBulkBtn2" type="button" class="touch-btn btn-ghost py-3 px-5 rounded-xl text-sm" style="min-height:48px;pointer-events:auto;">CLOSE</button>
   </div>
  </div>
 </div>
