@@ -1663,19 +1663,41 @@ function closeBulkInputModal(){
 }
 
 function saveAllBulkRecords(){
- takeUndoSnapshot('DataMap事前登録');
- const cards=$('bulkRaceContainer').children;let saved=0,updated=0,skipped=0;
- for(let i=0;i<cards.length;i++){
-  const venue=$('bulk_venue_'+i)?.value||'不明',raceName=$('bulk_race_'+i)?.value||'UNKNOWN';
-  const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||'',line1=$('bulk_line1_'+i)?.value||'',lineHeads=(()=>{try{return JSON.parse($('bulk_lineHeads_'+i)?.value||'[]')}catch(e){return []}})(),lineGroups=(()=>{try{return JSON.parse($('bulk_lineGroups_'+i)?.value||'[]')}catch(e){return []}})(),baseMarks=(()=>{try{return JSON.parse($('bulk_baseMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarks=(()=>{try{return JSON.parse($('bulk_lineMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarkGroups=(()=>{try{return JSON.parse($('bulk_lineMarkGroups_'+i)?.value||'[]')}catch(e){return []}})();
-  if(raceName==='UNKNOWN'){skipped++;continue}
-  const incoming=normalizeRecord({venue,raceName,raceDate,category,line1,lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,pattern:'',exacta:'',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,sourceType:'pre-registration',timestamp:Date.now()});
-  const idx=savedRecords.findIndex(r=>recordKey(r)===recordKey(incoming));
-  if(idx>=0){const old=savedRecords[idx];savedRecords[idx]=normalizeRecord({...old,venue,raceName,raceDate,category,line1:line1||old.line1||'',lineHeads:lineHeads.some(Boolean)?lineHeads:(old.lineHeads||[]),lineGroups:lineGroups.length?lineGroups:(old.lineGroups||[]),baseMarks:Object.keys(baseMarks).length?baseMarks:(old.baseMarks||{}),lineMarks:Object.keys(lineMarks).length?lineMarks:(old.lineMarks||{}),lineMarkGroups:lineMarkGroups.length?lineMarkGroups:(old.lineMarkGroups||[]),timestamp:old.timestamp||Date.now()});updated++;}
-  else{savedRecords.push(incoming);saved++;}
+ const stage=(msg,type='info')=>{try{logToTerminal('> 一括登録診断：'+msg,type)}catch(e){}};
+ try{
+  stage('クリック検出');
+  const host=$('bulkRaceContainer');
+  if(!host)throw new Error('bulkRaceContainer が見つかりません');
+  const cards=host.children;
+  if(!cards.length){stage('登録カードが0件です','error');alert('登録するレースがありません。Markdownの解析結果を確認してください。');return;}
+  stage('対象レース '+cards.length+'件');
+  takeUndoSnapshot('DataMap事前登録');
+  let saved=0,updated=0,skipped=0;
+  for(let i=0;i<cards.length;i++){
+   const venue=$('bulk_venue_'+i)?.value||'不明',raceName=$('bulk_race_'+i)?.value||'UNKNOWN';
+   const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||'',line1=$('bulk_line1_'+i)?.value||'',lineHeads=(()=>{try{return JSON.parse($('bulk_lineHeads_'+i)?.value||'[]')}catch(e){return []}})(),lineGroups=(()=>{try{return JSON.parse($('bulk_lineGroups_'+i)?.value||'[]')}catch(e){return []}})(),baseMarks=(()=>{try{return JSON.parse($('bulk_baseMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarks=(()=>{try{return JSON.parse($('bulk_lineMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarkGroups=(()=>{try{return JSON.parse($('bulk_lineMarkGroups_'+i)?.value||'[]')}catch(e){return []}})();
+   if(raceName==='UNKNOWN'){skipped++;continue}
+   const incoming=normalizeRecord({venue,raceName,raceDate,category,line1,lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,pattern:'',exacta:'',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,sourceType:'pre-registration',timestamp:Date.now()});
+   const idx=savedRecords.findIndex(r=>recordKey(r)===recordKey(incoming));
+   if(idx>=0){const old=savedRecords[idx];savedRecords[idx]=normalizeRecord({...old,venue,raceName,raceDate,category,line1:line1||old.line1||'',lineHeads:lineHeads.some(Boolean)?lineHeads:(old.lineHeads||[]),lineGroups:lineGroups.length?lineGroups:(old.lineGroups||[]),baseMarks:Object.keys(baseMarks).length?baseMarks:(old.baseMarks||{}),lineMarks:Object.keys(lineMarks).length?lineMarks:(old.lineMarks||{}),lineMarkGroups:lineMarkGroups.length?lineMarkGroups:(old.lineMarkGroups||[]),timestamp:old.timestamp||Date.now()});updated++;}
+   else{savedRecords.push(incoming);saved++;}
+  }
+  if(!(saved||updated)){stage('新規登録・更新対象がありません。対象外 '+skipped+'件','error');alert('登録対象がありませんでした。レース番号を確認してください。');return;}
+  stage('レコード作成完了：新規 '+saved+'件／更新 '+updated+'件');
+  const ok=persist();
+  if(!ok){stage('端末保存に失敗しました。画面は閉じません','error');alert('端末への保存を確認できませんでした。画面下の診断ログを確認してください。');return;}
+  stage('端末保存OK','success');
+  try{updateCountDisplay()}catch(e){stage('件数更新エラー：'+e.message,'error')}
+  try{runAnalysis()}catch(e){stage('分析更新エラー：'+e.message,'error')}
+  try{renderRecordManager()}catch(e){stage('記録一覧更新エラー：'+e.message,'error')}
+  stage('一括登録完了：新規 '+saved+'件／更新 '+updated+'件／対象外 '+skipped+'件','success');
+  closeBulkInputModal();
+  try{playBeep(880,'sine',.2)}catch(e){}
+ }catch(e){
+  console.error('Bulk manual save failed',e);
+  stage('処理中断：'+(e&&e.message?e.message:String(e)),'error');
+  alert('一括登録が途中で停止しました。画面下の「一括登録診断」を確認してください。');
  }
- if(saved||updated){persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> 事前登録完了：新規 ${saved}件／既存更新 ${updated}件／対象外 ${skipped}件。着順・配当は未入力で保存しました。`,'success');closeBulkInputModal();playBeep(880,'sine',.2);}
- else logToTerminal('> 登録対象がありませんでした。','error');
 }
 
 function renderRecordManager(){
