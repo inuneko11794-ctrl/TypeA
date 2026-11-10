@@ -490,6 +490,31 @@ body:after{opacity:.025!important;z-index:1!important}
 @media(prefers-reduced-motion:reduce){#dnaLifeCanvas{opacity:.32}}
 </style>
 
+
+<style id="BANK-CARD-THREE-RIDER-TRACK">
+.bank-track-cards{position:relative;height:66px;margin:0 0 14px;overflow:hidden;border-radius:18px;background:linear-gradient(100deg,rgba(255,255,255,.92),rgba(239,232,255,.86) 35%,rgba(226,248,255,.9) 70%,rgba(255,235,247,.92));border:1px solid rgba(133,111,218,.28);box-shadow:inset 0 1px 0 #fff,0 7px 18px rgba(110,93,180,.10);isolation:isolate}
+.bank-track-cards:before{content:"BATTLE BANK-KUN // 3 RIDER SLALOM";position:absolute;left:12px;top:5px;font:700 8px 'Share Tech Mono',monospace;letter-spacing:.16em;color:rgba(105,87,169,.52);z-index:2}
+.bank-track-cards .bank-line{position:absolute;left:0;right:0;top:43px;height:2px;background:repeating-linear-gradient(90deg,rgba(135,111,207,.38) 0 18px,transparent 18px 31px)}
+.bank-track-cards .bg-racer{position:absolute;top:15px;left:110%;font-size:27px;line-height:1;filter:drop-shadow(0 3px 3px rgba(80,70,130,.25));will-change:transform}
+.bank-track-cards .r-1{animation:card-rider-one 8.5s linear infinite}
+.bank-track-cards .r-2{top:25px;font-size:22px;animation:card-rider-two 9.5s linear -2.7s infinite}
+.bank-track-cards .r-3{top:12px;font-size:25px;animation:card-rider-three 10.5s linear -5.4s infinite}
+@keyframes card-rider-one{0%{transform:translateX(0) translateY(0) rotate(-5deg)}12%{transform:translateX(-18vw) translateY(5px) rotate(8deg)}25%{transform:translateX(-36vw) translateY(-3px) rotate(-8deg)}38%{transform:translateX(-54vw) translateY(6px) rotate(9deg)}52%{transform:translateX(-72vw) translateY(-4px) rotate(-7deg)}68%{transform:translateX(-90vw) translateY(5px) rotate(7deg)}100%{transform:translateX(-125vw) translateY(0) rotate(-4deg)}}
+@keyframes card-rider-two{0%{transform:translateX(0) translateY(0) rotate(5deg)}18%{transform:translateX(-22vw) translateY(-5px) rotate(-8deg)}34%{transform:translateX(-43vw) translateY(4px) rotate(7deg)}51%{transform:translateX(-65vw) translateY(-5px) rotate(-7deg)}72%{transform:translateX(-92vw) translateY(4px) rotate(8deg)}100%{transform:translateX(-125vw) translateY(0) rotate(-5deg)}}
+@keyframes card-rider-three{0%{transform:translateX(0) translateY(0) rotate(-3deg)}15%{transform:translateX(-20vw) translateY(6px) rotate(9deg)}31%{transform:translateX(-41vw) translateY(-5px) rotate(-8deg)}48%{transform:translateX(-63vw) translateY(5px) rotate(8deg)}67%{transform:translateX(-88vw) translateY(-4px) rotate(-7deg)}100%{transform:translateX(-125vw) translateY(0) rotate(4deg)}}
+@media(max-width:700px){
+ .bank-track-cards{height:78px;margin:0 0 12px;border-radius:14px;overflow:hidden;}
+ .bank-track-cards:before{left:8px;top:4px;font-size:7px;letter-spacing:.1em;}
+ .bank-track-cards .bank-line{top:61px;opacity:.8}
+ .bank-track-cards .bg-racer{font-size:21px;top:12px;line-height:1;filter:drop-shadow(0 2px 2px rgba(80,70,130,.28));}
+ .bank-track-cards .r-1{top:12px;animation-duration:7.8s;}
+ .bank-track-cards .r-2{top:31px;font-size:19px;animation-duration:8.8s;}
+ .bank-track-cards .r-3{top:49px;font-size:20px;animation-duration:9.8s;}
+}
+@media(min-width:701px){.bank-track-cards{height:70px}.bank-track-cards .r-2{top:27px}.bank-track-cards .r-3{top:13px}}
+@media(prefers-reduced-motion:reduce){.bank-track-cards .bg-racer{animation:none;left:auto}.bank-track-cards .r-1{left:24%}.bank-track-cards .r-2{left:49%}.bank-track-cards .r-3{left:74%}}
+</style>
+
 </head>
 <body>
 <canvas id="dnaLifeCanvas" aria-hidden="true"></canvas>
@@ -538,13 +563,6 @@ body:after{opacity:.025!important;z-index:1!important}
 
 <div class="app-shell">
 <header class="flex flex-col md:flex-row justify-between items-end border-b border-cyan-300/50 pb-5 mb-6 gap-3">
-
-<div class="bank-track">
-    <div class="bank-line"></div>
-    <div class="bg-racer right r-1">🚴‍♂️</div>
-    <div class="bg-racer right r-2">🚴‍♀️</div>
-    <div class="bg-racer left r-3">🚴‍♂️</div>
-</div>
 
  <div class="w-full">
   <div class="kicker mb-2">VIRUS MATRIX // INFECTED INTELLIGENCE</div>
@@ -770,6 +788,12 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
 
 <section class="mb-8" data-tab-panel="analysis">
  <h2 class="kicker border-l-4 border-sky-500 pl-2 mb-4">CATEGORY & PATTERN METRICS // 車番クラス別集計</h2>
+ <div class="bank-track bank-track-cards" aria-label="車番クラス別カードの直上を3台の自転車が右から左へ蛇行走行">
+    <div class="bank-line"></div>
+    <div class="bg-racer right r-1" aria-hidden="true">🚴‍♂️</div>
+    <div class="bg-racer right r-2" aria-hidden="true">🚴‍♀️</div>
+    <div class="bg-racer right r-3" aria-hidden="true">🚴‍♂️</div>
+ </div>
  <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3" id="categoryCards"></div>
 </section>
 
@@ -2257,28 +2281,8 @@ showExternalData('byn3');
    }
    ctx.restore();
   });
-  // miniature keirin rider: snakes from right to left with a controlled drift
-  {
-   const cycle=((t*.000075)%1); const x=w+90-cycle*(w+190);
-   const y=Math.max(82,Math.min(h*.19,150))+Math.sin(t*.0022)*8;
-   const lean=Math.sin(t*.0038)*.16;
-   ctx.save();ctx.translate(x,y);ctx.rotate(lean);ctx.scale(.92,.92);
-   // drifting tire smoke and motion ribbons
-   for(let k=0;k<5;k++){const sx=-72-k*13+Math.sin(t*.004+k)*5, sy=17+Math.cos(t*.003+k)*8;ctx.beginPath();ctx.ellipse(sx,sy,10+k*2,3+k*.7,-.18,0,Math.PI*2);ctx.fillStyle=`rgba(160,145,220,${.16-k*.022})`;ctx.fill()}
-   ctx.strokeStyle='rgba(104,120,190,.22)';ctx.lineWidth=2;for(let k=0;k<3;k++){ctx.beginPath();ctx.moveTo(-105-k*9,5+k*7);ctx.quadraticCurveTo(-75-k*8,-2+k*9,-48-k*7,7+k*7);ctx.stroke()}
-   // wheels
-   const spin=t*.018;[-34,34].forEach((wx)=>{ctx.beginPath();ctx.arc(wx,18,16,0,Math.PI*2);ctx.strokeStyle='rgba(65,105,150,.8)';ctx.lineWidth=2.6;ctx.stroke();ctx.beginPath();ctx.moveTo(wx-Math.cos(spin)*14,18-Math.sin(spin)*14);ctx.lineTo(wx+Math.cos(spin)*14,18+Math.sin(spin)*14);ctx.moveTo(wx-Math.sin(spin)*14,18+Math.cos(spin)*14);ctx.lineTo(wx+Math.sin(spin)*14,18-Math.cos(spin)*14);ctx.strokeStyle='rgba(135,115,205,.55)';ctx.lineWidth=1;ctx.stroke()});
-   // frame
-   ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#765ce0';ctx.lineWidth=3.2;ctx.beginPath();ctx.moveTo(-34,18);ctx.lineTo(-9,-7);ctx.lineTo(9,18);ctx.lineTo(-34,18);ctx.moveTo(-9,-7);ctx.lineTo(34,18);ctx.moveTo(9,18);ctx.lineTo(0,-8);ctx.stroke();
-   ctx.strokeStyle='#ff70b8';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-14,-9);ctx.lineTo(-4,-9);ctx.moveTo(27,1);ctx.lineTo(39,1);ctx.stroke();
-   // rider: crouched and leaning into the slalom
-   ctx.strokeStyle='#334d87';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-5,-13);ctx.lineTo(7,-27);ctx.lineTo(20,-13);ctx.lineTo(9,1);ctx.stroke();
-   ctx.strokeStyle='#ff72b5';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(7,-26);ctx.lineTo(-5,-18);ctx.lineTo(-16,-7);ctx.moveTo(8,-25);ctx.lineTo(23,-12);ctx.lineTo(33,0);ctx.stroke();
-   ctx.beginPath();ctx.arc(10,-34,6,0,Math.PI*2);ctx.fillStyle='#8d78e8';ctx.fill();ctx.strokeStyle='#ff9acb';ctx.lineWidth=1.5;ctx.stroke();
-   // drift spark at rear tire
-   ctx.beginPath();ctx.arc(-35,18,22,.25,1.2);ctx.strokeStyle='rgba(255,155,195,.7)';ctx.lineWidth=2;ctx.stroke();
-   ctx.restore();
-  }
+  // Rider animation is intentionally kept in the dedicated card track below the category heading.
+  // The full-screen DNA background contains no cyclist, preventing a duplicate rider on mobile.
   // sparse molecular particles
   for(let i=0;i<24;i++){const x=(i*137.5+t*.006)%Math.max(w,1),y=(i*83.7+t*.012)%Math.max(h,1);ctx.beginPath();ctx.arc(x,y,1.1,0,Math.PI*2);ctx.fillStyle='rgba(135,113,218,.28)';ctx.fill()}
   if(!reduced&&!paused)raf=requestAnimationFrame(draw);
