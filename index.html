@@ -2257,6 +2257,28 @@ showExternalData('byn3');
    }
    ctx.restore();
   });
+  // miniature keirin rider: snakes from right to left with a controlled drift
+  {
+   const cycle=((t*.000075)%1); const x=w+90-cycle*(w+190);
+   const y=Math.max(82,Math.min(h*.19,150))+Math.sin(t*.0022)*8;
+   const lean=Math.sin(t*.0038)*.16;
+   ctx.save();ctx.translate(x,y);ctx.rotate(lean);ctx.scale(.92,.92);
+   // drifting tire smoke and motion ribbons
+   for(let k=0;k<5;k++){const sx=-72-k*13+Math.sin(t*.004+k)*5, sy=17+Math.cos(t*.003+k)*8;ctx.beginPath();ctx.ellipse(sx,sy,10+k*2,3+k*.7,-.18,0,Math.PI*2);ctx.fillStyle=`rgba(160,145,220,${.16-k*.022})`;ctx.fill()}
+   ctx.strokeStyle='rgba(104,120,190,.22)';ctx.lineWidth=2;for(let k=0;k<3;k++){ctx.beginPath();ctx.moveTo(-105-k*9,5+k*7);ctx.quadraticCurveTo(-75-k*8,-2+k*9,-48-k*7,7+k*7);ctx.stroke()}
+   // wheels
+   const spin=t*.018;[-34,34].forEach((wx)=>{ctx.beginPath();ctx.arc(wx,18,16,0,Math.PI*2);ctx.strokeStyle='rgba(65,105,150,.8)';ctx.lineWidth=2.6;ctx.stroke();ctx.beginPath();ctx.moveTo(wx-Math.cos(spin)*14,18-Math.sin(spin)*14);ctx.lineTo(wx+Math.cos(spin)*14,18+Math.sin(spin)*14);ctx.moveTo(wx-Math.sin(spin)*14,18+Math.cos(spin)*14);ctx.lineTo(wx+Math.sin(spin)*14,18-Math.cos(spin)*14);ctx.strokeStyle='rgba(135,115,205,.55)';ctx.lineWidth=1;ctx.stroke()});
+   // frame
+   ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#765ce0';ctx.lineWidth=3.2;ctx.beginPath();ctx.moveTo(-34,18);ctx.lineTo(-9,-7);ctx.lineTo(9,18);ctx.lineTo(-34,18);ctx.moveTo(-9,-7);ctx.lineTo(34,18);ctx.moveTo(9,18);ctx.lineTo(0,-8);ctx.stroke();
+   ctx.strokeStyle='#ff70b8';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-14,-9);ctx.lineTo(-4,-9);ctx.moveTo(27,1);ctx.lineTo(39,1);ctx.stroke();
+   // rider: crouched and leaning into the slalom
+   ctx.strokeStyle='#334d87';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-5,-13);ctx.lineTo(7,-27);ctx.lineTo(20,-13);ctx.lineTo(9,1);ctx.stroke();
+   ctx.strokeStyle='#ff72b5';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(7,-26);ctx.lineTo(-5,-18);ctx.lineTo(-16,-7);ctx.moveTo(8,-25);ctx.lineTo(23,-12);ctx.lineTo(33,0);ctx.stroke();
+   ctx.beginPath();ctx.arc(10,-34,6,0,Math.PI*2);ctx.fillStyle='#8d78e8';ctx.fill();ctx.strokeStyle='#ff9acb';ctx.lineWidth=1.5;ctx.stroke();
+   // drift spark at rear tire
+   ctx.beginPath();ctx.arc(-35,18,22,.25,1.2);ctx.strokeStyle='rgba(255,155,195,.7)';ctx.lineWidth=2;ctx.stroke();
+   ctx.restore();
+  }
   // sparse molecular particles
   for(let i=0;i<24;i++){const x=(i*137.5+t*.006)%Math.max(w,1),y=(i*83.7+t*.012)%Math.max(h,1);ctx.beginPath();ctx.arc(x,y,1.1,0,Math.PI*2);ctx.fillStyle='rgba(135,113,218,.28)';ctx.fill()}
   if(!reduced&&!paused)raf=requestAnimationFrame(draw);
