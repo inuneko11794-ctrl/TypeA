@@ -1001,6 +1001,14 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
 </div>
 
 <script>
+function median(arr){
+ if(!Array.isArray(arr)||!arr.length)return 0;
+ const values=arr.map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
+ if(!values.length)return 0;
+ const mid=Math.floor(values.length/2);
+ return values.length%2?values[mid]:(values[mid-1]+values[mid])/2;
+}
+
 let savedRecords=[],myChart=null,bgmAudio=null,audioUnlocked=false,editingIndex=-1,sfxEnabled=true,audioCtx=null;
 function parseLineGroupsFromText(text){
  const row=String(text||'').match(/^\s*\|\s*並び予想\s*\|\s*(.+)$/m);
