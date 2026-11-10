@@ -690,18 +690,6 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
     </div>
    </div>
   </div>
-  <div class="glass-panel p-4 sm:p-5 mb-5" id="buyFormationReader">
-   <div class="panel-content">
-    <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">BUY FORMATION READER // 買い目テキスト解析</h2>
-    <p class="text-xs text-slate-500 mb-3">例：3連単 12-2345-345 ／ 単勝 1,2 ／ 2車単 1-2 3-4 5-6 7-1</p>
-    <textarea id="buyFormationInput" rows="4" class="field font-mono-tech text-sm mb-3" placeholder="3連単 12-2345-345&#10;単勝 1,2&#10;2車単 1-2 3-4 5-6 7-1"></textarea>
-    <div class="grid grid-cols-3 gap-2">
-     <button id="analyzeBuyFormationBtn" type="button" class="touch-btn btn-cyber col-span-2 py-3 rounded-xl text-xs tracking-widest">買い目を解析・展開する</button>
-     <button id="clearBuyFormationBtn" type="button" class="touch-btn btn-ghost py-3 rounded-xl text-xs tracking-widest">削除</button>
-    </div>
-    <div id="buyFormationResult" class="mt-4" aria-live="polite"><p class="text-xs text-slate-500">買い目テキストを入力して解析すると、券種・フォーメーション・実際の買い目・点数を表示します。</p></div>
-   </div>
-  </div>
   <div class="glass-panel p-4 sm:p-5 mb-5" id="aiDataViewPanel">
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-emerald-400 pl-2 mb-2">AI DATA VIEW // 分析用テキスト出力</h2>
@@ -721,7 +709,7 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
 
   <div class="glass-panel p-4 sm:p-5 mb-5" id="aiPredictionLab">
    <div class="panel-content">
-    <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.7</h2>
+    <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.8</h2>
     <p class="text-xs text-slate-400 mb-3">出走表の保存データから単勝・2車単・3連単を別々に予測します。結果登録後は未学習レースだけを自動学習します。</p>
     <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
     <input id="aiRaceDate" type="date" class="field text-sm mb-3">
@@ -737,9 +725,9 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
   <div class="glass-panel p-4 sm:p-5 mb-5" id="aiResultEntryPanel">
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-emerald-400 pl-2 mb-2">RACE RESULT INPUT // 結果・配当登録</h2>
-    <p class="text-xs text-slate-400 mb-3">予測とは別パネルです。結果が確定したレースだけ選び、着順と各券種の配当を入力してください。</p>
+    <p class="text-xs text-slate-400 mb-3">保存済みの出走表から結果未入力レースを選び、着順と各券種の配当を入力してください。AI予測があるレースは結果登録後に学習します。</p>
     <label class="block text-xs text-slate-300 mb-1" for="aiResultRaceSelect">結果を登録するレース</label>
-    <select id="aiResultRaceSelect" class="field text-sm mb-3"><option value="">予測済みレースを読み込み中…</option></select>
+    <select id="aiResultRaceSelect" class="field text-sm mb-3"><option value="">保存済みレースを読み込み中…</option></select>
     <label class="block text-xs text-slate-300 mb-1" for="aiResultOrder">3連単の着順（3桁入力可）</label>
     <input id="aiResultOrder" inputmode="numeric" maxlength="3" class="field text-2xl text-center tracking-[.5em] mb-1" placeholder="例：342">
     <p id="aiResultOrderPreview" class="text-[10px] text-slate-400 mb-3">342 → 1着3番・2着4番・3着2番</p>
@@ -2739,10 +2727,10 @@ showExternalData('byn3');
  }
  function refreshResultChoices(){
   const sel=$('aiResultRaceSelect'),previous=sel.value;
-  const items=(Array.isArray(savedRecords)?savedRecords:[]).filter(r=>model.predictions[key(r)]&&!validResult(r));
-  sel.innerHTML='<option value="">結果を登録するレースを選択</option>'+items.map(r=>'<option value="'+esc(key(r))+'">'+esc(r.raceDate||'日付なし')+' / '+esc(r.venue)+' / '+esc(r.raceName)+'</option>').join('');
+  const items=(Array.isArray(savedRecords)?savedRecords:[]).filter(r=>!validResult(r)&&rosterCars(r).length>=3);
+  sel.innerHTML='<option value="">結果を登録するレースを選択（'+items.length+'件）</option>'+items.map(r=>'<option value="'+esc(key(r))+'">'+esc(r.raceDate||'日付なし')+' / '+esc(r.venue)+' / '+esc(r.raceName)+(model.predictions[key(r)]?' / AI予測あり':' / AI予測なし')+'</option>').join('');
   if(items.some(r=>key(r)===previous))sel.value=previous;
-  if(!items.length)sel.innerHTML='<option value="">結果待ちの予測レースはありません</option>';
+  if(!items.length)sel.innerHTML='<option value="">結果未入力の出走表はありません</option>';
  }
  function updateOrderPreview(){
   const raw=$('aiResultOrder').value.replace(/[^1-9]/g,'').slice(0,3);$('aiResultOrder').value=raw;
@@ -2750,7 +2738,7 @@ showExternalData('byn3');
  }
  function saveAIResult(){
   const k=$('aiResultRaceSelect').value,r=savedRecords.find(x=>key(x)===k),p=model.predictions[k];
-  if(!r||!p){$('aiResultStatus').textContent='先に結果を登録するレースを選択してください。';return;}
+  if(!r){$('aiResultStatus').textContent='先に結果を登録するレースを選択してください。';return;}
   const raw=$('aiResultOrder').value.trim();
   if(!/^([1-9])([1-9])([1-9])$/.test(raw)||new Set(raw.split('')).size!==3){$('aiResultStatus').textContent='着順は重複しない3桁で入力してください（例：342）。';return;}
   const order=raw.split('').map(Number),validCars=rosterCars(r);
@@ -2763,8 +2751,8 @@ showExternalData('byn3');
   Object.assign(r,typeof normalizeRecord==='function'?normalizeRecord(r):r);
   const ok=typeof persist==='function'&&persist();
   if(!ok){$('aiResultStatus').textContent='保存に失敗しました。入力内容は画面に残しています。';return;}
-  learnPending();if(typeof updateCountDisplay==='function')updateCountDisplay();if(typeof runAnalysis==='function')runAnalysis();
-  $('aiResultStatus').textContent='保存完了：'+raw+' / 2車単 ¥'+p2.toLocaleString()+' / 3連単 ¥'+p3.toLocaleString()+' / 3連複 ¥'+pf.toLocaleString()+'。AI学習を実行しました。';
+  if(p)learnPending();if(typeof updateCountDisplay==='function')updateCountDisplay();if(typeof runAnalysis==='function')runAnalysis();
+  $('aiResultStatus').textContent='保存完了：'+raw+' / 2車単 ¥'+p2.toLocaleString()+' / 3連単 ¥'+p3.toLocaleString()+' / 3連複 ¥'+pf.toLocaleString()+(p?'。AI学習を実行しました。':'。このレースはAI予測がないため、結果保存のみ行いました。');
   ['aiResultOrder','aiResultPayout2','aiResultPayout3','aiResultPayoutF'].forEach(id=>$(id).value='');
   refreshResultChoices();
  }
