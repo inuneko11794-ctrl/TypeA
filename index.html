@@ -660,7 +660,7 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.1</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.2</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -1183,8 +1183,12 @@ function loadMarkdown(event){
    const races=parseMarkdownForBulk(text);
    if(races.length){
     openBulkInputModal(races);
-    setMarkdownStatus(`解析完了：${races.length}レースを検出しました。開催日を確認して保存してください。`);
-    logToTerminal(`> ${races.length}レースを事前登録フォームに展開しました。開催日を確認して保存してください。`,'success');
+    const detectedNumbers=races.map(r=>r.raceName);
+    const duplicateNumbers=detectedNumbers.filter((n,i,a)=>a.indexOf(n)!==i);
+    const numberSummary=detectedNumbers.join('・');
+    const duplicateNote=duplicateNumbers.length?' ／ 重複：'+[...new Set(duplicateNumbers)].join('・'):'';
+    setMarkdownStatus(`解析完了：${races.length}件［${numberSummary}］${duplicateNote}。開催日を確認して保存してください。`,duplicateNumbers.length>0);
+    logToTerminal(`> ${races.length}レース検出：${numberSummary}${duplicateNote}。事前登録フォームに展開しました。`,duplicateNumbers.length?'error':'success');
    }else{
     setMarkdownStatus('テキストは読み込みましたが、レース見出しを検出できません。',true);
     logToTerminal('> レース見出しを検出できません。テキストは入力欄に読み込み済みです。','error');
@@ -1255,7 +1259,7 @@ function checkHighPayoutRisk(category, line1, diffPattern){
 function extractAndSaveData(){
   const inputData=$('dataInput').value;let extractedCount=0,globalVenue="不明";
   // Markdownのレース見出しごとに分割。10Rなどの複数桁番号を保持する。
-  const headingPattern=/^#\s*競輪レースデータ：.*$/gm;
+  const headingPattern=/^#\s*競輪レースデータ[：:].*$/gm;
   const headingMatches=[...inputData.matchAll(headingPattern)];
   let blocks=[];
   if(headingMatches.length){
@@ -1264,10 +1268,10 @@ function extractAndSaveData(){
    blocks=inputData.split(/(?=^\s*(?:\d{1,2}R|レース名))/m);
    if(!blocks.length)blocks=[inputData];
   }
-  const firstHeading=inputData.match(/^#\s*競輪レースデータ：(.+)$/m);
+  const firstHeading=inputData.match(/^#\s*競輪レースデータ[：:](.+)$/m);
   if(firstHeading){for(const v of REAL_VENUES)if(firstHeading[1].includes(v)){globalVenue=v;break}}
   blocks.forEach(block=>{if(!block.trim())return;let venue=globalVenue,raceName="UNKNOWN";
-  const heading=block.match(/^#\s*競輪レースデータ：(.+)$/m);
+  const heading=block.match(/^#\s*競輪レースデータ[：:](.+)$/m);
   if(heading){
    const raceMatch=heading[1].match(/(?<!\d)(\d{1,2})\s*R\b/i);
    if(raceMatch)raceName=String(parseInt(raceMatch[1],10))+"R";
