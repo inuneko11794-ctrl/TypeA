@@ -660,7 +660,7 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.6</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.7</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -716,6 +716,21 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
     </div>
     <div class="flex justify-between text-[10px] text-slate-400 mb-2"><span id="aiDataStatus">未生成</span><span id="aiDataCharCount">0文字</span></div>
     <textarea id="aiDataOutput" rows="9" readonly class="field font-mono-tech text-[11px] resize-y" placeholder="「テキストを生成」を押すと、ここに分析用データが表示されます。"></textarea>
+   </div>
+  </div>
+
+  <div class="glass-panel p-4 sm:p-5 mb-5" id="aiPredictionLab">
+   <div class="panel-content">
+    <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.7</h2>
+    <p class="text-xs text-slate-400 mb-3">出走表の保存データから単勝・2車単・3連単を別々に予測します。結果登録後は未学習レースだけを自動学習します。</p>
+    <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
+    <input id="aiRaceDate" type="date" class="field text-sm mb-3">
+    <div class="grid grid-cols-2 gap-2 mb-3">
+     <button id="runAIPredictionBtn" type="button" class="touch-btn btn-cyber py-3 rounded-xl text-xs">未予測レースを予測</button>
+     <button id="exportAIModelBtn" type="button" class="touch-btn btn-ghost py-3 rounded-xl text-xs">AI学習データを書出</button>
+    </div>
+    <div id="aiPredictionStatus" class="text-xs text-slate-300 mb-2" aria-live="polite">予測履歴 0件 / 学習済み 0件</div>
+    <div id="aiPredictionOutput" class="rounded-xl border border-fuchsia-300/30 bg-slate-950/70 p-3 text-xs text-slate-200 max-h-96 overflow-y-auto">出走表を読み込んで「未予測レースを予測」を押してください。</div>
    </div>
   </div>
   <div class="glass-panel p-4 sm:p-5">
@@ -2618,6 +2633,96 @@ showExternalData('byn3');
    status.textContent='コピーしました。チャットにそのまま貼り付けてください。';
   }catch(e){out.focus();out.select();status.textContent='自動コピーできません。文章を長押ししてコピーしてください。';}
  });
+})();
+</script>
+<script>
+// AI PREDICTION LAB VOL.7 — independent prediction snapshots and online learning.
+(function(){
+ 'use strict';
+ const KEY='battleBankAIModelV1';
+ const $=id=>document.getElementById(id);
+ const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008}},learned:[],updatedAt:null});
+ let model=initial();
+ try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);if(v&&v.version===1&&v.weights&&v.predictions)model=v;}}catch(e){console.warn('AI model load failed',e);}
+ const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(model));return true;}catch(e){console.error(e);return false;}};
+ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const key=r=>[r.venue||'',r.raceDate||'',r.raceName||''].join('|');
+ const validResult=r=>{const a=String(r.pattern||'').split('-').map(Number);return a.length===3&&a.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(a).size===3;};
+ const marks={'◎':4,'◯':3,'〇':3,'○':3,'△':2,'✕':1,'×':1,'⑳':3.5,'●':2.5,'▲':1.7,'✖':.8,'☆':.5,'★':.2};
+ function features(r,car){
+  const groups=Array.isArray(r.lineGroups)?r.lineGroups:[];
+  let lineIndex=-1,pos=0,len=1,head=0;
+  groups.forEach((g,i)=>{const p=(g||[]).map(Number).indexOf(Number(car));if(p>=0){lineIndex=i;pos=p;len=g.length;head=p===0?1:0;}});
+  const mark=String((r.baseMarks||{})[car]||(r.lineMarks||{})[car]||'');
+  return {mark:(marks[mark]||0)/4,head,pos:len>1?pos/(len-1):0,len:Math.min(len,4)/4,car:Number(car)/9};
+ }
+ function score(r,car,market){const f=features(r,car),w=model.weights[market];return f.mark*w.mark+f.head*w.head-f.pos*w.pos+f.len*w.len-f.car*w.car;}
+ function rosterCars(r){
+  const set=new Set();(r.lineGroups||[]).forEach(g=>(g||[]).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));}));
+  Object.keys(r.baseMarks||{}).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));});
+  Object.keys(r.lineMarks||{}).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));});
+  return [...set].sort((a,b)=>a-b);
+ }
+ function ranked(r,market){return rosterCars(r).map(car=>({car,score:score(r,car,market)})).sort((a,b)=>b.score-a.score||a.car-b.car);}
+ function permutations(list,n,limit){
+  const out=[];function walk(prefix,left){if(out.length>=limit)return;if(prefix.length===n){out.push(prefix);return;}left.forEach((v,i)=>walk(prefix.concat(v),left.filter((_,j)=>j!==i)));}walk([],list);return out;
+ }
+ function predict(r){
+  const win=ranked(r,'win'),ex=ranked(r,'exacta'),tri=ranked(r,'trifecta');
+  const exacta=permutations(ex.slice(0,5).map(x=>x.car),2,5);
+  const trifecta=permutations(tri.slice(0,5).map(x=>x.car),3,5);
+  return {createdAt:new Date().toISOString(),race:{venue:r.venue||'',date:r.raceDate||'',race:r.raceName||'',category:r.category||'',lineGroups:r.lineGroups||[],baseMarks:r.baseMarks||{},lineMarks:r.lineMarks||{}},win:win.slice(0,3).map(x=>x.car),exacta,trifecta,scoreSnapshot:{win:win.slice(0,5),exacta:ex.slice(0,5),trifecta:tri.slice(0,5)},learned:false};
+ }
+ function render(){
+  const rows=Object.values(model.predictions),learned=rows.filter(x=>x.learned).length;
+  $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 学習済み '+learned+'件';
+  const recent=rows.slice(-8).reverse();
+  $('aiPredictionOutput').innerHTML=recent.length?recent.map(p=>'<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.learned?'学習済み':'結果待ち')+'</span><div class="mt-1">単勝候補：'+p.win.join(' → ')+'</div><div>2車単候補：'+p.exacta.map(x=>x.join('-')).join(' / ')+'</div><div>3連単候補：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div></div>').join(''):'予測履歴はまだありません。';
+ }
+ function learnPending(){
+  let count=0;
+  (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
+   if(!validResult(r))return;
+   const k=key(r),p=model.predictions[k];if(!p||p.learned)return;
+   const actual=String(r.pattern).split('-').map(Number),cars=rosterCars(r);if(actual.length!==3||!cars.length)return;
+   [['win',[actual[0]]],['exacta',actual.slice(0,2)],['trifecta',actual.slice(0,3)]].forEach(([market,targets])=>{
+    const w=model.weights[market],rate=market==='win'?1:market==='exacta'?.55:.35;
+    cars.forEach(car=>{
+     const f=features(r,car),rank=targets.indexOf(car),reward=rank===0?1:rank===1?.55:rank===2?.25:-.12;
+     const step=.025*rate*reward;
+     Object.keys(f).forEach(kf=>{w[kf]=Math.max(-3,Math.min(5,(Number(w[kf])||0)+step*f[kf]));});
+    });
+   });
+   p.learned=true;p.result=actual;p.learnedAt=new Date().toISOString();model.learned.push({key:k,result:actual,at:p.learnedAt});count++;
+  });
+  if(count){model.updatedAt=new Date().toISOString();save();if(typeof logToTerminal==='function')logToTerminal('> AI自動学習：'+count+'レースを反映しました。','success');}
+  render();
+ }
+ function run(){
+  const date=$('aiRaceDate').value;
+  let made=0,skipped=0;
+  (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
+   if(!Array.isArray(r.lineGroups)||!r.lineGroups.length){skipped++;return;}
+   if(!r.raceDate&&date)r.raceDate=date;
+   if(!r.raceDate){skipped++;return;}
+   const k=key(r);if(model.predictions[k])return;
+   const p=predict(r);if(!p.win.length){skipped++;return;}
+   model.predictions[k]=p;made++;
+  });
+  const ok=save();render();
+  $('aiPredictionStatus').textContent='今回の新規予測 '+made+'件 / 対象外 '+skipped+'件 / 保存 '+(ok?'成功':'失敗');
+  if(typeof logToTerminal==='function')logToTerminal('> AI予測：新規 '+made+'件。予測スナップショットを独立保存しました。',ok?'success':'error');
+ }
+ function exportModel(){
+  const blob=new Blob([JSON.stringify(model,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='battle-bank-ai-learning.json';a.click();URL.revokeObjectURL(url);
+ }
+ $('runAIPredictionBtn').addEventListener('click',run);
+ $('exportAIModelBtn').addEventListener('click',exportModel);
+ const saveButton=$('manSaveBtn');
+ if(saveButton)saveButton.addEventListener('click',()=>{learnPending();});
+ render();
+ window.addEventListener('beforeunload',()=>{save();});
 })();
 </script>
 </body>
