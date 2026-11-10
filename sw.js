@@ -1,4 +1,4 @@
-const CACHE_NAME = 'battle-bank-kun-v86';
+const CACHE_NAME = 'battle-bank-kun-v87';
 const urlsToCache = [
   './',
   './index.html',
