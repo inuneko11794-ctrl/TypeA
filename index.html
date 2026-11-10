@@ -496,9 +496,9 @@ body:after{opacity:.025!important;z-index:1!important}
 .bank-track-cards:before{content:"BATTLE BANK-KUN // 3 RIDER SLALOM";position:absolute;left:12px;top:5px;font:700 8px 'Share Tech Mono',monospace;letter-spacing:.16em;color:rgba(105,87,169,.52);z-index:2}
 .bank-track-cards .bank-line{position:absolute;left:0;right:0;top:43px;height:2px;background:repeating-linear-gradient(90deg,rgba(135,111,207,.38) 0 18px,transparent 18px 31px)}
 .bank-track-cards .bg-racer{position:absolute;top:15px;left:110%;font-size:27px;line-height:1;filter:drop-shadow(0 3px 3px rgba(80,70,130,.25));will-change:transform}
-.bank-track-cards .r-1{animation:card-rider-one 8.5s linear infinite}
-.bank-track-cards .r-2{top:25px;font-size:22px;animation:card-rider-two 9.5s linear -2.7s infinite}
-.bank-track-cards .r-3{top:12px;font-size:25px;animation:card-rider-three 10.5s linear -5.4s infinite}
+.bank-track-cards .r-1{animation:card-rider-one 3.4s linear infinite}
+.bank-track-cards .r-2{top:25px;font-size:22px;animation:card-rider-two 3.9s linear -1.1s infinite}
+.bank-track-cards .r-3{top:12px;font-size:25px;animation:card-rider-three 4.4s linear -2.2s infinite}
 @keyframes card-rider-one{0%{transform:translateX(0) translateY(0) rotate(-5deg)}12%{transform:translateX(-18vw) translateY(5px) rotate(8deg)}25%{transform:translateX(-36vw) translateY(-3px) rotate(-8deg)}38%{transform:translateX(-54vw) translateY(6px) rotate(9deg)}52%{transform:translateX(-72vw) translateY(-4px) rotate(-7deg)}68%{transform:translateX(-90vw) translateY(5px) rotate(7deg)}100%{transform:translateX(-125vw) translateY(0) rotate(-4deg)}}
 @keyframes card-rider-two{0%{transform:translateX(0) translateY(0) rotate(5deg)}18%{transform:translateX(-22vw) translateY(-5px) rotate(-8deg)}34%{transform:translateX(-43vw) translateY(4px) rotate(7deg)}51%{transform:translateX(-65vw) translateY(-5px) rotate(-7deg)}72%{transform:translateX(-92vw) translateY(4px) rotate(8deg)}100%{transform:translateX(-125vw) translateY(0) rotate(-5deg)}}
 @keyframes card-rider-three{0%{transform:translateX(0) translateY(0) rotate(-3deg)}15%{transform:translateX(-20vw) translateY(6px) rotate(9deg)}31%{transform:translateX(-41vw) translateY(-5px) rotate(-8deg)}48%{transform:translateX(-63vw) translateY(5px) rotate(8deg)}67%{transform:translateX(-88vw) translateY(-4px) rotate(-7deg)}100%{transform:translateX(-125vw) translateY(0) rotate(4deg)}}
@@ -507,14 +507,29 @@ body:after{opacity:.025!important;z-index:1!important}
  .bank-track-cards:before{left:8px;top:4px;font-size:7px;letter-spacing:.1em;}
  .bank-track-cards .bank-line{top:61px;opacity:.8}
  .bank-track-cards .bg-racer{font-size:21px;top:12px;line-height:1;filter:drop-shadow(0 2px 2px rgba(80,70,130,.28));}
- .bank-track-cards .r-1{top:12px;animation-duration:7.8s;}
- .bank-track-cards .r-2{top:31px;font-size:19px;animation-duration:8.8s;}
- .bank-track-cards .r-3{top:49px;font-size:20px;animation-duration:9.8s;}
+ .bank-track-cards .r-1{top:12px;animation-duration:3.2s;}
+ .bank-track-cards .r-2{top:31px;font-size:19px;animation-duration:3.7s;}
+ .bank-track-cards .r-3{top:49px;font-size:20px;animation-duration:4.2s;}
 }
 @media(min-width:701px){.bank-track-cards{height:70px}.bank-track-cards .r-2{top:27px}.bank-track-cards .r-3{top:13px}}
 @media(prefers-reduced-motion:reduce){.bank-track-cards .bg-racer{animation:none;left:auto}.bank-track-cards .r-1{left:24%}.bank-track-cards .r-2{left:49%}.bank-track-cards .r-3{left:74%}}
 </style>
 
+
+<style id="MOBILE-RACE-UX-BOOST">
+/* Faster keirin pace: three staggered riders, tuned for narrow screens */
+.bank-track-cards .bg-racer{filter:drop-shadow(0 2px 2px rgba(65,45,130,.24)) drop-shadow(0 0 5px rgba(255,90,190,.42));}
+@keyframes selected-button-wobble{0%,100%{transform:translateY(0) rotate(0deg) scale(1)}18%{transform:translateY(-1.5px) rotate(-1.1deg) scale(1.025)}36%{transform:translateY(0) rotate(1.1deg) scale(1.025)}54%{transform:translateY(-1px) rotate(-.7deg) scale(1.018)}72%{transform:translateY(0) rotate(.7deg) scale(1.018)}}
+.main-tab[aria-selected="true"],.touch-btn.btn-cyber,.touch-btn[aria-pressed="true"],.touch-btn.is-selected,.main-tab.is-selected{position:relative;z-index:2;outline:2px solid rgba(255,255,255,.98)!important;outline-offset:2px;box-shadow:0 0 0 4px rgba(113,83,238,.24),0 0 22px rgba(255,87,190,.48),0 8px 20px rgba(85,75,170,.22)!important;animation:selected-button-wobble 1.35s ease-in-out infinite!important;}
+.main-tab[aria-selected="true"]:after,.touch-btn.btn-cyber:after,.touch-btn[aria-pressed="true"]:after,.touch-btn.is-selected:after{content:"選択中";position:absolute;right:5px;top:-9px;padding:2px 6px;border-radius:999px;background:#fff;color:#6046c9;border:1px solid #9c82ff;font:800 8px/1.4 'Noto Sans JP',sans-serif;letter-spacing:.04em;box-shadow:0 2px 8px rgba(80,60,150,.18);}
+#manualInputModal{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;display:none;align-items:center!important;justify-content:center!important;padding: max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))!important;overflow-y:auto!important;background:rgba(30,24,70,.48)!important;backdrop-filter:blur(9px) saturate(1.15)!important;-webkit-backdrop-filter:blur(9px) saturate(1.15)!important;}
+#manualInputModal.flex{display:flex!important;}
+#manualInputModal .modal-card{position:relative!important;inset:auto!important;float:none!important;margin:auto!important;width:min(100%,560px)!important;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px)!important;transform:none!important;overflow:hidden!important;flex:0 1 auto!important;}
+#manualInputModal .modal-card>div.overflow-y-auto{min-height:0!important;max-height:none!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;}
+body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
+@media(max-width:700px){.bank-track-cards .r-1{animation-duration:2.9s!important}.bank-track-cards .r-2{animation-duration:3.35s!important}.bank-track-cards .r-3{animation-duration:3.8s!important}.bank-track-cards .bg-racer{filter:drop-shadow(0 0 6px rgba(255,75,180,.62));}#manualInputModal{padding-left:10px!important;padding-right:10px!important;}#manualInputModal .modal-card{width:100%!important;border-radius:20px!important;} .main-tab[aria-selected="true"],.touch-btn.btn-cyber,.touch-btn[aria-pressed="true"],.touch-btn.is-selected{animation-duration:1.55s!important;}}
+@media(prefers-reduced-motion:reduce){.main-tab[aria-selected="true"],.touch-btn.btn-cyber,.touch-btn[aria-pressed="true"],.touch-btn.is-selected{animation:none!important;}}
+</style>
 </head>
 <body>
 <canvas id="dnaLifeCanvas" aria-hidden="true"></canvas>
@@ -1000,8 +1015,8 @@ function playBeep(freq=700,type='sine',duration=.08,vol=.035){
  }catch(e){console.warn('SFX unavailable',e)}
 }
 function initManualSelects(){REAL_VENUES.forEach(v=>$('manVenue').add(new Option(v,v)));for(let i=1;i<=12;i++)$('manRace').add(new Option(i+'R',i+'R'))}
-function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');playBeep(600,'square',.1)}
-function closeManualModal(){$('manualInputModal').classList.add('hidden');$('manualInputModal').classList.remove('flex');editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD'}
+function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');document.body.classList.add('manual-modal-open');playBeep(600,'square',.1)}
+function closeManualModal(){$('manualInputModal').classList.add('hidden');$('manualInputModal').classList.remove('flex');document.body.classList.remove('manual-modal-open');editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD'}
 function saveManualData(){
  const venue=$('manVenue').value,race=$('manRace').value,category=$('manClass').value,raceDate=$('manDate').value||'';
  const vals=['manCar1','manCar2','manCar3'].map(id=>$(id).value.trim()),nums=vals.map(v=>v===''?NaN:parseInt(v,10));
