@@ -236,14 +236,226 @@ td { padding:8px; border-bottom:1px solid rgba(0,255,159,.2) !important; }
 th { background: #001500 !important; }
 .border-sky-200, .border-amber-300 { border-color: #00ff9f !important; }
 
+
+/* ===== CELESTIAL SILK THEME: bright sky + hanging spider silk ===== */
+:root{
+  --sky:#eaf8ff; --ink:#24305f; --cyan:#12b8d8; --pink:#ff4f9a;
+  --violet:#8155e8; --gold:#ffbd36; --panel:rgba(255,255,255,.91);
+}
+html,body{background:#eaf8ff!important;color:#26345f!important;text-shadow:none!important}
+body{
+  background:
+    radial-gradient(ellipse at 12% 5%,rgba(255,255,255,.98) 0 8%,transparent 34%),
+    radial-gradient(ellipse at 88% 12%,rgba(255,225,244,.85),transparent 34%),
+    linear-gradient(155deg,#e7f8ff 0%,#f7edff 48%,#fff4e8 100%)!important;
+  background-attachment:fixed!important;
+}
+body:before,body:after{display:none!important;content:none!important}
+.virus-banner,.cyber-particles{display:none!important}
+.app-shell{z-index:2;padding-top:clamp(22px,4vw,42px)}
+.app-shell:before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+  background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.65),transparent 48%);
+}
+.celestial-web{
+  position:absolute;left:0;right:0;top:0;height:290px;z-index:0;
+  pointer-events:none;overflow:hidden;opacity:.95;
+}
+.celestial-web svg{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:min(1100px,115vw);height:285px;overflow:visible}
+.silk-drop{
+  position:absolute;top:0;width:1px;height:var(--drop);left:var(--x);
+  background:linear-gradient(to bottom,rgba(255,255,255,.95),rgba(119,105,230,.25));
+  box-shadow:0 0 5px rgba(255,255,255,.9),0 0 10px rgba(129,85,232,.25);
+  transform-origin:top;animation:silk-sway 5s ease-in-out infinite alternate;
+}
+.silk-drop:after{
+  content:"";position:absolute;bottom:-7px;left:-5px;width:11px;height:11px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff,#ff80bd 48%,#8057df);
+  box-shadow:0 0 12px rgba(255,79,154,.65);
+}
+.silk-drop:nth-child(2n){animation-delay:-2s}
+@keyframes silk-sway{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
+header{position:relative;z-index:2;border-color:rgba(129,85,232,.35)!important}
+header:after{
+  content:"✧  ✦  ✧";position:absolute;right:8%;top:-8px;color:#ff9acb;
+  letter-spacing:1.2em;font-size:18px;text-shadow:0 0 12px white;pointer-events:none
+}
+.neon-title{
+  color:#6c48ce!important;
+  text-shadow:0 2px 0 #fff,0 5px 18px rgba(129,85,232,.22)!important;
+  animation:none!important;letter-spacing:.06em
+}
+.kicker{color:#7950cb!important;border-left-color:#ff65a8!important;text-shadow:none!important}
+.neon-cyan{color:#149ab9!important;text-shadow:none!important}
+.glass-panel{
+  background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(246,242,255,.91))!important;
+  border:1px solid rgba(148,120,221,.35)!important;border-radius:20px!important;
+  box-shadow:0 10px 28px rgba(86,77,151,.10),0 2px 8px rgba(255,255,255,.9) inset!important;
+  animation:none!important;overflow:hidden
+}
+.glass-panel:before{
+  background:linear-gradient(120deg,transparent 0 42%,rgba(255,255,255,.42) 50%,transparent 58%)!important;
+  opacity:.55
+}
+.field,.modal-field{
+  background:rgba(255,255,255,.95)!important;color:#27345f!important;
+  border:1px solid #b8a8e9!important;border-radius:11px!important;
+  box-shadow:inset 0 1px 3px rgba(64,49,119,.05)
+}
+.field::placeholder{color:#9298b5!important}
+.field:focus,.modal-field:focus{border-color:#ff65a8!important;box-shadow:0 0 0 3px rgba(255,101,168,.15)!important}
+.btn-cyber{
+  background:linear-gradient(100deg,#43d8df,#8de8d1 48%,#ffe17d)!important;
+  color:#26345f!important;border:1px solid #4bc9d2!important;
+  box-shadow:0 5px 14px rgba(36,184,198,.2)!important;border-radius:13px!important
+}
+.btn-alert{
+  background:linear-gradient(100deg,#ff6cae,#b47df0)!important;color:#fff!important;
+  border:1px solid #ed79bc!important;box-shadow:0 5px 16px rgba(214,93,172,.22)!important;
+  border-radius:13px!important
+}
+.btn-ghost{
+  background:rgba(255,255,255,.82)!important;color:#7051bb!important;
+  border:1px solid #c9b9ef!important;border-radius:11px!important
+}
+.main-tabs{gap:9px;margin-bottom:26px}
+.main-tab{
+  width:auto!important;min-width:21%!important;flex:1 1 21%;transform:none!important;
+  color:#6549a8!important;text-shadow:none!important;
+  background:linear-gradient(145deg,#fff,#f0eaff)!important;
+  border:1px solid #cfc1f0!important;border-radius:14px!important;
+  box-shadow:0 5px 12px rgba(93,76,151,.09);font-family:'Noto Sans JP',sans-serif
+}
+.main-tab .tab-sub{color:#a36aa9!important}
+.main-tab[aria-selected="true"]{
+  color:#fff!important;background:linear-gradient(110deg,#8d65e8,#ff76ad)!important;
+  border-color:#fff!important;box-shadow:0 7px 18px rgba(157,104,213,.28)!important;
+  animation:none!important;text-shadow:0 1px 2px rgba(55,25,90,.2)!important
+}
+.main-tab[aria-selected="true"] .tab-sub{color:#fff!important;background:transparent!important}
+.main-tabs:after{display:none!important}
+#dataCount{
+  background:linear-gradient(120deg,#fff,#f4eaff)!important;border:1px solid #c7b5ee!important;
+  color:#6049a5!important;box-shadow:0 5px 16px rgba(98,75,164,.12)!important;border-radius:15px!important
+}
+#dataCount span:first-child{color:#d95b9b!important}
+#dataCount span:last-child{color:#6749b1!important;text-shadow:none!important}
+.discovery-card,.card-matrix,.modal-card{
+  background:rgba(255,255,255,.92)!important;color:#344064!important;
+  border:1px solid #d6c9f2!important;border-radius:15px!important;
+  box-shadow:0 5px 16px rgba(90,75,145,.08)!important
+}
+.discovery-chip{background:#f4edff!important;color:#7655bd!important;border:1px solid #d0c0f1!important;border-radius:20px!important}
+.metric-number{color:#e85d9e!important;text-shadow:none!important}
+#outputArea{
+  background:linear-gradient(145deg,#f5f1ff,#edfaff)!important;color:#4d4785!important;
+  border:1px solid #c8b8eb!important;border-radius:13px!important
+}
+#matrixChart{filter:drop-shadow(0 3px 5px rgba(85,75,140,.08))}
+th{background:#eee8ff!important;color:#624b9e!important;border-bottom:1px solid #d3c5f0!important}
+td{color:#354064!important;border-bottom:1px solid #e9e2f6!important}
+table,.bg-white,.bg-white\/60,.bg-sky-100,.bg-amber-50,.rounded-xl.border{
+  background:rgba(255,255,255,.94)!important;color:#344064!important;border-color:#d9cef1!important
+}
+.text-sky-700,.text-sky-800,.text-sky-900,.text-slate-600,.text-slate-500,.text-slate-700{
+  color:#596487!important
+}
+.border-sky-200,.border-amber-300,.border-violet-200{border-color:#d8c9f0!important}
+.scanline{background:linear-gradient(90deg,transparent,#ff8fbd,#8a70e8,#8ce5e0,transparent)!important}
+.touch-btn{transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+.touch-btn:active{transform:translateY(1px) scale(.985);filter:brightness(1.04)}
+@media(max-width:520px){
+ .celestial-web{height:210px;opacity:.72}
+ .celestial-web svg{height:210px;width:145vw}
+ .main-tab{min-width:44%!important;flex:1 1 44%;font-size:10px}
+ header:after{right:2%;font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){.silk-drop{animation:none!important}.touch-btn{transition:none!important}}
+
+</style>
+
+<style id="trader-room-3d-theme">
+:root{--room-cyan:#67f4ff;--room-violet:#9b7cff;--room-pink:#ff78c8;--room-gold:#ffd98a}
+html,body{background:#080b1b!important;color:#eaf5ff!important}
+body{background:radial-gradient(ellipse at 50% 20%,#29305c 0%,#11152d 42%,#070a17 100%) fixed!important;text-shadow:none!important}
+body:before{opacity:.12!important;mix-blend-mode:screen!important}
+body:after{opacity:.2!important}
+.app-shell{width:min(1540px,100%);padding:clamp(12px,2.2vw,34px);z-index:4;perspective:1500px}
+.app-shell>header{background:linear-gradient(120deg,rgba(19,25,55,.88),rgba(36,26,68,.72));border:1px solid rgba(135,174,255,.3);border-radius:20px;padding:20px 24px;box-shadow:0 22px 55px rgba(0,0,0,.35),inset 0 1px rgba(255,255,255,.16);backdrop-filter:blur(18px)}
+.neon-title{color:#e7eaff!important;text-shadow:0 0 12px #8b7cff,0 0 30px rgba(103,244,255,.6)!important;animation:none!important}
+.kicker{color:#8fefff!important;border-color:#8fefff!important;text-shadow:0 0 10px rgba(103,244,255,.5)!important}
+.main-tabs{justify-content:flex-start;padding:8px 10px;background:rgba(9,14,34,.72);border:1px solid rgba(126,157,255,.25);border-radius:16px;backdrop-filter:blur(14px)}
+.main-tab{border-radius:12px!important;background:linear-gradient(145deg,rgba(43,54,96,.95),rgba(22,28,58,.95))!important;color:#cbd8ff!important;border:1px solid rgba(132,163,255,.35)!important;box-shadow:0 8px 18px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.12)!important}
+.main-tab .tab-sub{color:#8cecff!important}.main-tab[aria-selected=true]{background:linear-gradient(120deg,#6556c9,#c35da9)!important;color:#fff!important;box-shadow:0 0 24px rgba(160,119,255,.4),0 8px 20px rgba(0,0,0,.3)!important}
+.glass-panel{background:linear-gradient(145deg,rgba(31,39,77,.91),rgba(14,20,46,.94))!important;border:1px solid rgba(121,165,255,.38)!important;border-radius:18px!important;box-shadow:0 18px 40px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.13),0 0 22px rgba(103,147,255,.08)!important;animation:none!important;backdrop-filter:blur(16px);transform:translateZ(12px)}
+.glass-panel:before{background:linear-gradient(120deg,rgba(255,255,255,.05),transparent 32%,rgba(133,111,255,.04))!important}
+.field,.modal-field{background:rgba(7,13,34,.9)!important;color:#e8f3ff!important;border:1px solid rgba(111,194,255,.45)!important;border-radius:10px!important}
+.field::placeholder{color:#8192b9!important}.btn-cyber{background:linear-gradient(110deg,#42c8df,#6cddc6 55%,#f0d17b)!important;color:#101c38!important;border:0!important}.btn-alert{background:linear-gradient(110deg,#bd6bea,#ed70ad)!important;border:1px solid #df9aff!important;color:white!important}.btn-ghost{background:rgba(39,49,91,.9)!important;color:#c7d8ff!important;border:1px solid rgba(137,169,255,.4)!important}
+#dataCount{background:linear-gradient(130deg,#28365e,#342b62)!important;color:#fff!important;border:1px solid rgba(137,183,255,.55)!important;box-shadow:0 10px 25px rgba(0,0,0,.25)!important}#dataCount span:first-child,#dataCount span:last-child{color:#9ceeff!important}
+.discovery-card,.card-matrix,.modal-card{background:rgba(23,31,65,.96)!important;color:#e7efff!important;border:1px solid rgba(132,160,255,.35)!important;border-radius:14px!important}
+#outputArea{background:linear-gradient(145deg,#0b1630,#172447)!important;color:#9cf3e9!important;border:1px solid rgba(105,210,236,.35)!important}
+th{background:#29345f!important;color:#dce8ff!important}td{color:#e0e9ff!important;border-color:rgba(150,170,230,.16)!important}
+.text-sky-700,.text-sky-800,.text-sky-900,.text-slate-600,.text-slate-500,.text-slate-700{color:#aab9df!important}
+.celestial-web{opacity:.24!important;filter:drop-shadow(0 0 12px #8e79ff)}
+.trader-room{position:fixed;inset:0;z-index:4;pointer-events:none;overflow:hidden;perspective:1100px;opacity:.78}
+.trader-wall{position:absolute;opacity:.92;inset:0 0 15%;display:flex;align-items:flex-start;justify-content:center;gap:2.2vw;padding:5vh 5vw 0;transform:rotateX(-3deg)}
+.trader-screen{position:relative;width:27vw;height:36vh;min-height:190px;max-width:440px;border:9px solid #202b4c;border-bottom-width:16px;border-radius:12px;background:linear-gradient(145deg,#101d3b,#10152e);box-shadow:0 0 0 1px #7185c4,0 0 35px rgba(83,169,255,.22),inset 0 0 30px rgba(71,208,255,.1);transform:rotateY(var(--angle)) translateZ(-80px);overflow:hidden}
+.trader-screen:before{content:"";position:absolute;inset:9px;background:repeating-linear-gradient(0deg,transparent 0 19px,rgba(112,180,255,.1) 20px),linear-gradient(90deg,transparent 49%,rgba(100,180,255,.15) 50%,transparent 51%);border:1px solid rgba(122,205,255,.22)}
+.trader-screen:after{content:"LIVE DATA  /  PATTERN MATRIX";position:absolute;top:12px;left:14px;font:10px monospace;letter-spacing:2px;color:#8cecff;text-shadow:0 0 8px #48dfff}
+.screen-lines{position:absolute;left:15px;right:15px;top:55px;height:60%;background:linear-gradient(160deg,transparent 0 10%,rgba(107,237,255,.8) 10.5% 11%,transparent 11.5% 28%,rgba(185,125,255,.8) 28.5% 29%,transparent 29.5% 46%,rgba(255,124,193,.8) 46.5% 47%,transparent 47.5%);opacity:.7;filter:drop-shadow(0 0 5px #6cecff)}
+.trader-screen:nth-child(1){--angle:13deg;margin-top:8vh}.trader-screen:nth-child(2){--angle:0deg;width:34vw;height:43vh;margin-top:1vh;z-index:1}.trader-screen:nth-child(3){--angle:-13deg;margin-top:8vh}
+.operator-silhouette{position:absolute;bottom:-5vh;opacity:.88;left:50%;width:min(620px,70vw);height:58vh;transform:translateX(-50%);filter:drop-shadow(0 0 28px rgba(86,126,255,.28))}
+.operator-silhouette svg{width:100%;height:100%;overflow:visible}
+.operator-caption{position:absolute;bottom:2vh;left:50%;transform:translateX(-50%);font:10px monospace;letter-spacing:.28em;color:rgba(158,202,255,.42);white-space:nowrap}
+#dashboardPanel{perspective:1200px;gap:clamp(12px,1.5vw,22px)}
+#dashboardPanel>.xl\:col-span-4{transform:rotateY(2deg);transform-origin:right center}
+#dashboardPanel>.xl\:col-span-8{transform:rotateY(-1deg);transform-origin:left center}
+@media(max-width:900px){.trader-room{opacity:.48}.trader-wall{padding:7vh 0 0;gap:1vw}.trader-screen{width:30vw;height:23vh;min-height:120px;border-width:5px;border-bottom-width:10px}.trader-screen:nth-child(2){width:37vw;height:27vh}.operator-silhouette{height:42vh;width:90vw;bottom:-3vh}.trader-room{opacity:.48}.app-shell{padding:10px}.app-shell>header{padding:15px}}
+@media(max-width:520px){.trader-screen{height:18vh;min-height:100px}.trader-screen:nth-child(2){height:21vh}.operator-silhouette{height:34vh}.main-tabs{gap:6px;padding:6px}.main-tab{min-width:44%!important;flex:1 1 44%;font-size:10px}}
+@media(prefers-reduced-motion:reduce){.trader-room *{animation:none!important}}
 </style>
 </head>
 <body>
+
+<div class="celestial-web" aria-hidden="true">
+ <svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMin meet">
+  <defs>
+   <linearGradient id="silkGlow" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#ffffff" stop-opacity=".98"/>
+    <stop offset=".5" stop-color="#b7a1f2" stop-opacity=".7"/>
+    <stop offset="1" stop-color="#ff9bc8" stop-opacity=".75"/>
+   </linearGradient>
+   <filter id="silkBlur"><feGaussianBlur stdDeviation="1.6"/></filter>
+  </defs>
+  <g fill="none" stroke="url(#silkGlow)" stroke-width="1.5" opacity=".9">
+   <path d="M600 -12 L65 285 M600 -12 L230 300 M600 -12 L410 300 M600 -12 L790 300 M600 -12 L970 300 M600 -12 L1135 285"/>
+   <path d="M600 -12 Q390 60 65 285 M600 -12 Q470 100 230 300 M600 -12 Q520 145 410 300 M600 -12 Q680 145 790 300 M600 -12 Q730 100 970 300 M600 -12 Q810 60 1135 285"/>
+   <path d="M65 285 Q600 210 1135 285 M160 230 Q600 170 1040 230 M265 177 Q600 130 935 177 M370 125 Q600 91 830 125 M475 73 Q600 53 725 73"/>
+   <path d="M65 285 Q340 270 600 -12 Q860 270 1135 285" opacity=".65"/>
+  </g>
+  <g fill="#fff" stroke="#c4a9f0" stroke-width="1.5">
+   <circle cx="600" cy="18" r="5"/><circle cx="230" cy="300" r="3"/><circle cx="970" cy="300" r="3"/>
+  </g>
+ </svg>
+ <i class="silk-drop" style="--x:12%;--drop:155px"></i>
+ <i class="silk-drop" style="--x:27%;--drop:205px"></i>
+ <i class="silk-drop" style="--x:43%;--drop:125px"></i>
+ <i class="silk-drop" style="--x:61%;--drop:180px"></i>
+ <i class="silk-drop" style="--x:78%;--drop:145px"></i>
+ <i class="silk-drop" style="--x:91%;--drop:215px"></i>
+</div>
+
 <div class="virus-banner">⚠ SYSTEM INFECTED // CYBER VIRUS ACTIVE // MONITORS COMPROMISED ⚠</div>
 <div class="virus-banner">⚠ SYSTEM INFECTED // CYBER VIRUS ACTIVE // MONITORS COMPROMISED ⚠</div>
 
 <div class="cyber-particles">
     <div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div>
+</div>
+
+<div class="trader-room" aria-hidden="true">
+ <div class="trader-wall"><div class="trader-screen"><div class="screen-lines"></div></div><div class="trader-screen"><div class="screen-lines"></div></div><div class="trader-screen"><div class="screen-lines"></div></div></div>
+ <div class="operator-silhouette"><svg viewBox="0 0 700 600" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="personGrad" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7189bd"/><stop offset=".42" stop-color="#35466f"/><stop offset="1" stop-color="#111b35"/></linearGradient><radialGradient id="headGrad"><stop stop-color="#9aafd8"/><stop offset=".7" stop-color="#52688f"/><stop offset="1" stop-color="#263656"/></radialGradient></defs><path d="M0 600 Q30 490 145 455 Q225 425 262 390 L438 390 Q475 425 555 455 Q670 490 700 600Z" fill="url(#personGrad)" stroke="#7186b7" stroke-opacity=".55" stroke-width="3"/><path d="M255 400 Q245 360 250 315 L450 315 Q455 360 445 400 Q410 450 350 455 Q290 450 255 400Z" fill="#202e4e" stroke="#8ca4d7" stroke-opacity=".35" stroke-width="2"/><ellipse cx="350" cy="235" rx="118" ry="151" fill="url(#headGrad)" stroke="#8298c6" stroke-opacity=".6" stroke-width="3"/><path d="M236 229 Q218 100 310 65 Q420 28 463 144 Q478 190 464 244 Q447 183 416 162 Q368 127 319 155 Q275 177 236 229Z" fill="#111a30" stroke="#8298c6" stroke-opacity=".4" stroke-width="3"/><path d="M240 255 Q218 237 211 267 Q210 304 247 316 M460 255 Q482 237 489 267 Q490 304 453 316" fill="#263654" stroke="#8197c5" stroke-opacity=".5" stroke-width="4"/><path d="M278 370 Q350 405 422 370" fill="none" stroke="#90a9dc" stroke-opacity=".22" stroke-width="3"/><path d="M80 600 Q115 505 255 450 M620 600 Q585 505 445 450" fill="none" stroke="#8adfff" stroke-opacity=".2" stroke-width="4"/></svg></div>
+ <div class="operator-caption">BATTLE BANK-KUN  /  COMMANDER VIEW</div>
 </div>
 
 <div class="app-shell">
