@@ -733,6 +733,25 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
     <div id="aiPredictionOutput" class="rounded-xl border border-fuchsia-300/30 bg-slate-950/70 p-3 text-xs text-slate-200 max-h-96 overflow-y-auto">出走表を読み込んで「未予測レースを予測」を押してください。</div>
    </div>
   </div>
+
+  <div class="glass-panel p-4 sm:p-5 mb-5" id="aiResultEntryPanel">
+   <div class="panel-content">
+    <h2 class="kicker border-l-4 border-emerald-400 pl-2 mb-2">RACE RESULT INPUT // 結果・配当登録</h2>
+    <p class="text-xs text-slate-400 mb-3">予測とは別パネルです。結果が確定したレースだけ選び、着順と各券種の配当を入力してください。</p>
+    <label class="block text-xs text-slate-300 mb-1" for="aiResultRaceSelect">結果を登録するレース</label>
+    <select id="aiResultRaceSelect" class="field text-sm mb-3"><option value="">予測済みレースを読み込み中…</option></select>
+    <label class="block text-xs text-slate-300 mb-1" for="aiResultOrder">3連単の着順（3桁入力可）</label>
+    <input id="aiResultOrder" inputmode="numeric" maxlength="3" class="field text-2xl text-center tracking-[.5em] mb-1" placeholder="例：342">
+    <p id="aiResultOrderPreview" class="text-[10px] text-slate-400 mb-3">342 → 1着3番・2着4番・3着2番</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+     <div><label class="block text-xs text-slate-300 mb-1" for="aiResultPayout2">2車単 配当（円）</label><input id="aiResultPayout2" type="number" min="0" inputmode="numeric" class="field text-right" placeholder="例：1280"></div>
+     <div><label class="block text-xs text-slate-300 mb-1" for="aiResultPayout3">3連単 配当（円）</label><input id="aiResultPayout3" type="number" min="0" inputmode="numeric" class="field text-right" placeholder="例：12500"></div>
+     <div><label class="block text-xs text-slate-300 mb-1" for="aiResultPayoutF">3連複 配当（円）</label><input id="aiResultPayoutF" type="number" min="0" inputmode="numeric" class="field text-right" placeholder="例：2400"></div>
+    </div>
+    <button id="saveAIResultBtn" type="button" class="touch-btn btn-alert w-full py-3 rounded-xl text-sm">結果・配当を保存してAI学習</button>
+    <div id="aiResultStatus" class="text-xs text-slate-300 mt-2" aria-live="polite">結果が確定したレースだけ登録してください。</div>
+   </div>
+  </div>
   <div class="glass-panel p-4 sm:p-5">
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-sky-500 pl-2 mb-4">SYS.COMMANDS // 制御</h2>
@@ -2591,7 +2610,7 @@ showExternalData('byn3');
   const pick={date:safe(r.raceDate),venue:safe(r.venue),race:safe(r.raceName),category:safe(r.category),
    line1:safe(r.line1),lineHeads:safe(r.lineHeads),lineGroups:safe(r.lineGroups),
    baseMarks:safe(r.baseMarks),lineMarks:safe(r.lineMarks),lineMarkGroups:safe(r.lineMarkGroups),
-   result:safe(r.pattern),exacta:safe(r.exacta),payout2ren:Number(r.payout2ren)||0,payout3ren:Number(r.payout)||0,
+   result:safe(r.pattern),exacta:safe(r.exacta),payout2ren:Number(r.payout2ren)||0,payout3ren:Number(r.payout)||0,payout3fuku:Number(r.payout3fuku)||0,
    source:safe(r.sourceType)};
   Object.keys(pick).forEach(k=>{if(pick[k]===null)delete pick[k]});
   return pick;
@@ -2700,16 +2719,17 @@ showExternalData('byn3');
  }
  function run(){
   const date=$('aiRaceDate').value;
-  let made=0,skipped=0;
+  let made=0,skipped=0,dateChanged=false;
   (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
    if(!Array.isArray(r.lineGroups)||!r.lineGroups.length){skipped++;return;}
-   if(!r.raceDate&&date)r.raceDate=date;
+   if(!r.raceDate&&date){r.raceDate=date;dateChanged=true;}
    if(!r.raceDate){skipped++;return;}
    const k=key(r);if(model.predictions[k])return;
    const p=predict(r);if(!p.win.length){skipped++;return;}
    model.predictions[k]=p;made++;
   });
-  const ok=save();render();
+  if(dateChanged&&typeof persist==='function')persist();
+  const ok=save();render();refreshResultChoices();
   $('aiPredictionStatus').textContent='今回の新規予測 '+made+'件 / 対象外 '+skipped+'件 / 保存 '+(ok?'成功':'失敗');
   if(typeof logToTerminal==='function')logToTerminal('> AI予測：新規 '+made+'件。予測スナップショットを独立保存しました。',ok?'success':'error');
  }
@@ -2717,11 +2737,48 @@ showExternalData('byn3');
   const blob=new Blob([JSON.stringify(model,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download='battle-bank-ai-learning.json';a.click();URL.revokeObjectURL(url);
  }
+ function refreshResultChoices(){
+  const sel=$('aiResultRaceSelect'),previous=sel.value;
+  const items=(Array.isArray(savedRecords)?savedRecords:[]).filter(r=>model.predictions[key(r)]&&!validResult(r));
+  sel.innerHTML='<option value="">結果を登録するレースを選択</option>'+items.map(r=>'<option value="'+esc(key(r))+'">'+esc(r.raceDate||'日付なし')+' / '+esc(r.venue)+' / '+esc(r.raceName)+'</option>').join('');
+  if(items.some(r=>key(r)===previous))sel.value=previous;
+  if(!items.length)sel.innerHTML='<option value="">結果待ちの予測レースはありません</option>';
+ }
+ function updateOrderPreview(){
+  const raw=$('aiResultOrder').value.replace(/[^1-9]/g,'').slice(0,3);$('aiResultOrder').value=raw;
+  $('aiResultOrderPreview').textContent=raw.length===3&&new Set(raw.split('')).size===3?raw[0]+' → 1着 / '+raw[1]+' → 2着 / '+raw[2]+' → 3着':'3桁の異なる車番を入力（例：342）';
+ }
+ function saveAIResult(){
+  const k=$('aiResultRaceSelect').value,r=savedRecords.find(x=>key(x)===k),p=model.predictions[k];
+  if(!r||!p){$('aiResultStatus').textContent='先に結果を登録するレースを選択してください。';return;}
+  const raw=$('aiResultOrder').value.trim();
+  if(!/^([1-9])([1-9])([1-9])$/.test(raw)||new Set(raw.split('')).size!==3){$('aiResultStatus').textContent='着順は重複しない3桁で入力してください（例：342）。';return;}
+  const order=raw.split('').map(Number),validCars=rosterCars(r);
+  if(order.some(n=>!validCars.includes(n))){$('aiResultStatus').textContent='入力した車番が選択レースの出走表にありません。';return;}
+  const money=id=>{const v=$(id).value.trim();return v===''?0:Math.max(0,Math.floor(Number(v)||0));};
+  const p2=money('aiResultPayout2'),p3=money('aiResultPayout3'),pf=money('aiResultPayoutF');
+  if(typeof takeUndoSnapshot==='function')takeUndoSnapshot('AI結果入力');
+  r.pattern=order.join('-');r.exacta=order[0]+'-'+order[1];r.payout2ren=p2;r.payout=p3;r.payout3fuku=pf;r.sourceType='ai-result';
+  const d1=Math.abs(order[0]-order[1]),d2=Math.abs(order[1]-order[2]);r.diffPattern=d1+d2===4?'4':d1+'-'+d2;r.diffDisplay=d1+d2===4?'4(合算)':r.diffPattern;
+  Object.assign(r,typeof normalizeRecord==='function'?normalizeRecord(r):r);
+  const ok=typeof persist==='function'&&persist();
+  if(!ok){$('aiResultStatus').textContent='保存に失敗しました。入力内容は画面に残しています。';return;}
+  learnPending();if(typeof updateCountDisplay==='function')updateCountDisplay();if(typeof runAnalysis==='function')runAnalysis();
+  $('aiResultStatus').textContent='保存完了：'+raw+' / 2車単 ¥'+p2.toLocaleString()+' / 3連単 ¥'+p3.toLocaleString()+' / 3連複 ¥'+pf.toLocaleString()+'。AI学習を実行しました。';
+  ['aiResultOrder','aiResultPayout2','aiResultPayout3','aiResultPayoutF'].forEach(id=>$(id).value='');
+  refreshResultChoices();
+ }
+ $('aiResultOrder').addEventListener('input',updateOrderPreview);
+ $('aiResultRaceSelect').addEventListener('change',()=>{
+  const r=savedRecords.find(x=>key(x)===$('aiResultRaceSelect').value);if(!r)return;
+  $('aiResultOrder').value='';$('aiResultPayout2').value=r.payout2ren||'';$('aiResultPayout3').value=r.payout||'';$('aiResultPayoutF').value=r.payout3fuku||'';updateOrderPreview();
+ });
+ $('saveAIResultBtn').addEventListener('click',saveAIResult);
  $('runAIPredictionBtn').addEventListener('click',run);
  $('exportAIModelBtn').addEventListener('click',exportModel);
  const saveButton=$('manSaveBtn');
  if(saveButton)saveButton.addEventListener('click',()=>{learnPending();});
- render();
+ refreshResultChoices();render();
  window.addEventListener('beforeunload',()=>{save();});
 })();
 </script>
