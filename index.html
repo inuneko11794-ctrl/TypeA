@@ -1663,6 +1663,13 @@ function openBulkInputModal(races){
    <input type="hidden" id="bulk_cat_${idx}" value="${escapeHTML(r.category)}"><input type="hidden" id="bulk_line1_${idx}" value="${escapeHTML(r.line1||'')}"><input type="hidden" id="bulk_lineHeads_${idx}" value="${escapeHTML(JSON.stringify(r.lineHeads||[]))}"><input type="hidden" id="bulk_lineGroups_${idx}" value="${escapeHTML(JSON.stringify(r.lineGroups||[]))}"><input type="hidden" id="bulk_baseMarks_${idx}" value="${escapeHTML(JSON.stringify(r.baseMarks||{}))}"><input type="hidden" id="bulk_lineMarks_${idx}" value="${escapeHTML(JSON.stringify(r.lineMarks||{}))}"><input type="hidden" id="bulk_lineMarkGroups_${idx}" value="${escapeHTML(JSON.stringify(r.lineMarkGroups||[]))}">`;
   container.appendChild(card);
  });
+ const common=$('bulkCommonDate');
+ const dates=[...new Set(races.map(r=>r.raceDate||'').filter(Boolean))];
+ if(common)common.value=dates.length===1?dates[0]:'';
+ if(common)common.onchange=()=>{
+  const value=common.value;
+  [...container.querySelectorAll('input[type="date"]')].forEach(input=>{input.value=value;});
+ };
  $('bulkInputModal').classList.remove('hidden');$('bulkInputModal').classList.add('flex');
 }
 function closeBulkInputModal(){
@@ -1677,13 +1684,14 @@ function saveAllBulkRecords(){
   const host=$('bulkRaceContainer');
   if(!host)throw new Error('bulkRaceContainer が見つかりません');
   const cards=host.children;
+  const commonDate=$('bulkCommonDate')?.value||'';
   if(!cards.length){stage('登録カードが0件です','error');alert('登録するレースがありません。Markdownの解析結果を確認してください。');return;}
   stage('対象レース '+cards.length+'件');
   takeUndoSnapshot('DataMap事前登録');
   let saved=0,updated=0,skipped=0;
   for(let i=0;i<cards.length;i++){
    const venue=$('bulk_venue_'+i)?.value||'不明',raceName=$('bulk_race_'+i)?.value||'UNKNOWN';
-   const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||'',line1=$('bulk_line1_'+i)?.value||'',lineHeads=(()=>{try{return JSON.parse($('bulk_lineHeads_'+i)?.value||'[]')}catch(e){return []}})(),lineGroups=(()=>{try{return JSON.parse($('bulk_lineGroups_'+i)?.value||'[]')}catch(e){return []}})(),baseMarks=(()=>{try{return JSON.parse($('bulk_baseMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarks=(()=>{try{return JSON.parse($('bulk_lineMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarkGroups=(()=>{try{return JSON.parse($('bulk_lineMarkGroups_'+i)?.value||'[]')}catch(e){return []}})();
+   const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||commonDate,line1=$('bulk_line1_'+i)?.value||'',lineHeads=(()=>{try{return JSON.parse($('bulk_lineHeads_'+i)?.value||'[]')}catch(e){return []}})(),lineGroups=(()=>{try{return JSON.parse($('bulk_lineGroups_'+i)?.value||'[]')}catch(e){return []}})(),baseMarks=(()=>{try{return JSON.parse($('bulk_baseMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarks=(()=>{try{return JSON.parse($('bulk_lineMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarkGroups=(()=>{try{return JSON.parse($('bulk_lineMarkGroups_'+i)?.value||'[]')}catch(e){return []}})();
    if(raceName==='UNKNOWN'){skipped++;continue}
    const incoming=normalizeRecord({venue,raceName,raceDate,category,line1,lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,pattern:'',exacta:'',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,sourceType:'pre-registration',timestamp:Date.now()});
    const idx=savedRecords.findIndex(r=>recordKey(r)===recordKey(incoming));
@@ -1694,7 +1702,9 @@ function saveAllBulkRecords(){
   stage('レコード作成完了：新規 '+saved+'件／更新 '+updated+'件');
   const ok=persist();
   if(!ok){stage('端末保存に失敗しました。画面は閉じません','error');alert('端末への保存を確認できませんでした。画面下の診断ログを確認してください。');return;}
-  stage('端末保存OK','success');
+  const stored=JSON.parse(localStorage.getItem('battleBankProData')||'[]');
+  const dateCheck=stored.filter(r=>r.sourceType==='pre-registration'&&r.raceDate);
+  stage('端末保存OK／開催日付き '+dateCheck.length+'件','success');
   try{updateCountDisplay()}catch(e){stage('件数更新エラー：'+e.message,'error')}
   try{runAnalysis()}catch(e){stage('分析更新エラー：'+e.message,'error')}
   try{renderRecordManager()}catch(e){stage('記録一覧更新エラー：'+e.message,'error')}
@@ -2178,6 +2188,11 @@ if ("serviceWorker" in navigator) {
    <h2 class="font-orbitron text-2xl sm:text-3xl font-black tracking-widest">BULK MANUAL INPUT</h2>
    <p class="text-[10px] font-bold mt-1">FILE LOADED // レース情報の事前登録</p>
   </header>
+  <div class="mb-2 rounded-lg border border-sky-300 bg-sky-50 p-3">
+   <label for="bulkCommonDate" class="block text-xs font-bold text-sky-900 mb-1">開催日（全レース共通）</label>
+   <input type="date" id="bulkCommonDate" class="modal-field w-full">
+   <p class="text-[10px] text-slate-600 mt-1">ここに入力すると、各レースの日付にも反映されます。個別の日付変更も可能です。</p>
+  </div>
   <div id="bulkRaceContainer" class="flex-1 overflow-y-auto space-y-4 pr-1" style="max-height: calc(95dvh - 180px);">
    <!-- Races will be injected here -->
   </div>
