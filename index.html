@@ -660,7 +660,7 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.2</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.3</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -932,9 +932,10 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
    <div class="discovery-card">
     <h3 class="font-black text-sm mb-2">DATABASE SAFETY // データ保護</h3>
-    <p class="text-xs text-slate-600 mb-3">自動バックアップはこのブラウザ内に最大5世代保存します。JSONとして手動保存・復元もできます。</p>
+    <p class="text-xs text-slate-600 mb-3">自動バックアップはこのブラウザ内に最大30世代保存します。保存日時・件数を確認して世代を選んで復元できます。JSONを端末にも保存してください。</p>
     <div class="grid grid-cols-2 gap-2"><button id="backupNowBtn" class="touch-btn btn-cyber py-3 rounded-lg text-xs">今すぐバックアップ</button><button id="restoreBackupBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">自動バックアップ復元</button><button id="restoreJsonBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">JSONから復元</button><button id="undoActionBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">一つ前に戻す</button><button id="downloadBackupBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">JSON保存</button></div>
     <input type="file" id="restoreBackupFile" class="hidden" accept=".json,application/json">
+    <div class="mt-3 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-2"><select id="backupVersionSelect" class="field text-xs w-full"><option value="">バックアップを確認中…</option></select><button id="restoreSelectedBackupBtn" class="touch-btn btn-alert py-2 px-3 rounded-lg text-xs">選択した世代を復元</button></div>
     <div id="backupStatus" class="text-[11px] text-sky-800 mt-2">バックアップ状態を確認中…</div>
    </div>
    <div class="discovery-card">
@@ -1790,7 +1791,7 @@ async function writeBackup(label='自動バックアップ'){
   await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});
   const read=db.transaction('snapshots','readonly').objectStore('snapshots').getAll();
   const all=await new Promise((res,rej)=>{read.onsuccess=()=>res(read.result||[]);read.onerror=()=>rej(read.error);});
-  all.sort((a,b)=>b.id-a.id).slice(5).forEach(x=>{const t=db.transaction('snapshots','readwrite');t.objectStore('snapshots').delete(x.id)});
+  all.sort((a,b)=>b.id-a.id).slice(30).forEach(x=>{const t=db.transaction('snapshots','readwrite');t.objectStore('snapshots').delete(x.id)});
   const status=$('backupStatus');if(status)status.textContent=`自動バックアップ保存済み：${new Date().toLocaleString('ja-JP')} ／ ${savedRecords.length}件`;
  }catch(e){const status=$('backupStatus');if(status)status.textContent='自動バックアップを利用できません。JSON保存を使用してください。';console.warn(e)}
 }
@@ -1799,10 +1800,16 @@ function scheduleAutoBackup(){clearTimeout(backupTimer);backupTimer=setTimeout((
 async function listBackups(){
  try{const db=await openBackupDB(),req=db.transaction('snapshots','readonly').objectStore('snapshots').getAll();const arr=await new Promise((res,rej)=>{req.onsuccess=()=>res(req.result||[]);req.onerror=()=>rej(req.error)});return arr.sort((a,b)=>b.id-a.id)}catch(e){return []}
 }
-async function restoreLatestBackup(){
- const backups=await listBackups();if(!backups.length){alert('復元できるバックアップがありません。');return;}
- const b=backups[0];if(!confirm(`${new Date(b.id).toLocaleString('ja-JP')} のバックアップ（${b.count}件）に復元しますか？現在のデータは復元前に保存します。`))return;
- takeUndoSnapshot('バックアップ復元前');savedRecords=(b.records||[]).map(normalizeRecord);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal('> バックアップから復元しました。','success');
+async function refreshBackupStatus(){
+ const backups=await listBackups(),status=$('backupStatus'),select=$('backupVersionSelect');
+ if(select){select.innerHTML='';if(!backups.length){select.add(new Option('バックアップなし',''));}else backups.forEach((b,i)=>select.add(new Option(`${new Date(b.id).toLocaleString('ja-JP')} ／ ${b.count}件 ／ ${b.label||'バックアップ'}`,String(b.id))));}
+ if(status){const latest=backups[0];status.textContent=latest?`バックアップ ${backups.length}/30世代 ｜ 最終保存：${new Date(latest.id).toLocaleString('ja-JP')} ｜ ${latest.count}件`:'バックアップ0件 ｜ データを登録・保存すると自動バックアップを作成します。';}
+}
+async function restoreSelectedBackup(){
+ const backups=await listBackups(),select=$('backupVersionSelect'),id=Number(select&&select.value),b=backups.find(x=>x.id===id);
+ if(!b){alert('復元するバックアップ世代を選択してください。');return;}
+ if(!confirm(`${new Date(b.id).toLocaleString('ja-JP')} のバックアップ（${b.count}件）に復元しますか？現在のデータは復元前に保存します。`))return;
+ takeUndoSnapshot('バックアップ復元前');savedRecords=(b.records||[]).map(normalizeRecord);localStorage.setItem('battleBankProData',JSON.stringify(savedRecords));updateCountDisplay();runAnalysis();renderRecordManager();await writeBackup('復元前の退避');await refreshBackupStatus();logToTerminal('> 選択した世代から復元しました。','success');
 }
 function downloadJsonBackup(){const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`battle-bank-kun-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function restoreJsonBackup(event){const f=event.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(!Array.isArray(data))throw Error('not array');if(!confirm(`${data.length}件のデータで現在のDBを置き換えますか？`))return;takeUndoSnapshot('JSON復元前');savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal(`> JSON復元完了：${savedRecords.length}件`,'success');}catch(e){alert('JSONの形式を確認してください。')}finally{event.target.value=''}};reader.readAsText(f,'UTF-8');}
@@ -1827,7 +1834,7 @@ function loadMusicFile(event){const f=event.target.files?.[0];if(!f)return;const
 async function playPersonalMusic(){const a=$('personalMusic');if(!a.src){alert('先に音楽ファイルを選択してください。');return;}try{await a.play();$('musicState').textContent='再生中';}catch(e){$('musicState').textContent='再生できません。形式を確認してください。';}}
 function stopPersonalMusic(){const a=$('personalMusic');a.pause();a.currentTime=0;$('musicState').textContent='停止中';}
 function bindUserHub(){
- bind('backupNowBtn',()=>writeBackup('手動バックアップ'));bind('restoreBackupBtn',restoreLatestBackup);bind('restoreJsonBtn',()=>$('restoreBackupFile').click());bind('undoActionBtn',undoLastAction);bind('downloadBackupBtn',downloadJsonBackup);
+ bind('backupNowBtn',async()=>{await writeBackup('手動バックアップ');await refreshBackupStatus();});refreshBackupStatus();bind('restoreBackupBtn',async()=>{await refreshBackupStatus();const sel=$('backupVersionSelect');if(sel&&sel.options.length>1)sel.selectedIndex=0;await restoreSelectedBackup();});bind('restoreSelectedBackupBtn',restoreSelectedBackup);bind('restoreJsonBtn',()=>$('restoreBackupFile').click());bind('undoActionBtn',undoLastAction);bind('downloadBackupBtn',downloadJsonBackup);
  bind('duplicateCheckBtn',runDuplicateCheck);bind('qualityCheckBtn',runQualityCheck);bind('anomalyScanBtn',()=>{discoverPatterns();$('discoverySection').scrollIntoView({behavior:'smooth'});});bind('saveScanPresetBtn',saveScanPreset);
  $('savedScanPresets').addEventListener('click',e=>{const l=e.target.closest('[data-load-preset]'),d=e.target.closest('[data-delete-preset]');if(l)applySavedPreset(Number(l.dataset.loadPreset));if(d){const a=readScanPresets();a.splice(Number(d.dataset.deletePreset),1);try{localStorage.setItem('battleBankScanPresets',JSON.stringify(a));}catch(err){alert('条件を更新できませんでした。');}renderScanPresets();}});
  $('restoreBackupFile').addEventListener('change',restoreJsonBackup);$('musicFileInput').addEventListener('change',loadMusicFile);bind('musicPlayBtn',playPersonalMusic);bind('musicStopBtn',stopPersonalMusic);
