@@ -660,7 +660,7 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.5</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.6</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -700,6 +700,22 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
      <button id="clearBuyFormationBtn" type="button" class="touch-btn btn-ghost py-3 rounded-xl text-xs tracking-widest">削除</button>
     </div>
     <div id="buyFormationResult" class="mt-4" aria-live="polite"><p class="text-xs text-slate-500">買い目テキストを入力して解析すると、券種・フォーメーション・実際の買い目・点数を表示します。</p></div>
+   </div>
+  </div>
+  <div class="glass-panel p-4 sm:p-5 mb-5" id="aiDataViewPanel">
+   <div class="panel-content">
+    <h2 class="kicker border-l-4 border-emerald-400 pl-2 mb-2">AI DATA VIEW // 分析用テキスト出力</h2>
+    <p class="text-xs text-slate-400 mb-3">保存済みレースの数値・ライン・印・結果を、チャットへ貼り付けられる文章に変換します。ファイル添付は不要です。</p>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+     <select id="aiDataScope" class="field text-xs"><option value="all">全レース</option><option value="result">結果入力済み</option><option value="pending">結果未入力</option><option value="line">ライン情報あり</option></select>
+     <select id="aiDataLimit" class="field text-xs"><option value="30">最新30件</option><option value="50" selected>最新50件</option><option value="100">最新100件</option><option value="all">対象すべて</option></select>
+    </div>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+     <button id="generateAIDataBtn" type="button" class="touch-btn btn-cyber py-3 rounded-xl text-xs">テキストを生成</button>
+     <button id="copyAIDataBtn" type="button" class="touch-btn btn-alert py-3 rounded-xl text-xs">テキストをコピー</button>
+    </div>
+    <div class="flex justify-between text-[10px] text-slate-400 mb-2"><span id="aiDataStatus">未生成</span><span id="aiDataCharCount">0文字</span></div>
+    <textarea id="aiDataOutput" rows="9" readonly class="field font-mono-tech text-[11px] resize-y" placeholder="「テキストを生成」を押すと、ここに分析用データが表示されます。"></textarea>
    </div>
   </div>
   <div class="glass-panel p-4 sm:p-5">
@@ -2546,6 +2562,62 @@ showExternalData('byn3');
  const clearButton=document.getElementById('clearBuyFormationBtn');
  if(clearButton)clearButton.addEventListener('click',()=>{input.value='';output.innerHTML='<p class="text-xs text-slate-500">買い目テキストを入力して解析すると、券種・フォーメーション・実際の買い目・点数を表示します。</p>';input.focus();});
  input.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')render();});
+})();
+</script>
+<script>
+// AI DATA VIEW VOL.6 — exports readable text only; never changes stored race records.
+(function(){
+ const $id=id=>document.getElementById(id);
+ const scope=$id('aiDataScope'),limit=$id('aiDataLimit'),out=$id('aiDataOutput');
+ const status=$id('aiDataStatus'),chars=$id('aiDataCharCount');
+ if(!scope||!limit||!out)return;
+ const safe=v=>v===undefined||v===null||v===''?null:v;
+ const compact=r=>{
+  const pick={date:safe(r.raceDate),venue:safe(r.venue),race:safe(r.raceName),category:safe(r.category),
+   line1:safe(r.line1),lineHeads:safe(r.lineHeads),lineGroups:safe(r.lineGroups),
+   baseMarks:safe(r.baseMarks),lineMarks:safe(r.lineMarks),lineMarkGroups:safe(r.lineMarkGroups),
+   result:safe(r.pattern),exacta:safe(r.exacta),payout2ren:Number(r.payout2ren)||0,payout3ren:Number(r.payout)||0,
+   source:safe(r.sourceType)};
+  Object.keys(pick).forEach(k=>{if(pick[k]===null)delete pick[k]});
+  return pick;
+ };
+ function generate(){
+  const records=Array.isArray(savedRecords)?savedRecords:[];
+  let filtered=records.filter(r=>{
+   if(scope.value==='result')return typeof hasValidResult==='function'?hasValidResult(r):!!r.pattern;
+   if(scope.value==='pending')return !(typeof hasValidResult==='function'?hasValidResult(r):!!r.pattern);
+   if(scope.value==='line')return !!(r.line1||(r.lineGroups||[]).length||(r.lineHeads||[]).length);
+   return true;
+  }).slice().sort((a,b)=>(Number(b.timestamp)||0)-(Number(a.timestamp)||0));
+  const total=filtered.length;
+  if(limit.value!=='all')filtered=filtered.slice(0,Number(limit.value));
+  const resultCount=filtered.filter(r=>typeof hasValidResult==='function'?hasValidResult(r):!!r.pattern).length;
+  const lines=[
+   'BATTLE BANK-KUN / AI DATA VIEW',
+   'format: JSON Lines (one race per line)',
+   'generated_at: '+new Date().toISOString(),
+   'database_records: '+records.length,
+   'matched_records: '+total,
+   'included_records: '+filtered.length,
+   'result_entered_included: '+resultCount,
+   'scope: '+scope.options[scope.selectedIndex].text,
+   '--- RACE DATA ---',
+   ...filtered.map(r=>JSON.stringify(compact(r)))
+  ];
+  out.value=lines.join('\n');
+  status.textContent=filtered.length+'件を出力（対象 '+total+'件）';
+  chars.textContent=out.value.length.toLocaleString()+'文字';
+ }
+ $id('generateAIDataBtn').addEventListener('click',generate);
+ $id('copyAIDataBtn').addEventListener('click',async()=>{
+  if(!out.value.trim())generate();
+  if(!out.value.trim()){status.textContent='コピー対象がありません';return;}
+  try{
+   if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(out.value);}
+   else{out.focus();out.select();document.execCommand('copy');}
+   status.textContent='コピーしました。チャットにそのまま貼り付けてください。';
+  }catch(e){out.focus();out.select();status.textContent='自動コピーできません。文章を長押ししてコピーしてください。';}
+ });
 })();
 </script>
 </body>
