@@ -1755,7 +1755,7 @@ function saveBatchEdit(){
  }
  persist();updateCountDisplay();runAnalysis();renderRecordManager();const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
 }
-function deleteRecord(idx){const r=savedRecords[idx];if(!r)return;if(!confirm(`${r.venue||'不明'} ${r.raceName||''}（${r.raceDate||'開催日未設定'}）を削除しますか？`))return;takeUndoSnapshot('レース削除');savedRecords.splice(idx,1);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal('> レース記録を1件削除しました。','success');}
+function deleteRecord(idx){const r=savedRecords[idx];if(!r)return;if(!confirm(`${r.venue||'不明'} ${r.raceName||''}（${r.raceDate||'開催日未設定'}）を削除しますか？`))return;takeUndoSnapshot('レース削除');savedRecords.splice(idx,1);persist();updateCountDisplay();runAnalysis();renderRecordManager();try{updateBondSelect()}catch(e){console.error('bond chart refresh after delete failed',e)}logToTerminal('> レース記録を1件削除しました。','success');}
 
 
 // ===== V10 USER CONTROL HUB =====
