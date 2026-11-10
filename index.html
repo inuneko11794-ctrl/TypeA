@@ -660,7 +660,7 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.3</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.4</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -688,6 +688,15 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
      <button id="extractBtn" type="button" class="touch-btn btn-cyber py-4 rounded-xl text-xs tracking-widest">📥 EXTRACT & ARCHIVE [データ抽出保存]</button>
      <button id="syncBtn" type="button" class="touch-btn btn-alert py-4 rounded-xl text-xs tracking-widest">📋 PRE-REGISTER [レース情報を事前登録]</button>
     </div>
+   </div>
+  </div>
+  <div class="glass-panel p-4 sm:p-5 mb-5" id="buyFormationReader">
+   <div class="panel-content">
+    <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">BUY FORMATION READER // 買い目テキスト解析</h2>
+    <p class="text-xs text-slate-500 mb-3">例：3連単 12-2345-345 ／ 単勝 1,2 ／ 2車単 1-2 3-4 5-6 7-1</p>
+    <textarea id="buyFormationInput" rows="4" class="field font-mono-tech text-sm mb-3" placeholder="3連単 12-2345-345&#10;単勝 1,2&#10;2車単 1-2 3-4 5-6 7-1"></textarea>
+    <button id="analyzeBuyFormationBtn" type="button" class="touch-btn btn-cyber w-full py-3 rounded-xl text-xs tracking-widest">買い目を解析・展開する</button>
+    <div id="buyFormationResult" class="mt-4" aria-live="polite"><p class="text-xs text-slate-500">買い目テキストを入力して解析すると、券種・フォーメーション・実際の買い目・点数を表示します。</p></div>
    </div>
   </div>
   <div class="glass-panel p-4 sm:p-5">
@@ -2485,5 +2494,53 @@ showExternalData('byn3');
 })();
 </script>
 
+
+<script id="BUY-FORMATION-READER">
+(()=>{'use strict';
+ const input=document.getElementById('buyFormationInput'),button=document.getElementById('analyzeBuyFormationBtn'),output=document.getElementById('buyFormationResult');
+ if(!input||!button||!output)return;
+ const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const uniq=a=>[...new Set(a)],digits=s=>[...String(s)].filter(c=>/[1-9]/.test(c)).map(Number);
+ function parse(text){
+  const groups=[],lines=String(text||'').replace(/\r/g,'').split(/[\n;；]+/).map(x=>x.trim()).filter(Boolean);
+  for(const line of lines){
+   const kind=line.match(/(単勝|2車単|二車単|2連単|二連単|3連単|三連単)/),body=line.replace(/(単勝|2車単|二車単|2連単|二連単|3連単|三連単)\s*[:：]?/g,'').trim();
+   const tri=body.match(/([1-9]+)\s*[-‐‑‒–—ー－]\s*([1-9]+)\s*[-‐‑‒–—ー－]\s*([1-9]+)/);
+   if((kind&&/3連単|三連単/.test(kind[1]))||(!kind&&tri)){
+    if(!tri)throw Error('3連単は「12-2345-345」の形式で入力してください。');
+    const a=digits(tri[1]),b=digits(tri[2]),c=digits(tri[3]),bets=[];
+    for(const x of a)for(const y of b)for(const z of c)if(x!==y&&x!==z&&y!==z)bets.push([x,y,z].join('-'));
+    groups.push({type:'3連単',formation:[a,b,c],bets:uniq(bets)});continue;
+   }
+   if(kind&&/単勝/.test(kind[1])){
+    const cars=uniq(digits(body));if(!cars.length)throw Error('単勝の車番を読み取れません。');
+    groups.push({type:'単勝',formation:[cars],bets:cars.map(String)});continue;
+   }
+   if((kind&&/2車単|二車単|2連単|二連単/.test(kind[1]))||(!kind&&/^[1-9]+\s*[-‐‑‒–—ー－]\s*[1-9]+$/.test(body))){
+    const pairs=[...body.matchAll(/([1-9]+)\s*[-‐‑‒–—ー－→＞]\s*([1-9]+)/g)];
+    if(!pairs.length)throw Error('2車単は「1-2 3-4」の形式で入力してください。');
+    const bets=[];for(const m of pairs)for(const x of digits(m[1]))for(const y of digits(m[2]))if(x!==y)bets.push(x+'-'+y);
+    groups.push({type:'2車単',formation:null,bets:uniq(bets)});continue;
+   }
+   if(!kind){const cars=uniq(digits(body));if(cars.length){groups.push({type:'単勝',formation:[cars],bets:cars.map(String)});continue;}}
+   throw Error('券種または買い目の形式を判定できません：'+line);
+  }return groups;
+ }
+ function render(){
+  try{
+   const groups=parse(input.value);if(!groups.length)throw Error('買い目テキストを入力してください。');
+   let total=0;
+   const html=groups.map(g=>{
+    total+=g.bets.length;
+    const form=g.formation?g.formation.map((a,j)=>'<span class="inline-block rounded-md border border-cyan-300/50 bg-cyan-300/10 px-2 py-1">'+(j+1)+'着：'+a.join('・')+'</span>').join(' '):'<span class="text-xs text-slate-500">入力された組み合わせを展開</span>';
+    const items=g.bets.length?g.bets.map(x=>'<span class="inline-block rounded border border-slate-300/60 px-2 py-1 text-xs font-bold text-slate-800 bg-white">'+esc(x)+'</span>').join(' '):'<span class="text-xs text-rose-600">有効な買い目がありません</span>';
+    return '<section class="rounded-xl border border-cyan-300/40 bg-white/90 p-3 mb-3 text-slate-900"><div class="flex items-center justify-between gap-2 mb-2"><strong class="text-sm">'+esc(g.type)+'</strong><strong class="text-sm text-sky-700">'+g.bets.length+'点</strong></div><div class="flex flex-wrap gap-2 mb-3">'+form+'</div><div class="flex flex-wrap gap-1.5">'+items+'</div></section>';
+   }).join('');
+   output.innerHTML=html+'<div class="rounded-xl bg-slate-900 text-white p-3 flex items-center justify-between"><span class="text-sm font-bold">合計買い目数</span><strong class="text-xl">'+total+'点</strong></div><p class="text-[10px] text-slate-500 mt-2">※ 同一券種内の重複を除外。3連単は同じ車番が複数着に入る組み合わせを除外しています。</p>';
+  }catch(e){output.innerHTML='<p class="rounded-lg border border-rose-300 bg-rose-50 text-rose-700 p-3 text-sm">'+esc(e.message||'解析できませんでした。')+'</p>';}
+ }
+ button.addEventListener('click',render);input.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')render();});
+})();
+</script>
 </body>
 </html>
