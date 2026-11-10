@@ -1094,24 +1094,39 @@ function initManualSelects(){REAL_VENUES.forEach(v=>$('manVenue').add(new Option
 function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');$('manualInputModal').style.zIndex='4000';document.body.classList.add('manual-modal-open');document.body.style.overflow='hidden';playBeep(600,'square',.1)}
 function closeManualModal(){$('manualInputModal').classList.add('hidden');$('manualInputModal').classList.remove('flex');document.body.classList.remove('manual-modal-open');document.body.style.overflow='';editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD'}
 function saveManualData(){
- const venue=$('manVenue').value,race=$('manRace').value,category=$('manClass').value,raceDate=$('manDate').value||'';
- const vals=['manCar1','manCar2','manCar3'].map(id=>$(id).value.trim()),nums=vals.map(v=>v===''?NaN:parseInt(v,10));
- const [c1,c2,c3]=nums,anyResult=vals.some(v=>v!==''),has3ren=nums.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(nums).size===3;
- if(anyResult&&!has3ren){alert('着順を入力する場合は、1着・2着・3着を重複なく入力してください。');return}
- const payout=$('manPayout').value.trim()===''?0:Math.max(0,parseInt($('manPayout').value,10)||0);
- const payout2ren=$('manPayout2ren').value.trim()===''?0:Math.max(0,parseInt($('manPayout2ren').value,10)||0);
- let patternKey='',diffPatternKey='',diffDisplay='',exacta='';
- if(has3ren){const d1=Math.abs(c1-c2),d2=Math.abs(c2-c3);diffPatternKey=`${d1}-${d2}`;diffDisplay=diffPatternKey;if(d1+d2===4){diffPatternKey='4';diffDisplay='4(合算)'}patternKey=`${c1}-${c2}-${c3}`;exacta=`${c1}-${c2}`;}
- takeUndoSnapshot(editingIndex>=0?'手動編集':'手動登録');
- const rec={venue,raceName:race,raceDate,category,pattern:patternKey,diffPattern:diffPatternKey,diffDisplay,exacta,payout,payout2ren,timestamp:Date.now(),sourceType:has3ren?'manual-result':'manual'};
- let targetIndex=editingIndex;if(targetIndex<0)targetIndex=savedRecords.findIndex(r=>recordKey(r)===recordKey(rec));
- if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]=normalizeRecord({...old,...rec,line1:old.line1||'',lineHeads:old.lineHeads||[]});logToTerminal(`> [更新] ${venue} ${race} を更新しました。`,'success');}
- else{savedRecords.push(normalizeRecord(rec));logToTerminal(`> [手動登録] ${venue} ${race} を保存しました。`,'success');}
- editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD';
- persist();updateCountDisplay();runAnalysis();renderRecordManager();
- ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');closeManualModal();
+ const stage=(msg,type='info')=>{try{logToTerminal('> SAVE診断：'+msg,type)}catch(e){}};
+ try{
+  stage('クリック検出');
+  const venue=$('manVenue').value,race=$('manRace').value,category=$('manClass').value,raceDate=$('manDate').value||'';
+  const vals=['manCar1','manCar2','manCar3'].map(id=>$(id).value.trim()),nums=vals.map(v=>v===''?NaN:parseInt(v,10));
+  const [c1,c2,c3]=nums,anyResult=vals.some(v=>v!==''),has3ren=nums.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(nums).size===3;
+  if(anyResult&&!has3ren){alert('着順を入力する場合は、1着・2着・3着を重複なく入力してください。');stage('着順入力チェックで停止','error');return}
+  const payout=$('manPayout').value.trim()===''?0:Math.max(0,parseInt($('manPayout').value,10)||0);
+  const payout2ren=$('manPayout2ren').value.trim()===''?0:Math.max(0,parseInt($('manPayout2ren').value,10)||0);
+  let patternKey='',diffPatternKey='',diffDisplay='',exacta='';
+  if(has3ren){const d1=Math.abs(c1-c2),d2=Math.abs(c2-c3);diffPatternKey=`${d1}-${d2}`;diffDisplay=diffPatternKey;if(d1+d2===4){diffPatternKey='4';diffDisplay='4(合算)'}patternKey=`${c1}-${c2}-${c3}`;exacta=`${c1}-${c2}`;}
+  takeUndoSnapshot(editingIndex>=0?'手動編集':'手動登録');
+  const rec={venue,raceName:race,raceDate,category,pattern:patternKey,diffPattern:diffPatternKey,diffDisplay,exacta,payout,payout2ren,timestamp:Date.now(),sourceType:has3ren?'manual-result':'manual'};
+  let targetIndex=editingIndex;if(targetIndex<0)targetIndex=savedRecords.findIndex(r=>recordKey(r)===recordKey(rec));
+  if(targetIndex>=0&&targetIndex<savedRecords.length){const old=savedRecords[targetIndex];savedRecords[targetIndex]=normalizeRecord({...old,...rec,line1:old.line1||'',lineHeads:old.lineHeads||[]});}
+  else{savedRecords.push(normalizeRecord(rec));}
+  stage('レコード作成完了：'+venue+' '+race);
+  const saved=persist();
+  if(!saved){stage('端末の通常保存に失敗。画面は閉じずに保持します','error');alert('端末への保存確認ができませんでした。画面を閉じずに残しています。画面下の診断ログを確認してください。');return;}
+  stage('ブラウザ保存領域への書き込み成功','success');
+  editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD';
+  ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');
+  closeManualModal();
+  try{updateCountDisplay();stage('件数表示更新OK')}catch(e){stage('件数表示更新エラー：'+(e.message||e),'error')}
+  try{runAnalysis();stage('分析更新OK')}catch(e){stage('分析更新エラー：'+(e.message||e),'error')}
+  try{renderRecordManager();stage('記録一覧更新OK')}catch(e){stage('記録一覧更新エラー：'+(e.message||e),'error')}
+  stage('保存処理完了','success');
+ }catch(e){
+  console.error('Manual save failed',e);
+  stage('処理中断：'+(e&&e.message?e.message:String(e)),'error');
+  alert('保存処理が途中で停止しました。画面下のSAVE診断ログに停止箇所を表示しています。');
+ }
 }
-
 function logToTerminal(msg,type="info"){const out=$('outputArea'),time=new Date().toLocaleTimeString('ja-JP',{hour12:false});const color=type==="error"?"#ff6b9d":type==="success"?"#087ac0":"#8dfaff";out.insertAdjacentHTML('afterbegin',`<div><span style="color:#6b8da7">[${time}]</span> <span style="color:${color}">${escapeHTML(msg)}</span></div>`)}
 function logToTerminalRaw(html){$('outputArea').insertAdjacentHTML('afterbegin',html)}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
