@@ -1563,7 +1563,7 @@ function openEditModal(idx){
 function savePayouts(){takeUndoSnapshot('簡易修正');savedRecords.forEach((r,i)=>{const v=$(`edit_venue_${i}`),p=$(`edit_payout_${i}`);if(v)r.venue=v.value.trim()||'不明';if(p){const n=parseInt(p.value,10);r.payout=Number.isFinite(n)&&n>=0?n:0}Object.assign(r,normalizeRecord(r));});persist();updateCountDisplay();runAnalysis();logToTerminal("> DB更新完了。会場名と配当を反映しました。","success");playBeep(880,'sine',.15)}
 function exportData(){if(!savedRecords.length){logToTerminal("> 書き出すデータがありません。","error");return}const blob=new Blob([JSON.stringify(savedRecords,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='battleBank_pro_db.json';a.click();URL.revokeObjectURL(url);logToTerminal("> エクスポート完了。","success")}
 function importData(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw Error();takeUndoSnapshot('データ読込');savedRecords=data.map(normalizeRecord);persist();updateCountDisplay();runAnalysis();logToTerminal(`> 復元成功: ${data.length}件のデータを読み込みました。`,"success")}catch(err){logToTerminal("> エラー: JSONファイルの形式が不正です。","error")} $('fileInput').value=''};reader.readAsText(file,'UTF-8')}
-function clearData(){if(confirm("データベースを初期化しますか？")){takeUndoSnapshot('データベース初期化');savedRecords=[];localStorage.removeItem('battleBankProData');updateCountDisplay();runAnalysis();logToTerminal("> DBパージ完了。","success")}}
+function clearData(){if(confirm("データベースを初期化しますか？")){takeUndoSnapshot('データベース初期化');savedRecords=[];localStorage.removeItem('battleBankProData');updateCountDisplay();runAnalysis();try{updateBondSelect()}catch(e){console.warn('bond chart reset failed',e)}logToTerminal("> DBパージ完了。","success")}}
 function updateCountDisplay(){const n=savedRecords.length.toString().padStart(5,'0');$('dataCount').innerHTML=`<span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ ${n} ]</span>`;renderRecordManager();}
 
 // ===== BULK MANUAL INPUT =====
@@ -1836,7 +1836,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);$('recordSearch').addEventListener('input',renderRecordManager);$('recordStatus').addEventListener('change',renderRecordManager);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
  document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.id!=='audioToggleBtn'&&!b.disabled)playBeep(680,'sine',.045,.018);});
- try{bindUserHub();}catch(e){console.error('User hub initialization failed',e);logToTerminal('> 一部の管理機能を初期化できませんでした。','error');}try{initUserSettings();}catch(e){console.error('User settings initialization failed',e);}writeBackup('起動時バックアップ');updateCountDisplay();runAnalysis();logToTerminal(savedRecords.length?"> DBリカバリ完了。v10.0 稼働中.":"> SYSTEM READY // v10.2 稼働中.","success");
+ try{bindUserHub();}catch(e){console.error('User hub initialization failed',e);logToTerminal('> 一部の管理機能を初期化できませんでした。','error');}try{initUserSettings();}catch(e){console.error('User settings initialization failed',e);}writeBackup('起動時バックアップ');updateCountDisplay();runAnalysis();try{updateBondSelect()}catch(e){console.warn('bond chart init failed',e)}logToTerminal(savedRecords.length?"> DBリカバリ完了。v10.0 稼働中.":"> SYSTEM READY // v10.2 稼働中.","success");
 });
 </script>
 
@@ -2287,18 +2287,26 @@ function scanDivineEye(){
 // --- LINE BOND RADAR (結束力レーダー) ---
 let bondRadarChart = null;
 function updateBondSelect(){
-  const sel = $('bondRaceSelect');
-  if(!sel) return;
-  sel.innerHTML = '';
-  const recent = savedRecords.slice().reverse().slice(0, 20);
-  recent.forEach((r, i) => {
-    const opt = document.createElement('option');
-    opt.value = i; 
-    opt.textContent = `${r.venue||'不明'} ${r.raceName||''} (${r.category||'9車'}) ${r.payout>0?'配当済':'未'} / ${r.lineGroups?r.lineGroups.length:0}ライン`;
-    sel.appendChild(opt);
-  });
-  sel.onchange = () => { drawBondRadar(recent[sel.value]); };
-  if(recent.length > 0) drawBondRadar(recent[0]);
+  const sel=$('bondRaceSelect');
+  if(sel)sel.innerHTML='';
+  const recent=savedRecords.slice().reverse().filter(r=>Array.isArray(r.lineGroups)&&r.lineGroups.length>0).slice(0,20);
+  if(sel){
+    recent.forEach((r,i)=>{
+      const opt=document.createElement('option');
+      opt.value=i;
+      opt.textContent=(r.venue||'不明')+' '+(r.raceName||'')+' ('+(r.category||'9車')+') '+(r.payout>0?'配当済':'未')+' / '+r.lineGroups.length+'ライン';
+      sel.appendChild(opt);
+    });
+    sel.onchange=()=>drawBondRadar(recent[Number(sel.value)]);
+  }
+  if(recent.length)drawBondRadar(recent[0]);
+  else{
+    if(bondRadarChart){bondRadarChart.destroy();bondRadarChart=null;}
+    const canvas=$('bondRadarChart'),ctx=canvas?.getContext('2d');
+    if(ctx)ctx.clearRect(0,0,canvas.width,canvas.height);
+    const summary=$('bondPlainSummary');
+    if(summary)summary.textContent='登録データがありません。レースを登録するとライン結束力を表示します。';
+  }
 }
 
 function drawBondRadar(race){
