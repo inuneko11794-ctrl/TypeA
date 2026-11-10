@@ -529,6 +529,82 @@ body:after{opacity:.025!important;z-index:1!important}
 body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!important;}
 @media(max-width:700px){.bank-track-cards .r-1{animation-duration:2.9s!important}.bank-track-cards .r-2{animation-duration:3.35s!important}.bank-track-cards .r-3{animation-duration:3.8s!important}.bank-track-cards .bg-racer{filter:drop-shadow(0 0 6px rgba(255,75,180,.62));}#manualInputModal{padding-left:10px!important;padding-right:10px!important;}#manualInputModal .modal-card{width:100%!important;border-radius:20px!important;} .main-tab[aria-selected="true"],.touch-btn.btn-cyber,.touch-btn[aria-pressed="true"],.touch-btn.is-selected{animation-duration:1.55s!important;}}
 @media(prefers-reduced-motion:reduce){.main-tab[aria-selected="true"],.touch-btn.btn-cyber,.touch-btn[aria-pressed="true"],.touch-btn.is-selected{animation:none!important;}}
+
+/* ===== MOBILE MODAL FIXES ===== */
+#batchEditPanel:not(.hidden) {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 3000 !important;
+  background: rgba(255,255,255,0.97) !important;
+  backdrop-filter: blur(4px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  padding: 12px !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  max-height: 100dvh !important;
+}
+#batchEditPanel:not(.hidden) > div:first-child {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: inherit;
+  z-index: 10;
+  padding-bottom: 8px;
+}
+#batchEditPanel:not(.hidden) #batchEditRows {
+  flex: 1;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 80px;
+}
+#batchEditPanel:not(.hidden) #saveBatchEditBtn {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  margin-top: auto !important;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
+}
+#closeBatchEditBtn {
+  min-width: 60px !important;
+  min-height: 36px !important;
+  font-size: 14px !important;
+  z-index: 30 !important;
+}
+
+#manualInputModal {
+  z-index: 4000 !important;
+}
+#manualInputModal .modal-card {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 95dvh !important;
+}
+#manualInputModal .modal-card > div:nth-child(3) { /* the scrollable content */
+  flex: 1;
+  overflow-y: auto !important;
+  padding-bottom: 20px;
+}
+#manSaveBtn {
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 10 !important;
+  margin-top: 8px !important;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+#closeManualBtn {
+  z-index: 50 !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
+/* Ensure no overlays cover buttons */
+.touch-btn {
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
+}
 </style>
 </head>
 <body>
@@ -1015,8 +1091,8 @@ function playBeep(freq=700,type='sine',duration=.08,vol=.035){
  }catch(e){console.warn('SFX unavailable',e)}
 }
 function initManualSelects(){REAL_VENUES.forEach(v=>$('manVenue').add(new Option(v,v)));for(let i=1;i<=12;i++)$('manRace').add(new Option(i+'R',i+'R'))}
-function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');document.body.classList.add('manual-modal-open');playBeep(600,'square',.1)}
-function closeManualModal(){$('manualInputModal').classList.add('hidden');$('manualInputModal').classList.remove('flex');document.body.classList.remove('manual-modal-open');editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD'}
+function openManualModal(){$('manualInputModal').classList.remove('hidden');$('manualInputModal').classList.add('flex');$('manualInputModal').style.zIndex='4000';document.body.classList.add('manual-modal-open');document.body.style.overflow='hidden';playBeep(600,'square',.1)}
+function closeManualModal(){$('manualInputModal').classList.add('hidden');$('manualInputModal').classList.remove('flex');document.body.classList.remove('manual-modal-open');document.body.style.overflow='';editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD'}
 function saveManualData(){
  const venue=$('manVenue').value,race=$('manRace').value,category=$('manClass').value,raceDate=$('manDate').value||'';
  const vals=['manCar1','manCar2','manCar3'].map(id=>$(id).value.trim()),nums=vals.map(v=>v===''?NaN:parseInt(v,10));
@@ -1588,9 +1664,13 @@ function renderRecordManager(){
 function openBatchEdit(){
  const panel=$('batchEditPanel'),host=$('batchEditRows');if(!panel||!host)return;
  const rows=savedRecords.map((r,i)=>({r,i})).filter(({r})=>!hasValidResult(r)||(Number(r.payout)||0)===0||(Number(r.payout2ren)||0)===0);
- if(!rows.length){host.innerHTML='<div class="text-sm font-bold">未入力のレースはありません。</div>';panel.classList.remove('hidden');return;}
+ if(!rows.length){host.innerHTML='<div class="text-sm font-bold">未入力のレースはありません。</div>';panel.classList.remove('hidden');panel.style.display='flex';return;}
  host.innerHTML=rows.map(({r,i})=>{const pat=(r.pattern||'').split('-');return `<div class="bg-white border border-slate-300 rounded-lg p-3" data-batch-index="${i}"><div class="font-black text-sm mb-2">${escapeHTML(r.venue||'不明')} ${escapeHTML(r.raceName||'')} <span class="text-xs font-normal text-slate-500">${escapeHTML(r.raceDate||'開催日未設定')} / ${escapeHTML(r.category||'')}</span></div><div class="grid grid-cols-3 gap-2 mb-2"><input class="field text-center" type="number" min="1" max="9" placeholder="1着" data-field="c1" value="${pat[0]||''}"><input class="field text-center" type="number" min="1" max="9" placeholder="2着" data-field="c2" value="${pat[1]||''}"><input class="field text-center" type="number" min="1" max="9" placeholder="3着" data-field="c3" value="${pat[2]||''}"></div><div class="grid grid-cols-2 gap-2"><label class="text-xs">2連単配当<input class="field mt-1" type="number" min="0" placeholder="未入力" data-field="p2" value="${Number(r.payout2ren)||''}"></label><label class="text-xs">3連単配当<input class="field mt-1" type="number" min="0" placeholder="未入力" data-field="p3" value="${Number(r.payout)||''}"></label></div></div>`}).join('');
- panel.classList.remove('hidden');playBeep(620,'triangle',.08);
+ panel.classList.remove('hidden');
+ panel.style.display = 'flex';
+ panel.style.zIndex = '3000';
+ document.body.style.overflow = 'hidden';
+ playBeep(620,'triangle',.08);
 }
 function saveBatchEdit(){
  takeUndoSnapshot('一括編集');
@@ -1602,7 +1682,7 @@ function saveBatchEdit(){
   const p2=val('p2'),p3=val('p3');if(p2!=='')r.payout2ren=Math.max(0,Number(p2)||0);if(p3!=='')r.payout=Math.max(0,Number(p3)||0);Object.assign(r,normalizeRecord(r));
   updated++;
  }
- persist();updateCountDisplay();runAnalysis();renderRecordManager();$('batchEditPanel').classList.add('hidden');logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
+ persist();updateCountDisplay();runAnalysis();renderRecordManager();const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
 }
 function deleteRecord(idx){const r=savedRecords[idx];if(!r)return;if(!confirm(`${r.venue||'不明'} ${r.raceName||''}（${r.raceDate||'開催日未設定'}）を削除しますか？`))return;takeUndoSnapshot('レース削除');savedRecords.splice(idx,1);persist();updateCountDisplay();runAnalysis();renderRecordManager();logToTerminal('> レース記録を1件削除しました。','success');}
 
@@ -1680,7 +1760,7 @@ function bindUserHub(){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
- bindUserHub();initUserSettings();writeBackup('起動時バックアップ');bind('openBatchEditBtn',openBatchEdit);bind('closeBatchEditBtn',()=>$('batchEditPanel').classList.add('hidden'));bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);
+ bindUserHub();initUserSettings();writeBackup('起動時バックアップ');bind('openBatchEditBtn',openBatchEdit);bind('closeBatchEditBtn',()=>{const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';});bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);
  $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);$('recordSearch').addEventListener('input',renderRecordManager);$('recordStatus').addEventListener('change',renderRecordManager);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
  document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.id!=='audioToggleBtn'&&!b.disabled)playBeep(680,'sine',.045,.018);});
