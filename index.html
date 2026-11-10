@@ -1373,16 +1373,23 @@ function runAnalysis(){
  counts=sorted.map(x=>x[1].count),
  avgs=sorted.map(x=>x[1].payouts.length?Math.round(x[1].payouts.reduce((a,b)=>a+b,0)/x[1].payouts.length):0),
  avgs2=sorted.map(x=>x[1].payouts2ren.length?Math.round(x[1].payouts2ren.reduce((a,b)=>a+b,0)/x[1].payouts2ren.length):0);
- const ctx=$('matrixChart').getContext('2d');if(myChart)myChart.destroy();
- myChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[
-  {label:'発生件数',data:counts,backgroundColor:'rgba(0,145,235,.55)',borderColor:'#008fe0',borderWidth:1.5,yAxisID:'y',borderRadius:6,order:3},
-  {label:'3連単 平均配当',data:avgs,type:'line',borderColor:'#168cff',backgroundColor:'rgba(22,140,255,.08)',borderWidth:2.5,fill:false,pointBackgroundColor:'#fff',pointBorderColor:'#168cff',pointBorderWidth:2,pointRadius:4,yAxisID:'y1',tension:.25,order:1},
-  {label:'2連単 平均配当',data:avgs2,type:'line',borderColor:'#00b8ff',backgroundColor:'rgba(0,184,255,.08)',borderWidth:2.5,borderDash:[4,4],fill:false,pointBackgroundColor:'#fff',pointBorderColor:'#00b8ff',pointBorderWidth:2,pointRadius:4,yAxisID:'y1',tension:.25,order:2}
- ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{color:'#315875',font:{family:"'Share Tech Mono', monospace",size:10}}},y:{ticks:{color:'#00f5ff'},grid:{color:'rgba(40,120,170,.13)'}},y1:{position:'right',grid:{display:false},ticks:{color:'#087ac0'}}},plugins:{legend:{position:'top',labels:{color:'#174365',font:{family:'Orbitron',size:9},boxWidth:10,usePointStyle:true}}}}})
- analyzeLine1Payouts();
- analyzeVenuePayouts();
- scanDivineEye();
- updateBondSelect();
+
+ try{
+  const canvas=$('matrixChart');
+  if(!canvas)throw new Error('分析グラフ領域 matrixChart が見つかりません');
+  if(typeof Chart==='undefined')throw new Error('Chart.js が読み込まれていません');
+  const ctx=canvas.getContext('2d');
+  if(!ctx)throw new Error('分析グラフの描画コンテキストを取得できません');
+  if(myChart)myChart.destroy();
+  myChart=new Chart(ctx,{type:'bar',data:{labels,datasets:[
+   {label:'発生件数',data:counts,backgroundColor:'rgba(0,145,235,.55)',borderColor:'#008fe0',borderWidth:1.5,yAxisID:'y',borderRadius:6,order:3},
+   {label:'3連単 平均配当',data:avgs,type:'line',borderColor:'#168cff',backgroundColor:'rgba(22,140,255,.08)',borderWidth:2.5,fill:false,pointBackgroundColor:'#fff',pointBorderColor:'#168cff',pointBorderWidth:2,pointRadius:4,yAxisID:'y1',tension:.25,order:1},
+   {label:'2連単 平均配当',data:avgs2,type:'line',borderColor:'#00b8ff',backgroundColor:'rgba(0,184,255,.08)',borderWidth:2.5,borderDash:[4,4],fill:false,pointBackgroundColor:'#fff',pointBorderColor:'#00b8ff',pointBorderWidth:2,pointRadius:4,yAxisID:'y1',tension:.25,order:2}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{color:'#315875',font:{family:"'Share Tech Mono', monospace",size:10}}},y:{ticks:{color:'#00f5ff'},grid:{color:'rgba(40,120,170,.13)'}},y1:{position:'right',grid:{display:false},ticks:{color:'#087ac0'}}},plugins:{legend:{position:'top',labels:{color:'#174365',font:{family:'Orbitron',size:9},boxWidth:10,usePointStyle:true}}}}});
+ }catch(e){console.error('Matrix chart update failed',e);try{logToTerminal('> 分析グラフ更新エラー：'+(e.message||e),'error')}catch(_){}}
+ const steps=[['ライン①配当分析',analyzeLine1Payouts],['開催場別配当分析',analyzeVenuePayouts],['ディバインアイ',scanDivineEye],['ボンド選択更新',updateBondSelect]];
+ steps.forEach(([name,fn])=>{try{if(typeof fn==='function')fn();else throw new Error('関数が見つかりません');}catch(e){console.error(name+' failed',e);try{logToTerminal('> '+name+'エラー：'+(e.message||e),'error')}catch(_){}}});
+
 }
 function analyzeLine1Payouts(){
  const filter=$('line1ClassFilter')?.value||'ALL';
