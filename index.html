@@ -927,7 +927,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.53</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.54</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -3306,6 +3306,37 @@ showExternalData('byn3');
 @media(min-width:700px){
  .app-shell>header{max-width:260px!important}
  .app-shell>[data-tab-panel]{padding-left:24px!important;padding-right:24px!important}
+}
+</style>
+
+<style id="book-one-card-per-page-vol54">
+/* VOL.54: 各カードを独立した一枚の大きなページとして配置 */
+.app-shell{
+ width:100%!important;max-width:none!important;margin:0!important;padding:0!important;
+ scroll-snap-type:y proximity;scroll-padding-top:0
+}
+.app-shell>[data-tab-panel]{
+ display:flow-root!important;position:relative!important;
+ width:100vw!important;max-width:none!important;
+ min-height:100dvh!important;height:auto!important;
+ margin:0!important;padding:68px 14px calc(66px + env(safe-area-inset-bottom,0px))!important;
+ box-sizing:border-box!important;overflow:visible!important;
+ scroll-snap-align:start;scroll-snap-stop:normal;
+ border-radius:0!important;border-left:0!important;border-right:0!important;
+}
+.app-shell>[data-tab-panel]>.panel-content{
+ width:100%!important;max-width:none!important;margin:0!important
+}
+.app-shell>[data-tab-panel] .glass-panel,
+.app-shell>[data-tab-panel].glass-panel{
+ max-width:none!important
+}
+.app-shell>[data-tab-panel][hidden]{display:none!important}
+#bbkBookTurnInner [data-tab-panel],#bbkBookTurnBackInner [data-tab-panel]{
+ width:100vw!important;min-height:100dvh!important;box-sizing:border-box!important
+}
+@media(min-width:700px){
+ .app-shell>[data-tab-panel]{padding-left:28px!important;padding-right:28px!important}
 }
 </style>
 </body>
