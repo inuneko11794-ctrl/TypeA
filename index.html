@@ -3219,11 +3219,17 @@ showExternalData('byn3');
    }
   }
   sourcePanels.forEach(panel=>{
+   const shell=document.createElement('div');
+   shell.className='app-shell';
+   shell.style.cssText='width:100%;max-width:none;margin:0;padding:0;background:transparent;box-shadow:none;border:0;';
    const clone=panel.cloneNode(true);
-   clone.hidden=false;clone.removeAttribute('data-tab-panel');clone.removeAttribute('id');
+   // data-tab-panelを残し、元ページ用のCSSを複製画面にも適用する
+   clone.hidden=false;clone.removeAttribute('id');
    clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
    clone.querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=true);
-   clone.setAttribute('aria-hidden','true');inner.appendChild(clone);
+   clone.setAttribute('aria-hidden','true');
+   shell.appendChild(clone);
+   inner.appendChild(shell);
   });
   if(backward){
    // 表裏に文字や画面は複製せず、紙面の色味だけ同じにする。
