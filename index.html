@@ -900,7 +900,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.18</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.27</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -959,6 +959,12 @@ body.book-cover-active .app-shell{
     </div>
     <div id="aiPredictionStatus" class="text-xs text-slate-300 mb-2" aria-live="polite">予測履歴 0件 / 学習済み 0件</div>
     <div id="aiPredictionOutput" class="rounded-xl border border-fuchsia-300/30 bg-slate-950/70 p-3 text-xs text-slate-200 max-h-96 overflow-y-auto">出走表を読み込んで「未予測レースを予測」を押してください。</div>
+    <div class="mt-4 rounded-xl border border-emerald-300/30 bg-slate-950/70 p-3">
+     <div class="flex items-center justify-between gap-2 mb-2"><b class="text-emerald-200 text-sm">AI DISCOVERY NOTE // 発見ノート</b><button id="refreshDiscoveryBtn" type="button" class="touch-btn btn-ghost px-3 py-2 rounded-lg text-[10px]">再集計</button></div>
+     <p class="text-[10px] text-slate-400 mb-2">保存済みの結果入力レースを全件集計。車番・ライン位置・印ごとの出現数と1着率／2着以内率を記録します。予測モデルの重みは変更しません。</p>
+     <div id="discoveryStatus" class="text-[10px] text-slate-300 mb-2">集計待ち</div>
+     <div id="discoveryOutput" class="text-xs text-slate-200">結果入力済みレースが蓄積されると、ここに傾向が表示されます。</div>
+    </div>
    </div>
   </div>
 
@@ -2943,6 +2949,34 @@ showExternalData('byn3');
   const recent=rows.slice(-8).reverse();
   $('aiPredictionOutput').innerHTML=recent.length?recent.map(p=>'<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.learned?'学習済み':'結果待ち')+'</span><div class="mt-1">単勝候補：'+p.win.join(' → ')+'</div><div>2車単候補：'+p.exacta.map(x=>x.join('-')).join(' / ')+'</div><div>3連単候補：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div></div>').join(''):'予測履歴はまだありません。';
  }
+ function renderDiscoveries(){
+  const status=$('discoveryStatus'),out=$('discoveryOutput');if(!status||!out)return;
+  const buckets=new Map();let races=0;
+  const add=(label,pos)=>{
+   if(!buckets.has(label))buckets.set(label,{n:0,first:0,top2:0});
+   const b=buckets.get(label);b.n++;if(pos===0)b.first++;if(pos>=0&&pos<2)b.top2++;
+  };
+  (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
+   if(!validResult(r))return;
+   const actual=String(r.pattern).split('-').map(Number),cars=rosterCars(r);
+   if(actual.length!==3||cars.length<3)return;races++;
+   cars.forEach(car=>{
+    const pos=actual.indexOf(car);
+    add('車番 '+car+'番',pos);
+    let role='単騎';
+    (Array.isArray(r.lineGroups)?r.lineGroups:[]).forEach(g=>{const at=(g||[]).map(Number).indexOf(car);if(at>=0)role=at===0?'ライン先頭':'ライン番手以降';});
+    add(role,pos);
+    const raw=String((r.baseMarks||{})[car]||(r.lineMarks||{})[car]||'無');
+    const mark=/^(◎|◯|〇|○|△|✕|×)$/.test(raw)?raw:'無';
+    add('印 '+(mark==='○'||mark==='〇'?'◯':mark),pos);
+   });
+  });
+  const rows=[...buckets.entries()].filter(([,b])=>b.n>=5).sort((a,b)=>(b[1].first/b[1].n)-(a[1].first/a[1].n)||b[1].n-a[1].n);
+  status.textContent='集計対象 '+races+'レース / 条件 '+rows.length+'件（各条件5出走以上）';
+  if(!races){out.textContent='結果入力済みレースがまだありません。結果が保存されると自動で集計します。';return;}
+  if(!rows.length){out.textContent='各条件の出走数が5回に達すると傾向を表示します。';return;}
+  out.innerHTML=rows.slice(0,18).map(([label,b])=>'<div class="flex justify-between items-center gap-2 border-b border-slate-700/60 py-2"><span>'+esc(label)+' <span class="text-slate-400">('+b.n+'出走)</span></span><span class="text-right whitespace-nowrap"><b class="text-emerald-300">'+(100*b.first/b.n).toFixed(1)+'%</b> 1着 <span class="text-cyan-300">'+(100*b.top2/b.n).toFixed(1)+'%</span> 2着以内</span></div>').join('')+'<p class="text-[10px] text-slate-500 mt-2">※出走数を分母にした単純集計。少数データの偏りに注意。予測モデルの学習重みとは別の参考ノートです。</p>';
+ }
  function learnPending(){
   let count=0;
   (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
@@ -3019,11 +3053,12 @@ showExternalData('byn3');
   $('aiResultOrder').value='';$('aiResultPayout2').value=r.payout2ren||'';$('aiResultPayout3').value=r.payout||'';$('aiResultPayoutF').value=r.payout3fuku||'';updateOrderPreview();
  });
  $('saveAIResultBtn').addEventListener('click',saveAIResult);
+ const discoveryRefresh=$('refreshDiscoveryBtn');if(discoveryRefresh)discoveryRefresh.addEventListener('click',renderDiscoveries);
  $('runAIPredictionBtn').addEventListener('click',run);
  $('exportAIModelBtn').addEventListener('click',exportModel);
  const saveButton=$('manSaveBtn');
  if(saveButton)saveButton.addEventListener('click',()=>{learnPending();});
- refreshResultChoices();render();
+ refreshResultChoices();render();renderDiscoveries();
  window.addEventListener('beforeunload',()=>{save();});
 })();
 </script>
