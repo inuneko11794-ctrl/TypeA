@@ -927,7 +927,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.29</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.53</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -3205,8 +3205,9 @@ showExternalData('byn3');
   const front=document.createElement('div');front.id='bbkBookTurnFront';
   const back=document.createElement('div');back.id='bbkBookTurnBack';
   const inner=document.createElement('div');inner.id=backward?'bbkBookTurnBackInner':'bbkBookTurnInner';
-  inner.style.top=Math.max(0,firstRect.top)+'px';
-  inner.style.height=Math.max(0,window.innerHeight-firstRect.top)+'px';
+  // VOL.53: ページ面を画面全体に広げ、上部ヘッダー分で欠けないようにする
+  inner.style.top='0px';
+  inner.style.height=window.innerHeight+'px';
   if(backward){
    let node=sourcePanels[0],paint=null;
    while(node&&node!==document.documentElement){
@@ -3257,5 +3258,55 @@ showExternalData('byn3');
  },true);
 })();
 </script>
+
+<style id="book-fullscreen-layout-vol53">
+/* BATTLE BANK-KUNのヘッダーは小さなコーナーカードへ */
+.app-shell{width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
+.app-shell>header{
+ position:fixed!important;top:env(safe-area-inset-top,0px)!important;right:6px!important;
+ z-index:1200!important;width:auto!important;max-width:min(54vw,230px)!important;
+ display:flex!important;flex-direction:column!important;align-items:flex-end!important;
+ gap:2px!important;margin:0!important;padding:5px 7px!important;
+ border:1px solid rgba(0,255,159,.55)!important;border-radius:8px!important;
+ background:rgba(0,0,0,.78)!important;backdrop-filter:blur(8px)!important;
+ box-shadow:0 2px 12px rgba(0,0,0,.35)!important
+}
+.app-shell>header>div:first-child{width:auto!important}
+.app-shell>header .kicker{display:none!important}
+.app-shell>header h1{font-size:clamp(9px,2.5vw,12px)!important;line-height:1.2!important;letter-spacing:.04em!important;white-space:nowrap!important}
+.app-shell>header>div:first-child>div{gap:3px!important;margin-top:3px!important}
+.app-shell>header>div:first-child>div>span:first-child{display:none!important}
+#releaseVol{font-size:8px!important;padding:2px 5px!important}
+#audioToggleBtn{font-size:8px!important;padding:2px 5px!important}
+#dataCount{font-size:9px!important;padding:2px 5px!important;gap:3px!important;border-radius:5px!important}
+#dataCount span:first-child{display:none!important}
+.app-shell>.main-tabs{
+ position:fixed!important;left:0!important;right:0!important;bottom:env(safe-area-inset-bottom,0px)!important;
+ z-index:1100!important;display:flex!important;flex-wrap:nowrap!important;justify-content:stretch!important;
+ gap:3px!important;width:100%!important;margin:0!important;padding:4px 5px!important;
+ background:rgba(0,0,0,.88)!important;border-top:1px solid rgba(0,255,159,.35)!important;
+ backdrop-filter:blur(8px)!important
+}
+.app-shell>.main-tabs .main-tab{
+ flex:1 1 0!important;width:25%!important;min-width:0!important;min-height:38px!important;
+ padding:4px 2px!important;font-size:9px!important;transform:none!important;
+ border:1px solid rgba(0,255,159,.55)!important;border-radius:5px!important
+}
+.app-shell>.main-tabs .main-tab .tab-sub{display:none!important}
+.app-shell>[data-tab-panel]{
+ width:100vw!important;max-width:none!important;min-height:100dvh!important;
+ margin:0!important;padding:58px 12px calc(58px + env(safe-area-inset-bottom,0px))!important;
+ box-sizing:border-box!important;overflow-x:hidden!important
+}
+#divineEyeAlert{margin:0!important}
+#bbkBookTurnStage{inset:0!important}
+#bbkBookTurnInner [data-tab-panel],#bbkBookTurnBackInner [data-tab-panel]{
+ width:100vw!important;min-height:100dvh!important
+}
+@media(min-width:700px){
+ .app-shell>header{max-width:260px!important}
+ .app-shell>[data-tab-panel]{padding-left:24px!important;padding-right:24px!important}
+}
+</style>
 </body>
 </html>
