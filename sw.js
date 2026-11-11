@@ -1,4 +1,4 @@
-const CACHE_NAME = 'battle-bank-kun-v107';
+const CACHE_NAME = 'battle-bank-kun-v108';
 const urlsToCache = [
   './',
   './index.html',
@@ -31,23 +31,28 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
+  const isPage = event.request.mode === 'navigate' ||
+    new URL(event.request.url).pathname.endsWith('/index.html') ||
+    new URL(event.request.url).pathname.endsWith('/');
+  if (isPage) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        if (response && response.status === 200) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         }
-        return fetch(event.request).then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          return response;
-        });
-      })
+        return response;
+      }).catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+  event.respondWith(
+    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+      if (response && response.status === 200 && response.type === 'basic') {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+      }
+      return response;
+    }))
   );
 });
