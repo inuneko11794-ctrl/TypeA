@@ -2913,5 +2913,24 @@ showExternalData('byn3');
  window.addEventListener('beforeunload',()=>{save();});
 })();
 </script>
+
+<style id="selected-button-clean-v17">
+/* Selected controls: indicate state with color only; remove badges, wobble and extra outlines */
+.main-tab[aria-selected="true"],
+.main-tab.is-selected,
+.touch-btn[aria-pressed="true"],
+.touch-btn.is-selected{
+ outline:none!important;outline-offset:0!important;
+ box-shadow:none!important;
+ animation:none!important;
+ transform:none!important;
+}
+.main-tab[aria-selected="true"]:after,
+.main-tab.is-selected:after,
+.touch-btn[aria-pressed="true"]:after,
+.touch-btn.is-selected:after,
+.touch-btn.btn-cyber:after{content:none!important;display:none!important}
+.touch-btn.btn-cyber{animation:none!important}
+</style>
 </body>
 </html>
