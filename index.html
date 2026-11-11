@@ -2954,6 +2954,7 @@ showExternalData('byn3');
   const status=$('discoveryStatus'),out=$('discoveryOutput');if(!status||!out)return;
   const buckets=new Map();let races=0;
   const add=(label,pos)=>{
+   if(!label)return;
    if(!buckets.has(label))buckets.set(label,{n:0,first:0,top2:0});
    const b=buckets.get(label);b.n++;if(pos===0)b.first++;if(pos>=0&&pos<2)b.top2++;
   };
@@ -2961,22 +2962,24 @@ showExternalData('byn3');
    if(!validResult(r))return;
    const actual=String(r.pattern).split('-').map(Number),cars=rosterCars(r);
    if(actual.length!==3||cars.length<3)return;races++;
+   const transformed=(r.lineMarks&&typeof r.lineMarks==='object'&&Object.keys(r.lineMarks).length)
+    ?r.lineMarks:transformLineMarks(r.lineGroups||[],r.baseMarks||{});
    cars.forEach(car=>{
     const pos=actual.indexOf(car);
     add('車番 '+car+'番',pos);
     let role='単騎';
     (Array.isArray(r.lineGroups)?r.lineGroups:[]).forEach(g=>{const at=(g||[]).map(Number).indexOf(car);if(at>=0)role=at===0?'ライン先頭':'ライン番手以降';});
     add(role,pos);
-    const raw=String((r.baseMarks||{})[car]||(r.lineMarks||{})[car]||'無');
-    const mark=/^(◎|◯|〇|○|△|✕|×)$/.test(raw)?raw:'無';
-    add('印 '+(mark==='○'||mark==='〇'?'◯':mark),pos);
+    const mark=String(transformed?.[car]||'').trim();
+    // 空欄は印カテゴリに入れない。「無印」という独立カテゴリは作らない。
+    if(mark)add('変換後印 '+mark,pos);
    });
   });
   const rows=[...buckets.entries()].filter(([,b])=>b.n>=5).sort((a,b)=>(b[1].first/b[1].n)-(a[1].first/a[1].n)||b[1].n-a[1].n);
   status.textContent='集計対象 '+races+'レース / 条件 '+rows.length+'件（各条件5出走以上）';
   if(!races){out.textContent='結果入力済みレースがまだありません。結果が保存されると自動で集計します。';return;}
   if(!rows.length){out.textContent='各条件の出走数が5回に達すると傾向を表示します。';return;}
-  out.innerHTML=rows.slice(0,18).map(([label,b])=>'<div class="flex justify-between items-center gap-2 border-b border-slate-700/60 py-2"><span>'+esc(label)+' <span class="text-slate-400">('+b.n+'出走)</span></span><span class="text-right whitespace-nowrap"><b class="text-emerald-300">'+(100*b.first/b.n).toFixed(1)+'%</b> 1着 <span class="text-cyan-300">'+(100*b.top2/b.n).toFixed(1)+'%</span> 2着以内</span></div>').join('')+'<p class="text-[10px] text-slate-500 mt-2">※出走数を分母にした単純集計。少数データの偏りに注意。予測モデルの学習重みとは別の参考ノートです。</p>';
+  out.innerHTML=rows.slice(0,18).map(([label,b])=>'<div class="flex justify-between items-center gap-2 border-b border-slate-700/60 py-2"><span>'+esc(label)+' <span class="text-slate-400">('+b.n+'出走)</span></span><span class="text-right whitespace-nowrap"><b class="text-emerald-300">'+(100*b.first/b.n).toFixed(1)+'%</b> 1着 <span class="text-cyan-300">'+(100*b.top2/b.n).toFixed(1)+'%</span> 2着以内</span></div>').join('')+'<p class="text-[10px] text-slate-500 mt-2">※出走数を分母にした単純集計。印はライン変換後の記号のみを集計し、空欄は印カテゴリに含めません。予測モデルの学習重みとは別の参考ノートです。</p>';
  }
  function learnPending(){
   let count=0;
