@@ -646,6 +646,50 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
 }
 @media(prefers-reduced-motion:reduce){[data-tab-panel]:not([hidden]){animation:none}.main-tabs.book-bookmarks .main-tab{transition:none}}
 </style>
+
+<style id="manga-comic-layout">
+/* VOL.10 — manga panel treatment */
+:root{--manga-ink:#10172d;--manga-paper:#f5f2e9;--manga-cyan:#75efff;--manga-pink:#ff9bd5;--manga-yellow:#ffe18b}
+.app-shell [data-tab-panel]:not([hidden]){gap:clamp(12px,1.5vw,22px)!important}
+.app-shell .glass-panel{
+ position:relative!important;isolation:isolate;
+ border:2px solid rgba(235,244,255,.94)!important;border-radius:5px!important;
+ background:
+  radial-gradient(circle at 2px 2px,rgba(142,165,225,.17) 1px,transparent 1.4px) 0 0/9px 9px,
+  linear-gradient(145deg,rgba(34,43,77,.98),rgba(15,21,46,.98))!important;
+ box-shadow:5px 5px 0 rgba(5,9,24,.88),0 0 0 1px rgba(8,13,31,.8),inset 0 1px rgba(255,255,255,.16)!important;
+ border-radius:4px 9px 4px 4px!important;
+}
+.app-shell .glass-panel:after{
+ content:"";position:absolute;z-index:-1;inset:5px;border:1px solid rgba(255,255,255,.09);pointer-events:none;
+}
+.app-shell .glass-panel:nth-of-type(3n+1){border-left:5px solid var(--manga-cyan)!important}
+.app-shell .glass-panel:nth-of-type(3n+2){border-top:5px solid var(--manga-pink)!important}
+.app-shell .glass-panel:nth-of-type(3n){border-right:5px solid var(--manga-yellow)!important}
+.app-shell [data-tab-panel] .kicker{
+ display:inline-flex;align-items:center;min-height:27px;padding:3px 9px;
+ color:#fff!important;background:linear-gradient(90deg,#4659a0,#27345e)!important;
+ border:1px solid rgba(255,255,255,.72)!important;border-left:5px solid var(--manga-yellow)!important;
+ box-shadow:2px 2px 0 #080d20;letter-spacing:.08em
+}
+.app-shell [data-tab-panel] h2,.app-shell [data-tab-panel] h3{ text-shadow:1px 2px 0 rgba(0,0,0,.45)}
+.app-shell [data-tab-panel] .grid{row-gap:14px}
+.app-shell [data-tab-panel] button:not(.main-tab){border-radius:4px}
+.app-shell [data-tab-panel] .glass-panel:nth-of-type(4n+2){transform:rotate(.18deg)}
+.app-shell [data-tab-panel] .glass-panel:nth-of-type(4n+3){transform:rotate(-.16deg)}
+.app-shell [data-tab-panel] .glass-panel:nth-of-type(4n+1),
+.app-shell [data-tab-panel] .glass-panel:nth-of-type(4n){transform:none}
+.main-tabs.book-bookmarks{border:2px solid #e8e2d6!important;box-shadow:4px 5px 0 rgba(5,9,24,.65)!important}
+.main-tabs.book-bookmarks .main-tab{border:2px solid #fff!important;box-shadow:2px 3px 0 rgba(5,9,24,.6)!important}
+.main-tabs.book-bookmarks .main-tab[aria-selected="true"]{outline:2px solid #202947;outline-offset:1px}
+@media(max-width:600px){
+ .app-shell [data-tab-panel]:not([hidden]){gap:12px!important}
+ .app-shell .glass-panel{box-shadow:3px 3px 0 rgba(5,9,24,.88)!important}
+ .app-shell [data-tab-panel] .glass-panel:nth-of-type(n){transform:none}
+}
+@media(prefers-reduced-motion:reduce){.app-shell .glass-panel{transform:none!important}}
+</style>
+
 </head>
 <body>
 <canvas id="dnaLifeCanvas" aria-hidden="true"></canvas>
