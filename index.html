@@ -3145,24 +3145,25 @@ showExternalData('byn3');
 </script>
 
 
-<style id="book-page-turn-vol33">
+<style id="book-page-turn-vol34">
 #bbkBookTurnStage{position:fixed;inset:0;z-index:2147483647;pointer-events:none;perspective:2200px;perspective-origin:0% 48%;overflow:hidden}
 #bbkBookTurnStage:after{content:"";position:absolute;z-index:6;left:0;top:0;bottom:0;width:15px;pointer-events:none;background:linear-gradient(90deg,rgba(28,18,8,.30),rgba(28,18,8,.12) 38%,transparent);box-shadow:2px 0 12px rgba(20,12,4,.10)}
 #bbkBookTurnLeaf{position:absolute;top:0;left:-8px;width:calc(100vw + 8px);height:100%;overflow:visible;transform-style:preserve-3d;transform-origin:8px center;backface-visibility:visible;will-change:transform;filter:drop-shadow(3px 5px 10px rgba(20,12,4,.22))}
-#bbkBookTurnLeaf.bbk-turn-forward{transform-origin:8px center;animation:bbkBookForward33 1.32s cubic-bezier(.43,.035,.2,1) both}
-#bbkBookTurnLeaf.bbk-turn-backward{transform-origin:8px center;animation:bbkBookBackward33 1.32s cubic-bezier(.43,.035,.2,1) both}
+#bbkBookTurnLeaf.bbk-turn-forward{left:-8px;transform-origin:8px center;animation:bbkBookForward34 1.32s cubic-bezier(.43,.035,.2,1) both}
+#bbkBookTurnLeaf.bbk-turn-backward{left:calc(-100vw - 8px);transform-origin:right center;animation:bbkBookBackward34 1.32s cubic-bezier(.43,.035,.2,1) both}
 #bbkBookTurnFront,#bbkBookTurnBack{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;border:1px solid rgba(80,57,31,.13);background:#f4edda;box-shadow:inset 0 0 22px rgba(80,57,31,.08)}
 #bbkBookTurnFront{z-index:2}
 #bbkBookTurnBack{transform:rotateY(180deg);background:linear-gradient(90deg,#e5dac2 0%,#f5eddc 12%,#f8f1e2 78%,#e8dec9 100%);box-shadow:inset 0 0 26px rgba(65,45,24,.14)}
 #bbkBookTurnInner{position:absolute;top:0;left:8px;width:100vw;min-height:100%;overflow:hidden}
-#bbkBookTurnInner [data-tab-panel]{width:100%;min-height:100%;box-sizing:border-box}
+#bbkBookTurnBackInner{position:absolute;top:0;right:8px;width:100vw;min-height:100%;overflow:hidden;transform:rotateY(180deg)}
+#bbkBookTurnInner [data-tab-panel],#bbkBookTurnBackInner [data-tab-panel]{width:100%;min-height:100%;box-sizing:border-box}
 #bbkBookTurnFront:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,.025),transparent 72%,rgba(25,15,5,.18))}
 #bbkBookTurnBack:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(270deg,rgba(255,255,255,.05),rgba(25,15,5,.07))}
-@keyframes bbkBookForward33{0%{transform:rotateY(0deg) translateZ(0);filter:brightness(1)}12%{transform:rotateY(-8deg) translateZ(3px);filter:brightness(1.035)}43%{transform:rotateY(-72deg) translateZ(10px);filter:brightness(1.07)}74%{transform:rotateY(-146deg) translateZ(5px);filter:brightness(1.01)}100%{transform:rotateY(-180deg) translateZ(0);filter:brightness(.97)}}
-@keyframes bbkBookBackward33{0%{transform:rotateY(0deg) translateZ(0);filter:brightness(1)}12%{transform:rotateY(8deg) translateZ(3px);filter:brightness(1.035)}43%{transform:rotateY(72deg) translateZ(10px);filter:brightness(1.07)}74%{transform:rotateY(146deg) translateZ(5px);filter:brightness(1.01)}100%{transform:rotateY(180deg) translateZ(0);filter:brightness(.97)}}
+@keyframes bbkBookForward34{0%{transform:rotateY(0deg) translateZ(0);filter:brightness(1)}12%{transform:rotateY(-8deg) translateZ(3px);filter:brightness(1.035)}43%{transform:rotateY(-72deg) translateZ(10px);filter:brightness(1.07)}74%{transform:rotateY(-146deg) translateZ(5px);filter:brightness(1.01)}100%{transform:rotateY(-180deg) translateZ(0);filter:brightness(.97)}}
+@keyframes bbkBookBackward34{0%{transform:rotateY(0deg) translateZ(0);filter:brightness(.97)}12%{transform:rotateY(8deg) translateZ(3px);filter:brightness(1.01)}43%{transform:rotateY(72deg) translateZ(10px);filter:brightness(1.07)}74%{transform:rotateY(146deg) translateZ(5px);filter:brightness(1.035)}100%{transform:rotateY(180deg) translateZ(0);filter:brightness(1)}}
 @media(prefers-reduced-motion:reduce){#bbkBookTurnLeaf{animation-duration:.01ms!important}}
 </style>
-<script id="book-page-turn-vol33-controller">
+<script id="book-page-turn-vol34-controller">
 (()=>{
  const nav=document.querySelector('.main-tabs');
  if(!nav)return;
@@ -3190,27 +3191,30 @@ showExternalData('byn3');
   if(!active||active===target)return;
   const from=tabs.indexOf(active),to=tabs.indexOf(target);
   if(from<0||to<0)return;
-  const activeName=active.dataset.tabTarget;
-  const activePanels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===activeName&&!p.hidden);
-  if(!activePanels.length)return;
+  const backward=to<from;
+  const sourceName=backward?target.dataset.tabTarget:active.dataset.tabTarget;
+  const sourcePanels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===sourceName);
+  const activePanels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===active.dataset.tabTarget&&!p.hidden);
+  if(!sourcePanels.length||!activePanels.length)return;
   const firstRect=activePanels[0].getBoundingClientRect();
   const stage=document.createElement('div');stage.id='bbkBookTurnStage';stage.setAttribute('aria-hidden','true');
   const leaf=document.createElement('div');leaf.id='bbkBookTurnLeaf';
   const front=document.createElement('div');front.id='bbkBookTurnFront';
   const back=document.createElement('div');back.id='bbkBookTurnBack';
-  const inner=document.createElement('div');inner.id='bbkBookTurnInner';
+  const inner=document.createElement('div');inner.id=backward?'bbkBookTurnBackInner':'bbkBookTurnInner';
   inner.style.top=Math.max(0,firstRect.top)+'px';
   inner.style.height=Math.max(0,window.innerHeight-firstRect.top)+'px';
-  activePanels.forEach(panel=>{
+  sourcePanels.forEach(panel=>{
    const clone=panel.cloneNode(true);
    clone.hidden=false;clone.removeAttribute('data-tab-panel');clone.removeAttribute('id');
    clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
    clone.querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=true);
    clone.setAttribute('aria-hidden','true');inner.appendChild(clone);
   });
-  front.appendChild(inner);leaf.appendChild(front);leaf.appendChild(back);stage.appendChild(leaf);document.body.appendChild(stage);
+  if(backward){back.appendChild(inner)}else{front.appendChild(inner)}
+  leaf.appendChild(front);leaf.appendChild(back);stage.appendChild(leaf);document.body.appendChild(stage);
   paperSound();
-  requestAnimationFrame(()=>leaf.classList.add(to>from?'bbk-turn-forward':'bbk-turn-backward'));
+  requestAnimationFrame(()=>leaf.classList.add(backward?'bbk-turn-backward':'bbk-turn-forward'));
   const clean=()=>{if(stage.isConnected)stage.remove()};
   leaf.addEventListener('animationend',clean,{once:true});
   window.setTimeout(clean,1600);
