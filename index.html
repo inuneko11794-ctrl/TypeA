@@ -927,7 +927,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.28</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.29</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -3145,48 +3145,51 @@ showExternalData('byn3');
 </script>
 
 
-<style id="book-page-turn-vol28-real">
-#bbkPageTurnSheet{
- position:fixed;z-index:2147482;pointer-events:none;margin:0!important;
- transform-origin:left center;backface-visibility:hidden;
- transform-style:preserve-3d;will-change:transform,opacity;
- background:#f4edda;
- box-shadow:inset -18px 0 24px -20px rgba(20,12,4,.8),18px 8px 32px -18px rgba(0,0,0,.65);
-}
-#bbkPageTurnSheet:after{
- content:"";position:absolute;inset:0;
- background:linear-gradient(90deg,rgba(255,255,255,.02) 0%,rgba(255,255,255,.08) 55%,rgba(20,12,4,.38) 100%);
- pointer-events:none;
-}
-#bbkPageTurnSheet.bbk-turning{animation:bbkActualPageFlip .72s cubic-bezier(.45,.02,.72,.35) forwards}
-@keyframes bbkActualPageFlip{
- 0%{transform:perspective(1600px) rotateY(0deg);opacity:1}
- 28%{transform:perspective(1600px) rotateY(-24deg);opacity:1}
- 72%{transform:perspective(1600px) rotateY(-68deg);opacity:.96}
- 100%{transform:perspective(1600px) rotateY(-92deg);opacity:0}
-}
-@media(prefers-reduced-motion:reduce){#bbkPageTurnSheet.bbk-turning{animation-duration:.01ms}}
+<style id="book-page-turn-vol29">
+#bbkPageTurnSheet{position:fixed;z-index:2147482;pointer-events:none;margin:0!important;backface-visibility:hidden;transform-style:preserve-3d;will-change:transform,opacity;background:#f4edda;box-shadow:inset -18px 0 24px -20px rgba(20,12,4,.8),18px 8px 32px -18px rgba(0,0,0,.65)}
+#bbkPageTurnSheet:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.08) 55%,rgba(20,12,4,.38));pointer-events:none}
+#bbkPageTurnSheet.bbk-turn-forward{transform-origin:left center;animation:bbkFlipForward .78s cubic-bezier(.45,.02,.72,.35) forwards}
+#bbkPageTurnSheet.bbk-turn-backward{transform-origin:right center;animation:bbkFlipBackward .78s cubic-bezier(.45,.02,.72,.35) forwards}
+@keyframes bbkFlipForward{0%{transform:perspective(1600px) rotateY(0);opacity:1}28%{transform:perspective(1600px) rotateY(-24deg);opacity:1}72%{transform:perspective(1600px) rotateY(-68deg);opacity:.96}100%{transform:perspective(1600px) rotateY(-92deg);opacity:0}}
+@keyframes bbkFlipBackward{0%{transform:perspective(1600px) rotateY(0);opacity:1}28%{transform:perspective(1600px) rotateY(24deg);opacity:1}72%{transform:perspective(1600px) rotateY(68deg);opacity:.96}100%{transform:perspective(1600px) rotateY(92deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){#bbkPageTurnSheet{animation-duration:.01ms!important}}
 </style>
-<script id="book-page-turn-vol28-controller">
+<script id="book-page-turn-vol29-controller">
 (()=>{
- const nav=document.querySelector('.main-tabs');
- if(!nav)return;
+ const nav=document.querySelector('.main-tabs');if(!nav)return;
+ function paperSound(){
+  if(typeof sfxEnabled!=='undefined'&&!sfxEnabled)return;
+  try{
+   const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;
+   if(!audioCtx)audioCtx=new Ctx();
+   if(audioCtx.state==='suspended')audioCtx.resume();
+   const ctx=audioCtx,now=ctx.currentTime,duration=.24,length=Math.floor(ctx.sampleRate*duration);
+   const buffer=ctx.createBuffer(1,length,ctx.sampleRate),data=buffer.getChannelData(0);
+   for(let i=0;i<length;i++){const fade=1-i/length;data[i]=(Math.random()*2-1)*fade*fade;}
+   const source=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),gain=ctx.createGain();
+   source.buffer=buffer;filter.type='lowpass';filter.frequency.setValueAtTime(2100,now);filter.frequency.exponentialRampToValueAtTime(520,now+duration);
+   gain.gain.setValueAtTime(.0001,now);gain.gain.linearRampToValueAtTime(.12,now+.025);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+   source.connect(filter);filter.connect(gain);gain.connect(ctx.destination);source.start(now);source.stop(now+duration);
+  }catch(err){console.warn('Page sound unavailable',err)}
+ }
  nav.addEventListener('click',e=>{
-  const tab=e.target.closest('[data-tab-target]');
-  if(!tab)return;
+  const tab=e.target.closest('[data-tab-target]');if(!tab)return;
   const current=document.querySelector('[data-tab-panel]:not([hidden])');
   if(!current||current.dataset.tabPanel===tab.dataset.tabTarget)return;
-  const rect=current.getBoundingClientRect();
-  const sheet=current.cloneNode(true);
+  const buttons=[...nav.querySelectorAll('[data-tab-target]')];
+  const from=buttons.findIndex(b=>b.dataset.tabTarget===current.dataset.tabPanel);
+  const to=buttons.indexOf(tab),forward=to>=from;
+  const rect=current.getBoundingClientRect(),sheet=current.cloneNode(true);
   sheet.id='bbkPageTurnSheet';sheet.removeAttribute('data-tab-panel');
   sheet.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
   sheet.querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=true);
   sheet.setAttribute('aria-hidden','true');
   Object.assign(sheet.style,{position:'fixed',left:rect.left+'px',top:rect.top+'px',width:rect.width+'px',height:rect.height+'px',maxHeight:'none',overflow:'hidden'});
   document.body.appendChild(sheet);
-  requestAnimationFrame(()=>sheet.classList.add('bbk-turning'));
+  paperSound();
+  requestAnimationFrame(()=>sheet.classList.add(forward?'bbk-turn-forward':'bbk-turn-backward'));
   sheet.addEventListener('animationend',()=>sheet.remove(),{once:true});
-  window.setTimeout(()=>sheet.remove(),950);
+  window.setTimeout(()=>sheet.remove(),1000);
  },true);
 })();
 </script>
