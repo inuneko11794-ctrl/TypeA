@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" class="light book-cover-closed">
+<html lang="ja" class="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -717,74 +717,10 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
 </style>
 
 
-<style id="book-cover-gate-style">
-html.book-cover-closed,body.book-cover-closed{overflow:hidden!important}
-body.book-cover-closed .app-shell{visibility:hidden!important;pointer-events:none!important}
-.book-cover-gate{
- position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;
- padding:clamp(12px,3vw,32px);background:
- radial-gradient(ellipse at 50% 45%,rgba(112,83,45,.22),transparent 55%),
- linear-gradient(135deg,#090b12,#171321 48%,#080a10);
-}
-.book-cover-gate[hidden]{display:none!important}
-.book-cover-frame{
- position:relative;width:min(650px,100%);min-height:min(820px,94dvh);padding:clamp(30px,7vw,66px) clamp(24px,7vw,64px) 30px;
- display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;
- color:#f3dfb0;text-align:center;border:3px solid #b58a4c;border-radius:7px 16px 16px 7px;
- background:
-  radial-gradient(ellipse at 50% 40%,rgba(184,142,77,.15),transparent 55%),
-  repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px),
-  linear-gradient(120deg,#21170f,#49301d 18%,#302014 52%,#1d150f);
- box-shadow:inset 10px 0 0 rgba(0,0,0,.28),inset 14px 0 0 rgba(204,158,91,.16),inset 0 0 0 7px #2a1b12,inset 0 0 0 9px #a77a40,0 24px 70px #000c;
-}
-.book-cover-spine{position:absolute;left:0;top:0;bottom:0;width:22px;background:linear-gradient(90deg,#100b08,#6c4928 55%,#21160f);box-shadow:4px 0 12px #0008}
-.book-cover-corner{position:absolute;width:42px;height:42px;border-color:#c39a5d;opacity:.9}
-.book-cover-corner-tl{top:20px;left:28px;border-top:2px solid;border-left:2px solid}
-.book-cover-corner-tr{top:20px;right:20px;border-top:2px solid;border-right:2px solid}
-.book-cover-corner-bl{bottom:20px;left:28px;border-bottom:2px solid;border-left:2px solid}
-.book-cover-corner-br{bottom:20px;right:20px;border-bottom:2px solid;border-right:2px solid}
-.book-cover-emblem{width:112px;height:112px;border:2px solid #c9a66c;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 0 6px #c9a66c22,inset 0 0 18px #0008;margin:4px auto 26px;color:#f4d79d}
-.book-cover-emblem span{font-family:Georgia,serif;font-size:37px;font-weight:900;letter-spacing:.04em}
-.book-cover-emblem small{font-size:7px;letter-spacing:.1em}
-.book-cover-kicker{font-size:clamp(8px,2vw,11px);letter-spacing:.22em;color:#d2b47e}
-.book-cover-title{margin:18px 0 14px;font-family:"Noto Serif JP","Yu Mincho",serif;font-weight:900;font-size:clamp(38px,9vw,68px);line-height:1.35;letter-spacing:.12em;color:#f8e7c4;text-shadow:0 3px 0 #674323,0 7px 18px #000c}
-.book-cover-rule{width:min(270px,70%);height:1px;background:linear-gradient(90deg,transparent,#d7b779,transparent);margin:8px auto 17px}
-.book-cover-subtitle{font-size:clamp(12px,3vw,16px);letter-spacing:.3em;color:#e5c995}
-.book-cover-edition{margin:12px 0 32px;font-size:11px;letter-spacing:.22em;color:#b99a6a}
-.book-cover-bottom{display:flex;justify-content:space-between;gap:10px;width:100%;margin-top:auto;padding-top:16px;border-top:1px solid #b58a4c77;font-size:9px;letter-spacing:.12em;color:#c7a979}
-.book-cover-bookmarks{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:30px}
-.book-cover-bookmarks button{min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid #d5bd8c;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#e8d4a8,#ad8750);color:#302014;box-shadow:2px 4px 0 #100b08;font-family:"Noto Sans JP",sans-serif;font-size:11px;font-weight:900}
-.book-cover-bookmarks button:nth-child(2){background:linear-gradient(180deg,#d9c6a7,#997650)}
-.book-cover-bookmarks button:nth-child(3){background:linear-gradient(180deg,#c9d5b5,#78875e)}
-.book-cover-bookmarks button:nth-child(4){background:linear-gradient(180deg,#c7d0e0,#7786a5)}
-.book-cover-bookmarks button b{font-family:Georgia,serif;font-size:10px;letter-spacing:.1em}
-.book-cover-bookmarks button:active{transform:translateY(2px)}
-.book-cover-instruction{margin-top:17px;font-size:10px;letter-spacing:.2em;color:#d8bd8d}
-@media(max-width:420px){
- .book-cover-frame{min-height:min(760px,94dvh);padding:38px 18px 22px}
- .book-cover-emblem{width:88px;height:88px;margin-bottom:18px}
- .book-cover-emblem span{font-size:30px}
- .book-cover-bookmarks{gap:5px;margin-top:22px}
- .book-cover-bookmarks button{min-height:54px;font-size:10px}
- .book-cover-bottom{font-size:7px}
-}
-@media(prefers-reduced-motion:reduce){.book-cover-bookmarks button{transition:none}}
-</style>
 
-
-<style id="book-cover-emergency-fix">
-html.book-cover-closed,body.book-cover-closed{background:#090b12!important;min-height:100%!important}
-body.book-cover-closed .app-shell{display:none!important}
-#bookCoverGate{position:fixed!important;inset:0!important;z-index:2147483000!important;display:flex!important;visibility:visible!important;opacity:1!important;align-items:center!important;justify-content:center!important;background:radial-gradient(ellipse at center,#30251b 0%,#111018 65%,#05060a 100%)!important}
-#bookCoverGate[hidden]{display:none!important}
-#bookCoverGate .book-cover-frame{display:flex!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:1!important;width:min(650px,100%)!important;min-height:min(820px,94dvh)!important;background:linear-gradient(120deg,#21170f,#49301d 18%,#302014 52%,#1d150f)!important;color:#f3dfb0!important}
-#bookCoverGate .book-cover-title{display:block!important;color:#f8e7c4!important}
-#bookCoverGate .book-cover-bookmarks{display:grid!important;visibility:visible!important;opacity:1!important}
-#bookCoverGate .book-cover-bookmarks button{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;position:relative!important;z-index:2!important}
-</style>
 
 </head>
-<body class="book-cover-closed">
+<body>
 <canvas id="dnaLifeCanvas" aria-hidden="true"></canvas>
 <div class="dna-caption" aria-hidden="true">DATA HELIX / PATTERN GENOME / BATTLE BANK-KUN</div>
 
@@ -830,28 +766,6 @@ body.book-cover-closed .app-shell{display:none!important}
 </div>
 
 
-<div id="bookCoverGate" class="book-cover-gate" role="region" aria-label="競輪のすべて 表紙">
- <div class="book-cover-frame">
-  <div class="book-cover-spine"></div>
-  <div class="book-cover-corner book-cover-corner-tl"></div><div class="book-cover-corner book-cover-corner-tr"></div>
-  <div class="book-cover-corner book-cover-corner-bl"></div><div class="book-cover-corner book-cover-corner-br"></div>
-  <div class="book-cover-emblem" aria-hidden="true"><span>BBK</span><small>THE RACE ENCYCLOPEDIA</small></div>
-  <div class="book-cover-kicker">BATTLE BANK-KUN · COMPLETE EDITION</div>
-  <h1 class="book-cover-title">競輪のすべて</h1>
-  <div class="book-cover-rule"></div>
-  <p class="book-cover-subtitle">予測・研究・記録・検証</p>
-  <p class="book-cover-edition">競輪データ研究大百科</p>
-  <div class="book-cover-bottom"><span>VOL.12</span><span>知を蓄え、勝ち筋を探る。</span><span>EST. BBK</span></div>
-  <div class="book-cover-bookmarks" aria-label="栞からページを開く">
-   <button type="button" data-tab-target="home" data-book-open="true"><b>01</b><span>ホーム</span></button>
-   <button type="button" data-tab-target="analysis" data-book-open="true"><b>02</b><span>研究</span></button>
-   <button type="button" data-tab-target="database" data-book-open="true"><b>03</b><span>記録庫</span></button>
-   <button type="button" data-tab-target="settings" data-book-open="true"><b>04</b><span>設定</span></button>
-  </div>
-  <div class="book-cover-instruction">栞を選んで、本を開く</div>
- </div>
-</div>
-
 <div class="app-shell">
 <header class="flex flex-col md:flex-row justify-between items-end border-b border-cyan-300/50 pb-5 mb-6 gap-3">
 
@@ -860,7 +774,7 @@ body.book-cover-closed .app-shell{display:none!important}
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.13</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.14</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -909,7 +823,7 @@ body.book-cover-closed .app-shell{display:none!important}
 
   <div class="glass-panel p-4 sm:p-5 mb-5" id="aiPredictionLab">
    <div class="panel-content">
-    <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.13</h2>
+    <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.14</h2>
     <p class="text-xs text-slate-400 mb-3">出走表の保存データから単勝・2車単・3連単を別々に予測します。結果登録後は未学習レースだけを自動学習します。</p>
     <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
     <input id="aiRaceDate" type="date" class="field text-sm mb-3">
@@ -2468,13 +2382,7 @@ if ("serviceWorker" in navigator) {
 
 <script>
 (function(){
- const tabs=[...document.querySelectorAll('[data-tab-target]')];
- const cover=document.getElementById('bookCoverGate');
- document.querySelectorAll('[data-book-open]').forEach(btn=>btn.addEventListener('click',()=>{
-   document.documentElement.classList.remove('book-cover-closed');
-   document.body.classList.remove('book-cover-closed');
-   if(cover)cover.hidden=true;
- }));
+  const tabs=[...document.querySelectorAll('.main-tabs [data-tab-target]')];
  const panels=[...document.querySelectorAll('[data-tab-panel]')];
  function activateTab(name,save=true){
    tabs.forEach(btn=>{
