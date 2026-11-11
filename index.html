@@ -804,6 +804,16 @@ body.book-cover-active .app-shell{
  .app-shell,#bookCoverGate.is-opening{transition:none!important}
 }
 </style>
+<style id="mobile-background-performance-vol27">
+@media(max-width:700px){
+ html{scroll-behavior:auto!important}
+ body{background-attachment:scroll!important;background-image:linear-gradient(145deg,#fff 0%,#f8faff 55%,#fff8fc 100%)!important}
+ #dnaLifeCanvas{opacity:.28!important}
+ .glass-panel,.warp-data-panel,.card-matrix,.discovery-card,.main-tabs,.main-tab{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ .glass-panel,.warp-data-panel,.card-matrix,.discovery-card{box-shadow:0 4px 12px rgba(80,80,130,.09)!important}
+ .celestial-web{opacity:.12!important}
+}
+</style>
 </head>
 <body class="book-cover-active">
 
@@ -2753,24 +2763,25 @@ showExternalData('byn3');
 <script id="DNA-LIFEFORM-RENDERER">
 (()=>{
  const canvas=document.getElementById('dnaLifeCanvas'); if(!canvas)return;
- const ctx=canvas.getContext('2d'); let w=0,h=0,dpr=1,raf=0,paused=false;
+ const ctx=canvas.getContext('2d'); let w=0,h=0,dpr=1,raf=0,paused=false,lastFrame=0;
+ const mobile=window.matchMedia&&window.matchMedia('(max-width: 700px)').matches;
  const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
- function resize(){dpr=Math.min(window.devicePixelRatio||1,1.6);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0)}
- function draw(t){ctx.clearRect(0,0,w,h);const time=(reduced?0:t*.00032),amp=Math.min(105,w*.105),turns=2.25,steps=Math.max(100,Math.floor(h/4));
+ function resize(){dpr=Math.min(window.devicePixelRatio||1,mobile?1:1.6);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';ctx.setTransform(dpr,0,0,dpr,0,0)}
+ function draw(t){if(mobile&&t-lastFrame<40){if(!reduced&&!paused)raf=requestAnimationFrame(draw);return}lastFrame=t;ctx.clearRect(0,0,w,h);const time=(reduced?0:t*.00032),amp=Math.min(105,w*.105),turns=2.25,steps=Math.max(mobile?45:100,Math.floor(h/(mobile?10:4)));
   const centers=[w*.13,w*.86];
   centers.forEach((cx,index)=>{const localAmp=amp*(index===0?1:.78);ctx.save();ctx.globalAlpha=index===0?.75:.56;
    // translucent double ribbons
-   for(let strand=0;strand<2;strand++){ctx.beginPath();for(let i=0;i<=steps;i++){const y=i/steps*h;const phase=y/h*Math.PI*2*turns+time+(strand?Math.PI:0)+(index*.8);const x=cx+Math.sin(phase)*localAmp+Math.sin(y*.009+time*2+index)*13;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.strokeStyle=strand?'rgba(255,102,181,.45)':'rgba(65,178,218,.48)';ctx.lineWidth= strand?5:6;ctx.shadowColor=strand?'#ff8bc9':'#71d8ee';ctx.shadowBlur=12;ctx.stroke();}
+   for(let strand=0;strand<2;strand++){ctx.beginPath();for(let i=0;i<=steps;i++){const y=i/steps*h;const phase=y/h*Math.PI*2*turns+time+(strand?Math.PI:0)+(index*.8);const x=cx+Math.sin(phase)*localAmp+Math.sin(y*.009+time*2+index)*13;if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)}ctx.strokeStyle=strand?'rgba(255,102,181,.45)':'rgba(65,178,218,.48)';ctx.lineWidth= strand?5:6;ctx.shadowColor=strand?'#ff8bc9':'#71d8ee';ctx.shadowBlur=mobile?0:12;ctx.stroke();}
    // base-pair rungs and nodes
    for(let i=0;i<=steps;i+=9){const y=i/steps*h;const phase=y/h*Math.PI*2*turns+time+index*.8;const x1=cx+Math.sin(phase)*localAmp+Math.sin(y*.009+time*2+index)*13;const x2=cx+Math.sin(phase+Math.PI)*localAmp+Math.sin(y*.009+time*2+index)*13;const grad=ctx.createLinearGradient(x1,y,x2,y);grad.addColorStop(0,'rgba(130,105,235,.55)');grad.addColorStop(.5,'rgba(255,255,255,.85)');grad.addColorStop(1,'rgba(255,112,184,.55)');ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.strokeStyle=grad;ctx.lineWidth=1.6;ctx.stroke();
-    [[x1,'#8b77ed'],[x2,'#ff83bf']].forEach(([x,c])=>{ctx.beginPath();ctx.arc(x,y,2.1+(i%18===0?1.1:0),0,Math.PI*2);ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=8;ctx.fill()});
+    [[x1,'#8b77ed'],[x2,'#ff83bf']].forEach(([x,c])=>{ctx.beginPath();ctx.arc(x,y,2.1+(i%18===0?1.1:0),0,Math.PI*2);ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=mobile?0:8;ctx.fill()});
    }
    ctx.restore();
   });
   // Rider animation is intentionally kept in the dedicated card track below the category heading.
   // The full-screen DNA background contains no cyclist, preventing a duplicate rider on mobile.
   // sparse molecular particles
-  for(let i=0;i<24;i++){const x=(i*137.5+t*.006)%Math.max(w,1),y=(i*83.7+t*.012)%Math.max(h,1);ctx.beginPath();ctx.arc(x,y,1.1,0,Math.PI*2);ctx.fillStyle='rgba(135,113,218,.28)';ctx.fill()}
+  for(let i=0;i<(mobile?7:24);i++){const x=(i*137.5+t*.006)%Math.max(w,1),y=(i*83.7+t*.012)%Math.max(h,1);ctx.beginPath();ctx.arc(x,y,1.1,0,Math.PI*2);ctx.fillStyle='rgba(135,113,218,.28)';ctx.fill()}
   if(!reduced&&!paused)raf=requestAnimationFrame(draw);
  }
  resize(); if(!reduced)raf=requestAnimationFrame(draw);else draw(0);
