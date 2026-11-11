@@ -841,6 +841,59 @@ body.book-cover-active .app-shell{
  .app-shell [data-tab-panel]:not([hidden]){animation:none!important;transform:none!important;filter:none!important}
 }
 </style>
+
+<style id="brand-one-screen-vol32">
+/* VOL.32 — BATTLE BANK-KUN title card fills one book-page viewport. */
+#brandPanel{
+ min-height:calc(100svh - 150px);
+ min-height:calc(100dvh - 150px);
+ display:flex;
+ align-items:stretch;
+ margin-bottom:0!important;
+}
+#brandPanel>header{
+ width:100%;
+ min-height:calc(100svh - 150px);
+ min-height:calc(100dvh - 150px);
+ margin:0!important;
+ padding:clamp(22px,5vh,56px) clamp(18px,4vw,48px)!important;
+ display:flex;
+ flex-direction:column!important;
+ justify-content:center!important;
+ align-items:center!important;
+ gap:clamp(24px,6vh,64px)!important;
+ text-align:center;
+ border:1px solid rgba(0,255,159,.48);
+ border-radius:22px;
+ background:linear-gradient(145deg,rgba(0,28,22,.94),rgba(8,5,12,.96) 58%,rgba(30,0,10,.88));
+ box-shadow:inset 0 0 45px rgba(0,255,159,.07),0 18px 48px rgba(0,0,0,.42);
+}
+#brandPanel>header>div:first-child{
+ width:100%;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ gap:clamp(14px,3vh,28px);
+}
+#brandPanel .neon-title{
+ font-size:clamp(2.1rem,7.5vw,5.8rem)!important;
+ line-height:1.12;
+ overflow-wrap:anywhere;
+}
+#brandPanel>header>div:first-child>div:last-child{
+ justify-content:center;
+}
+#brandPanel #dataCount{
+ font-size:clamp(1.1rem,3.5vw,1.6rem);
+}
+@media(max-width:520px){
+ #brandPanel,#brandPanel>header{
+  min-height:calc(100svh - 142px);
+  min-height:calc(100dvh - 142px);
+ }
+ #brandPanel>header{border-radius:16px}
+}
+</style>
 </head>
 <body class="book-cover-active">
 
@@ -939,7 +992,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.31</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.32</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
