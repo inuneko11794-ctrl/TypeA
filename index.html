@@ -3146,12 +3146,12 @@ showExternalData('byn3');
 
 
 <style id="book-page-turn-vol29">
-#bbkPageTurnSheet{position:fixed;z-index:2147482;pointer-events:none;margin:0!important;backface-visibility:hidden;transform-style:preserve-3d;will-change:transform,opacity;background:#f4edda;box-shadow:inset -18px 0 24px -20px rgba(20,12,4,.8),18px 8px 32px -18px rgba(0,0,0,.65)}
-#bbkPageTurnSheet:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.08) 55%,rgba(20,12,4,.38));pointer-events:none}
-#bbkPageTurnSheet.bbk-turn-forward{transform-origin:left center;animation:bbkFlipForward .78s cubic-bezier(.45,.02,.72,.35) forwards}
-#bbkPageTurnSheet.bbk-turn-backward{transform-origin:right center;animation:bbkFlipBackward .78s cubic-bezier(.45,.02,.72,.35) forwards}
-@keyframes bbkFlipForward{0%{transform:perspective(1600px) rotateY(0);opacity:1}28%{transform:perspective(1600px) rotateY(-24deg);opacity:1}72%{transform:perspective(1600px) rotateY(-68deg);opacity:.96}100%{transform:perspective(1600px) rotateY(-92deg);opacity:0}}
-@keyframes bbkFlipBackward{0%{transform:perspective(1600px) rotateY(0);opacity:1}28%{transform:perspective(1600px) rotateY(24deg);opacity:1}72%{transform:perspective(1600px) rotateY(68deg);opacity:.96}100%{transform:perspective(1600px) rotateY(92deg);opacity:0}}
+#bbkPageTurnSheet{position:fixed;z-index:2147482;pointer-events:none;margin:0!important;backface-visibility:hidden;transform-style:preserve-3d;will-change:transform,opacity,filter;background:#f4edda;box-shadow:inset -10px 0 18px -14px rgba(20,12,4,.55),12px 5px 26px -16px rgba(0,0,0,.48)}
+#bbkPageTurnSheet:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.015) 0%,rgba(255,255,255,.10) 48%,rgba(20,12,4,.30) 100%);pointer-events:none}
+#bbkPageTurnSheet.bbk-turn-forward{transform-origin:left center;animation:bbkFlipForward 1.08s cubic-bezier(.22,.61,.36,1) both}
+#bbkPageTurnSheet.bbk-turn-backward{transform-origin:right center;animation:bbkFlipBackward 1.08s cubic-bezier(.22,.61,.36,1) both}
+@keyframes bbkFlipForward{0%{transform:perspective(1900px) rotateY(0) translateZ(0);opacity:1;filter:brightness(1)}16%{transform:perspective(1900px) rotateY(-10deg) translateZ(2px);opacity:1;filter:brightness(1.025)}48%{transform:perspective(1900px) rotateY(-43deg) translateZ(5px);opacity:1;filter:brightness(1.04)}78%{transform:perspective(1900px) rotateY(-79deg) translateZ(2px);opacity:.98;filter:brightness(.98)}100%{transform:perspective(1900px) rotateY(-104deg) translateZ(0);opacity:0;filter:brightness(.92)}}
+@keyframes bbkFlipBackward{0%{transform:perspective(1900px) rotateY(0) translateZ(0);opacity:1;filter:brightness(1)}16%{transform:perspective(1900px) rotateY(10deg) translateZ(2px);opacity:1;filter:brightness(1.025)}48%{transform:perspective(1900px) rotateY(43deg) translateZ(5px);opacity:1;filter:brightness(1.04)}78%{transform:perspective(1900px) rotateY(79deg) translateZ(2px);opacity:.98;filter:brightness(.98)}100%{transform:perspective(1900px) rotateY(104deg) translateZ(0);opacity:0;filter:brightness(.92)}}
 @media(prefers-reduced-motion:reduce){#bbkPageTurnSheet{animation-duration:.01ms!important}}
 </style>
 <script id="book-page-turn-vol30-controller">
@@ -3204,7 +3204,7 @@ showExternalData('byn3');
   requestAnimationFrame(()=>sheet.classList.add(to>from?'bbk-turn-forward':'bbk-turn-backward'));
   const clean=()=>{if(sheet.isConnected)sheet.remove()};
   sheet.addEventListener('animationend',clean,{once:true});
-  window.setTimeout(clean,1050);
+  window.setTimeout(clean,1350);
  },true);
 })();
 </script>
