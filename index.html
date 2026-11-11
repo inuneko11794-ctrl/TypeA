@@ -605,6 +605,46 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
   z-index: 1;
   pointer-events: auto !important;
 }
+
+/* ===== BOOK / BOOKMARK UI VOL.9 ===== */
+.app-shell{
+  width:min(1440px,100%); margin:18px auto; padding:clamp(12px,2.5vw,30px);
+  border:1px solid rgba(215,177,103,.75); border-radius:18px 8px 8px 18px;
+  background:linear-gradient(90deg,rgba(74,42,22,.96) 0 9px,rgba(18,13,11,.96) 9px 100%);
+  box-shadow:0 22px 60px rgba(0,0,0,.55),inset 5px 0 0 rgba(235,195,120,.22),inset 0 0 0 1px rgba(255,231,184,.12);
+}
+.app-shell:after{content:"";display:block;position:absolute;pointer-events:none;z-index:-1;top:8px;right:-5px;bottom:8px;width:8px;border-radius:0 5px 5px 0;background:repeating-linear-gradient(180deg,#e8d9b8 0 2px,#bba77e 2px 3px);box-shadow:3px 2px 8px #0008}
+.main-tabs.book-bookmarks{display:flex;flex-wrap:nowrap;gap:5px;justify-content:stretch;align-items:flex-end;margin:0 0 18px;padding:0 8px;border-bottom:3px solid #b88b49;overflow-x:auto;scrollbar-width:thin}
+.main-tabs.book-bookmarks .main-tab,
+.main-tabs.book-bookmarks .main-tab:nth-child(n){
+  flex:1 0 0;width:auto;min-width:0;min-height:58px;padding:9px 5px 8px;
+  transform:none;border:1px solid rgba(91,61,31,.8)!important;border-bottom:0!important;
+  border-radius:9px 9px 2px 2px;background:linear-gradient(145deg,#e8d8b4,#b99a68)!important;
+  color:#342313!important;text-shadow:none!important;box-shadow:inset 0 1px #fff9,0 -2px 8px #0003;
+  font-family:'Noto Sans JP',sans-serif;letter-spacing:.02em;transition:transform .22s,filter .22s,background .22s;
+}
+.main-tabs.book-bookmarks .main-tab:nth-child(2){background:linear-gradient(145deg,#d9c4a2,#a88759)!important}
+.main-tabs.book-bookmarks .main-tab:nth-child(3){background:linear-gradient(145deg,#c9d3b0,#81936a)!important}
+.main-tabs.book-bookmarks .main-tab:nth-child(4){background:linear-gradient(145deg,#c2c9dc,#7c8aa8)!important}
+.main-tabs.book-bookmarks .main-tab .bookmark-label{display:block;font-size:clamp(10px,2.5vw,13px);font-weight:900;white-space:nowrap}
+.main-tabs.book-bookmarks .main-tab .tab-sub{display:block;margin-top:4px;font-size:7px;letter-spacing:.08em;color:#59452e!important;opacity:.8;white-space:nowrap}
+.main-tabs.book-bookmarks .main-tab[aria-selected="true"]{
+  min-height:66px;transform:translateY(2px);background:linear-gradient(180deg,#fff7df,#ead9b3)!important;
+  border-color:#f3d18d!important;color:#2d2114!important;
+  box-shadow:0 -5px 16px #d8b16b44,inset 0 2px #fff;
+  animation:none;z-index:100
+}
+.main-tabs.book-bookmarks .main-tab[aria-selected="true"] .tab-sub{background:transparent!important;color:#80602f!important}
+[data-tab-panel]:not([hidden]){transform-origin:left center;animation:bookPageTurn .34s cubic-bezier(.2,.75,.25,1)}
+@keyframes bookPageTurn{0%{opacity:.45;transform:perspective(1000px) rotateY(-5deg) translateX(10px)}100%{opacity:1;transform:perspective(1000px) rotateY(0) translateX(0)}}
+@media(max-width:520px){
+ .app-shell{margin:8px 5px;padding:12px 9px;border-radius:12px}
+ .main-tabs.book-bookmarks{gap:3px;padding:0 2px;margin-bottom:14px}
+ .main-tabs.book-bookmarks .main-tab,.main-tabs.book-bookmarks .main-tab:nth-child(n){flex:1 0 22%;min-width:74px;min-height:52px;padding:7px 3px 6px}
+ .main-tabs.book-bookmarks .main-tab[aria-selected="true"]{min-height:58px}
+ .main-tabs.book-bookmarks .main-tab .tab-sub{font-size:6px}
+}
+@media(prefers-reduced-motion:reduce){[data-tab-panel]:not([hidden]){animation:none}.main-tabs.book-bookmarks .main-tab{transition:none}}
 </style>
 </head>
 <body>
@@ -667,11 +707,11 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
  <div id="dataCount" class="font-mono-tech text-xl text-cyan-100 border border-cyan-300/70 bg-cyan-400/10 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ 00000 ]</span></div>
 </header>
 
-<nav class="main-tabs" role="tablist" aria-label="メインメニュー">
- <button type="button" class="main-tab" role="tab" id="tabHome" aria-controls="dashboardPanel" aria-selected="true" data-tab-target="home">ホーム<span class="tab-sub">DATA / STATUS</span></button>
- <button type="button" class="main-tab" role="tab" id="tabAnalysis" aria-selected="false" data-tab-target="analysis">分析・集計<span class="tab-sub">PATTERN / TABLES</span></button>
- <button type="button" class="main-tab" role="tab" id="tabDatabase" aria-selected="false" data-tab-target="database">レース管理<span class="tab-sub">DATABASE</span></button>
- <button type="button" class="main-tab" role="tab" id="tabSettings" aria-selected="false" data-tab-target="settings">設定・音楽<span class="tab-sub">BACKUP / AUDIO</span></button>
+<nav class="main-tabs book-bookmarks" role="tablist" aria-label="本のしおり">
+ <button type="button" class="main-tab" role="tab" id="tabHome" aria-controls="dashboardPanel" aria-selected="true" data-tab-target="home"><span class="bookmark-label">表紙・ホーム</span><span class="tab-sub">01 / RACE DESK</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabAnalysis" aria-selected="false" data-tab-target="analysis"><span class="bookmark-label">研究ページ</span><span class="tab-sub">02 / LABORATORY</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabDatabase" aria-selected="false" data-tab-target="database"><span class="bookmark-label">記録庫</span><span class="tab-sub">03 / ARCHIVE</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabSettings" aria-selected="false" data-tab-target="settings"><span class="bookmark-label">書庫・設定</span><span class="tab-sub">04 / LIBRARY</span></button>
 </nav>
 
 
