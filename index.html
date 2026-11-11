@@ -927,7 +927,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.55</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.56</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -3311,34 +3311,65 @@ showExternalData('byn3');
 
 
 
-<style id="book-one-card-per-page-vol55">
-/* VOL.55: スクロールする画面そのものをページ送りの基準にする */
-html{scroll-snap-type:y proximity;scroll-padding-top:0}
-#discoverySection,
-#numericTrickLab,
-#trifectaProductMarkLab,
-#line1AnalysisSection,
-#venueAnalysisSection,
-#externalJsonAnalysis{
- display:flow-root!important;width:100vw!important;max-width:none!important;
- min-height:100dvh!important;height:auto!important;box-sizing:border-box!important;
- margin:0!important;padding:72px 14px calc(66px + env(safe-area-inset-bottom,0px))!important;
- scroll-snap-align:start;scroll-snap-stop:normal;
- border-radius:0!important;border-left:0!important;border-right:0!important
+
+
+<style id="book-true-single-page-vol56">
+#analysisBookPages{
+ display:none;
+ position:relative;
+ width:100vw;
+ height:calc(100dvh - 48px - env(safe-area-inset-bottom,0px));
+ margin:0;
+ padding:0;
+ overflow-y:auto;
+ overflow-x:hidden;
+ overscroll-behavior-y:contain;
+ scroll-snap-type:y mandatory;
+ scroll-behavior:smooth;
+ box-sizing:border-box;
 }
-#discoverySection,
-#numericTrickLab,
-#trifectaProductMarkLab,
-#line1AnalysisSection,
-#venueAnalysisSection,
-#externalJsonAnalysis .panel-content{width:100%!important;max-width:none!important;margin:0!important}
-#dashboardPanel,#recordManager,#userControlHub{min-height:100dvh!important;box-sizing:border-box!important}
-@media(min-width:700px){#discoverySection,
-#numericTrickLab,
-#trifectaProductMarkLab,
-#line1AnalysisSection,
-#venueAnalysisSection,
-#externalJsonAnalysis{padding-left:28px!important;padding-right:28px!important}}
+.app-shell:has(#analysisBookPages [data-tab-panel="analysis"]:not([hidden])) #analysisBookPages{display:block}
+#analysisBookPages>[data-tab-panel="analysis"]{
+ display:block!important;
+ position:relative!important;
+ width:100%!important;
+ max-width:none!important;
+ height:100%!important;
+ min-height:100%!important;
+ max-height:100%!important;
+ margin:0!important;
+ padding:12px 12px 18px!important;
+ box-sizing:border-box!important;
+ overflow:hidden!important;
+ scroll-snap-align:start;
+ scroll-snap-stop:always;
+ border-radius:0!important;
+}
+#analysisBookPages>[data-tab-panel="analysis"]>.panel-content{
+ width:100%!important;
+ height:100%!important;
+ max-height:100%!important;
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ box-sizing:border-box!important;
+ padding-bottom:12px!important;
+}
+#analysisBookPages>[data-tab-panel="analysis"][hidden]{display:none!important}
+@media(min-width:700px){
+ #analysisBookPages>[data-tab-panel="analysis"]{padding-left:28px!important;padding-right:28px!important}
+}
 </style>
+<script id="book-page-container-vol56">
+(()=>{
+ const ids=["discoverySection","numericTrickLab","trifectaProductMarkLab","line1AnalysisSection","venueAnalysisSection","externalJsonAnalysis"];
+ const panels=ids.map(id=>document.getElementById(id)).filter(Boolean);
+ if(panels.length!==ids.length)return;
+ if(document.getElementById('analysisBookPages'))return;
+ const first=panels[0],wrap=document.createElement('div');
+ wrap.id='analysisBookPages';
+ first.parentNode.insertBefore(wrap,first);
+ panels.forEach(panel=>wrap.appendChild(panel));
+})();
+</script>
 </body>
 </html>
