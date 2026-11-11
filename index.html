@@ -748,30 +748,7 @@ body.manual-modal-open{overflow:hidden!important;overscroll-behavior:none!import
 }
 </style>
 
-<style id="book-cover-stability-vol19">
-html:has(body.book-cover-active),html:has(body.book-cover-active) body{margin:0!important;min-height:100%!important;background:#080706!important}
-body.book-cover-active{overflow:hidden!important;background:#080706!important}
-body.book-cover-active>:not(#bookCoverGate){visibility:hidden!important}
-body.book-cover-active>#bookCoverGate{
- position:fixed!important;inset:0!important;z-index:2147483647!important;
- display:flex!important;visibility:visible!important;opacity:1!important;
- transform:none!important;isolation:isolate!important;
- background:#17120f!important;
-}
-body.book-cover-active>#bookCoverGate:before{z-index:0!important}
-body.book-cover-active>#bookCoverGate>*{position:relative;z-index:1}
-body.book-cover-active>#bookCoverGate>.cover-book{
- display:block!important;visibility:visible!important;opacity:1!important;
- width:min(82vw,390px)!important;height:min(66vh,570px)!important;
- min-height:320px!important;max-height:570px!important;box-sizing:border-box!important;
- background:linear-gradient(90deg,#100b08 0,#51351b 3%,#24160d 7%,#604323 12%,#24170e 17%,#382414 100%)!important;
- border:1px solid #a17b3e!important;
-}
-body.book-cover-active>#bookCoverGate>.cover-book>.cover-frame{
- display:flex!important;visibility:visible!important;opacity:1!important;
-}
-body.book-cover-active>#bookCoverGate>#bookCoverOpenBtn{display:flex!important;visibility:visible!important;opacity:1!important}
-</style>
+
 <style id="book-cover-vol18">
 body.book-cover-active{overflow:hidden!important}
 #bookCoverGate{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(12px,2.4vh,22px);padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));overflow:auto;background:radial-gradient(ellipse at 50% 38%,#3b2b1d 0%,#17120f 47%,#080706 100%);color:#e8d6a2;font-family:'Noto Sans JP',serif;isolation:isolate}
