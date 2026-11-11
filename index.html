@@ -779,10 +779,16 @@ body.book-cover-active{overflow:hidden!important}
 @media(max-height:650px){.cover-book{height:56vh;min-height:320px}.cover-emblem{width:86px}.cover-frame{padding-top:15px;padding-bottom:12px}.cover-title-jp{font-size:clamp(27px,7vw,36px)}}
 @media(prefers-reduced-motion:reduce){#bookCoverGate.is-opening{transition:none}}
 </style>
+<style id="book-cover-top-layer-v21">
+/* Native dialog top layer: keep the book cover above every app stacking context. */
+html body{perspective:none!important;transform:none!important;filter:none!important}
+#bookCoverGate{position:fixed!important;inset:0!important;z-index:2147483647!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;background:radial-gradient(ellipse at 50% 38%,#3b2b1d 0%,#17120f 47%,#080706 100%)!important;color:#e8d6a2!important;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom))!important;overflow:auto!important;}
+#bookCoverGate::backdrop{background:#080706!important}
+</style>
 </head>
 <body class="book-cover-active">
 
-<div id="bookCoverGate" role="dialog" aria-modal="true" aria-label="競輪のすべて 表紙" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:18px 16px;background:radial-gradient(ellipse at 50% 38%,#3b2b1d 0%,#17120f 47%,#080706 100%);color:#e8d6a2;overflow:auto;">
+<dialog id="bookCoverGate" open aria-label="競輪のすべて 表紙" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:18px 16px;background:radial-gradient(ellipse at 50% 38%,#3b2b1d 0%,#17120f 47%,#080706 100%);color:#e8d6a2;overflow:auto;">
  <div class="cover-book">
   <div class="cover-spine"></div>
   <div class="cover-frame">
@@ -810,7 +816,7 @@ body.book-cover-active{overflow:hidden!important}
  <div class="cover-instruction">THE BOOK OF KEIRIN / DIGITAL EDITION</div>
  <button id="bookCoverOpenBtn" type="button"><span class="bookmark-ribbon">BOOKMARK</span><span class="cover-open-label">栞を引いて、本を開く</span><span class="cover-open-arrow">→</span></button>
  <div class="cover-footnote">TAP TO OPEN THE BOOK</div>
-</div>
+</dialog>
 
 <canvas id="dnaLifeCanvas" aria-hidden="true"></canvas>
 <div class="dna-caption" aria-hidden="true">DATA HELIX / PATTERN GENOME / BATTLE BANK-KUN</div>
