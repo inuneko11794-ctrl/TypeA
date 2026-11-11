@@ -771,6 +771,18 @@ body.book-cover-closed .app-shell{visibility:hidden!important;pointer-events:non
 @media(prefers-reduced-motion:reduce){.book-cover-bookmarks button{transition:none}}
 </style>
 
+
+<style id="book-cover-emergency-fix">
+html.book-cover-closed,body.book-cover-closed{background:#090b12!important;min-height:100%!important}
+body.book-cover-closed .app-shell{display:none!important}
+#bookCoverGate{position:fixed!important;inset:0!important;z-index:2147483000!important;display:flex!important;visibility:visible!important;opacity:1!important;align-items:center!important;justify-content:center!important;background:radial-gradient(ellipse at center,#30251b 0%,#111018 65%,#05060a 100%)!important}
+#bookCoverGate[hidden]{display:none!important}
+#bookCoverGate .book-cover-frame{display:flex!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:1!important;width:min(650px,100%)!important;min-height:min(820px,94dvh)!important;background:linear-gradient(120deg,#21170f,#49301d 18%,#302014 52%,#1d150f)!important;color:#f3dfb0!important}
+#bookCoverGate .book-cover-title{display:block!important;color:#f8e7c4!important}
+#bookCoverGate .book-cover-bookmarks{display:grid!important;visibility:visible!important;opacity:1!important}
+#bookCoverGate .book-cover-bookmarks button{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;position:relative!important;z-index:2!important}
+</style>
+
 </head>
 <body class="book-cover-closed">
 <canvas id="dnaLifeCanvas" aria-hidden="true"></canvas>
@@ -848,7 +860,7 @@ body.book-cover-closed .app-shell{visibility:hidden!important;pointer-events:non
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.12</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.13</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -897,7 +909,7 @@ body.book-cover-closed .app-shell{visibility:hidden!important;pointer-events:non
 
   <div class="glass-panel p-4 sm:p-5 mb-5" id="aiPredictionLab">
    <div class="panel-content">
-    <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.12</h2>
+    <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.13</h2>
     <p class="text-xs text-slate-400 mb-3">出走表の保存データから単勝・2車単・3連単を別々に予測します。結果登録後は未学習レースだけを自動学習します。</p>
     <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
     <input id="aiRaceDate" type="date" class="field text-sm mb-3">
