@@ -3161,7 +3161,8 @@ showExternalData('byn3');
 #bbkBookTurnBack:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(270deg,rgba(255,255,255,.05),rgba(25,15,5,.07))}
 @keyframes bbkBookForward39{0%{transform:rotateY(0deg) translateZ(0);filter:brightness(1)}12%{transform:rotateY(-8deg) translateZ(3px);filter:brightness(1.035)}43%{transform:rotateY(-72deg) translateZ(10px);filter:brightness(1.07)}74%{transform:rotateY(-146deg) translateZ(5px);filter:brightness(1.01)}100%{transform:rotateY(-180deg) translateZ(0);filter:brightness(.97)}}
 @keyframes bbkBookBackward39{0%{transform:rotateY(0deg) translateZ(0);filter:brightness(.97)}12%{transform:rotateY(8deg) translateZ(3px);filter:brightness(1.01)}43%{transform:rotateY(72deg) translateZ(10px);filter:brightness(1.07)}74%{transform:rotateY(146deg) translateZ(5px);filter:brightness(1.035)}100%{transform:rotateY(180deg) translateZ(0);filter:brightness(1)}}
-@media(prefers-reduced-motion:reduce){#bbkBookTurnLeaf{animation-duration:.01ms!important}}
+/* 本のページめくりは端末の簡易アニメーション設定に関係なく再生する */
+@media(prefers-reduced-motion:reduce){#bbkBookTurnLeaf.bbk-turn-forward{animation:bbkBookForward39 1.32s cubic-bezier(.43,.035,.2,1) both!important}#bbkBookTurnLeaf.bbk-turn-backward{animation:bbkBookBackward39 1.32s cubic-bezier(.43,.035,.2,1) both!important}}
 </style>
 <script id="book-page-turn-vol40-controller">
 (()=>{
