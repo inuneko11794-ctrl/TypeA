@@ -920,6 +920,18 @@ body.book-cover-active .app-shell{
 
 
 <div class="app-shell">
+
+
+<nav class="main-tabs book-bookmarks" role="tablist" aria-label="本のしおり">
+  <button type="button" class="main-tab" role="tab" id="tabBrand" aria-controls="brandPanel" aria-selected="false" data-tab-target="brand"><span class="bookmark-label">BATTLE BANK</span><span class="tab-sub">00 / COMMANDER</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabHome" aria-controls="dashboardPanel" aria-selected="true" data-tab-target="home"><span class="bookmark-label">表紙・ホーム</span><span class="tab-sub">01 / RACE DESK</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabInput" aria-controls="inputPanel" aria-selected="false" data-tab-target="input"><span class="bookmark-label">データ入力</span><span class="tab-sub">02 / DATA UPLINK</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabAnalysis" aria-selected="false" data-tab-target="analysis"><span class="bookmark-label">研究ページ</span><span class="tab-sub">02 / LABORATORY</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabDatabase" aria-selected="false" data-tab-target="database"><span class="bookmark-label">記録庫</span><span class="tab-sub">03 / ARCHIVE</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabSettings" aria-selected="false" data-tab-target="settings"><span class="bookmark-label">書庫・設定</span><span class="tab-sub">04 / LIBRARY</span></button>
+</nav>
+
+<div id="brandPanel" data-tab-panel="brand" class="mb-7">
 <header class="flex flex-col md:flex-row justify-between items-end border-b border-cyan-300/50 pb-5 mb-6 gap-3">
 
  <div class="w-full">
@@ -927,20 +939,13 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.30</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.31</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
  <div id="dataCount" class="font-mono-tech text-xl text-cyan-100 border border-cyan-300/70 bg-cyan-400/10 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ 00000 ]</span></div>
 </header>
-
-<nav class="main-tabs book-bookmarks" role="tablist" aria-label="本のしおり">
- <button type="button" class="main-tab" role="tab" id="tabHome" aria-controls="dashboardPanel" aria-selected="true" data-tab-target="home"><span class="bookmark-label">表紙・ホーム</span><span class="tab-sub">01 / RACE DESK</span></button>
- <button type="button" class="main-tab" role="tab" id="tabInput" aria-controls="inputPanel" aria-selected="false" data-tab-target="input"><span class="bookmark-label">データ入力</span><span class="tab-sub">02 / DATA UPLINK</span></button>
- <button type="button" class="main-tab" role="tab" id="tabAnalysis" aria-selected="false" data-tab-target="analysis"><span class="bookmark-label">研究ページ</span><span class="tab-sub">02 / LABORATORY</span></button>
- <button type="button" class="main-tab" role="tab" id="tabDatabase" aria-selected="false" data-tab-target="database"><span class="bookmark-label">記録庫</span><span class="tab-sub">03 / ARCHIVE</span></button>
- <button type="button" class="main-tab" role="tab" id="tabSettings" aria-selected="false" data-tab-target="settings"><span class="bookmark-label">書庫・設定</span><span class="tab-sub">04 / LIBRARY</span></button>
-</nav>
+</div>
 
 
 <div id="divineEyeAlert" class="hidden mb-5"></div>
