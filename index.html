@@ -927,7 +927,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.29</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.30</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -936,6 +936,7 @@ body.book-cover-active .app-shell{
 
 <nav class="main-tabs book-bookmarks" role="tablist" aria-label="本のしおり">
  <button type="button" class="main-tab" role="tab" id="tabHome" aria-controls="dashboardPanel" aria-selected="true" data-tab-target="home"><span class="bookmark-label">表紙・ホーム</span><span class="tab-sub">01 / RACE DESK</span></button>
+ <button type="button" class="main-tab" role="tab" id="tabInput" aria-controls="inputPanel" aria-selected="false" data-tab-target="input"><span class="bookmark-label">データ入力</span><span class="tab-sub">02 / DATA UPLINK</span></button>
  <button type="button" class="main-tab" role="tab" id="tabAnalysis" aria-selected="false" data-tab-target="analysis"><span class="bookmark-label">研究ページ</span><span class="tab-sub">02 / LABORATORY</span></button>
  <button type="button" class="main-tab" role="tab" id="tabDatabase" aria-selected="false" data-tab-target="database"><span class="bookmark-label">記録庫</span><span class="tab-sub">03 / ARCHIVE</span></button>
  <button type="button" class="main-tab" role="tab" id="tabSettings" aria-selected="false" data-tab-target="settings"><span class="bookmark-label">書庫・設定</span><span class="tab-sub">04 / LIBRARY</span></button>
@@ -943,8 +944,8 @@ body.book-cover-active .app-shell{
 
 
 <div id="divineEyeAlert" class="hidden mb-5"></div>
-<div id="dashboardPanel" data-tab-panel="home" class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-7">
- <section class="xl:col-span-4 flex flex-col gap-5">
+<div id="inputPanel" data-tab-panel="input" class="mb-7">
+ <section class="flex flex-col gap-5">
   <div class="glass-panel p-4 sm:p-5">
    <div class="panel-content">
     <button id="openManualBtn" type="button" class="touch-btn btn-alert w-full py-4 px-4 mb-5 rounded-xl flex justify-between items-center text-sm tracking-widest"><span>⚡ 手動入力モード</span><span>▶</span></button>
@@ -957,6 +958,12 @@ body.book-cover-active .app-shell{
     </div>
    </div>
   </div>
+
+ </section>
+</div>
+
+<div id="dashboardPanel" data-tab-panel="home" class="grid grid-cols-1 xl:grid-cols-12 gap-5 mb-7">
+ <section class="xl:col-span-4 flex flex-col gap-5">
   <div class="glass-panel p-4 sm:p-5 mb-5" id="aiDataViewPanel">
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-emerald-400 pl-2 mb-2">AI DATA VIEW // 分析用テキスト出力</h2>
