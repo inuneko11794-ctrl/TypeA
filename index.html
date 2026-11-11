@@ -3219,21 +3219,30 @@ showExternalData('byn3');
     if(paint.backgroundImage!=='none'){back.style.backgroundImage=paint.backgroundImage;front.style.backgroundImage=paint.backgroundImage;}
    }
   }
-  sourcePanels.forEach(panel=>{
-   const shell=document.createElement('div');
-   shell.className='app-shell';
-   shell.style.cssText='width:100%;max-width:none;margin:0;padding:0;background:transparent;box-shadow:none;border:0;';
-   const clone=panel.cloneNode(true);
-   // data-tab-panelを残し、元ページ用のCSSを複製画面にも適用する
-   clone.hidden=false;clone.removeAttribute('id');
-   clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
-   clone.querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=true);
-   clone.setAttribute('aria-hidden','true');
-   shell.appendChild(clone);
-   inner.appendChild(shell);
-  });
+  const fillPage=(pageInner)=>{
+   sourcePanels.forEach(panel=>{
+    const shell=document.createElement('div');
+    shell.className='app-shell';
+    shell.style.cssText='width:100%;max-width:none;margin:0;padding:0;background:transparent;box-shadow:none;border:0;';
+    const clone=panel.cloneNode(true);
+    // 元ページと同じパネル構造を保ち、複製側も表示状態にする
+    clone.hidden=false;clone.removeAttribute('id');
+    clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+    clone.querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=true);
+    clone.setAttribute('aria-hidden','true');
+    shell.appendChild(clone);
+    pageInner.appendChild(shell);
+   });
+  };
+  fillPage(inner);
   if(backward){
-   // 表裏に文字や画面は複製せず、紙面の色味だけ同じにする。
+   // 戻る方向は表裏の両面に同じ向きのページを置き、回転中に黒い面が出ないようにする
+   const frontInner=document.createElement('div');
+   frontInner.id='bbkBookTurnInner';
+   frontInner.style.cssText='position:absolute;top:'+inner.style.top+';left:8px;width:100vw;height:'+inner.style.height+';overflow:hidden;';
+   frontInner.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+   fillPage(frontInner);
+   front.appendChild(frontInner);
    front.style.backgroundColor=back.style.backgroundColor;
    if(back.style.backgroundImage!=='none')front.style.backgroundImage=back.style.backgroundImage;
    back.appendChild(inner);
