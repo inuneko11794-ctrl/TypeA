@@ -894,6 +894,21 @@ body.book-cover-active .app-shell{
  #brandPanel>header{border-radius:16px}
 }
 </style>
+
+<style id="book-paper-pages-vol33">
+/* VOL.33 — 本文ページの地色を紙色に統一。表紙・本体外側・カード意匠は維持。 */
+.app-shell [data-tab-panel]{
+ background-color:#f7f1e3!important;
+ background-image:
+  radial-gradient(circle at 18% 24%,rgba(255,255,255,.42) 0%,transparent 42%),
+  radial-gradient(circle at 82% 76%,rgba(200,180,140,.16) 0%,transparent 52%),
+  repeating-linear-gradient(0deg,rgba(105,78,43,.018) 0px,rgba(105,78,43,.018) 1px,transparent 1px,transparent 4px)!important;
+ background-blend-mode:normal,normal,multiply!important;
+ border:1px solid rgba(104,79,48,.22);
+ box-shadow:inset 0 0 34px rgba(80,50,20,.055),0 3px 12px rgba(20,12,4,.12);
+}
+</style>
+
 </head>
 <body class="book-cover-active">
 
@@ -992,7 +1007,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.32</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.33</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
