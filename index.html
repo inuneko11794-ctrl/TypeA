@@ -2948,6 +2948,7 @@ showExternalData('byn3');
   $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 学習済み '+learned+'件';
   const recent=rows.slice(-8).reverse();
   $('aiPredictionOutput').innerHTML=recent.length?recent.map(p=>'<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.learned?'学習済み':'結果待ち')+'</span><div class="mt-1">単勝候補：'+p.win.join(' → ')+'</div><div>2車単候補：'+p.exacta.map(x=>x.join('-')).join(' / ')+'</div><div>3連単候補：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div></div>').join(''):'予測履歴はまだありません。';
+  renderDiscoveries();
  }
  function renderDiscoveries(){
   const status=$('discoveryStatus'),out=$('discoveryOutput');if(!status||!out)return;
