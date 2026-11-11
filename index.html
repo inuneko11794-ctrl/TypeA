@@ -785,34 +785,25 @@ html body{perspective:none!important;transform:none!important;filter:none!import
 #bookCoverGate{position:fixed!important;inset:0!important;z-index:2147483647!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;background:radial-gradient(ellipse at 50% 38%,#3b2b1d 0%,#17120f 47%,#080706 100%)!important;color:#e8d6a2!important;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom))!important;overflow:auto!important;}
 #bookCoverGate::backdrop{background:#080706!important}
 </style>
-<style id="book-cover-light-suction-v22">
-/* Tap: a warm ring of light contracts toward the center before the book opens. */
+<style id="book-cover-world-transition-v23">
+/* A person is drawn into a brilliant portal and emerges inside the book world. */
 #bookCoverGate{isolation:isolate}
-#bookCoverGate.is-opening{opacity:0!important;transition:opacity 1.42s ease!important}
-#bookCoverGate.is-opening::after{
- content:"";position:fixed;inset:-45vmax;z-index:100;pointer-events:none;
- background:radial-gradient(circle at 50% 50%,
-  rgba(255,249,225,0) 0 13%,
-  rgba(255,239,190,.12) 22%,
-  rgba(255,228,160,.72) 43%,
-  rgba(255,246,214,.98) 52%,
-  rgba(255,226,160,.38) 60%,
-  rgba(255,226,160,0) 69%);
- filter:blur(10px);
- transform:scale(1.12);
- opacity:0;
- animation:book-light-suction 1.42s cubic-bezier(.45,0,.22,1) forwards;
-}
-@keyframes book-light-suction{
- 0%{transform:scale(1.12);opacity:0}
- 14%{opacity:1}
- 78%{transform:scale(.13);opacity:.96}
- 100%{transform:scale(.015);opacity:0}
-}
-@media(prefers-reduced-motion:reduce){
- #bookCoverGate.is-opening{transition:none!important}
- #bookCoverGate.is-opening::after{animation-duration:.01ms}
-}
+#bookCoverGate.is-opening{opacity:0!important;transition:opacity 2.12s ease 0s!important}
+.book-world-transition{position:fixed;inset:0;z-index:999999;overflow:hidden;pointer-events:none;opacity:0;background:#080706}
+.book-world-light{position:absolute;inset:-35%;background:radial-gradient(ellipse at 50% 48%,#fff 0%,#fff9df 8%,rgba(255,239,183,.98) 17%,rgba(255,205,111,.72) 31%,rgba(255,179,80,.2) 48%,transparent 66%);filter:blur(3px);transform:scale(.08)}
+.book-world-tunnel{position:absolute;inset:-30%;opacity:0;background:repeating-radial-gradient(ellipse at 50% 48%,transparent 0 7%,rgba(255,249,221,.0) 8%,rgba(255,249,221,.72) 8.4%,transparent 9.2%),conic-gradient(from 0deg at 50% 48%,rgba(255,255,255,.0),rgba(255,239,190,.5),rgba(255,255,255,0),rgba(255,222,157,.6),rgba(255,255,255,0));filter:blur(5px);transform:perspective(500px) scale(1.7) rotateX(8deg)}
+.book-world-person{position:absolute;left:50%;bottom:9%;width:clamp(48px,12vw,86px);height:clamp(125px,29vh,190px);opacity:0;transform:translateX(-50%) scale(1);filter:drop-shadow(0 0 15px rgba(255,255,255,.8))}
+.book-world-person:before{content:"";position:absolute;left:34%;top:0;width:32%;aspect-ratio:1;border-radius:50%;background:#17110c;box-shadow:0 0 0 5px rgba(255,255,255,.08)}
+.book-world-person:after{content:"";position:absolute;left:13%;top:28%;width:74%;height:72%;background:#17110c;clip-path:polygon(35% 0,65% 0,78% 22%,100% 100%,68% 100%,55% 48%,48% 100%,0 100%,22% 22%);border-radius:35% 35% 4% 4%}
+#bookCoverGate.is-opening .book-world-transition{animation:world-arrival 2.12s ease-in-out forwards}
+#bookCoverGate.is-opening .book-world-light{animation:world-flare 2.12s cubic-bezier(.18,.72,.2,1) forwards}
+#bookCoverGate.is-opening .book-world-tunnel{animation:world-tunnel 2.12s cubic-bezier(.45,0,.15,1) forwards}
+#bookCoverGate.is-opening .book-world-person{animation:world-person 2.12s cubic-bezier(.42,0,.12,1) forwards}
+@keyframes world-arrival{0%{opacity:0}12%{opacity:1}78%{opacity:1}100%{opacity:1}}
+@keyframes world-flare{0%{transform:scale(.08);opacity:0}12%{transform:scale(.55);opacity:1}38%{transform:scale(1.8);opacity:1}70%{transform:scale(3.4);opacity:.95}100%{transform:scale(5);opacity:1}}
+@keyframes world-tunnel{0%{opacity:0;transform:perspective(500px) scale(1.7) rotateX(8deg)}20%{opacity:.9}75%{opacity:1;transform:perspective(500px) scale(.22) rotateX(8deg)}100%{opacity:0;transform:perspective(500px) scale(.035) rotateX(8deg)}}
+@keyframes world-person{0%{opacity:0;transform:translate(-50%,0) scale(1)}18%{opacity:1;transform:translate(-50%,-3vh) scale(1.05)}55%{opacity:1;transform:translate(-50%,-22vh) scale(.48)}82%{opacity:.9;transform:translate(-50%,-36vh) scale(.08)}100%{opacity:0;transform:translate(-50%,-40vh) scale(.01)}}
+@media(prefers-reduced-motion:reduce){#bookCoverGate.is-opening{transition:none!important}.book-world-transition,.book-world-light,.book-world-tunnel,.book-world-person{animation-duration:.01ms!important}}
 </style>
 </head>
 <body class="book-cover-active">
@@ -845,6 +836,7 @@ html body{perspective:none!important;transform:none!important;filter:none!import
  <div class="cover-instruction">THE BOOK OF KEIRIN / DIGITAL EDITION</div>
  <button id="bookCoverOpenBtn" type="button"><span class="bookmark-ribbon">BOOKMARK</span><span class="cover-open-label">栞を引いて、本を開く</span><span class="cover-open-arrow">→</span></button>
  <div class="cover-footnote">TAP TO OPEN THE BOOK</div>
+ <div class="book-world-transition" aria-hidden="true"><div class="book-world-light"></div><div class="book-world-tunnel"></div><div class="book-world-person"></div></div>
 </dialog>
 
 <canvas id="dnaLifeCanvas" aria-hidden="true"></canvas>
@@ -3056,7 +3048,7 @@ showExternalData('byn3');
       try { localStorage.setItem('bbk_active_tab', 'home'); } catch (e) {}
       const home = document.getElementById('tabHome');
       if (home) home.click();
-    }, 1450);
+    }, 2120);
   });
 })();
 </script>
