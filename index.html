@@ -1190,7 +1190,7 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
  <div class="panel-content">
   <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
    <h2 class="kicker border-l-4 border-sky-500 pl-2">RACE DATABASE // 登録レース管理</h2>
-   <div class="flex items-center gap-2"><span class="discovery-chip">SEARCH / EDIT / DELETE</span><button id="openBatchEditBtn" type="button" class="touch-btn btn-alert px-3 py-2 text-xs">未入力を一括編集</button></div>
+   <div class="flex items-center gap-2 flex-wrap"><span class="discovery-chip">SEARCH / EDIT / DELETE</span><button id="openBatchEditBtn" type="button" class="touch-btn btn-alert px-3 py-2 text-xs">未入力を一括編集</button><button id="deletePendingRecordsBtn" type="button" class="touch-btn btn-ghost px-3 py-2 text-xs">未入力を一括削除</button></div>
   </div>
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
    <input id="recordSearch" class="field text-sm" placeholder="競輪場・開催日・レース番号で検索">
@@ -2041,6 +2041,20 @@ function saveBatchEdit(){
  }
  persist();updateCountDisplay();runAnalysis();renderRecordManager();const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
 }
+function deletePendingRecords(){
+ const targets=savedRecords.map((r,i)=>({r,i})).filter(({r})=>!hasValidResult(r)&&!(Number(r.payout)>0)&&!(Number(r.payout2ren)>0));
+ if(!targets.length){alert('削除対象の未入力レースはありません。');return;}
+ const count=targets.length;
+ if(!confirm(`着順未入力かつ配当未入力の ${count}件を一括削除します。\n\n着順または配当が登録されているレースは削除しません。\nこの操作は取り消し機能から復元できます。\n\n実行しますか？`))return;
+ takeUndoSnapshot('未入力レース一括削除');
+ const remove=new Set(targets.map(x=>x.i));
+ savedRecords=savedRecords.filter((r,i)=>!remove.has(i));
+ persist();updateCountDisplay();runAnalysis();renderRecordManager();
+ try{updateBondSelect()}catch(e){console.error('bond chart refresh after bulk delete failed',e)}
+ logToTerminal(`> 未入力レースを一括削除：${count}件`,'success');
+ playBeep(760,'sine',.16);
+ alert(`${count}件を削除しました。`);
+}
 function deleteRecord(idx){const r=savedRecords[idx];if(!r)return;if(!confirm(`${r.venue||'不明'} ${r.raceName||''}（${r.raceDate||'開催日未設定'}）を削除しますか？`))return;takeUndoSnapshot('レース削除');savedRecords.splice(idx,1);persist();updateCountDisplay();runAnalysis();renderRecordManager();try{updateBondSelect()}catch(e){console.error('bond chart refresh after delete failed',e)}logToTerminal('> レース記録を1件削除しました。','success');}
 
 
@@ -2124,7 +2138,7 @@ function bindUserHub(){
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
- bind('openBatchEditBtn',openBatchEdit);bind('closeBatchEditBtn',()=>{const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';});bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);
+ bind('openBatchEditBtn',openBatchEdit);bind('deletePendingRecordsBtn',deletePendingRecords);bind('closeBatchEditBtn',()=>{const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';});bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);
  $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);$('recordSearch').addEventListener('input',renderRecordManager);$('recordStatus').addEventListener('change',renderRecordManager);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
  document.addEventListener('click',e=>{const b=e.target.closest('button');if(b&&b.id!=='audioToggleBtn'&&!b.disabled)playBeep(680,'sine',.045,.018);});
