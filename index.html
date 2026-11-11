@@ -927,7 +927,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.57</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.58</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -3431,5 +3431,142 @@ html,body{
 }
 </style>
 
+
+<style id="research-bookmark-tabs-vol58">
+/* VOL.58: Research sections become individual book pages, selected by bookmarks. */
+#analysisBookPages{
+ display:none!important;
+ height:calc(100dvh - 48px - env(safe-area-inset-bottom,0px))!important;
+ overflow:hidden!important;
+ flex-direction:column!important;
+ scroll-snap-type:none!important;
+}
+.app-shell:has(#analysisBookPages [data-tab-panel="analysis"]:not([hidden])) #analysisBookPages{
+ display:flex!important;
+}
+#researchBookmarkNav{
+ flex:0 0 auto;
+ display:grid;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:5px;
+ padding:5px 8px 9px;
+ background:linear-gradient(180deg,#563820,#2b1a0f);
+ border-bottom:2px solid #b99353;
+ box-shadow:0 3px 9px rgba(30,18,8,.24);
+ position:relative;
+ z-index:5;
+}
+#researchBookmarkNav button{
+ min-width:0;min-height:34px;padding:6px 3px;
+ border:1px solid #c4a16a;border-radius:5px 5px 2px 2px;
+ background:linear-gradient(180deg,#78512e,#432a19);
+ color:#f1dfb8;font:800 11px 'Noto Sans JP',sans-serif;
+ box-shadow:inset 0 1px rgba(255,235,190,.18),0 2px 0 #1c1009;
+}
+#researchBookmarkNav button[aria-selected="true"]{
+ background:linear-gradient(180deg,#ead8ad,#c5a36b);
+ color:#392516;border-color:#f0d79e;
+ box-shadow:inset 0 1px rgba(255,255,255,.55),0 2px 0 #1d1008;
+}
+#analysisBookPages>[data-tab-panel="analysis"]{
+ display:none!important;
+ flex:1 1 auto!important;
+ width:100%!important;height:100%!important;min-height:0!important;max-height:none!important;
+ overflow-y:auto!important;overflow-x:hidden!important;
+ scroll-snap-align:none!important;
+}
+#analysisBookPages>[data-tab-panel="analysis"].research-page-active{
+ display:block!important;
+}
+#analysisBookPages>[data-tab-panel="analysis"]>.panel-content{
+ height:auto!important;max-height:none!important;min-height:100%!important;
+ overflow:visible!important;
+}
+#researchBookTurnStage{
+ position:fixed;inset:0;z-index:2147483647;pointer-events:none;
+ perspective:2200px;perspective-origin:0% 48%;overflow:hidden;
+}
+#researchBookTurnLeaf{
+ position:absolute;top:0;left:-8px;width:calc(100vw + 8px);height:100%;
+ transform-style:preserve-3d;transform-origin:left center;
+ backface-visibility:visible;will-change:transform;
+ filter:drop-shadow(3px 5px 10px rgba(20,12,4,.22));
+}
+#researchBookTurnLeaf.forward{animation:bbkBookForward39 1.32s cubic-bezier(.43,.035,.2,1) both}
+#researchBookTurnLeaf.reverse{animation:bbkBookBackward39 1.32s cubic-bezier(.43,.035,.2,1) both}
+#researchBookTurnFront{
+ position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;
+ background:#e9ddc3;border:1px solid rgba(105,75,39,.22);
+ box-shadow:inset 0 0 36px rgba(92,61,27,.12),0 2px 9px rgba(0,0,0,.12);
+}
+#researchBookTurnFront .research-turn-copy{
+ width:100vw;height:100%;overflow:hidden;padding:58px 12px calc(58px + env(safe-area-inset-bottom,0px));
+ background:#e9ddc3;
+}
+#researchBookTurnFront .research-turn-copy>.panel-content{height:100%;overflow:hidden}
+@media(min-width:700px){#researchBookTurnFront .research-turn-copy{padding-left:28px;padding-right:28px}}
+</style>
+<script id="research-bookmark-tabs-vol58">
+(()=>{
+ const wrap=document.getElementById('analysisBookPages');
+ if(!wrap||wrap.dataset.bookTabsReady==='1')return;
+ const ids=["discoverySection","numericTrickLab","trifectaProductMarkLab","line1AnalysisSection","venueAnalysisSection","externalJsonAnalysis"];
+ const labels=[{"id":"discoverySection","label":"発見","num":"01"},{"id":"numericTrickLab","label":"数字の関係","num":"02"},{"id":"trifectaProductMarkLab","label":"3連単分析","num":"03"},{"id":"line1AnalysisSection","label":"ライン①","num":"04"},{"id":"venueAnalysisSection","label":"会場分析","num":"05"},{"id":"externalJsonAnalysis","label":"追加JSON","num":"06"}];
+ const pages=ids.map(id=>document.getElementById(id)).filter(Boolean);
+ if(pages.length!==ids.length)return;
+ wrap.dataset.bookTabsReady='1';
+ const nav=document.createElement('nav');
+ nav.id='researchBookmarkNav';nav.setAttribute('role','tablist');nav.setAttribute('aria-label','研究ページのしおり');
+ labels.forEach((item,i)=>{
+  const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');
+  b.dataset.researchPage=item.id;b.setAttribute('aria-selected',i===0?'true':'false');
+  b.textContent=item.num+' '+item.label;nav.appendChild(b);
+ });
+ wrap.insertBefore(nav,wrap.firstChild);
+ let current=0,busy=false;
+ pages.forEach((p,i)=>{p.classList.toggle('research-page-active',i===0);p.setAttribute('aria-hidden',i===0?'false':'true')});
+ function sound(){
+  try{
+   if(typeof sfxEnabled!=='undefined'&&!sfxEnabled)return;
+   const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+   if(!window.bbkPageAudio)window.bbkPageAudio=new C();
+   const c=window.bbkPageAudio;if(c.state==='suspended')c.resume();
+   const d=.34,n=Math.floor(c.sampleRate*d),buf=c.createBuffer(1,n,c.sampleRate),a=buf.getChannelData(0);
+   for(let i=0;i<n;i++){const f=1-i/n;a[i]=(Math.random()*2-1)*f*f}
+   const src=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain();
+   src.buffer=buf;filter.type='lowpass';filter.frequency.setValueAtTime(1900,c.currentTime);filter.frequency.exponentialRampToValueAtTime(400,c.currentTime+d);
+   gain.gain.setValueAtTime(.0001,c.currentTime);gain.gain.linearRampToValueAtTime(.075,c.currentTime+.03);gain.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);
+   src.connect(filter);filter.connect(gain);gain.connect(c.destination);src.start();src.stop(c.currentTime+d);
+  }catch(e){}
+ }
+ function turn(next){
+  if(busy||next===current||!pages[next])return;
+  busy=true;
+  const old=pages[current],target=pages[next],direction=next>current?'forward':'reverse';
+  const stage=document.createElement('div');stage.id='researchBookTurnStage';stage.setAttribute('aria-hidden','true');
+  const leaf=document.createElement('div');leaf.id='researchBookTurnLeaf';leaf.className=direction;
+  const face=document.createElement('div');face.id='researchBookTurnFront';
+  const copy=document.createElement('div');copy.className='research-turn-copy';
+  const clone=old.cloneNode(true);clone.hidden=false;clone.classList.add('research-page-active');
+  clone.removeAttribute('id');clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+  clone.querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=true);
+  clone.setAttribute('aria-hidden','true');copy.appendChild(clone);face.appendChild(copy);leaf.appendChild(face);stage.appendChild(leaf);document.body.appendChild(stage);
+  nav.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-selected',i===next?'true':'false'));
+  sound();
+  requestAnimationFrame(()=>{});
+  const finish=()=>{
+   old.classList.remove('research-page-active');old.setAttribute('aria-hidden','true');
+   target.classList.add('research-page-active');target.setAttribute('aria-hidden','false');
+   current=next;stage.remove();busy=false;
+  };
+  leaf.addEventListener('animationend',e=>{if(e.target===leaf)finish()},{once:true});
+  setTimeout(()=>{if(busy)finish()},1550);
+ }
+ nav.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-research-page]');if(!b)return;
+  const i=ids.indexOf(b.dataset.researchPage);if(i>=0)turn(i);
+ });
+})();
+</script>
 </body>
 </html>
