@@ -785,6 +785,35 @@ html body{perspective:none!important;transform:none!important;filter:none!import
 #bookCoverGate{position:fixed!important;inset:0!important;z-index:2147483647!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;background:radial-gradient(ellipse at 50% 38%,#3b2b1d 0%,#17120f 47%,#080706 100%)!important;color:#e8d6a2!important;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom))!important;overflow:auto!important;}
 #bookCoverGate::backdrop{background:#080706!important}
 </style>
+<style id="book-cover-light-suction-v22">
+/* Tap: a warm ring of light contracts toward the center before the book opens. */
+#bookCoverGate{isolation:isolate}
+#bookCoverGate.is-opening{opacity:0!important;transition:opacity 1.42s ease!important}
+#bookCoverGate.is-opening::after{
+ content:"";position:fixed;inset:-45vmax;z-index:100;pointer-events:none;
+ background:radial-gradient(circle at 50% 50%,
+  rgba(255,249,225,0) 0 13%,
+  rgba(255,239,190,.12) 22%,
+  rgba(255,228,160,.72) 43%,
+  rgba(255,246,214,.98) 52%,
+  rgba(255,226,160,.38) 60%,
+  rgba(255,226,160,0) 69%);
+ filter:blur(10px);
+ transform:scale(1.12);
+ opacity:0;
+ animation:book-light-suction 1.42s cubic-bezier(.45,0,.22,1) forwards;
+}
+@keyframes book-light-suction{
+ 0%{transform:scale(1.12);opacity:0}
+ 14%{opacity:1}
+ 78%{transform:scale(.13);opacity:.96}
+ 100%{transform:scale(.015);opacity:0}
+}
+@media(prefers-reduced-motion:reduce){
+ #bookCoverGate.is-opening{transition:none!important}
+ #bookCoverGate.is-opening::after{animation-duration:.01ms}
+}
+</style>
 </head>
 <body class="book-cover-active">
 
@@ -3027,7 +3056,7 @@ showExternalData('byn3');
       try { localStorage.setItem('bbk_active_tab', 'home'); } catch (e) {}
       const home = document.getElementById('tabHome');
       if (home) home.click();
-    }, 650);
+    }, 1450);
   });
 })();
 </script>
