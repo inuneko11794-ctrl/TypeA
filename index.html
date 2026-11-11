@@ -3244,7 +3244,7 @@ showExternalData('byn3');
   paperSound();
   requestAnimationFrame(()=>leaf.classList.add(backward?'bbk-turn-backward':'bbk-turn-forward'));
   const clean=()=>{if(stage.isConnected)stage.remove()};
-  leaf.addEventListener('animationend',clean,{once:true});
+  leaf.addEventListener('animationend',event=>{if(event.target===leaf&&(event.animationName==='bbkBookForward39'||event.animationName==='bbkBookBackward39'))clean();});
   window.setTimeout(clean,1600);
  },true);
 })();
