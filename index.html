@@ -775,7 +775,7 @@ body.book-cover-active{overflow:hidden!important}
 #bookCoverOpenBtn:active{transform:translateY(2px);box-shadow:0 3px 0 #120c07,0 6px 15px rgba(0,0,0,.4)}
 .bookmark-ribbon{position:absolute;left:9px;top:-11px;padding:4px 7px;background:#8b1e25;color:#f8e5b9;border:1px solid #d5b16d;font:700 7px 'Orbitron',sans-serif;letter-spacing:.12em}
 .cover-open-label{font-size:14px}.cover-open-arrow{font-size:21px;color:#e8c77d}
-#bookCoverGate.is-opening{opacity:0;transform:scale(1.025) translateY(-10px);transition:opacity .48s ease,transform .48s ease;pointer-events:none}
+#bookCoverGate.is-opening{opacity:0;transition:opacity .62s ease;pointer-events:none}#bookCoverOpenBtn:disabled{opacity:.75;cursor:default}
 @media(max-height:650px){.cover-book{height:56vh;min-height:320px}.cover-emblem{width:86px}.cover-frame{padding-top:15px;padding-bottom:12px}.cover-title-jp{font-size:clamp(27px,7vw,36px)}}
 @media(prefers-reduced-motion:reduce){#bookCoverGate.is-opening{transition:none}}
 </style>
@@ -2998,8 +2998,32 @@ showExternalData('byn3');
 
 
 
-<script id="book-cover-controller-vol18">
-(()=>{const gate=document.getElementById('bookCoverGate'),button=document.getElementById('bookCoverOpenBtn');if(!gate||!button)return;document.body.classList.add('book-cover-active');button.addEventListener('click',()=>{if(gate.classList.contains('is-opening'))return;gate.classList.add('is-opening');document.body.classList.remove('book-cover-active');window.setTimeout(()=>gate.remove(),520);try{localStorage.setItem('bbk_active_tab','home')}catch(e){};const home=document.getElementById('tabHome');if(home)home.click();});})();
+<script id="book-cover-controller-vol20">
+(()=> {
+  const gate = document.getElementById('bookCoverGate');
+  const button = document.getElementById('bookCoverOpenBtn');
+  if (!gate || !button) return;
+
+  // 起動時は必ず表紙を保持。自動で閉じる処理は置かない。
+  document.body.classList.add('book-cover-active');
+  gate.classList.remove('is-opening');
+  button.disabled = false;
+
+  button.addEventListener('click', () => {
+    if (gate.classList.contains('is-opening')) return;
+    button.disabled = true;
+    gate.classList.add('is-opening');
+
+    // 表紙のフェードが終わってから本編を表示する。
+    window.setTimeout(() => {
+      gate.remove();
+      document.body.classList.remove('book-cover-active');
+      try { localStorage.setItem('bbk_active_tab', 'home'); } catch (e) {}
+      const home = document.getElementById('tabHome');
+      if (home) home.click();
+    }, 650);
+  });
+})();
 </script>
 
 </body>
