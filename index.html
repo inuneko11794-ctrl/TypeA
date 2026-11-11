@@ -3145,12 +3145,12 @@ showExternalData('byn3');
 </script>
 
 
-<style id="book-page-turn-vol39">
+<style id="book-page-turn-vol40">
 #bbkBookTurnStage{position:fixed;inset:0;z-index:2147483647;pointer-events:none;perspective:2200px;perspective-origin:0% 48%;overflow:hidden}
 #bbkBookTurnStage:after{content:"";position:absolute;z-index:6;left:0;top:0;bottom:0;width:15px;pointer-events:none;background:linear-gradient(90deg,rgba(28,18,8,.30),rgba(28,18,8,.12) 38%,transparent);box-shadow:2px 0 12px rgba(20,12,4,.10)}
 #bbkBookTurnLeaf{position:absolute;top:0;left:-8px;width:calc(100vw + 8px);height:100%;overflow:visible;transform-style:preserve-3d;transform-origin:0 center;backface-visibility:visible;will-change:transform;filter:drop-shadow(3px 5px 10px rgba(20,12,4,.22))}
-#bbkBookTurnLeaf.bbk-turn-forward{left:-8px;transform-origin:0 center;animation:bbkBookForward39 1.32s cubic-bezier(.43,.035,.2,1) both}
-#bbkBookTurnLeaf.bbk-turn-backward{left:calc(-100vw - 16px);transform-origin:right center;animation:bbkBookBackward39 1.32s cubic-bezier(.43,.035,.2,1) both}
+#bbkBookTurnLeaf.bbk-turn-forward{left:-8px;transform-origin:0 center;animation:bbkBookForward40 1.32s cubic-bezier(.43,.035,.2,1) both}
+#bbkBookTurnLeaf.bbk-turn-backward{left:calc(-100vw - 16px);transform-origin:right center;animation:bbkBookBackward40 1.32s cubic-bezier(.43,.035,.2,1) both}
 #bbkBookTurnFront,#bbkBookTurnBack{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;border:1px solid rgba(80,57,31,.13);background:#f4edda;box-shadow:inset 0 0 22px rgba(80,57,31,.08)}
 #bbkBookTurnFront{z-index:2}
 #bbkBookTurnBack{transform:rotateY(180deg);background:linear-gradient(90deg,#e5dac2 0%,#f5eddc 12%,#f8f1e2 78%,#e8dec9 100%);box-shadow:inset 0 0 26px rgba(65,45,24,.14)}
@@ -3163,7 +3163,7 @@ showExternalData('byn3');
 @keyframes bbkBookBackward39{0%{transform:rotateY(0deg) translateZ(0);filter:brightness(.97)}12%{transform:rotateY(8deg) translateZ(3px);filter:brightness(1.01)}43%{transform:rotateY(72deg) translateZ(10px);filter:brightness(1.07)}74%{transform:rotateY(146deg) translateZ(5px);filter:brightness(1.035)}100%{transform:rotateY(180deg) translateZ(0);filter:brightness(1)}}
 @media(prefers-reduced-motion:reduce){#bbkBookTurnLeaf{animation-duration:.01ms!important}}
 </style>
-<script id="book-page-turn-vol39-controller">
+<script id="book-page-turn-vol40-controller">
 (()=>{
  const nav=document.querySelector('.main-tabs');
  if(!nav)return;
@@ -3226,9 +3226,19 @@ showExternalData('byn3');
    clone.setAttribute('aria-hidden','true');inner.appendChild(clone);
   });
   if(backward){
-   // 表裏に文字や画面は複製せず、紙面の色味だけ同じにする。
-   front.style.backgroundColor=back.style.backgroundColor;
-   if(back.style.backgroundImage!=='none')front.style.backgroundImage=back.style.backgroundImage;
+   // 戻るときは同じページを紙の両面に置き、裏面側は180度補正して正しい向きで見せる。
+   const frontInner=document.createElement('div');
+   frontInner.id='bbkBookTurnInner';
+   frontInner.style.top=Math.max(0,firstRect.top)+'px';
+   frontInner.style.height=Math.max(0,window.innerHeight-firstRect.top)+'px';
+   sourcePanels.forEach(panel=>{
+    const clone=panel.cloneNode(true);
+    clone.hidden=false;clone.removeAttribute('data-tab-panel');clone.removeAttribute('id');
+    clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+    clone.querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=true);
+    clone.setAttribute('aria-hidden','true');frontInner.appendChild(clone);
+   });
+   front.appendChild(frontInner);
    back.appendChild(inner);
   }else{
    front.appendChild(inner);
