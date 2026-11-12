@@ -3354,9 +3354,10 @@ showExternalData('byn3');
   const from=tabs.indexOf(active),to=tabs.indexOf(target);
   if(from<0||to<0)return;
   const backward=to<from;
-  // 前後どちらも、いま見えているページそのものを紙としてめくる
-  const sourcePanels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===active.dataset.tabTarget&&!p.hidden&&p.getClientRects().length>0&&getComputedStyle(p).display!=='none'&&getComputedStyle(p).visibility!=='hidden');
-  if(!sourcePanels.length)return;
+  // すべてのページ移動で、最初の目次ページを共通のめくり紙として使う
+  const pageTemplate=document.getElementById('brandPanel');
+  if(!pageTemplate)return;
+  const sourcePanels=[pageTemplate];
   const stage=document.createElement('div');stage.id='bbkBookTurnStage';stage.setAttribute('aria-hidden','true');
   const leaf=document.createElement('div');leaf.id='bbkBookTurnLeaf';
   const front=document.createElement('div');front.id='bbkBookTurnFront';
@@ -3370,9 +3371,8 @@ showExternalData('byn3');
     shell.className='app-shell';
     shell.style.cssText='width:100%;max-width:none;margin:0;padding:0;background:transparent;box-shadow:none;border:0;';
     const clone=panel.cloneNode(true);
-    // 元ページと同じパネル構造を保ち、複製側も表示状態にする
-    clone.hidden=false;clone.removeAttribute('id');
-    clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+    // 目次ページの紙色・カード装飾を保つため、テンプレートのIDとスタイルを維持
+    clone.hidden=false;
     clone.querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=true);
     clone.setAttribute('aria-hidden','true');
     shell.appendChild(clone);
@@ -3623,7 +3623,7 @@ showExternalData('byn3');
  tabNav.addEventListener('click',()=>requestAnimationFrame(refresh));
  refresh();
  const vol=document.getElementById('releaseVol');
- if(vol)vol.textContent='UPDATE VOL.49';
+ if(vol)vol.textContent='UPDATE VOL.50';
 })();
 </script>
 
