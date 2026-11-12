@@ -3354,11 +3354,9 @@ showExternalData('byn3');
   const from=tabs.indexOf(active),to=tabs.indexOf(target);
   if(from<0||to<0)return;
   const backward=to<from;
-  const sourceName=backward?target.dataset.tabTarget:active.dataset.tabTarget;
-  const sourcePanels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===sourceName);
-  const activePanels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===active.dataset.tabTarget&&!p.hidden);
-  if(!sourcePanels.length||!activePanels.length)return;
-  const firstRect=activePanels[0].getBoundingClientRect();
+  // 前後どちらも、いま見えているページそのものを紙としてめくる
+  const sourcePanels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===active.dataset.tabTarget&&!p.hidden);
+  if(!sourcePanels.length)return;
   const stage=document.createElement('div');stage.id='bbkBookTurnStage';stage.setAttribute('aria-hidden','true');
   const leaf=document.createElement('div');leaf.id='bbkBookTurnLeaf';
   const front=document.createElement('div');front.id='bbkBookTurnFront';
@@ -3366,20 +3364,6 @@ showExternalData('byn3');
   const inner=document.createElement('div');inner.id='bbkBookTurnInner';  // 反転なしのため常に前面用
   inner.style.top='0px';
   inner.style.height='100vh';
-  if(backward){
-   let node=sourcePanels[0],paint=null;
-   while(node&&node!==document.documentElement){
-    const cs=getComputedStyle(node);
-    const transparent=cs.backgroundColor==='rgba(0, 0, 0, 0)'||cs.backgroundColor==='transparent';
-    if(!transparent||cs.backgroundImage!=='none'){paint=cs;break;}
-    node=node.parentElement;
-   }
-   if(paint){
-    back.style.backgroundColor=paint.backgroundColor;
-    front.style.backgroundColor=paint.backgroundColor;
-    if(paint.backgroundImage!=='none'){back.style.backgroundImage=paint.backgroundImage;front.style.backgroundImage=paint.backgroundImage;}
-   }
-  }
   const fillPage=(pageInner)=>{
    sourcePanels.forEach(panel=>{
     const shell=document.createElement('div');
@@ -3396,14 +3380,8 @@ showExternalData('byn3');
    });
   };
   fillPage(inner);
-  if(backward){
-   // 戻るとき：前のページを前面に置き、反転しないよう裏は使わない
-   front.appendChild(inner);
-   back.style.visibility = 'hidden';
-   back.style.pointerEvents = 'none';
-  }else{
-   front.appendChild(inner);
-  }
+  // 戻るときも同じ紙の表裏を使い、同じめくり動作を逆再生する
+  front.appendChild(inner);
   leaf.appendChild(front);leaf.appendChild(back);stage.appendChild(leaf);document.body.appendChild(stage);
   paperSound();
   requestAnimationFrame(()=>leaf.classList.add(backward?'bbk-turn-backward':'bbk-turn-forward'));
