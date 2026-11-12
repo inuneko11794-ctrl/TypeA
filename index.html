@@ -3355,7 +3355,7 @@ showExternalData('byn3');
   if(from<0||to<0)return;
   const backward=to<from;
   // 前後どちらも、いま見えているページそのものを紙としてめくる
-  const sourcePanels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===active.dataset.tabTarget&&!p.hidden);
+  const sourcePanels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===active.dataset.tabTarget&&!p.hidden&&p.getClientRects().length>0&&getComputedStyle(p).display!=='none'&&getComputedStyle(p).visibility!=='hidden');
   if(!sourcePanels.length)return;
   const stage=document.createElement('div');stage.id='bbkBookTurnStage';stage.setAttribute('aria-hidden','true');
   const leaf=document.createElement('div');leaf.id='bbkBookTurnLeaf';
@@ -3623,11 +3623,21 @@ showExternalData('byn3');
  tabNav.addEventListener('click',()=>requestAnimationFrame(refresh));
  refresh();
  const vol=document.getElementById('releaseVol');
- if(vol)vol.textContent='UPDATE VOL.48';
+ if(vol)vol.textContent='UPDATE VOL.49';
 })();
 </script>
 
 
+<style id="book-turn-clone-isolation-vol49">
+/* VOL.49 — めくり紙の複製内では通常ページ用アニメーションを止める */
+#bbkBookTurnInner [data-tab-panel]{
+ animation:none!important;
+ transform:none!important;
+ filter:none!important;
+}
+#bbkBookTurnInner .bbk-page-navigation,
+#bbkBookTurnInner .bbk-book-controls{display:none!important}
+</style>
 <style id="book-index-fullpage-vol47">
 /* VOL.47 — 1ページ目だけ、目次カードまで画面の高さを使う */
 #brandPanel{
