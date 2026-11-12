@@ -1006,7 +1006,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="bbk-brand-core text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.37</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.38</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-700"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -3449,11 +3449,20 @@ showExternalData('byn3');
 .main-tabs .main-tab .tab-sub{font-size:7px}
 @media(max-width:520px){.bbk-contents-list{grid-template-columns:1fr 1fr}.bbk-index-entry{padding:9px 7px;font-size:10px;gap:6px}}
 </style>
-<script id="book-index-vol36">
+<script id="book-index-vol38">
 (()=>{
  const nav=document.querySelector('.main-tabs');
+ const brand=document.getElementById('brandPanel');
  const list=document.getElementById('bookContentsList');
- if(!nav||!list)return;
+ if(!nav||!brand||!list)return;
+
+ // 目次は本の最初のページに一つだけ置く。別ページ側に複製があれば除去する。
+ const contents=[...document.querySelectorAll('.bbk-contents-paper')];
+ const indexPage=contents.find(el=>el.id==='bookContents')||contents[0];
+ contents.forEach((el,i)=>{if(el!==indexPage)el.remove();});
+ if(indexPage&&indexPage.parentElement!==brand)brand.appendChild(indexPage);
+ list.replaceChildren();
+
  const tabs=[...nav.querySelectorAll('[data-tab-target]')];
  tabs.forEach((tab,index)=>{
   const sub=tab.querySelector('.tab-sub');
@@ -3470,7 +3479,7 @@ showExternalData('byn3');
   list.appendChild(entry);
  });
  const vol=document.getElementById('releaseVol');
- if(vol)vol.textContent='UPDATE VOL.37';
+ if(vol)vol.textContent='UPDATE VOL.38';
 })();
 </script>
 
