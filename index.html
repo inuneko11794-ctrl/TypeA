@@ -3576,5 +3576,78 @@ showExternalData('byn3');
 }
 </style>
 
+
+<style id="book-fixed-navigation-vol46">
+/* VOL.46: ページ内の配置に依存せず、移動ボタンを画面下部に常時表示 */
+.bbk-page-navigation{display:none!important}
+.bbk-book-controls{
+ position:fixed!important;z-index:99999;left:10px;right:10px;
+ bottom:calc(10px + env(safe-area-inset-bottom,0px));
+ display:flex;align-items:center;justify-content:space-between;gap:7px;
+ padding:9px 8px;border:1px solid #bca47c;border-radius:10px;
+ background:linear-gradient(180deg,#fff9e9,#e9dcc1);
+ box-shadow:0 4px 18px rgba(40,25,10,.22),inset 0 1px #fff;
+ color:#493722;font-family:'Noto Sans JP',sans-serif;
+}
+.bbk-book-controls button{
+ flex:1;min-width:0;min-height:42px;padding:8px 7px;
+ border:1px solid #bca47c;border-radius:7px;
+ background:linear-gradient(180deg,#fffdf5,#e9dcc1);
+ color:#493722;font-size:12px;font-weight:800;
+}
+.bbk-book-controls button:disabled{opacity:.35}
+.bbk-book-controls .bbk-book-position{
+ flex:0 0 auto;min-width:48px;text-align:center;
+ color:#8a704b;font:700 10px 'Share Tech Mono',monospace;
+ white-space:nowrap
+}
+.app-shell{padding-bottom:76px!important}
+</style>
+<script id="book-fixed-navigation-vol46-controller">
+(()=>{
+ const tabNav=document.querySelector('.main-tabs.book-bookmarks');
+ if(!tabNav)return;
+ const tabs=()=>[...tabNav.querySelectorAll('[data-tab-target]')];
+ const current=()=>tabs().findIndex(t=>t.getAttribute('aria-selected')==='true');
+ const bar=document.createElement('nav');
+ bar.className='bbk-book-controls';
+ bar.setAttribute('aria-label','本のページ移動');
+ const prev=document.createElement('button');
+ prev.type='button';prev.textContent='‹ 前のページ';
+ const position=document.createElement('span');
+ position.className='bbk-book-position';
+ const next=document.createElement('button');
+ next.type='button';next.textContent='次のページ ›';
+ const contents=document.createElement('button');
+ contents.type='button';contents.textContent='目次';
+ bar.append(prev,position,next,contents);
+ document.body.appendChild(bar);
+ const refresh=()=>{
+  const list=tabs(),index=current();
+  prev.disabled=index<=0;
+  next.disabled=index<0||index>=list.length-1;
+  position.textContent=(index+1).toString().padStart(2,'0')+' / '+list.length.toString().padStart(2,'0');
+ };
+ prev.addEventListener('click',()=>{
+  const list=tabs(),index=current();
+  if(index>0)list[index-1].click();
+  requestAnimationFrame(refresh);
+ });
+ next.addEventListener('click',()=>{
+  const list=tabs(),index=current();
+  if(index>=0&&index<list.length-1)list[index+1].click();
+  requestAnimationFrame(refresh);
+ });
+ contents.addEventListener('click',()=>{
+  const first=tabs()[0];if(first)first.click();
+  requestAnimationFrame(refresh);
+ });
+ tabNav.addEventListener('click',()=>requestAnimationFrame(refresh));
+ refresh();
+ const vol=document.getElementById('releaseVol');
+ if(vol)vol.textContent='UPDATE VOL.46';
+})();
+</script>
+
 </body>
 </html>
