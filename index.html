@@ -1004,7 +1004,7 @@ body.book-cover-active .app-shell{
  <div class="w-full">
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="bbk-brand-core text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.44</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.45</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-700"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -3533,7 +3533,7 @@ showExternalData('byn3');
   const prev=document.createElement('button');prev.type='button';prev.dataset.pagePrev='1';prev.textContent='‹ 前のページ';
   const position=document.createElement('span');position.className='bbk-page-position';
   const next=document.createElement('button');next.type='button';next.dataset.pageNext='1';next.textContent='次のページ ›';
-  const contents=document.createElement('button');contents.type='button';contents.dataset-pageContents='1';contents.textContent='目次';
+  const contents=document.createElement('button');contents.type='button';contents.setAttribute('data-page-contents','1');contents.textContent='目次';
   footer.append(prev,position,next,contents);target.appendChild(footer);
  });
  document.addEventListener('click',event=>{
@@ -3552,7 +3552,7 @@ showExternalData('byn3');
   if(event.target.closest('.bbk-page-navigation button'))requestAnimationFrame(refresh);
  });
  refresh();
- const vol=document.getElementById('releaseVol');if(vol)vol.textContent='UPDATE VOL.44';
+ const vol=document.getElementById('releaseVol');if(vol)vol.textContent='UPDATE VOL.45';
 })();
 </script>
 
