@@ -1000,19 +1000,23 @@ body.book-cover-active .app-shell{
 </nav>
 
 <div id="brandPanel" data-tab-panel="brand" class="mb-7">
-<header class="flex flex-col md:flex-row justify-between items-end border-b border-cyan-300/50 pb-5 mb-6 gap-3">
-
+<header class="bbk-brand-paper-card flex flex-col md:flex-row justify-between items-center gap-4">
  <div class="w-full">
   <div class="kicker mb-2">VIRUS MATRIX // INFECTED INTELLIGENCE</div>
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
-   <span class="text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full border border-cyan-300/70 bg-cyan-300/10 text-cyan-100">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.35</span>
-   <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-300"></span><span>SFX [ON]</span></button>
+   <span class="bbk-brand-core text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full">VIRUS CORE v10.9 INFECTED</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.36</span>
+   <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-700"></span><span>SFX [ON]</span></button>
   </div>
  </div>
- <div id="dataCount" class="font-mono-tech text-xl text-cyan-100 border border-cyan-300/70 bg-cyan-400/10 px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] text-cyan-300 font-bold">DB.RECORDS</span><span class="font-bold tracking-widest text-white">[ 00000 ]</span></div>
+ <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
+<section id="bookContents" class="bbk-contents-paper">
+ <div class="bbk-contents-heading"><span>BOOK INDEX</span><strong>目次</strong></div>
+ <p class="bbk-contents-note">栞を選ぶと、そのページへ移動します。</p>
+ <div id="bookContentsList" class="bbk-contents-list"></div>
+</section>
 </div>
 
 
@@ -2695,7 +2699,7 @@ if ("serviceWorker" in navigator) {
      tabs[next].focus();activateTab(tabs[next].dataset.tabTarget);
    });
  });
- let initial='home';
+ let initial='brand';
  try{
    const saved=localStorage.getItem('bbk_active_tab');
    if(tabs.some(t=>t.dataset.tabTarget===saved))initial=saved;
@@ -3249,11 +3253,11 @@ showExternalData('byn3');
     window.setTimeout(() => {
       gate.remove();
       document.body.classList.remove('book-cover-active');
-      try { localStorage.setItem('bbk_active_tab', 'home'); } catch (e) {}
-      // 表紙を開く動作そのものが最初のページ遷移なので、直後のタブ切替では紙めくりを重ねない。
+      try { localStorage.setItem('bbk_active_tab', 'brand'); } catch (e) {}
+      // 表紙を開く動作そのものが最初のページ遷移。最初の表示はBATTLE BANKページ。
       window.bbkSkipNextPageTurn = true;
-      const home = document.getElementById('tabHome');
-      if (home) home.click();
+      const firstPage = document.getElementById('tabBrand');
+      if (firstPage) firstPage.click();
     }, 1950);
   });
 })();
@@ -3409,5 +3413,64 @@ showExternalData('byn3');
  },true);
 })();
 </script>
+<style id="book-brand-index-vol36">
+/* VOL.36 — BATTLE BANKのカードを紙色にし、目次とページ番号を追加 */
+#brandPanel{
+ min-height:calc(100dvh - 145px)!important;
+ display:flex!important;flex-direction:column!important;gap:clamp(16px,3vh,26px)!important;
+}
+#brandPanel>header.bbk-brand-paper-card{
+ width:100%;min-height:0!important;margin:0!important;padding:clamp(20px,4vw,38px)!important;
+ border:1px solid rgba(104,79,48,.30)!important;border-radius:16px!important;
+ background-color:#f7f1e3!important;
+ background-image:radial-gradient(circle at 18% 24%,rgba(255,255,255,.48),transparent 42%),radial-gradient(circle at 82% 76%,rgba(200,180,140,.18),transparent 52%),repeating-linear-gradient(0deg,rgba(105,78,43,.025) 0px,rgba(105,78,43,.025) 1px,transparent 1px,transparent 4px)!important;
+ box-shadow:inset 0 0 30px rgba(80,50,20,.06),0 5px 16px rgba(20,12,4,.12)!important;
+}
+#brandPanel .bbk-brand-paper-card .neon-title{color:#352719!important;text-shadow:1px 1px 0 rgba(255,255,255,.7)!important}
+#brandPanel .bbk-brand-paper-card .kicker{color:#80613b!important}
+#brandPanel .bbk-brand-core{color:#365c4a;background:#e5eddf;border:1px solid #9caf91}
+#brandPanel #dataCount{color:#493722!important;background:#eee3cb!important;border:1px solid #bba47d!important}
+#brandPanel #dataCount span:first-child,#brandPanel #dataCount span:last-child{color:#493722!important;text-shadow:none!important}
+#brandPanel .bbk-contents-paper{
+ padding:clamp(16px,3vw,26px);border:1px solid rgba(104,79,48,.28);border-radius:14px;
+ background:#f7f1e3;background-image:repeating-linear-gradient(0deg,rgba(105,78,43,.022) 0 1px,transparent 1px 4px);
+ box-shadow:inset 0 0 24px rgba(80,50,20,.045),0 3px 10px rgba(20,12,4,.09);color:#493722;
+}
+.bbk-contents-heading{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid #cbb995;padding-bottom:9px;color:#8a704b;letter-spacing:.18em;font:700 11px 'Share Tech Mono',monospace}
+.bbk-contents-heading strong{font:900 20px sans-serif;letter-spacing:.12em;color:#493722}
+.bbk-contents-note{font-size:11px;color:#806f56;margin:10px 0 12px}
+.bbk-contents-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.bbk-index-entry{display:flex;align-items:center;gap:10px;min-width:0;text-align:left;padding:11px 12px;border:1px solid #d4c4a5;border-radius:8px;background:rgba(255,255,255,.42);color:#493722;font-weight:800;font-size:12px}
+.bbk-index-entry:active{background:#e9ddc5}
+.bbk-index-number{font:700 11px 'Share Tech Mono',monospace;color:#9a7440;min-width:22px}
+.bbk-index-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.main-tabs .main-tab .tab-sub{font-size:7px}
+@media(max-width:520px){.bbk-contents-list{grid-template-columns:1fr 1fr}.bbk-index-entry{padding:9px 7px;font-size:10px;gap:6px}}
+</style>
+<script id="book-index-vol36">
+(()=>{
+ const nav=document.querySelector('.main-tabs');
+ const list=document.getElementById('bookContentsList');
+ if(!nav||!list)return;
+ const tabs=[...nav.querySelectorAll('[data-tab-target]')];
+ tabs.forEach((tab,index)=>{
+  const sub=tab.querySelector('.tab-sub');
+  if(sub){
+   const label=sub.textContent.replace(/^\s*\d+\s*\/\s*/,'').trim();
+   sub.textContent=String(index+1).padStart(2,'0')+' / '+label;
+  }
+  const name=tab.querySelector('.bookmark-label')?.textContent.trim()||tab.dataset.tabTarget;
+  const entry=document.createElement('button');
+  entry.type='button';entry.className='bbk-index-entry';
+  entry.innerHTML='<span class="bbk-index-number">'+String(index+1).padStart(2,'0')+'</span><span class="bbk-index-name"></span>';
+  entry.querySelector('.bbk-index-name').textContent=name;
+  entry.addEventListener('click',()=>tab.click());
+  list.appendChild(entry);
+ });
+ const vol=document.getElementById('releaseVol');
+ if(vol)vol.textContent='UPDATE VOL.36';
+})();
+</script>
+
 </body>
 </html>
