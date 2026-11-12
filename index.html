@@ -3649,5 +3649,38 @@ showExternalData('byn3');
 })();
 </script>
 
+
+<style id="book-index-fullpage-vol47">
+/* VOL.47 — 1ページ目だけ、目次カードまで画面の高さを使う */
+#brandPanel{
+ box-sizing:border-box!important;
+ min-height:calc(100dvh - 92px)!important;
+ display:flex!important;
+ flex-direction:column!important;
+ justify-content:flex-start!important;
+ gap:clamp(8px,1.5vh,14px)!important;
+ padding-bottom:4px!important;
+}
+#brandPanel>header.bbk-brand-paper-card{
+ flex:0 0 auto!important;
+}
+#brandPanel>#bookContents{
+ flex:1 0 auto!important;
+ min-height:0!important;
+ display:flex!important;
+ flex-direction:column!important;
+ justify-content:flex-start!important;
+}
+#brandPanel>#bookContents .bbk-contents-list{
+ flex:1 0 auto!important;
+ align-content:space-evenly!important;
+}
+@media(max-height:720px){
+ #brandPanel{min-height:calc(100dvh - 82px)!important}
+ #brandPanel>#bookContents{padding:14px!important}
+ #brandPanel .bbk-index-entry{padding:8px 9px!important}
+}
+</style>
+
 </body>
 </html>
