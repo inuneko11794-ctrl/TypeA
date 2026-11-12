@@ -1004,7 +1004,7 @@ body.book-cover-active .app-shell{
  <div class="w-full">
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="bbk-brand-core text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.43</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.44</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-700"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -3264,7 +3264,7 @@ showExternalData('byn3');
 </script>
 
 
-<style id="book-page-turn-vol43">
+<style id="book-page-turn-vol44">
 #bbkBookTurnStage{position:fixed;inset:0;z-index:2147483647;pointer-events:none;perspective:2800px;perspective-origin:0% 50%;overflow:hidden}
 #bbkBookTurnStage:after{content:"";position:absolute;z-index:6;left:0;top:0;bottom:0;width:15px;pointer-events:none;background:linear-gradient(90deg,rgba(28,18,8,.30),rgba(28,18,8,.12) 38%,transparent);box-shadow:2px 0 12px rgba(20,12,4,.10)}
 #bbkBookTurnLeaf{position:absolute;top:0;left:-8px;width:calc(100vw + 8px);height:100%;overflow:visible;transform-style:preserve-3d;transform-origin:0 center;backface-visibility:visible;will-change:transform;filter:drop-shadow(3px 5px 10px rgba(20,12,4,.22))}
@@ -3272,7 +3272,7 @@ showExternalData('byn3');
 #bbkBookTurnLeaf.bbk-turn-backward{
   left: -8px;
   transform-origin: left center;
-  animation: bbkBookBackwardSoft 1.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: bbkBookForwardSmooth 1.85s cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse both;
 }
 #bbkBookTurnFront,#bbkBookTurnBack{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;border:1px solid rgba(80,57,31,.13);background:#f4edda;box-shadow:inset 0 0 22px rgba(80,57,31,.08)}
 #bbkBookTurnFront{z-index:2}
@@ -3501,47 +3501,58 @@ showExternalData('byn3');
  flex:1;text-align:center;font:700 10px 'Share Tech Mono',monospace;
  color:#8a704b;white-space:nowrap
 }
+.bbk-page-navigation[hidden]{display:none!important}
 </style>
-<script id="book-page-navigation-vol43-controller">
+<script id="book-page-navigation-vol44-controller">
 (()=>{
  const nav=document.querySelector('.main-tabs.book-bookmarks');
  if(!nav)return;
- const getTabs=()=>[...nav.querySelectorAll('[data-tab-target]')];
- const pages=getTabs().map(tab=>({tab,panels:[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===tab.dataset.tabTarget)}));
+ const tabs=()=>[...nav.querySelectorAll('[data-tab-target]')];
+ const activeIndex=()=>tabs().findIndex(t=>t.getAttribute('aria-selected')==='true');
  const refresh=()=>{
-  const current=getTabs().findIndex(t=>t.getAttribute('aria-selected')==='true');
+  const list=tabs(),current=activeIndex();
   document.querySelectorAll('.bbk-page-navigation').forEach(footer=>{
    const index=Number(footer.dataset.pageIndex);
    const prev=footer.querySelector('[data-page-prev]');
    const next=footer.querySelector('[data-page-next]');
    const pos=footer.querySelector('.bbk-page-position');
    if(prev)prev.disabled=index<=0;
-   if(next)next.disabled=index<0||index>=getTabs().length-1;
-   if(pos)pos.textContent=String(index+1).padStart(2,'0')+' / '+String(getTabs().length).padStart(2,'0');
+   if(next)next.disabled=index<0||index>=list.length-1;
+   if(pos)pos.textContent=String(index+1).padStart(2,'0')+' / '+String(list.length).padStart(2,'0');
    footer.hidden=index!==current;
   });
  };
- pages.forEach((page,index)=>{
-  const target=page.panels[page.panels.length-1];
+ const list=tabs();
+ list.forEach((tab,index)=>{
+  const panels=[...document.querySelectorAll('[data-tab-panel]')].filter(p=>p.dataset.tabPanel===tab.dataset.tabTarget);
+  const target=panels[panels.length-1];
   if(!target||target.querySelector(':scope > .bbk-page-navigation'))return;
   const footer=document.createElement('nav');
   footer.className='bbk-page-navigation';footer.dataset.pageIndex=String(index);
   footer.setAttribute('aria-label','ページ移動');
-  const previous=document.createElement('button');
-  previous.type='button';previous.dataset.pagePrev='1';previous.textContent='‹ 前のページ';
-  previous.addEventListener('click',()=>{const tabs=getTabs(),i=tabs.indexOf(page.tab);if(i>0)tabs[i-1].click();});
+  const prev=document.createElement('button');prev.type='button';prev.dataset.pagePrev='1';prev.textContent='‹ 前のページ';
   const position=document.createElement('span');position.className='bbk-page-position';
-  const next=document.createElement('button');
-  next.type='button';next.dataset.pageNext='1';next.textContent='次のページ ›';
-  next.addEventListener('click',()=>{const tabs=getTabs(),i=tabs.indexOf(page.tab);if(i>=0&&i<tabs.length-1)tabs[i+1].click();});
-  const contents=document.createElement('button');
-  contents.type='button';contents.textContent='目次';
-  contents.addEventListener('click',()=>{const tabs=getTabs();if(tabs[0])tabs[0].click();});
-  footer.append(previous,position,next,contents);target.appendChild(footer);
+  const next=document.createElement('button');next.type='button';next.dataset.pageNext='1';next.textContent='次のページ ›';
+  const contents=document.createElement('button');contents.type='button';contents.dataset-pageContents='1';contents.textContent='目次';
+  footer.append(prev,position,next,contents);target.appendChild(footer);
+ });
+ document.addEventListener('click',event=>{
+  const control=event.target.closest('.bbk-page-navigation button');
+  if(!control)return;
+  const list=tabs(),current=activeIndex();
+  let destination=current;
+  if(control.hasAttribute('data-page-prev'))destination=current-1;
+  else if(control.hasAttribute('data-page-next'))destination=current+1;
+  else if(control.hasAttribute('data-page-contents'))destination=0;
+  else return;
+  if(destination>=0&&destination<list.length&&destination!==current)list[destination].click();
  });
  nav.addEventListener('click',()=>requestAnimationFrame(refresh));
+ document.addEventListener('click',event=>{
+  if(event.target.closest('.bbk-page-navigation button'))requestAnimationFrame(refresh);
+ });
  refresh();
- const vol=document.getElementById('releaseVol');if(vol)vol.textContent='UPDATE VOL.43';
+ const vol=document.getElementById('releaseVol');if(vol)vol.textContent='UPDATE VOL.44';
 })();
 </script>
 
