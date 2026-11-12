@@ -1006,7 +1006,7 @@ body.book-cover-active .app-shell{
   <h1 class="font-orbitron text-3xl sm:text-4xl md:text-6xl font-black tracking-wider neon-title">BATTLE BANK-KUN</h1>
   <div class="flex flex-wrap items-center gap-2 mt-3">
    <span class="bbk-brand-core text-[10px] font-black tracking-widest px-3 py-1.5 rounded-full">VIRUS CORE v10.9 INFECTED</span>
-   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.39</span>
+   <span id="releaseVol" class="text-[11px] font-black tracking-widest px-3 py-1.5 rounded-full border-2 border-fuchsia-400 bg-fuchsia-100 text-fuchsia-800 shadow-md">UPDATE VOL.40</span>
    <button id="audioToggleBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-1.5 rounded-full flex items-center gap-2"><span id="audioStatus" class="w-2 h-2 rounded-full bg-cyan-700"></span><span>SFX [ON]</span></button>
   </div>
  </div>
@@ -3541,6 +3541,26 @@ showExternalData('byn3');
  if(vol)vol.textContent='UPDATE VOL.39';
 })();
 </script>
+
+
+<style id="book-page-proportions-vol40">
+/* VOL.40 — 目次ページの上カードを少し細くし、全ページの本文位置を上げる */
+#brandPanel{gap:clamp(8px,1.5vh,14px)!important}
+#brandPanel>header.bbk-brand-paper-card{
+ width:88%!important;max-width:900px!important;
+ align-self:center!important;
+ padding:clamp(14px,2.8vw,26px)!important;
+}
+#brandPanel .bbk-contents-paper{margin-top:0!important}
+.app-shell [data-tab-panel]{
+ padding-top:clamp(4px,.8vh,9px)!important;
+}
+.app-shell [data-tab-panel] > :first-child{margin-top:0!important}
+@media(max-width:520px){
+ #brandPanel>header.bbk-brand-paper-card{width:92%!important;padding:14px 12px!important}
+ #brandPanel{gap:8px!important}
+}
+</style>
 
 </body>
 </html>
