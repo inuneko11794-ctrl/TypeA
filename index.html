@@ -2633,6 +2633,39 @@ if ("serviceWorker" in navigator) {
 </div>
 
 
+<script id="research-card-pages-vol34">
+(()=>{
+ const nav=document.querySelector('.main-tabs');
+ const oldTab=document.getElementById('tabAnalysis');
+ if(!nav||!oldTab)return;
+ const panels=[...document.querySelectorAll('[data-tab-panel="analysis"]')];
+ if(!panels.length)return;
+ const groups=[];
+ for(let i=0;i<panels.length;i+=2)groups.push(panels.slice(i,i+2));
+ oldTab.dataset.tabTarget='analysis-1';
+ oldTab.setAttribute('aria-controls','analysisPage1');
+ oldTab.querySelector('.bookmark-label').textContent='研究 1・2';
+ oldTab.querySelector('.tab-sub').textContent='05 / LABORATORY';
+ groups.forEach((group,index)=>{
+  const name='analysis-'+(index+1);
+  group.forEach(panel=>{panel.dataset.tabPanel=name;});
+  if(index===0)return;
+  const tab=document.createElement('button');
+  tab.type='button';tab.className='main-tab';tab.role='tab';
+  tab.id='tabAnalysis'+(index+1);tab.dataset.tabTarget=name;
+  tab.setAttribute('aria-selected','false');
+  tab.setAttribute('aria-controls','analysisPage'+(index+1));
+  tab.innerHTML='<span class="bookmark-label">研究 '+(index*2+1)+'・'+(index*2+2)+'</span><span class="tab-sub">'+(5+index)+' / LABORATORY</span>';
+  oldTab.after(tab);
+ });
+ document.querySelectorAll('[data-tab-panel^="analysis-"]').forEach((panel,index)=>{
+  if(index===0)panel.id='analysisPage1';
+ });
+ const vol=document.getElementById('releaseVol');
+ if(vol)vol.textContent='UPDATE VOL.34';
+})();
+</script>
+
 <script>
 (function(){
   const tabs=[...document.querySelectorAll('.main-tabs [data-tab-target]')];
