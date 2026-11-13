@@ -1390,7 +1390,7 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
 <section class="glass-panel p-4 sm:p-5 mb-8" id="numericTrickLab" data-tab-panel="analysis">
  <div class="panel-content">
   <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-cyan-500 pl-2">LINE HEAD PAIR + MARK RELATION LAB // 車番ペア・印の関係分析</h2><span class="discovery-chip">PAIR PAYOUT RANKING</span></div>
-  <p class="text-xs text-sky-800 mb-4">ライン先頭の車番ペアごとの平均配当に加え、先頭2人の印の組み合わせと、2ライン全選手の印の並びも分析します。1－4と4－1は同じ車番ペアとして集計します。</p>
+  <p class="text-xs text-sky-800 mb-4">ライン先頭の車番ペアごとの平均配当・中央値に加え、先頭2人の印の組み合わせと、2ライン全選手の印の並びも分析します。1－4と4－1は同じ車番ペアとして集計します。</p>
   <div class="discovery-card mb-3 border border-sky-200 bg-sky-50/80">
    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
     <div class="text-xs font-black tracking-wide text-sky-900">初期搭載データ｜基礎統計スナップショット</div>
@@ -1423,7 +1423,7 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
   <div id="trickSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
   <div id="trickResults" class="space-y-3"><div class="discovery-card text-center text-sky-700 text-xs">CSVを読み込み、分析を実行してください。</div></div>
   <div class="mt-4"><h3 class="kicker border-l-4 border-violet-500 pl-2 mb-2">MARK RELATION LAB // 印の関係分析</h3><p class="text-[11px] text-slate-600 mb-2">ライン位置（①×②・①×③・②×③）ごとに、両ライン先頭の印の関係と2ライン全員の印並びを集計します。最低件数に満たないパターンは低配当・高配当ランキングから除外します。</p><div class="flex items-end gap-2 mb-3"><label class="text-[10px] font-bold text-violet-800 flex-1">ランキング最低出現数<select id="markPatternMinCount" class="field !py-2 text-xs mt-1"><option value="5">5件</option><option value="10" selected>10件</option><option value="20">20件</option><option value="30">30件</option><option value="50">50件</option></select></label><div class="text-[10px] text-slate-500 flex-1">件数不足の組み合わせはランキング対象外</div></div><div id="trickMarkResults" class="space-y-3"><div class="discovery-card text-xs">組み合わせ分析を実行してください。</div></div><div class="mt-4 border-t border-violet-200 pt-3"><h4 class="kicker border-l-4 border-fuchsia-500 pl-2 mb-2">CSV × LIVE JSON MARK COMPARISON // 変換印の比較</h4><p class="text-[10px] text-slate-600 mb-2">⑳・●・▲・✖・☆・★に変換したライン内の印並びを、過去CSVと直近JSONで比較します。無印という共通ラベルにはまとめません。</p><div id="trickMarkJsonCompare" class="space-y-2"><div class="discovery-card text-xs">CSV分析を実行すると比較します。</div></div></div></div>
-  <p class="text-[10px] text-slate-500 mt-3">集計対象はライン先頭車番のペアです。提示された組み合わせ条件に従い、1－2と1－3は対象外。平均配当の算出には選択した配当が入力済みのレースだけを使用し、各組み合わせの出現数も併記します。奇数・偶数の分析は行いません。</p>
+  <p class="text-[10px] text-slate-500 mt-3">集計対象はライン先頭車番のペアです。提示された組み合わせ条件に従い、1－2と1－3は対象外。平均配当・中央値の算出には選択した配当が入力済みのレースだけを使用し、各組み合わせの出現数も併記します。奇数・偶数の分析は行いません。</p>
   <div class="mt-6 border-t-2 border-cyan-200 pt-4" id="lowPayoutHeadLab">
    <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h3 class="kicker border-l-4 border-emerald-500 pl-2">LOW PAYOUT HEAD PAIR LAB // ライン先頭ペア・1万円以下分析</h3><span class="discovery-chip">UNDER THRESHOLD RATE</span></div>
    <p class="text-xs text-sky-800 mb-3">ライン①〜④の位置を区別して、各ライン先頭車番の組み合わせを総当たりします。たとえば①×②なら「①の先頭1番－②の先頭2番」と「①の先頭2番－②の先頭1番」は別集計です。3連単配当が基準以下になる割合を比較します。</p>
@@ -2626,8 +2626,8 @@ function runTrick(){
   for(let i=0;i<heads.length;i++)for(let j=i+1;j<heads.length;j++){
    const a=heads[i],b=heads[j];if(!allowedHeadPair(a,b))continue;
    const key=pairKey(a,b),lo=Math.min(a,b),hi=Math.max(a,b);
-   if(!stats.has(key))stats.set(key,{pair:key,a:lo,b:hi,count:0,sum:0,min:Infinity,max:0});
-   const g=stats.get(key);g.count++;g.sum+=r.payout;g.min=Math.min(g.min,r.payout);g.max=Math.max(g.max,r.payout);
+   if(!stats.has(key))stats.set(key,{pair:key,a:lo,b:hi,count:0,sum:0,min:Infinity,max:0,payouts:[]});
+   const g=stats.get(key);g.count++;g.sum+=r.payout;g.payouts.push(r.payout);g.min=Math.min(g.min,r.payout);g.max=Math.max(g.max,r.payout);
   }
   const markOf=n=>r.marks[n]||'';
   const posPairs=[[0,1,'ライン① × ②'],[0,2,'ライン① × ③'],[1,2,'ライン② × ③']];
@@ -2640,12 +2640,13 @@ function runTrick(){
    const headSig=`${lineA[0]}番:${markOf(lineA[0])||'—'} × ${lineB[0]}番:${markOf(lineB[0])||'—'}`;
    const lineSig=`${lineA.map(markOf).join('－')} ／ ${lineB.map(markOf).join('－')}`;
    for(const [map,sig] of [[ms.head,headSig],[ms.lines,lineSig]]){
-    if(!map.has(sig))map.set(sig,{sig,count:0,sum:0});
-    const z=map.get(sig);z.count++;z.sum+=r.payout;
+    if(!map.has(sig))map.set(sig,{sig,count:0,sum:0,payouts:[]});
+    const z=map.get(sig);z.count++;z.sum+=r.payout;z.payouts.push(r.payout);
    }
   });
  });
- const pairs=[...stats.values()].map(g=>({...g,avg:g.sum/g.count}));
+ const medianOf=values=>{const v=values.slice().sort((a,b)=>a-b),n=v.length;return n?(n%2?v[(n-1)/2]:(v[n/2-1]+v[n/2])/2):0;};
+ const pairs=[...stats.values()].map(g=>({...g,avg:g.sum/g.count,median:medianOf(g.payouts)}));
  const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
  const summary=[['対象レース',allData.length.toLocaleString()],['配当入力済',payoutRows.length.toLocaleString()],['集計ペア数',pairs.length.toLocaleString()],['配当種別',type==='tri_yen'?'3連単':'2車単']];
  $t('trickSummary').innerHTML=summary.map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-sky-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold text-sky-900">${v}</div></div>`).join('');
@@ -2654,15 +2655,15 @@ function runTrick(){
   const related=pairs.filter(g=>g.a===car||g.b===car);
   const cheap=related.slice().sort((a,b)=>a.avg-b.avg||b.count-a.count).slice(0,3);
   const expensive=related.slice().sort((a,b)=>b.avg-a.avg||b.count-a.count).slice(0,3);
-  const render=(arr,empty)=>arr.length?arr.map((g,i)=>`<div class="flex items-center justify-between gap-2 border-b border-sky-100 py-1.5 last:border-0"><span class="font-bold text-slate-800">${i+1}. ${g.pair}</span><span class="text-right"><b class="text-sky-900">${fmt(g.avg)}</b><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):`<div class="py-2 text-[11px] text-slate-500">${empty}</div>`;
+  const render=(arr,empty)=>arr.length?arr.map((g,i)=>`<div class="flex items-center justify-between gap-2 border-b border-sky-100 py-1.5 last:border-0"><span class="font-bold text-slate-800">${i+1}. ${g.pair}</span><span class="text-right"><b class="text-sky-900">平均 ${fmt(g.avg)}</b><small class="block text-[10px] text-slate-600">中央値 ${fmt(g.median)}</small><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):`<div class="py-2 text-[11px] text-slate-500">${empty}</div>`;
   html+=`<div class="discovery-card"><div class="flex items-center justify-between mb-2"><h3 class="font-bold text-sky-900">車番 ${car} を含む組み合わせ</h3><span class="text-[10px] text-slate-500">${related.length}ペア</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-3"><div class="rounded-lg bg-sky-50 p-2"><div class="text-[11px] font-bold text-sky-800 mb-1">平均配当が安い 3組</div>${render(cheap,'該当する組み合わせなし')}</div><div class="rounded-lg bg-amber-50 p-2"><div class="text-[11px] font-bold text-amber-800 mb-1">平均配当が高い 3組</div>${render(expensive,'該当する組み合わせなし')}</div></div></div>`;
  }
  $t('trickResults').innerHTML=html;
  const minMarkCount=Math.max(1,Number($t('markPatternMinCount')?.value)||10);
- const markFmt=(arr)=>arr.length?arr.map((g,i)=>`<div class="flex items-start justify-between gap-2 border-b border-violet-100 py-1.5 last:border-0"><span class="text-[11px] font-semibold text-slate-700">${i+1}. ${esc(g.sig)}</span><span class="shrink-0 text-right"><b class="text-slate-900">${fmt(g.avg)}</b><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">最低件数を満たすパターンなし</div>';
+ const markFmt=(arr)=>arr.length?arr.map((g,i)=>`<div class="flex items-start justify-between gap-2 border-b border-violet-100 py-1.5 last:border-0"><span class="text-[11px] font-semibold text-slate-700">${i+1}. ${esc(g.sig)}</span><span class="shrink-0 text-right"><b class="text-slate-900">平均 ${fmt(g.avg)}</b><small class="block text-[10px] text-slate-600">中央値 ${fmt(g.median)}</small><small class="block text-[10px] text-slate-500">${g.count.toLocaleString()}件</small></span></div>`).join(''):'<div class="text-[11px] text-slate-500 py-2">最低件数を満たすパターンなし</div>';
  const markCards=[];
  for(const [posKey,ms] of positionMarkStats){
-  const renderSide=(map,low)=>{const arr=[...map.values()].filter(x=>x.count>=minMarkCount).map(x=>({...x,avg:x.sum/x.count}));arr.sort((a,b)=>low?(a.avg-b.avg||b.count-a.count):(b.avg-a.avg||b.count-a.count));return markFmt(arr.slice(0,3));};
+  const renderSide=(map,low)=>{const arr=[...map.values()].filter(x=>x.count>=minMarkCount).map(x=>({...x,avg:x.sum/x.count,median:medianOf(x.payouts)}));arr.sort((a,b)=>low?(a.median-b.median||b.count-a.count):(b.median-a.median||b.count-a.count));return markFmt(arr.slice(0,3));};
   markCards.push(`<div class="discovery-card"><h4 class="font-bold text-violet-900 mb-2">${ms.label}</h4><div class="grid grid-cols-1 lg:grid-cols-2 gap-3"><section class="rounded-lg bg-violet-50 p-2"><div class="font-bold text-[11px] text-violet-900 mb-1">両ライン先頭2人の印の関係</div><div class="text-[10px] text-slate-500 mb-1">先頭車番の印をライン順に比較</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.head,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.head,false)}</div></div></section><section class="rounded-lg bg-slate-50 p-2"><div class="font-bold text-[11px] text-slate-800 mb-1">2ライン全員の印の並び</div><div class="text-[10px] text-slate-500 mb-1">各ライン内の順番を保持</div><div class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div><div class="text-[10px] font-bold text-sky-800">低配当 3パターン</div>${renderSide(ms.lines,true)}</div><div><div class="text-[10px] font-bold text-amber-800">高配当 3パターン</div>${renderSide(ms.lines,false)}</div></div></section></div><div class="text-[10px] text-slate-500 mt-2">最低出現数：${minMarkCount}件以上</div></div>`);
  }
  $t('trickMarkResults').innerHTML=markCards.length?markCards.join(''):'<div class="discovery-card text-xs">印の組み合わせデータがありません。</div>';
