@@ -1,46 +1,40 @@
-# BATTLE BANK-KUN AI Point Engine v1
+# BATTLE BANK-KUN 2車単配当ポイント学習エンジン
 
-## Purpose
-Estimate the relative payout level of a 2-car exacta combination. This is separate from the existing hit-candidate ranking model. It does not estimate hit probability or profitability.
+## 目的
+既存の的中候補順位モデルとは独立して、2車単候補の「配当水準」を評価する。的中確率や回収率を保証する機能ではない。正解が事前に固定されていない探索型の学習機能として、結果データが増えるたびに評価を更新する。
 
-## Training data and split
-- Source: supplied `brain races 2024-08 all_印配置変換.csv`
-- Scope: all 25,477 races; no filtering by car count or line type
-- Excluded: `pt`, `chaos_score`, and post-race fields other than the target payout
-- Target: `log(exa_yen)`
-- Chronological training/validation split: 20,350 training races and 5,127 validation races
-- Training period: 2024-07-30 through 2026-03-21
-- Validation period: 2026-03-22 through 2026-06-15
-- Entire dates are kept in one split; no date leakage across the boundary
+## 実装状況
+- `index.html` に独立した配当学習処理を追加済み。
+- 既存の `battleBankAIModelV1`、既存の選手順位スコア、買い目生成処理は変更していない。
+- 2車単候補の表示に配当ポイントを追加。
+- 結果登録後に保存済みレース全体から学習し直し、表示を更新する。
+- 学習元はアプリ内の `savedRecords`。2車単配当 `payout2ren` が正で、1着・2着が有効なレースを利用する。
+- 結果入力済みの全レースを使うため、AI予測が付いていなかったレースも学習材料になる。
+- 独立した localStorage キーや係数ファイルを必要とせず、保存済み結果から毎回同じ集計を再構成する。
 
-## Model
-Ridge regression with one-hot categorical features, rare-category pooling, and deterministic coefficients. Inputs:
-- First and second place marks, plus ordered mark pair
-- Same-line / different-line / single-rider relationship
-- First and second rider positions (lead, second, third-or-later, solo)
-- Individual line lengths
-- Ordered line-size pattern and full ordered line structure
-- Singleton count, car count, race class segment, and line type
+## 現在の学習方式
+各実績レースの実際の1着→2着について、log(2車単配当)を集計する。特徴カテゴリは次の通り。
+- 1着印→2着印
+- 同ライン／別ライン／1着単騎／2着単騎
+- 1着位置→2着位置（先頭、番手、3番手、4番手以降、単騎）
+- 順序を保持したライン人数構成
+- 印ペアとライン関係の組み合わせ
+- 印ペアと位置関係の組み合わせ
 
-Line order is preserved. For example, 3+2+2 and 2+3+2 are distinct. A solo rider is never treated as a member of a multi-rider line. Mark symbols ◎, ◯, △, ✕, ⑳, ●, ▲, ✖, ☆, ★, T, and 星 remain distinct.
+各カテゴリの推定は全体平均へ縮小し、サンプルが少ないカテゴリが極端なポイントになりにくいようにする。カテゴリの寄与は実績件数から決まり、条件ごとの固定点数を人間が設定する方式ではない。単騎はライン構成員として扱わない。
 
-## Validation
-- Validation log-scale MAE: 0.4542
-- Baseline log-scale MAE (training median): 1.0337
-- Validation log-scale RMSE: 0.5827
-- Prediction/actual correlation: 0.8848
-- Training median payout reference: 990 yen
+## ポイント
+学習済み実績の幾何平均配当を基準に、候補ペアの推定配当水準を相対ポイントへ変換する。
+- +10：基準の約2倍
+- 0：基準付近
+- -10：基準の約半分
+- 表示範囲：-30〜+30
 
-The model reduces log-scale MAE against the constant-median baseline on the latest holdout. This evaluates payout estimation for realized winning pairs, not whether the model can identify which candidate pair will hit.
+## 学習方針
+- 的中したかどうかで学習対象を限定しない。実際に結果と2車単配当が登録された全レースを利用する。
+- 新しい結果が増えたら全データから再集計する。同じデータと同じコードなら同じポイントを再現する。
+- 新しい特徴やカテゴリを発見した場合は、過去データで再検証してから追加する。
+- 学習件数、各カテゴリの件数、時系列での変化を確認し、少数データを確定法則として扱わない。
 
-## Point conversion
-`points = clamp(10 * ln(predicted_median_payout / 990) / ln(2), -30, 30)`
-
-- +10: estimated payout level is about 2x the reference
-- -10: estimated payout level is about half the reference
-- 0: estimated payout level is near the reference
-
-The points are deterministic for identical inputs and model version. They are a relative payout indicator, not a betting recommendation or guarantee.
-
-## Integration status
-A fitted coefficient JSON and reproducible training script have been generated locally and independently rerun. They are not yet connected to `index.html`. The existing prediction model and its learning key must remain untouched. Runtime integration must be a separate payout-scoring module and must be tested before the engine is described as active.
+## 現段階の制約
+これは初期のオンライン再集計版であり、まだCSV全件を使った正式な学習済み係数モデルではない。過去に記載されていた回帰モデルの検証数値・精度は、再現可能な学習成果物と独立検証を確認できていないため、正式な性能値として採用しない。今後、CSVとアプリ内実績の双方で時系列検証し、必要に応じて推定方式を更新する。
