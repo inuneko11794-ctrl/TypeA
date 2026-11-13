@@ -3081,6 +3081,51 @@ showExternalData('byn3');
  function permutations(list,n,limit){
   const out=[];function walk(prefix,left){if(out.length>=limit)return;if(prefix.length===n){out.push(prefix);return;}left.forEach((v,i)=>walk(prefix.concat(v),left.filter((_,j)=>j!==i)));}walk([],list);return out;
  }
+
+ // 独立配当学習エンジン。既存の的中順位モデルには触れない。
+ const PAYOUT_KEY='battleBankExactaPayoutLearnerV1';
+ const payoutMarks=r=>r.lineMarks&&Object.keys(r.lineMarks).length?r.lineMarks:(typeof transformLineMarks==='function'?transformLineMarks(r.lineGroups||[],r.baseMarks||{}):(r.baseMarks||{}));
+ function payoutContext(r,a,b){
+  const marks=payoutMarks(r),groups=Array.isArray(r.lineGroups)?r.lineGroups:[];
+  const locate=car=>{
+   for(let i=0;i<groups.length;i++){const at=(groups[i]||[]).map(Number).indexOf(Number(car));if(at>=0)return {line:i,pos:at,len:groups[i].length};}
+   return {line:-1,pos:0,len:1};
+  };
+  const x=locate(a),y=locate(b),mx=String(marks[a]||r.baseMarks?.[a]||'無'),my=String(marks[b]||r.baseMarks?.[b]||'無');
+  const role=z=>z.line<0?'単騎':z.pos===0?'先頭':z.pos===1?'番手':z.pos===2?'3番手':'4番手以降';
+  const sizes=groups.map(g=>(g||[]).length).filter(n=>n>1).join('+')||'単騎構成';
+  const rel=x.line<0?'1着単騎':y.line<0?'2着単騎':x.line===y.line?'同ライン':'別ライン';
+  return {keys:['印:'+mx+'>'+my,'関係:'+rel,'位置:'+role(x)+'>'+role(y),'ライン:'+sizes,'印関係:'+mx+'>'+my+'|'+rel,'印位置:'+mx+'>'+my+'|'+role(x)+'>'+role(y)],marks:mx+'>'+my,rel};
+ }
+ function payoutLearner(){
+  const buckets=new Map();let total=0,sum=0,n=0;
+  (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
+   const order=String(r.pattern||'').split('-').map(Number),pay=Number(r.payout2ren||0);
+   if(order.length<2||!order[0]||!order[1]||!Number.isFinite(pay)||pay<=0)return;
+   const ctx=payoutContext(r,order[0],order[1]),v=Math.log(pay);
+   total+=v;n++;
+   ctx.keys.forEach(k=>{if(!buckets.has(k))buckets.set(k,{n:0,sum:0});const z=buckets.get(k);z.n++;z.sum+=v;});
+  });
+  return {buckets,mean:n?total/n:Math.log(990),count:n};
+ }
+ function payoutEstimate(r,pair,trained){
+  const ctx=payoutContext(r,pair[0],pair[1]),prior=trained.mean;
+  let weighted=0,weight=0;
+  ctx.keys.forEach(k=>{
+   const b=trained.buckets.get(k);if(!b)return;
+   const support=b.n/(b.n+8);
+   weighted+=((b.sum/b.n)*support+prior*(1-support))*support;
+   weight+=support;
+  });
+  const logValue=weight?weighted/weight:prior;
+  const predicted=Math.exp(logValue),reference=Math.exp(prior);
+  const points=Math.max(-30,Math.min(30,10*Math.log(predicted/reference)/Math.log(2)));
+  return {points,predicted:Math.round(predicted),samples:trained.count,marks:ctx.marks,relation:ctx.rel};
+ }
+ function payoutLabel(r,pair,trained){
+  const z=payoutEstimate(r,pair,trained),sign=z.points>0?'+':'';
+  return sign+z.points.toFixed(1)+'pt';
+ }
  function predict(r){
   const win=ranked(r,'win'),ex=ranked(r,'exacta'),tri=ranked(r,'trifecta');
   const exacta=permutations(ex.slice(0,5).map(x=>x.car),2,5);
@@ -3091,7 +3136,13 @@ showExternalData('byn3');
   const rows=Object.values(model.predictions),learned=rows.filter(x=>x.learned).length;
   $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 学習済み '+learned+'件';
   const recent=rows.slice(-8).reverse();
-  $('aiPredictionOutput').innerHTML=recent.length?recent.map(p=>'<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.learned?'学習済み':'結果待ち')+'</span><div class="mt-1">単勝候補：'+p.win.join(' → ')+'</div><div>2車単候補：'+p.exacta.map(x=>x.join('-')).join(' / ')+'</div><div>3連単候補：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div></div>').join(''):'予測履歴はまだありません。';
+  const payoutModel=payoutLearner();
+  $('aiPredictionOutput').innerHTML=recent.length?recent.map(p=>{
+   const race=savedRecords.find(r=>key(r)===[p.race.venue||'',p.race.date||'',p.race.race||''].join('|'))||p.race;
+   const payoutText=p.exacta.map(pair=>pair.join('-')+' ['+payoutLabel(race,pair,payoutModel)+']').join(' / ');
+   return '<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.learned?'学習済み':'結果待ち')+'</span><div class="mt-1">単勝候補：'+p.win.join(' → ')+'</div><div>2車単候補・配当評価：'+payoutText+'</div><div>3連単候補：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div></div>';
+  }).join(''):'予測履歴はまだありません。';
+  $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 着順学習 '+learned+'件 / 配当学習 '+payoutModel.count+'件';
   renderDiscoveries();
  }
  function renderDiscoveries(){
@@ -3190,7 +3241,7 @@ showExternalData('byn3');
   Object.assign(r,typeof normalizeRecord==='function'?normalizeRecord(r):r);
   const ok=typeof persist==='function'&&persist();
   if(!ok){$('aiResultStatus').textContent='保存に失敗しました。入力内容は画面に残しています。';return;}
-  if(p)learnPending();if(typeof updateCountDisplay==='function')updateCountDisplay();if(typeof runAnalysis==='function')runAnalysis();
+  if(p)learnPending();render();if(typeof updateCountDisplay==='function')updateCountDisplay();if(typeof runAnalysis==='function')runAnalysis();
   $('aiResultStatus').textContent='保存完了：'+raw+' / 2車単 ¥'+p2.toLocaleString()+' / 3連単 ¥'+p3.toLocaleString()+' / 3連複 ¥'+pf.toLocaleString()+(p?'。AI学習を実行しました。':'。このレースはAI予測がないため、結果保存のみ行いました。');
   ['aiResultOrder','aiResultPayout2','aiResultPayout3','aiResultPayoutF'].forEach(id=>$(id).value='');
   refreshResultChoices();
