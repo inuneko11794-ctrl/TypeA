@@ -1099,9 +1099,9 @@ body.book-cover-active .app-shell{
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-sky-500 pl-2 mb-4">SYS.COMMANDS // 制御</h2>
     <div class="grid grid-cols-3 gap-2 mb-4 control-grid">
-     <button id="editPayoutBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">簡易修正</button>
-     <button id="analysisBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">UI再構築</button>
-     <button id="deepScanBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">7車 DEEP SCAN</button>
+     <button id="editPayoutBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">配当の簡易修正</button>
+     <button id="analysisBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">統計を再計算</button>
+     <button id="deepScanBtn" type="button" class="touch-btn btn-ghost py-3 rounded-lg text-[10px] font-bold">7車差分分析</button>
     </div>
     <div class="scanline mb-4"><div class="scanline-racer">🚴💨</div></div>
     <div class="grid grid-cols-3 gap-2">
@@ -1348,12 +1348,6 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
     <p class="text-xs text-slate-600 mb-3">重複候補と着順・配当の入力漏れを検出します。検出だけを行い、データは自動削除しません。</p>
     <div class="grid grid-cols-2 gap-2"><button id="duplicateCheckBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">重複チェック</button><button id="qualityCheckBtn" class="touch-btn btn-ghost py-3 rounded-lg text-xs">入力漏れチェック</button></div>
     <div id="healthResults" class="text-xs mt-3 text-slate-700">点検結果はここに表示されます。</div>
-   </div>
-   <div class="discovery-card">
-    <h3 class="font-black text-sm mb-2">PATTERN WATCH // 異常パターン発見</h3>
-    <p class="text-xs text-slate-600 mb-3">既存の自動パターン探索を呼び出し、高配当基準・最低出現数・検証用20%を確認します。</p>
-    <button id="anomalyScanBtn" class="touch-btn btn-alert w-full py-3 rounded-lg text-xs">高配当パターン探索を実行</button>
-    <div class="text-[10px] text-slate-500 mt-2">※探索結果は予測保証ではありません。サンプル数と検証結果を併せて確認してください。</div>
    </div>
    <div class="discovery-card">
     <h3 class="font-black text-sm mb-2">SAVED SCANS // 分析条件の保存</h3>
@@ -2254,7 +2248,7 @@ async function playPersonalMusic(){const a=$('personalMusic');if(!a.src){alert('
 function stopPersonalMusic(){const a=$('personalMusic');a.pause();a.currentTime=0;$('musicState').textContent='停止中';}
 function bindUserHub(){
  bind('backupNowBtn',async()=>{await writeBackup('手動バックアップ');await refreshBackupStatus();});refreshBackupStatus();bind('restoreBackupBtn',async()=>{await refreshBackupStatus();const sel=$('backupVersionSelect');if(sel&&sel.options.length>1)sel.selectedIndex=0;await restoreSelectedBackup();});bind('restoreSelectedBackupBtn',restoreSelectedBackup);bind('restoreJsonBtn',()=>$('restoreBackupFile').click());bind('undoActionBtn',undoLastAction);bind('downloadBackupBtn',downloadJsonBackup);
- bind('duplicateCheckBtn',runDuplicateCheck);bind('qualityCheckBtn',runQualityCheck);bind('anomalyScanBtn',()=>{discoverPatterns();$('discoverySection').scrollIntoView({behavior:'smooth'});});bind('saveScanPresetBtn',saveScanPreset);
+ bind('duplicateCheckBtn',runDuplicateCheck);bind('qualityCheckBtn',runQualityCheck);bind('saveScanPresetBtn',saveScanPreset);
  $('savedScanPresets').addEventListener('click',e=>{const l=e.target.closest('[data-load-preset]'),d=e.target.closest('[data-delete-preset]');if(l)applySavedPreset(Number(l.dataset.loadPreset));if(d){const a=readScanPresets();a.splice(Number(d.dataset.deletePreset),1);try{localStorage.setItem('battleBankScanPresets',JSON.stringify(a));}catch(err){alert('条件を更新できませんでした。');}renderScanPresets();}});
  $('restoreBackupFile').addEventListener('change',restoreJsonBackup);$('musicFileInput').addEventListener('change',loadMusicFile);bind('musicPlayBtn',playPersonalMusic);bind('musicStopBtn',stopPersonalMusic);
  $('musicVolume').addEventListener('input',e=>{const v=Number(e.target.value)/100;$('personalMusic').volume=v;localStorage.setItem('battleBankMusicVolume',e.target.value)});$('musicLoop').addEventListener('change',e=>$('personalMusic').loop=e.target.checked);
@@ -2658,7 +2652,8 @@ if ("serviceWorker" in navigator) {
   tab.id='tabAnalysis'+(index+1);tab.dataset.tabTarget=name;
   tab.setAttribute('aria-selected','false');
   tab.setAttribute('aria-controls','analysisPage'+(index+1));
-  tab.innerHTML='<span class="bookmark-label">研究 '+(index*2+1)+'・'+(index*2+2)+'</span><span class="tab-sub">'+(5+index)+' / LABORATORY</span>';
+  const researchNames=['研究｜パターン・印','研究｜3連単・ライン','研究｜会場・クラス','研究｜外部データ'];
+  tab.innerHTML='<span class="bookmark-label">'+(researchNames[index]||('研究 '+(index+1)))+'</span><span class="tab-sub">'+(5+index)+' / LABORATORY</span>';
   lastResearchTab.after(tab);
   lastResearchTab=tab;
  });
