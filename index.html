@@ -2932,7 +2932,7 @@ function renderMansha(){const d=MANSHANOTE_DATA,p2=d.map(x=>+x.nirentan).filter(
 function showExternalData(which){const out=$('externalDataOutput');if(!out)return;out.innerHTML=which==='byn3'?renderByn3():renderMansha();$('showByn3Btn')?.classList.toggle('btn-cyber',which==='byn3');$('showManshaBtn')?.classList.toggle('btn-cyber',which==='mansha');}
 function parseExternalJson(text,kind){const raw=JSON.parse(text);let rows;if(kind==='byn3'){rows=Array.isArray(raw)?raw:(Array.isArray(raw.records)?raw.records:(Array.isArray(raw.data)?raw.data:null));if(!rows||!rows.length||!('payout2' in rows[0])||!('payout3' in rows[0])||!('sites' in rows[0]))throw Error('B/N/Y形式ではありません。B/N/YバックアップJSONを選択してください。');}
 else{rows=Array.isArray(raw)?raw:(Array.isArray(raw.races)?raw.races:null);if(!rows||!rows.length||!('sanrentan' in rows[0])||!('nirentan' in rows[0])||!('first' in rows[0]))throw Error('万車券ノート形式ではありません。万車券ノートJSONを選択してください。');}return rows;}
-function loadExternalJsonFile(inputId,kind){const input=$(inputId),file=input?.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{try{const rows=parseExternalJson(ev.target.result,kind);if(kind==='byn3'){BYN3_DATA=rows;try{localStorage.setItem('bbk_external_byn3',JSON.stringify(rows));localStorage.setItem('bbk_external_byn3_userOverride','1');}catch(e){console.warn('B/N/Yデータの保存容量を超えました',e);}$('byn3FileStatus').textContent=`手動更新：${rows.length.toLocaleString()}件 / ${file.name}`;}else{MANSHANOTE_DATA=rows;try{localStorage.setItem('bbk_external_mansha',JSON.stringify(rows));localStorage.setItem('bbk_external_mansha_userOverride','1');}catch(e){console.warn('万車券データの保存容量を超えました',e);}$('manshaFileStatus').textContent=`手動更新：${rows.length.toLocaleString()}件 / ${file.name}`;}window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};window.dispatchEvent(new Event('bbk-extra-seed-ready'));showExternalData(kind);logToTerminal(`> ${kind==='byn3'?'B/N/Y':'万車券ノート'} JSONを更新：${rows.length}件`,'success');}catch(err){alert(err.message||'JSONを読み込めませんでした。');}input.value='';};reader.onerror=()=>alert('ファイルを読み込めませんでした。');reader.readAsText(file,'UTF-8');}
+function loadExternalJsonFile(inputId,kind){const input=$(inputId),file=input?.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{try{const rows=parseExternalJson(ev.target.result,kind);if(kind==='byn3'){BYN3_DATA=rows;try{localStorage.setItem('bbk_external_byn3',JSON.stringify(rows));localStorage.setItem('bbk_external_byn3_userOverride','1');}catch(e){console.warn('B/N/Yデータの保存容量を超えました',e);}$('byn3FileStatus').textContent=`手動更新：${rows.length.toLocaleString()}件 / ${file.name}`;}else{MANSHANOTE_DATA=rows;try{localStorage.setItem('bbk_external_mansha',JSON.stringify(rows));localStorage.setItem('bbk_external_mansha_userOverride','1');}catch(e){console.warn('万車券データの保存容量を超えました',e);}$('manshaFileStatus').textContent=`手動更新：${rows.length.toLocaleString()}件 / ${file.name}`;}window.BBK_EXTRA_SEED_STATS=null;window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};window.dispatchEvent(new Event('bbk-extra-seed-ready'));showExternalData(kind);logToTerminal(`> ${kind==='byn3'?'B/N/Y':'万車券ノート'} JSONを更新：${rows.length}件`,'success');}catch(err){alert(err.message||'JSONを読み込めませんでした。');}input.value='';};reader.onerror=()=>alert('ファイルを読み込めませんでした。');reader.readAsText(file,'UTF-8');}
 $('loadByn3FileBtn')?.addEventListener('click',()=>$('byn3JsonFile').click());
 $('loadManshaFileBtn')?.addEventListener('click',()=>$('manshaJsonFile').click());
 $('byn3JsonFile')?.addEventListener('change',()=>loadExternalJsonFile('byn3JsonFile','byn3'));
@@ -3178,6 +3178,12 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
     externalBuckets.set('外部戦型:'+battle,{n:bn,sum});externalCount+=bn;
    });
   }else{
+   const manshaRows=window.BBK_EXTRA_SEED_DATA?.mansha;
+   if(Array.isArray(manshaRows))manshaRows.forEach(x=>{
+    const pay=Number(x.nirentan);
+    if(!Number.isFinite(pay)||pay<=0)return;
+    total+=Math.log(pay);n++;
+   });
    const externalRows=window.BBK_EXTRA_SEED_DATA?.byn3;
    if(Array.isArray(externalRows))externalRows.forEach(x=>{
     const pay=Number(x.payout2),battle=String(x.battle||'').trim();
