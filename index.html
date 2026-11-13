@@ -1069,6 +1069,51 @@ body.book-cover-active .app-shell{
 @media(max-height:700px){.bbk-sunken-stage{height:55vh!important;min-height:300px!important}.bbk-book-reveal{top:37%!important}.bbk-gold-book{height:46vh!important;min-height:205px!important}}
 </style>
 
+
+<style id="bbk-real-image-cover-vol55">
+/* VOL.55 — 実画像を表紙背景に採用。既存の本を開く操作・ページ機構は維持 */
+#bookCoverGate.bbk-treasure-gate{
+  background:radial-gradient(ellipse at 50% 42%,#102d38 0%,#06151e 65%,#02080e 100%)!important;
+  justify-content:center!important;
+  gap:clamp(8px,2vh,18px)!important;
+  padding: max(12px,env(safe-area-inset-top)) 0 max(14px,env(safe-area-inset-bottom))!important;
+  overflow:hidden!important;
+}
+#bookCoverGate .bbk-treasure-heading{
+  width:100%;text-align:center;font-size:clamp(10px,2.2vw,15px)!important;
+  letter-spacing:.12em;padding:0 10px;box-sizing:border-box;
+}
+#bookCoverGate .bbk-sunken-stage{
+  width:min(100vw,1100px)!important;
+  height:auto!important;min-height:0!important;max-height:66vh!important;
+  aspect-ratio:1672 / 941!important;flex:0 1 auto!important;
+  overflow:hidden!important;border:1px solid rgba(220,190,120,.65)!important;
+  border-radius:clamp(0px,1.2vw,12px)!important;
+  background:#07131b url("./BATTLE_BANK_KUN_top.png") center center / contain no-repeat!important;
+  box-shadow:0 18px 48px #000c,0 0 32px #d4ad5b33!important;
+}
+#bookCoverGate .bbk-sunken-stage>*{display:none!important}
+#bookCoverGate .bbk-treasure-footer{
+  width:100%;display:flex;align-items:center;gap:clamp(7px,1.5vh,13px);
+  padding:0 12px;box-sizing:border-box;
+}
+#bookCoverGate .bbk-treasure-caption{font-size:clamp(10px,2.5vw,13px)!important}
+#bookCoverGate #bookCoverOpenBtn{
+  flex:0 0 auto;min-height:52px!important;width:min(82vw,390px)!important;
+  border-color:#e3c477!important;
+  background:linear-gradient(180deg,#8b682e,#382514)!important;
+  color:#fff0c5!important;
+  box-shadow:0 5px 0 #160e08,0 12px 28px #000b,inset 0 1px #fff0bd!important;
+}
+#bookCoverGate .cover-footnote{color:#d4bd83!important}
+@media(max-width:600px){
+ #bookCoverGate .bbk-sunken-stage{width:100vw!important;max-height:58vh!important;border-radius:0!important}
+ #bookCoverGate .bbk-treasure-footer{flex-direction:column}
+ #bookCoverGate .bbk-treasure-caption{max-width:94%;text-align:center}
+ #bookCoverGate #bookCoverOpenBtn{width:min(88vw,390px)!important}
+}
+</style>
+
 </head>
 <body class="book-cover-active">
 
