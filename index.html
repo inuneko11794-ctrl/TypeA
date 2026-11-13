@@ -3083,7 +3083,6 @@ showExternalData('byn3');
  }
 
  // 独立配当学習エンジン。既存の的中順位モデルには触れない。
- const PAYOUT_KEY='battleBankExactaPayoutLearnerV1';
  const payoutMarks=r=>r.lineMarks&&Object.keys(r.lineMarks).length?r.lineMarks:(typeof transformLineMarks==='function'?transformLineMarks(r.lineGroups||[],r.baseMarks||{}):(r.baseMarks||{}));
  function payoutContext(r,a,b){
   const marks=payoutMarks(r),groups=Array.isArray(r.lineGroups)?r.lineGroups:[];
@@ -3098,10 +3097,10 @@ showExternalData('byn3');
   return {keys:['印:'+mx+'>'+my,'関係:'+rel,'位置:'+role(x)+'>'+role(y),'ライン:'+sizes,'印関係:'+mx+'>'+my+'|'+rel,'印位置:'+mx+'>'+my+'|'+role(x)+'>'+role(y)],marks:mx+'>'+my,rel};
  }
  function payoutLearner(){
-  const buckets=new Map();let total=0,sum=0,n=0;
+  const buckets=new Map();let total=0,n=0;
   (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
    const order=String(r.pattern||'').split('-').map(Number),pay=Number(r.payout2ren||0);
-   if(order.length<2||!order[0]||!order[1]||!Number.isFinite(pay)||pay<=0)return;
+   if(order.length<2||!Number.isInteger(order[0])||!Number.isInteger(order[1])||order[0]<1||order[0]>9||order[1]<1||order[1]>9||order[0]===order[1]||!Number.isFinite(pay)||pay<=0)return;
    const ctx=payoutContext(r,order[0],order[1]),v=Math.log(pay);
    total+=v;n++;
    ctx.keys.forEach(k=>{if(!buckets.has(k))buckets.set(k,{n:0,sum:0});const z=buckets.get(k);z.n++;z.sum+=v;});
