@@ -1,46 +1,46 @@
 # BATTLE BANK-KUN AI Point Engine v1
 
 ## Purpose
-Estimate whether a 2-car exacta combination is likely to be relatively high- or low-priced. This score represents payout tendency, not hit probability.
+Estimate the relative payout level of a 2-car exacta combination. This is separate from the existing hit-candidate ranking model. It does not estimate hit probability or profitability.
 
-## Inputs
-- First-place mark and second-place mark, including transformed marks: ◎, ◯, △, ✕, ⑳, ●, ▲, ✖, ☆, ★, T, 星
-- Ordered mark pair
+## Training data and split
+- Source: supplied `brain races 2024-08 all_印配置変換.csv`
+- Scope: all 25,477 races; no filtering by car count or line type
+- Excluded: `pt`, `chaos_score`, and post-race fields other than the target payout
+- Target: `log(exa_yen)`
+- Chronological training/validation split: 20,350 training races and 5,127 validation races
+- Training period: 2024-07-30 through 2026-03-21
+- Validation period: 2026-03-22 through 2026-06-15
+- Entire dates are kept in one split; no date leakage across the boundary
+
+## Model
+Ridge regression with one-hot categorical features, rare-category pooling, and deterministic coefficients. Inputs:
+- First and second place marks, plus ordered mark pair
 - Same-line / different-line / single-rider relationship
-- Within-line position pair
-- Ordered line-shape signature (do not merge 3+2+2 with 2+3+2)
-- Winner's and second-place rider's line lengths
-- Single-rider status for each finisher
+- First and second rider positions (lead, second, third-or-later, solo)
+- Individual line lengths
+- Ordered line-size pattern and full ordered line structure
+- Singleton count, car count, race class segment, and line type
 
-## Learning policy
-- Determine all point weights from historical race data; do not hand-tune individual conditions.
-- Use chronological validation. Keep all races from the same date in the same split.
-- Prefer patterns that remain predictive in the newest holdout period.
-- Shrink or suppress low-sample effects.
-- Refit weights when new confirmed race results are added.
-- Identical inputs and identical model version must produce identical points.
+Line order is preserved. For example, 3+2+2 and 2+3+2 are distinct. A solo rider is never treated as a member of a multi-rider line. Mark symbols ◎, ◯, △, ✕, ⑳, ●, ▲, ✖, ☆, ★, T, and 星 remain distinct.
 
-## Point scale
-The model predicts log(2-car exacta payout). Convert the difference from the reference log payout into points:
+## Validation
+- Validation log-scale MAE: 0.4541
+- Baseline log-scale MAE (training median): 1.0337
+- Validation log-scale RMSE: 0.5827
+- Prediction/actual correlation: 0.8848
+- Training median payout reference: 990 yen
 
-`points = round((predicted_log_payout - reference_log_payout) / ln(2) * 10)`
+The model reduces log-scale MAE against the constant-median baseline on the latest holdout. This evaluates payout estimation for realized winning pairs, not whether the model can identify which candidate pair will hit.
 
-Interpretation:
-- +10 points: predicted payout is about 2x the reference.
-- -10 points: predicted payout is about 1/2 the reference.
-- 0 points: near the reference level.
+## Point conversion
+`points = clamp(10 * ln(predicted_median_payout / 990) / ln(2), -30, 30)`
 
-This is a relative payout scale, not a guarantee or a probability.
+- +10: estimated payout level is about 2x the reference
+- -10: estimated payout level is about half the reference
+- 0: estimated payout level is near the reference
 
-## v1 validation record
-- Training: 20,410 races
-- Validation: 5,067 races
-- Chronological split by unique race dates; same date never split
-- Training dates: 2024-07-30 to 2026-03-22
-- Validation dates: 2026-03-23 to 2026-06-15
-- Log-scale MAE: 0.4591 (baseline 1.0335)
-- Log-scale RMSE: 0.5884 (baseline 1.2470)
-- Prediction/actual correlation: 0.8818
+The points are deterministic for identical inputs and model version. They are a relative payout indicator, not a betting recommendation or guarantee.
 
 ## Integration status
-This file records the engine specification and validation. The fitted coefficient JSON and runtime integration into `index.html` are separate steps. Do not treat the engine as active in the live app until the coefficient asset is committed and the input-to-score code is connected and tested.
+A fitted coefficient JSON and reproducible training script have been generated locally. They are not yet connected to `index.html`. The existing prediction model and its learning key must remain untouched. Runtime integration must be a separate payout-scoring module and must be tested before the engine is described as active.
