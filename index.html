@@ -2899,6 +2899,114 @@ if ("serviceWorker" in navigator) {
 </div>
 
 
+
+<style id="research-memory-library-style-vol1">
+#researchMemoryLibraryVol1 .research-memory-card{background:linear-gradient(145deg,#fffdf6,#f4ead5);border:1px solid #d8c49b;border-radius:14px;padding:14px;box-shadow:0 5px 16px #5b452015}
+#researchMemoryLibraryVol1 .research-memory-card h3{color:#5e431d;font-weight:900;font-size:13px;letter-spacing:.04em}
+#researchMemoryLibraryVol1 .research-memory-field{width:100%;border:1px solid #d7c39c;border-radius:9px;background:#fffdf8;padding:10px;color:#3b3021;font-size:12px}
+#researchMemoryLibraryVol1 .research-memory-list{display:grid;gap:8px}
+#researchMemoryLibraryVol1 .research-memory-entry{background:#fffdf8;border:1px solid #e4d5b7;border-radius:10px;padding:10px;color:#493b29;font-size:12px}
+#researchMemoryLibraryVol1 .research-memory-entry small{color:#8b7654}
+#researchMemoryLibraryVol1 .research-memory-entry button{font-size:10px;border:1px solid #cdbb98;border-radius:7px;padding:4px 8px;color:#6d542d}
+#researchMemoryLibraryVol1 .research-memory-status{font-size:10px;color:#6c7651;min-height:1.2em}
+</style>
+<section class="glass-panel p-4 sm:p-5 mb-8" id="researchMemoryLibraryVol1" data-tab-panel="analysis">
+ <div class="panel-content">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+   <h2 class="kicker border-l-4 border-amber-600 pl-2">RESEARCH MEMORY ARCHIVE // 研究記録・法則図書館</h2>
+   <span class="discovery-chip">LOCAL AUTO SAVE</span>
+  </div>
+  <p class="text-xs text-slate-700 mb-4">検証した内容、再現性のある発見、まだ答えの出ていない課題を分けて蓄積します。入力内容はこの端末のブラウザに保存されます。</p>
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-3">
+   <div class="research-memory-card">
+    <h3>01 / RESEARCH JOURNAL — 研究記録</h3>
+    <p class="text-[10px] text-slate-600 my-2">入力途中の文章も自動保存。記録ボタンで履歴に追加します。</p>
+    <input id="researchJournalTitle" class="research-memory-field mb-2" placeholder="研究テーマ・条件名">
+    <textarea id="researchJournalBody" class="research-memory-field" rows="5" placeholder="対象データ、調べた条件、結果、次に確認すること…"></textarea>
+    <div class="flex items-center justify-between gap-2 mt-2">
+     <span id="researchJournalStatus" class="research-memory-status">下書きは自動保存されます。</span>
+     <button id="researchJournalSave" type="button" class="touch-btn btn-cyber px-3 py-2 rounded-lg text-[10px]">研究記録を保存</button>
+    </div>
+    <div id="researchJournalList" class="research-memory-list mt-3"></div>
+   </div>
+   <div class="research-memory-card">
+    <h3>02 / LAW LIBRARY — 発見した法則</h3>
+    <p class="text-[10px] text-slate-600 my-2">再検証したい条件や、数字で確認できた特徴を登録します。</p>
+    <input id="researchLawTitle" class="research-memory-field mb-2" placeholder="法則・発見の名前">
+    <textarea id="researchLawBody" class="research-memory-field" rows="4" placeholder="成立条件、対象レース数、的中率、検証期間、再現性など"></textarea>
+    <button id="researchLawSave" type="button" class="touch-btn btn-cyber w-full py-2.5 rounded-lg text-[10px] mt-2">法則図書館に登録</button>
+    <div id="researchLawList" class="research-memory-list mt-3"></div>
+   </div>
+   <div class="research-memory-card">
+    <h3>03 / OPEN QUESTIONS — 未解明パターン</h3>
+    <p class="text-[10px] text-slate-600 my-2">まだ答えが出ていない疑問を残し、解決したら状態を切り替えます。</p>
+    <input id="researchQuestionTitle" class="research-memory-field mb-2" placeholder="次に調べる疑問・パターン">
+    <textarea id="researchQuestionBody" class="research-memory-field" rows="4" placeholder="なぜ気になったか、比較したい条件、必要なデータ"></textarea>
+    <button id="researchQuestionSave" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-lg text-[10px] mt-2">未解明リストに追加</button>
+    <div id="researchQuestionList" class="research-memory-list mt-3"></div>
+   </div>
+  </div>
+  <p class="text-[10px] text-slate-500 mt-3">保存先は端末・ブラウザごとのローカル領域です。別端末との共有や端末変更に備え、既存のJSONバックアップも引き続き利用してください。</p>
+ </div>
+</section>
+<script id="research-memory-library-controller-vol1">
+(()=>{
+ const $=id=>document.getElementById(id);
+ const keys={journal:'bbk_research_journal_v1',law:'bbk_research_laws_v1',question:'bbk_research_questions_v1',draft:'bbk_research_draft_v1'};
+ const read=k=>{try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}};
+ const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
+ const stamp=()=>new Date().toLocaleString('ja-JP');
+ const make=(title,body)=>({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),title:title.trim(),body:body.trim(),created:stamp(),done:false});
+ function entry(host,item,kind){
+  const card=document.createElement('div');card.className='research-memory-entry';
+  const head=document.createElement('div');head.className='flex items-start justify-between gap-2';
+  const title=document.createElement('b');title.textContent=item.title||'名称未設定';
+  const date=document.createElement('small');date.textContent=item.created||'';
+  head.append(title,date);card.append(head);
+  const body=document.createElement('p');body.className='whitespace-pre-wrap mt-2';body.textContent=item.body||'';card.append(body);
+  const actions=document.createElement('div');actions.className='flex justify-end gap-2 mt-2';
+  if(kind==='question'){
+   const toggle=document.createElement('button');toggle.type='button';toggle.textContent=item.done?'未解決に戻す':'解決済みにする';
+   toggle.addEventListener('click',()=>{const rows=read(keys.question);const x=rows.find(v=>v.id===item.id);if(x){x.done=!x.done;write(keys.question,rows);render();}});actions.append(toggle);
+  }
+  const del=document.createElement('button');del.type='button';del.textContent='削除';
+  del.addEventListener('click',()=>{if(!confirm('この記録を削除しますか？'))return;const rows=read(keys[kind]);write(keys[kind],rows.filter(v=>v.id!==item.id));render();});
+  actions.append(del);card.append(actions);host.append(card);
+ }
+ function render(){
+  const j=$('researchJournalList'),l=$('researchLawList'),q=$('researchQuestionList');
+  if(j){j.replaceChildren();read(keys.journal).slice().reverse().forEach(x=>entry(j,x,'journal'));if(!j.children.length)j.textContent='研究記録はまだありません。';}
+  if(l){l.replaceChildren();read(keys.law).slice().reverse().forEach(x=>entry(l,x,'law'));if(!l.children.length)l.textContent='登録した法則はまだありません。';}
+  if(q){q.replaceChildren();const rows=read(keys.question).slice().sort((a,b)=>Number(a.done)-Number(b.done)).reverse();rows.forEach(x=>entry(q,x,'question'));if(!q.children.length)q.textContent='未解明パターンはまだありません。';}
+ }
+ const draft=()=>{const d={title:$('researchJournalTitle').value,body:$('researchJournalBody').value};try{localStorage.setItem(keys.draft,JSON.stringify(d));$('researchJournalStatus').textContent='下書き自動保存：'+new Date().toLocaleTimeString('ja-JP');}catch(e){$('researchJournalStatus').textContent='自動保存できません。端末の空き容量を確認してください。';}};
+ try{const d=JSON.parse(localStorage.getItem(keys.draft)||'{}');$('researchJournalTitle').value=d.title||'';$('researchJournalBody').value=d.body||'';}catch(e){}
+ ['researchJournalTitle','researchJournalBody'].forEach(id=>$(id).addEventListener('input',draft));
+ $('researchJournalSave').addEventListener('click',()=>{
+  const title=$('researchJournalTitle').value,body=$('researchJournalBody').value;
+  if(!title.trim()&&!body.trim()){alert('研究テーマか記録内容を入力してください。');return;}
+  const rows=read(keys.journal);rows.push(make(title,body));
+  if(!write(keys.journal,rows)){alert('保存できませんでした。');return;}
+  $('researchJournalTitle').value='';$('researchJournalBody').value='';draft();$('researchJournalStatus').textContent='研究記録を保存しました。';render();
+ });
+ $('researchLawSave').addEventListener('click',()=>{
+  const title=$('researchLawTitle').value,body=$('researchLawBody').value;
+  if(!title.trim()||!body.trim()){alert('法則名と内容を入力してください。');return;}
+  const rows=read(keys.law);rows.push(make(title,body));
+  if(!write(keys.law,rows)){alert('保存できませんでした。');return;}
+  $('researchLawTitle').value='';$('researchLawBody').value='';render();
+ });
+ $('researchQuestionSave').addEventListener('click',()=>{
+  const title=$('researchQuestionTitle').value,body=$('researchQuestionBody').value;
+  if(!title.trim()){alert('調べたい疑問を入力してください。');return;}
+  const rows=read(keys.question);rows.push(make(title,body));
+  if(!write(keys.question,rows)){alert('保存できませんでした。');return;}
+  $('researchQuestionTitle').value='';$('researchQuestionBody').value='';render();
+ });
+ render();
+})();
+</script>
+
 <script id="research-card-pages-vol34">
 (()=>{
  const nav=document.querySelector('.main-tabs');
