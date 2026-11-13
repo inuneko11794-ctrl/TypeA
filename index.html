@@ -3113,6 +3113,11 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008}},learned:[],updatedAt:null});
  let model=initial();
  try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);if(v&&v.version===1&&v.weights&&v.predictions)model=v;}}catch(e){console.warn('AI model load failed',e);}
+ model.metrics=model.metrics||{races:0,winHits:0,exactaHits:0,trifectaHits:0};
+ model.metrics.races=Number(model.metrics.races)||0;
+ model.metrics.winHits=Number(model.metrics.winHits)||0;
+ model.metrics.exactaHits=Number(model.metrics.exactaHits)||0;
+ model.metrics.trifectaHits=Number(model.metrics.trifectaHits)||0;
  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(model));return true;}catch(e){console.error(e);return false;}};
  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const key=r=>[r.venue||'',r.raceDate||'',r.raceName||''].join('|');
@@ -3214,9 +3219,17 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  }
  function predict(r){
   const win=ranked(r,'win'),ex=ranked(r,'exacta'),tri=ranked(r,'trifecta');
-  const exacta=permutations(ex.slice(0,5).map(x=>x.car),2,5);
-  const trifecta=permutations(tri.slice(0,5).map(x=>x.car),3,5);
-  return {createdAt:new Date().toISOString(),race:{venue:r.venue||'',date:r.raceDate||'',race:r.raceName||'',category:r.category||'',lineGroups:r.lineGroups||[],baseMarks:r.baseMarks||{},lineMarks:r.lineMarks||{}},win:win.slice(0,3).map(x=>x.car),exacta,trifecta,scoreSnapshot:{win:win.slice(0,5),exacta:ex.slice(0,5),trifecta:tri.slice(0,5)},learned:false};
+  const rankMap=list=>new Map(list.map((x,i)=>[x.car,{rank:i,score:x.score}]));
+  const exactaScores=rankMap(ex),trifectaScores=rankMap(tri);
+  const exactaPool=ex.slice(0,5).map(x=>x.car);
+  const trifectaPool=tri.slice(0,5).map(x=>x.car);
+  const exacta=permutations(exactaPool,2,1000).map(pair=>({
+   cars:pair,score:(exactaScores.get(pair[0])?.score||0)*1+(exactaScores.get(pair[1])?.score||0)*.72
+  })).sort((a,b)=>b.score-a.score||a.cars.join('').localeCompare(b.cars.join(''))).slice(0,4).map(x=>x.cars);
+  const trifecta=permutations(trifectaPool,3,1000).map(order=>({
+   cars:order,score:(trifectaScores.get(order[0])?.score||0)*1+(trifectaScores.get(order[1])?.score||0)*.72+(trifectaScores.get(order[2])?.score||0)*.48
+  })).sort((a,b)=>b.score-a.score||a.cars.join('').localeCompare(b.cars.join(''))).slice(0,10).map(x=>x.cars);
+  return {createdAt:new Date().toISOString(),race:{venue:r.venue||'',date:r.raceDate||'',race:r.raceName||'',category:r.category||'',lineGroups:r.lineGroups||[],baseMarks:r.baseMarks||{},lineMarks:r.lineMarks||{}},win:win.slice(0,2).map(x=>x.car),exacta,trifecta,scoreSnapshot:{win:win.slice(0,5),exacta:ex.slice(0,5),trifecta:tri.slice(0,5)},learned:false};
  }
  function render(){
   const rows=Object.values(model.predictions),learned=rows.filter(x=>x.learned).length;
@@ -3226,9 +3239,12 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   $('aiPredictionOutput').innerHTML=recent.length?recent.map(p=>{
    const race=savedRecords.find(r=>key(r)===[p.race.venue||'',p.race.date||'',p.race.race||''].join('|'))||p.race;
    const payoutText=p.exacta.map(pair=>pair.join('-')+' ['+payoutLabel(race,pair,payoutModel)+']').join(' / ');
-   return '<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.learned?'学習済み':'結果待ち')+'</span><div class="mt-1">単勝候補：'+p.win.join(' → ')+'</div><div>2車単候補・配当評価：'+payoutText+'</div><div>3連単候補：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div></div>';
+   const evalText=p.learned?' / 的中：単勝 '+(p.evaluation?.win?'○':'×')+'・2車単 '+(p.evaluation?.exacta?'○':'×')+'・3連単 '+(p.evaluation?.trifecta?'○':'×'):'';
+   return '<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.learned?'学習済み':'結果待ち')+'</span><div class="mt-1">単勝（2点）：'+p.win.join('・')+'</div><div>2車単（4点）：'+p.exacta.map(x=>x.join('-')).join(' / ')+'</div><div>3連単（10点）：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div><div class="text-[10px] text-slate-400">結果照合'+evalText+'</div></div>';
   }).join(''):'予測履歴はまだありません。';
-  $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 着順学習 '+learned+'件 / 配当学習 '+payoutModel.count+'件（外部 '+(payoutModel.externalCount||0)+'件）';
+  const m=model.metrics;
+  const pct=(n,d)=>d?((100*n/d).toFixed(1)+'%'):'—';
+  $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 学習済み '+learned+'件 / 的中率 単勝 '+pct(m.winHits,m.races)+'・2車単 '+pct(m.exactaHits,m.races)+'・3連単 '+pct(m.trifectaHits,m.races)+'（検証 '+m.races+'R） / 配当学習 '+payoutModel.count+'件（外部 '+(payoutModel.externalCount||0)+'件）';
   renderDiscoveries();
  }
  function renderDiscoveries(){
@@ -3276,7 +3292,15 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
      Object.keys(f).forEach(kf=>{w[kf]=Math.max(-3,Math.min(5,(Number(w[kf])||0)+step*f[kf]));});
     });
    });
-   p.learned=true;p.result=actual;p.learnedAt=new Date().toISOString();model.learned.push({key:k,result:actual,at:p.learnedAt});count++;
+   const hitWin=p.win.includes(actual[0]);
+   const hitExacta=p.exacta.some(x=>x[0]===actual[0]&&x[1]===actual[1]);
+   const hitTrifecta=p.trifecta.some(x=>x[0]===actual[0]&&x[1]===actual[1]&&x[2]===actual[2]);
+   model.metrics.races++;
+   if(hitWin)model.metrics.winHits++;
+   if(hitExacta)model.metrics.exactaHits++;
+   if(hitTrifecta)model.metrics.trifectaHits++;
+   p.learned=true;p.result=actual;p.evaluation={win:hitWin,exacta:hitExacta,trifecta:hitTrifecta,checkedAt:new Date().toISOString()};
+   p.learnedAt=new Date().toISOString();model.learned.push({key:k,result:actual,evaluation:p.evaluation,at:p.learnedAt});count++;
   });
   if(count){model.updatedAt=new Date().toISOString();save();if(typeof logToTerminal==='function')logToTerminal('> AI自動学習：'+count+'レースを反映しました。','success');}
   render();
