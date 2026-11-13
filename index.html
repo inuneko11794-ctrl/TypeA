@@ -2308,11 +2308,24 @@ async function restoreResearchCSV(){
   const db=await researchDb();
   const raw=await new Promise((resolve,reject)=>{const tx=db.transaction(RESEARCH_STORE,'readonly');const q=tx.objectStore(RESEARCH_STORE).get(RESEARCH_KEY);q.onsuccess=()=>resolve(q.result||'');q.onerror=()=>reject(q.error);});
   db.close();
-  if(!raw)return;
-  const rows=parseCSV(raw),mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');
+  let csvText=raw;
+  if(!csvText){
+   try{
+    const response=await fetch('./data/brain-races-25477.csv.gz',{cache:'no-store'});
+    if(response.ok){
+     const compressed=await response.arrayBuffer();
+     if(!('DecompressionStream' in window))throw new Error('このブラウザはgzip展開に未対応です');
+     const stream=new Blob([compressed]).stream().pipeThrough(new DecompressionStream('gzip'));
+     csvText=await new Response(stream).text();
+     await saveResearchCSV(csvText);
+    }
+   }catch(e){console.warn('GitHub初期データの取得をスキップ:',e);}
+  }
+  if(!csvText)return;
+  const rows=parseCSV(csvText),mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');
   trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));
   const status=$t('trickCsvStatus');
-  if(status)status.textContent=`端末内データを自動復元：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース`;
+  if(status)status.textContent=`${raw?'端末内':'GitHub初期搭載'}データを自動読込：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース`;
   const results=$t('trickResults');if(results)results.innerHTML='<div class="discovery-card text-center text-sky-700 text-xs">保存済みデータを復元しました。組み合わせ分析を実行できます。</div>';
  }catch(e){console.warn('研究CSVの自動復元をスキップ:',e);}
 }
