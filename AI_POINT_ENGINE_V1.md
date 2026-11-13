@@ -25,7 +25,7 @@ Ridge regression with one-hot categorical features, rare-category pooling, and d
 Line order is preserved. For example, 3+2+2 and 2+3+2 are distinct. A solo rider is never treated as a member of a multi-rider line. Mark symbols ◎, ◯, △, ✕, ⑳, ●, ▲, ✖, ☆, ★, T, and 星 remain distinct.
 
 ## Validation
-- Validation log-scale MAE: 0.4541
+- Validation log-scale MAE: 0.4542
 - Baseline log-scale MAE (training median): 1.0337
 - Validation log-scale RMSE: 0.5827
 - Prediction/actual correlation: 0.8848
@@ -43,4 +43,4 @@ The model reduces log-scale MAE against the constant-median baseline on the late
 The points are deterministic for identical inputs and model version. They are a relative payout indicator, not a betting recommendation or guarantee.
 
 ## Integration status
-A fitted coefficient JSON and reproducible training script have been generated locally. They are not yet connected to `index.html`. The existing prediction model and its learning key must remain untouched. Runtime integration must be a separate payout-scoring module and must be tested before the engine is described as active.
+A fitted coefficient JSON and reproducible training script have been generated locally and independently rerun. They are not yet connected to `index.html`. The existing prediction model and its learning key must remain untouched. Runtime integration must be a separate payout-scoring module and must be tested before the engine is described as active.
