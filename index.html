@@ -1029,11 +1029,51 @@ body.book-cover-active .app-shell{
 @media(prefers-reduced-motion:reduce){.bbk-shrine-rays{animation:none}}
 </style>
 
+
+<style id="bbk-sunken-treasure-hoard-vol54">
+/* VOL.54 — 海底の財宝と髑髏の山、その頂上に眠るBATTLE BANK-KUN */
+.bbk-sunken-stage{height:min(68vh,630px)!important}
+.bbk-treasure-mound{position:absolute;z-index:2;left:0;right:0;top:20%;bottom:0;pointer-events:none}
+.bbk-hoard-base{position:absolute;left:-8%;right:-8%;bottom:-18%;height:76%;border-radius:50% 50% 0 0/35% 35% 0 0;background:
+ radial-gradient(ellipse at 50% 5%,#b18a3d 0 2%,transparent 18%),
+ radial-gradient(ellipse at 28% 35%,#b58a38 0 4%,transparent 28%),
+ radial-gradient(ellipse at 73% 40%,#92703a 0 5%,transparent 30%),
+ repeating-radial-gradient(ellipse at 50% 30%,#72552d 0 3px,#d1a84e 4px 7px,#493a27 8px 10px);
+ border:5px solid #66502d;box-shadow:inset 0 14px 28px #f3d17a55,inset 0 -35px 40px #07151b,0 -5px 22px #d9b35b55,0 0 0 2px #a17b3d}
+.bbk-treasure-cascade{position:absolute;bottom:2%;width:42%;height:55%;border-radius:50% 50% 0 0;background:
+ radial-gradient(circle at 20% 25%,#f7d77a 0 3px,transparent 5px),
+ radial-gradient(circle at 42% 48%,#d5aa4b 0 5px,transparent 7px),
+ radial-gradient(circle at 70% 32%,#f1d17a 0 4px,transparent 6px),
+ radial-gradient(circle at 82% 66%,#a87b35 0 5px,transparent 7px),
+ repeating-linear-gradient(35deg,#654a28 0 5px,#c59a46 6px 10px,#e5c36c 11px 13px,#614523 14px 18px);
+ border:3px solid #9c793d;box-shadow:inset 0 0 24px #f1d17a66,0 8px 15px #0009}
+.cascade-left{left:-9%;transform:rotate(13deg)}.cascade-right{right:-9%;transform:rotate(-13deg)}
+.bbk-coin-pile{position:absolute;width:24%;height:17%;border-radius:50%;background:repeating-radial-gradient(ellipse,#f5d77e 0 4px,#a9792c 5px 7px,#f0c65d 8px 10px);border:3px solid #8f692d;box-shadow:0 8px 12px #0009,inset 0 0 10px #fff0a0}
+.coin-pile-a{left:8%;bottom:18%;transform:rotate(-15deg)}.coin-pile-b{right:8%;bottom:22%;transform:rotate(18deg)}.coin-pile-c{left:38%;bottom:4%;width:28%;height:18%}
+.bbk-treasure-chest{position:absolute;bottom:20%;width:23%;height:16%;border:3px solid #9d793e;border-radius:7px 7px 15px 15px;background:repeating-linear-gradient(90deg,#392718 0 10px,#75502a 11px 14px);box-shadow:inset 0 0 0 2px #d2a953,0 8px 12px #0009}
+.bbk-treasure-chest:before{content:"";position:absolute;left:-2px;right:-2px;top:-35%;height:42%;border:3px solid #a98442;border-radius:50% 50% 0 0;background:linear-gradient(180deg,#73552c,#2c2118)}
+.chest-left{left:1%;transform:rotate(-12deg)}.chest-right{right:0;transform:rotate(10deg)}
+.bbk-skull{position:absolute;z-index:3;color:#d9d0b0;font:900 clamp(25px,6vw,43px)/1 Georgia,serif;text-shadow:0 3px 2px #000,0 0 8px #d6c99b88;filter:drop-shadow(0 5px 5px #000);opacity:.92}
+.skull-a{left:12%;top:27%;transform:rotate(-18deg)}.skull-b{right:11%;top:35%;transform:rotate(17deg);font-size:clamp(30px,7vw,48px)}.skull-c{left:27%;bottom:13%;transform:rotate(9deg);font-size:clamp(23px,5vw,35px)}.skull-d{right:27%;bottom:8%;transform:rotate(-12deg);font-size:clamp(22px,5vw,34px)}
+.bbk-gem{position:absolute;z-index:3;width:17px;height:22px;clip-path:polygon(50% 0,100% 35%,78% 100%,22% 100%,0 35%);background:linear-gradient(110deg,#b7fff1,#168c9c 45%,#073d61);filter:drop-shadow(0 0 7px #63e7ed);box-shadow:0 0 10px #7fffff}
+.gem-a{left:7%;top:48%}.gem-b{right:7%;top:54%;background:linear-gradient(110deg,#fff2a3,#b42b43 50%,#520d24)}.gem-c{left:38%;bottom:21%;width:14px;height:18px;background:linear-gradient(110deg,#d7b8ff,#6a39ac 55%,#24104d)}.gem-d{right:35%;bottom:14%;width:12px;height:16px;background:linear-gradient(110deg,#fff4a6,#b99a27 55%,#51400c)}
+.bbk-treasure-chain{position:absolute;left:18%;right:15%;bottom:7%;height:28%;border-bottom:4px dotted #d5ad55;border-radius:50%;transform:rotate(-7deg);filter:drop-shadow(0 2px 2px #000)}
+.bbk-coin-scatter{position:absolute;width:42%;height:30%;background:radial-gradient(ellipse at 15% 30%,#f1cf70 0 5px,transparent 7px),radial-gradient(ellipse at 42% 58%,#c79a3e 0 6px,transparent 8px),radial-gradient(ellipse at 75% 28%,#efd078 0 4px,transparent 6px),radial-gradient(ellipse at 92% 72%,#a77b34 0 5px,transparent 7px);filter:drop-shadow(0 3px 3px #000)}
+.scatter-a{left:-2%;top:15%}.scatter-b{right:-2%;top:18%}
+.bbk-book-reveal{z-index:6!important;left:50%!important;top:39%!important;bottom:auto!important;transform:translate(-50%,-50%) scale(1)!important;filter:drop-shadow(0 10px 18px #000) drop-shadow(0 0 16px #e8bd5a88)!important}
+.bbk-gold-book{width:min(43vw,245px)!important;height:min(57vw,315px)!important;min-width:185px!important;min-height:245px!important}
+.bbk-treasure-glow{z-index:5!important;left:30%!important;right:30%!important;top:17%!important;bottom:25%!important;background:#f1c45e!important;filter:blur(44px)!important;opacity:.38!important}
+.bbk-shrine-plaque{display:none!important}
+.bbk-treasure-caption{max-width:95%;text-align:center}
+@media(max-width:390px){.bbk-sunken-stage{height:61vh!important;min-height:340px!important}.bbk-book-reveal{top:38%!important}.bbk-gold-book{width:47vw!important;height:61vw!important;min-width:180px!important;min-height:235px!important}.bbk-skull{font-size:27px}.bbk-skull.skull-b{font-size:32px}}
+@media(max-height:700px){.bbk-sunken-stage{height:55vh!important;min-height:300px!important}.bbk-book-reveal{top:37%!important}.bbk-gold-book{height:46vh!important;min-height:205px!important}}
+</style>
+
 </head>
 <body class="book-cover-active">
 
 <dialog id="bookCoverGate" open aria-label="BATTLE BANK-KUN 金装飾の研究書" class="bbk-treasure-gate">
- <div class="bbk-treasure-heading">THE SUNKEN SHRINE <span>— 海底の祠に眠る、失われた研究書 —</span></div>
+ <div class="bbk-treasure-heading">THE SUNKEN SHRINE <span>— 海底の財宝の頂に眠る、失われた研究書 —</span></div>
  <div class="bbk-treasure-stage bbk-sunken-stage" id="bbkTreasureStage">
   <div class="bbk-shrine-rays" aria-hidden="true"></div>
   <div class="bbk-shrine-wall" aria-hidden="true">
@@ -1043,12 +1083,14 @@ body.book-cover-active .app-shell{
    <div class="bbk-coral coral-a"></div><div class="bbk-coral coral-b"></div>
    <div class="bbk-bubbles"><i></i><i></i><i></i><i></i><i></i><i></i></div>
   </div>
-  <div class="bbk-bookshelf" aria-hidden="true">
-   <div class="bbk-shelf-top"></div><div class="bbk-shelf-board shelf-mid"></div><div class="bbk-shelf-board shelf-low"></div>
-   <div class="bbk-shelf-side side-left"></div><div class="bbk-shelf-side side-right"></div>
-   <div class="bbk-old-volume volume-left"></div><div class="bbk-old-volume volume-right"></div>
-   <div class="bbk-old-volume volume-small"></div>
-   <div class="bbk-shelf-shell"></div>
+  <div class="bbk-treasure-mound" aria-hidden="true">
+   <div class="bbk-hoard-base"></div>
+   <div class="bbk-treasure-cascade cascade-left"></div><div class="bbk-treasure-cascade cascade-right"></div>
+   <div class="bbk-coin-pile coin-pile-a"></div><div class="bbk-coin-pile coin-pile-b"></div><div class="bbk-coin-pile coin-pile-c"></div>
+   <div class="bbk-treasure-chest chest-left"></div><div class="bbk-treasure-chest chest-right"></div>
+   <div class="bbk-skull skull-a">☠</div><div class="bbk-skull skull-b">☠</div><div class="bbk-skull skull-c">☠</div><div class="bbk-skull skull-d">☠</div>
+   <div class="bbk-gem gem-a"></div><div class="bbk-gem gem-b"></div><div class="bbk-gem gem-c"></div><div class="bbk-gem gem-d"></div>
+   <div class="bbk-treasure-chain"></div><div class="bbk-coin-scatter scatter-a"></div><div class="bbk-coin-scatter scatter-b"></div>
   </div>
   <div class="bbk-book-reveal">
    <div class="bbk-gold-book">
@@ -1067,7 +1109,7 @@ body.book-cover-active .app-shell{
   <div class="bbk-shrine-plaque">忘れられた祠の書庫</div>
  </div>
  <div class="bbk-treasure-footer">
-  <div class="bbk-treasure-caption">古びた本棚の奥で、ひときわ異彩を放つ一冊。</div>
+  <div class="bbk-treasure-caption">金銀財宝と髑髏の山。その頂に残された、ただ一冊の研究書。</div>
   <button id="bookCoverOpenBtn" type="button"><span class="bookmark-ribbon">ANCIENT ARCHIVE</span><span class="cover-open-label">この本を手に取る</span><span class="cover-open-arrow">→</span></button>
   <div class="cover-footnote">THE ART & SCIENCE OF KEIRIN</div>
  </div>
