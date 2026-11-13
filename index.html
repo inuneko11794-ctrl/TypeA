@@ -2329,6 +2329,22 @@ function closeBulkInputModal(){
   $('bulkInputModal').classList.remove('flex');
 }
 
+function parseBulkPasteLines(id,kind,count){
+ const el=$(id),raw=el?String(el.value||''):'';
+ const lines=raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ if(!lines.length)return Array(count).fill('');
+ if(lines.length!==count)throw new Error(kind+'の行数がレース数と一致しません（入力 '+lines.length+'行／対象 '+count+'R）。');
+ return lines.map((line,i)=>{
+  if(kind==='着順'){
+   const digits=line.replace(/[\s,，、-]/g,'');
+   if(!/^\d{3}$/.test(digits)||new Set(digits).size!==3||[...digits].some(n=>Number(n)<1||Number(n)>9))throw new Error((i+1)+'行目の着順が不正です。例：135');
+   return digits.split('').join('-');
+  }
+  const value=line.replace(/[\s,，円￥¥]/g,'');
+  if(!/^\d+$/.test(value))throw new Error((i+1)+'行目の'+kind+'が不正です。数字だけ入力してください。');
+  return Number(value);
+ });
+}
 function saveAllBulkRecords(){
  const stage=(msg,type='info')=>{try{logToTerminal('> 一括登録診断：'+msg,type)}catch(e){}};
  try{
@@ -2339,15 +2355,21 @@ function saveAllBulkRecords(){
   const commonDate=$('bulkCommonDate')?.value||'';
   if(!cards.length){stage('登録カードが0件です','error');alert('登録するレースがありません。Markdownの解析結果を確認してください。');return;}
   stage('対象レース '+cards.length+'件');
+  const bulkOrders=parseBulkPasteLines('bulkPasteOrder','着順',cards.length);
+  const bulkPayout3=parseBulkPasteLines('bulkPastePayout3','3連単配当',cards.length);
+  const bulkPayout2=parseBulkPasteLines('bulkPastePayout2','2連単配当',cards.length);
   takeUndoSnapshot('DataMap事前登録');
   let saved=0,updated=0,skipped=0;
   for(let i=0;i<cards.length;i++){
    const venue=$('bulk_venue_'+i)?.value||'不明',raceName=$('bulk_race_'+i)?.value||'UNKNOWN';
    const category=$('bulk_cat_'+i)?.value||'9車',raceDate=$('bulk_date_'+i)?.value||commonDate,line1=$('bulk_line1_'+i)?.value||'',lineHeads=(()=>{try{return JSON.parse($('bulk_lineHeads_'+i)?.value||'[]')}catch(e){return []}})(),lineGroups=(()=>{try{return JSON.parse($('bulk_lineGroups_'+i)?.value||'[]')}catch(e){return []}})(),baseMarks=(()=>{try{return JSON.parse($('bulk_baseMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarks=(()=>{try{return JSON.parse($('bulk_lineMarks_'+i)?.value||'{}')}catch(e){return {}}})(),lineMarkGroups=(()=>{try{return JSON.parse($('bulk_lineMarkGroups_'+i)?.value||'[]')}catch(e){return []}})();
    if(raceName==='UNKNOWN'){skipped++;continue}
-   const incoming=normalizeRecord({venue,raceName,raceDate,category,line1,lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,pattern:'',exacta:'',diffPattern:'',diffDisplay:'',payout:0,payout2ren:0,sourceType:'pre-registration',timestamp:Date.now()});
+   const resultPattern=bulkOrders[i]||'';
+   const payout3=bulkPayout3[i]!==''?bulkPayout3[i]:0;
+   const payout2=bulkPayout2[i]!==''?bulkPayout2[i]:0;
+   const incoming=normalizeRecord({venue,raceName,raceDate,category,line1,lineHeads,lineGroups,baseMarks,lineMarks,lineMarkGroups,pattern:resultPattern,exacta:'',diffPattern:'',diffDisplay:'',payout:payout3,payout2ren:payout2,sourceType:'pre-registration',timestamp:Date.now()});
    const idx=savedRecords.findIndex(r=>recordKey(r)===recordKey(incoming));
-   if(idx>=0){const old=savedRecords[idx];savedRecords[idx]=normalizeRecord({...old,venue,raceName,raceDate,category,line1:line1||old.line1||'',lineHeads:lineHeads.some(Boolean)?lineHeads:(old.lineHeads||[]),lineGroups:lineGroups.length?lineGroups:(old.lineGroups||[]),baseMarks:Object.keys(baseMarks).length?baseMarks:(old.baseMarks||{}),lineMarks:Object.keys(lineMarks).length?lineMarks:(old.lineMarks||{}),lineMarkGroups:lineMarkGroups.length?lineMarkGroups:(old.lineMarkGroups||[]),timestamp:old.timestamp||Date.now()});updated++;}
+   if(idx>=0){const old=savedRecords[idx];savedRecords[idx]=normalizeRecord({...old,venue,raceName,raceDate,category,line1:line1||old.line1||'',lineHeads:lineHeads.some(Boolean)?lineHeads:(old.lineHeads||[]),lineGroups:lineGroups.length?lineGroups:(old.lineGroups||[]),baseMarks:Object.keys(baseMarks).length?baseMarks:(old.baseMarks||{}),lineMarks:Object.keys(lineMarks).length?lineMarks:(old.lineMarks||{}),lineMarkGroups:lineMarkGroups.length?lineMarkGroups:(old.lineMarkGroups||[]),pattern:resultPattern||old.pattern||'',payout:bulkPayout3[i]!==''?payout3:(Number(old.payout)||0),payout2ren:bulkPayout2[i]!==''?payout2:(Number(old.payout2ren)||0),timestamp:old.timestamp||Date.now()});updated++;}
    else{savedRecords.push(incoming);saved++;}
   }
   if(!(saved||updated)){stage('新規登録・更新対象がありません。対象外 '+skipped+'件','error');alert('登録対象がありませんでした。レース番号を確認してください。');return;}
@@ -2362,6 +2384,7 @@ function saveAllBulkRecords(){
   try{renderRecordManager()}catch(e){stage('記録一覧更新エラー：'+e.message,'error')}
   stage('一括登録完了：新規 '+saved+'件／更新 '+updated+'件／対象外 '+skipped+'件','success');
   closeBulkInputModal();
+  ['bulkPasteOrder','bulkPastePayout3','bulkPastePayout2'].forEach(id=>{const el=$(id);if(el)el.value='';});
   try{playBeep(880,'sine',.2)}catch(e){}
  }catch(e){
   console.error('Bulk manual save failed',e);
@@ -2896,6 +2919,13 @@ if ("serviceWorker" in navigator) {
    <label for="bulkCommonDate" class="block text-xs font-bold text-sky-900 mb-1">開催日（全レース共通）</label>
    <input type="date" id="bulkCommonDate" class="modal-field w-full">
    <p class="text-[10px] text-slate-600 mt-1">ここに入力すると、各レースの日付にも反映されます。個別の日付変更も可能です。</p>
+  </div>
+  <div class="mb-3 rounded-lg border border-emerald-300 bg-emerald-50 p-3 space-y-2" id="bulkResultPaste">
+   <b class="block text-xs text-emerald-900">着順・配当の縦一括入力（1行＝1R／上からレース番号順）</b>
+   <div><label for="bulkPasteOrder" class="block text-[10px] font-bold text-slate-700 mb-1">着順（例：135 または 1-3-5）</label><textarea id="bulkPasteOrder" class="modal-field w-full" rows="4" placeholder="135&#10;241&#10;367"></textarea></div>
+   <div><label for="bulkPastePayout3" class="block text-[10px] font-bold text-slate-700 mb-1">3連単配当（円）</label><textarea id="bulkPastePayout3" class="modal-field w-full" rows="4" inputmode="numeric" placeholder="12450&#10;8760&#10;3250"></textarea></div>
+   <div><label for="bulkPastePayout2" class="block text-[10px] font-bold text-slate-700 mb-1">2連単配当（円）</label><textarea id="bulkPastePayout2" class="modal-field w-full" rows="4" inputmode="numeric" placeholder="2180&#10;1240&#10;680"></textarea></div>
+   <p class="text-[10px] text-slate-600">空欄は既存値を変更しません。入力した欄は対象レース数と行数が一致しない場合、保存を中止します。</p>
   </div>
   <div id="bulkRaceContainer" class="flex-1 overflow-y-auto space-y-4 pr-1" style="max-height: calc(95dvh - 180px);">
    <!-- Races will be injected here -->
