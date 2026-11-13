@@ -2551,7 +2551,7 @@ async function restoreResearchCSV(){
    }catch(e){console.warn('GitHub初期データの取得をスキップ:',e);}
   }
   if(!csvText)return;
-  const rows=parseCSV(csvText),mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');
+  const rows=parseCSV(csvText);window.BBK_AI_HISTORY=rows.map(makeAIHistoryRecord).filter(Boolean).sort((a,b)=>a.raceDate.localeCompare(b.raceDate)||a.sourceId.localeCompare(b.sourceId));window.dispatchEvent(new Event('bbkResearchDataReady'));const mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');
   trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));
   const status=$t('trickCsvStatus');
   if(status)status.textContent=`${raw?'端末内':'GitHub初期搭載'}データを自動読込：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース`;
@@ -2575,12 +2575,20 @@ function parseCSV(text){
  return rows.map(a=>Object.fromEntries(headers.map((h,i)=>[h,(a[i]??'').trim()])));
 }
 function splitLines(value){return String(value||'').split('/').map(g=>g.trim()).filter(Boolean).map(g=>g.split(/[-‐‑‒–—\s]+/).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=1&&n<=9));}
+function makeAIHistoryRecord(row){
+ const allLines=splitLines(row.lines),lineGroups=allLines.filter(g=>g.length>=2),n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
+ const result=String(row.result||'').split(/[-\s>→]+/).map(Number).filter(v=>v>=1&&v<=9).slice(0,3);
+ if(result.length!==3||new Set(result).size!==3||!allLines.length)return null;
+ const baseMarks={};[['honmei','◎'],['taikou','◯'],['tanana','△'],['renge','✕']].forEach(([k,v])=>{const car=Number(row[k]);if(car>=1&&car<=9)baseMarks[car]=v;});
+ const lineMarks={};for(let car=1;car<=9;car++){const v=String(row['mark_'+car]||'').trim();if(v)lineMarks[car]=v;}
+ const starters=[...new Set(allLines.flat())].sort((a,b)=>a-b);
+ return {sourceId:'csv:'+String(row.race_id||[row.date,row.lines,row.result].join('|')),venue:'CSV',raceDate:String(row.date||row.raceDate||''),raceName:String(row.race_id||''),pattern:result.join('-'),car_count:n||starters.length,lineType:String(row.line_type||row.sho||''),lineShape:allLines.map(g=>g.length).join('+'),lineGroups,baseMarks,lineMarks,starters};
+}
 function makeRace(row){
  const girls=String(row.dai||'').toUpperCase()==='G'||String(row.gl||'').toUpperCase().startsWith('G')||/ガールズ|L級/.test(String(row.race_class||''));
  const n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
  const category=girls?'ガールズ':(n>=5&&n<=9?`${n}車`:'不明');
- const lines=splitLines(row.lines).filter(g=>g.length>=2); // 単騎はライン位置①②③④に含めない
- if(!lines.length)return null;
+ const lines=splitLines(row.lines).filter(g=>g.length>=2);
  const marks={};for(let car=1;car<=9;car++){const v=String(row['mark_'+car]||'').trim();if(v)marks[car]=v;}if(!Object.keys(marks).length){Object.entries(markMap).forEach(([key,sym])=>{const car=Number(row[key]);if(car>=1&&car<=9)marks[car]=sym;});Object.assign(marks,transformLineMarks(lines,marks));}
  const result=String(row.result||'').split(/[-\s>→]+/).map(Number).filter(n=>n>=1&&n<=9).slice(0,3);
  return {date:String(row.date||row.raceDate||''),category,lines,heads:lines.map(g=>g[0]).filter(n=>n>=1&&n<=9),marks,lineMarks:marks,result,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0};
@@ -2589,7 +2597,7 @@ function makeRace(row){
 function allowedHeadPair(a,b){if(a===b)return false;const x=Math.min(a,b),y=Math.max(a,b);return !(x===1&&(y===2||y===3));}
 function pairKey(a,b){return [a,b].sort((x,y)=>x-y).join('－');}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function loadCSV(file){const reader=new FileReader();reader.onload=()=>{try{const raw=String(reader.result||'');const rows=parseCSV(raw);const mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));$t('trickCsvStatus').textContent=`読込成功：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース（全員単騎・分類不明を除外）・端末保存中`;$t('trickSummary').innerHTML='';$t('trickResults').innerHTML='<div class="discovery-card text-center text-sky-700 text-xs">読み込み完了。組み合わせ分析を実行してください。</div>';saveResearchCSV(raw).then(()=>{$t('trickCsvStatus').textContent+= '／次回起動時も自動復元';}).catch(e=>{$t('trickCsvStatus').textContent+='／端末保存は利用できません';console.warn(e);}); }catch(e){$t('trickCsvStatus').textContent='CSV読込エラー：列名・文字コードを確認してください。';console.error(e);}};reader.onerror=()=>{$t('trickCsvStatus').textContent='ファイルを読み込めませんでした。';};reader.readAsText(file,'UTF-8');}
+function loadCSV(file){const reader=new FileReader();reader.onload=()=>{try{const raw=String(reader.result||'');const rows=parseCSV(raw);window.BBK_AI_HISTORY=rows.map(makeAIHistoryRecord).filter(Boolean).sort((a,b)=>a.raceDate.localeCompare(b.raceDate)||a.sourceId.localeCompare(b.sourceId));window.dispatchEvent(new Event('bbkResearchDataReady'));const mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));$t('trickCsvStatus').textContent=`読込成功：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース（全員単騎・分類不明を除外）・端末保存中`;$t('trickSummary').innerHTML='';$t('trickResults').innerHTML='<div class="discovery-card text-center text-sky-700 text-xs">読み込み完了。組み合わせ分析を実行してください。</div>';saveResearchCSV(raw).then(()=>{$t('trickCsvStatus').textContent+= '／次回起動時も自動復元';}).catch(e=>{$t('trickCsvStatus').textContent+='／端末保存は利用できません';console.warn(e);}); }catch(e){$t('trickCsvStatus').textContent='CSV読込エラー：列名・文字コードを確認してください。';console.error(e);}};reader.onerror=()=>{$t('trickCsvStatus').textContent='ファイルを読み込めませんでした。';};reader.readAsText(file,'UTF-8');}
 function renderMarkJsonComparison(){
  const host=$t('trickMarkJsonCompare');if(!host)return;
  if(!trickRows.length){host.innerHTML='<div class="discovery-card text-xs">CSVを読み込んでください。</div>';return;}
@@ -3471,7 +3479,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  }
  function score(r,car,market){const f=features(r,car),w=model.weights[market];return f.mark*w.mark+f.head*w.head-f.pos*w.pos+f.len*w.len-f.car*w.car;}
  function rosterCars(r){
-  const set=new Set();(r.lineGroups||[]).forEach(g=>(g||[]).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));}));
+  const set=new Set((r.starters||[]).map(Number).filter(n=>n>=1&&n<=9));(r.lineGroups||[]).forEach(g=>(g||[]).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));}));
   Object.keys(r.baseMarks||{}).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));});
   Object.keys(r.lineMarks||{}).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));});
   return [...set].sort((a,b)=>a-b);
@@ -3588,14 +3596,14 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  }
  function renderDiscoveries(){
   const status=$('discoveryStatus'),out=$('discoveryOutput');if(!status||!out)return;
-  const buckets=new Map(),ordered=(Array.isArray(savedRecords)?savedRecords:[]).filter(r=>validResult(r)&&rosterCars(r).length>=3).slice();
+  const buckets=new Map(),history=[...(Array.isArray(window.BBK_AI_HISTORY)?window.BBK_AI_HISTORY:[]),...(Array.isArray(savedRecords)?savedRecords:[])],dedup=new Map();history.forEach(r=>{if(validResult(r)&&rosterCars(r).length>=3){const k=r.sourceId||key(r);if(!dedup.has(k)||r.sourceId)dedup.set(k,r);}});const ordered=[...dedup.values()];
   ordered.sort((a,b)=>String(a.raceDate||'').localeCompare(String(b.raceDate||''))||String(key(a)).localeCompare(String(key(b))));
   const add=(label,pos)=>{
    if(!label)return;
    if(!buckets.has(label))buckets.set(label,{n:0,first:0,top2:0});
    const b=buckets.get(label);b.n++;if(pos===0)b.first++;if(pos>=0&&pos<2)b.top2++;
   };
-  const splitAt=Math.max(1,Math.floor(ordered.length*.7)),train=ordered.slice(0,splitAt),test=ordered.slice(splitAt);
+  const splitAt=Math.max(1,Math.floor(ordered.length*.8)),train=ordered.slice(0,splitAt),test=ordered.slice(splitAt);
   const collect=(rows)=>{
    const map=new Map();let starters=0,winners=0;
    rows.forEach(r=>{
@@ -3613,6 +3621,12 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
      if(mark)features.push(['印×位置','印 '+mark+' × '+role]);
      if(mark)features.push(['印×車番','印 '+mark+' × '+car+'番']);
      features.push(['位置×車番',role+' × '+car+'番']);
+     const carCount=Number(r.car_count)||cars.length;
+     if(carCount)features.push(['車数','全'+carCount+'車']);
+     if(r.lineType)features.push(['分戦',String(r.lineType)]);
+     if(r.lineShape)features.push(['ライン構成',String(r.lineShape)]);
+     if(carCount)features.push(['車数×位置','全'+carCount+'車 × '+role]);
+     if(r.lineShape)features.push(['構成×位置',String(r.lineShape)+' × '+role]);
      features.forEach(([kind,label])=>{
       const id=kind+'::'+label;
       if(!map.has(id))map.set(id,{id,kind,label,n:0,first:0});
@@ -3657,12 +3671,12 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   save();
   const races=ordered.length;
   const rows=[...all.map.entries()].filter(([,b])=>b.n>=5).sort((a,b)=>(b[1].first/b[1].n)-(a[1].first/a[1].n)||b[1].n-a[1].n);
-  status.textContent='結果入力 '+races+'レース / 自動法則候補 '+candidates.length+'件 / 時系列検証 '+train.length+'R→'+test.length+'R';
+  status.textContent='学習対象 '+races.toLocaleString()+'レース（CSV '+(Array.isArray(window.BBK_AI_HISTORY)?window.BBK_AI_HISTORY.length:0).toLocaleString()+' + 追加 '+(Array.isArray(savedRecords)?savedRecords.length:0).toLocaleString()+'） / 候補 '+candidates.length+'件 / 時系列80:20 '+train.length.toLocaleString()+'R→'+test.length.toLocaleString()+'R';
   const overview=!races?'結果入力済みレースがまだありません。':rows.length?rows.slice(0,12).map(([label,b])=>'<div class="flex justify-between items-center gap-2 border-b border-slate-700/60 py-2"><span>'+esc(label)+' <span class="text-slate-400">('+b.n+'出走)</span></span><span class="text-right whitespace-nowrap"><b class="text-emerald-300">'+(100*b.first/b.n).toFixed(1)+'%</b> 1着 <span class="text-cyan-300">'+(100*b.top2/b.n).toFixed(1)+'%</span> 2着以内</span></div>').join(''):'各条件の出走数が5回に達すると傾向を表示します。';
   const laws=Object.values(model.autoLaws).sort((a,b)=>({継続:0,検証中:1,保留:2,破棄:3}[a.state]-({継続:0,検証中:1,保留:2,破棄:3}[b.state]))||b.validationN-a.validationN||b.trainN-a.trainN);
-  const lawHtml='<div class="mt-4 pt-3 border-t border-emerald-300/20"><b class="text-emerald-200">AUTO LAW ENGINE // AI自動発見・継続判定</b><p class="text-[10px] text-slate-400 mt-1 mb-2">過去70%で候補を発見し、新しい30%で再検証。候補は自動保存され、継続・検証中・保留・破棄を更新します。</p>'+
+  const lawHtml='<div class="mt-4 pt-3 border-t border-emerald-300/20"><b class="text-emerald-200">AUTO LAW ENGINE // AI自動発見・継続判定</b><p class="text-[10px] text-slate-400 mt-1 mb-2">全車数・全ライン形式を対象に、古い80%で候補を発見し、新しい20%で再検証。ライン構成の順番も別条件として扱います。</p>'+
    (laws.length?laws.slice(0,20).map(x=>'<div class="border-b border-slate-700/60 py-2"><div class="flex justify-between gap-2"><b>'+esc(x.label)+'</b><span class="font-bold '+(x.state==='継続'?'text-emerald-300':x.state==='破棄'?'text-rose-300':'text-amber-200')+'">'+x.state+'</span></div><div class="text-[10px] text-slate-400">発見側 '+x.trainN+'出走・1着率 '+(100*x.trainRate).toFixed(1)+'% / 検証側 '+x.validationN+'出走・1着率 '+(x.validationN?(100*x.validationRate).toFixed(1)+'%':'未評価')+' / '+esc(x.reason)+'</div></div>').join(''):'条件を満たす法則候補はまだありません。データが増えると自動で候補を作ります。')+'</div>';
-  out.innerHTML=overview+lawHtml+'<p class="text-[10px] text-slate-500 mt-2">※出走数を分母にした1着率。候補条件は印×位置、印×車番、位置×車番。候補の最低出走数20、最新検証の最低出走数8。単純集計による自動スクリーニングであり、因果関係を証明するものではありません。</p>';
+  out.innerHTML=overview+lawHtml+'<p class="text-[10px] text-slate-500 mt-2">※出走数を分母にした1着率。印・車番・位置に加え、車数、分戦形式、順序付きライン構成（例：3+2+2と2+3+2）を評価します。単騎はライン位置に混ぜず独立扱い。候補の最低出走数20、最新検証の最低出走数8。単純集計による自動スクリーニングであり、因果関係を証明するものではありません。</p>';
  }
  function learnPending(){
   let count=0;
@@ -3749,7 +3763,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   $('aiResultOrder').value='';$('aiResultPayout2').value=r.payout2ren||'';$('aiResultPayout3').value=r.payout||'';$('aiResultPayoutF').value=r.payout3fuku||'';updateOrderPreview();
  });
  $('saveAIResultBtn').addEventListener('click',saveAIResult);
- const discoveryRefresh=$('refreshDiscoveryBtn');if(discoveryRefresh)discoveryRefresh.addEventListener('click',renderDiscoveries);
+ const discoveryRefresh=$('refreshDiscoveryBtn');if(discoveryRefresh)discoveryRefresh.addEventListener('click',renderDiscoveries);window.addEventListener('bbkResearchDataReady',renderDiscoveries);
  $('runAIPredictionBtn').addEventListener('click',run);
  $('exportAIModelBtn').addEventListener('click',exportModel);
  const saveButton=$('manSaveBtn');
