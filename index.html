@@ -3452,6 +3452,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  let model=initial();
  try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);if(v&&v.version===1&&v.weights&&v.predictions)model=v;}}catch(e){console.warn('AI model load failed',e);}
  model.metrics=model.metrics||{races:0,winHits:0,exactaHits:0,trifectaHits:0};
+ model.autoLaws=model.autoLaws&&typeof model.autoLaws==='object'?model.autoLaws:{};
  model.metrics.races=Number(model.metrics.races)||0;
  model.metrics.winHits=Number(model.metrics.winHits)||0;
  model.metrics.exactaHits=Number(model.metrics.exactaHits)||0;
@@ -3587,34 +3588,71 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  }
  function renderDiscoveries(){
   const status=$('discoveryStatus'),out=$('discoveryOutput');if(!status||!out)return;
-  const buckets=new Map();let races=0;
+  const buckets=new Map(),ordered=(Array.isArray(savedRecords)?savedRecords:[]).filter(r=>validResult(r)&&rosterCars(r).length>=3).slice();
+  ordered.sort((a,b)=>String(a.raceDate||'').localeCompare(String(b.raceDate||''))||String(key(a)).localeCompare(String(key(b))));
   const add=(label,pos)=>{
    if(!label)return;
    if(!buckets.has(label))buckets.set(label,{n:0,first:0,top2:0});
    const b=buckets.get(label);b.n++;if(pos===0)b.first++;if(pos>=0&&pos<2)b.top2++;
   };
-  (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
-   if(!validResult(r))return;
-   const actual=String(r.pattern).split('-').map(Number),cars=rosterCars(r);
-   if(actual.length!==3||cars.length<3)return;races++;
-   const transformed=(r.lineMarks&&typeof r.lineMarks==='object'&&Object.keys(r.lineMarks).length)
-    ?r.lineMarks:transformLineMarks(r.lineGroups||[],r.baseMarks||{});
-   cars.forEach(car=>{
-    const pos=actual.indexOf(car);
-    add('車番 '+car+'番',pos);
-    let role='単騎';
-    (Array.isArray(r.lineGroups)?r.lineGroups:[]).forEach(g=>{const at=(g||[]).map(Number).indexOf(car);if(at>=0)role=at===0?'ライン先頭':'ライン番手以降';});
-    add(role,pos);
-    const mark=String(transformed?.[car]||'').trim();
-    // 空欄は印カテゴリに入れない。「無印」という独立カテゴリは作らない。
-    if(mark)add('変換後印 '+mark,pos);
+  const splitAt=Math.max(1,Math.floor(ordered.length*.7)),train=ordered.slice(0,splitAt),test=ordered.slice(splitAt);
+  const collect=(rows)=>{
+   const map=new Map();let starters=0,winners=0;
+   rows.forEach(r=>{
+    const actual=String(r.pattern).split('-').map(Number),cars=rosterCars(r);
+    if(actual.length!==3||cars.length<3)return;
+    starters+=cars.length;winners++;
+    const transformed=(r.lineMarks&&typeof r.lineMarks==='object'&&Object.keys(r.lineMarks).length)?r.lineMarks:transformLineMarks(r.lineGroups||[],r.baseMarks||{});
+    cars.forEach(car=>{
+     const pos=actual.indexOf(car);
+     let role='単騎';
+     (Array.isArray(r.lineGroups)?r.lineGroups:[]).forEach(g=>{const at=(g||[]).map(Number).indexOf(car);if(at>=0)role=at===0?'ライン先頭':'ライン番手以降';});
+     const mark=String(transformed?.[car]||'').trim();
+     add('車番 '+car+'番',pos);add(role,pos);if(mark)add('変換後印 '+mark,pos);
+     const features=[];
+     if(mark)features.push(['印×位置','印 '+mark+' × '+role]);
+     if(mark)features.push(['印×車番','印 '+mark+' × '+car+'番']);
+     features.push(['位置×車番',role+' × '+car+'番']);
+     features.forEach(([kind,label])=>{
+      const id=kind+'::'+label;
+      if(!map.has(id))map.set(id,{id,kind,label,n:0,first:0});
+      const b=map.get(id);b.n++;if(pos===0)b.first++;
+     });
+    });
    });
+   return {map,starters,winners,baseline:starters? winners/starters:0};
+  };
+  const tr=collect(train),te=collect(test);
+  const all=collect(ordered);
+  const candidates=[...tr.map.entries()].filter(([,b])=>b.n>=20&&tr.baseline>0&&(b.first/b.n)>=tr.baseline*1.15&&(b.first/b.n)-tr.baseline>=.04);
+  const seen=new Set();
+  candidates.forEach(([id,b])=>{
+   seen.add(id);const v=te.map.get(id)||{n:0,first:0};
+   const trainRate=b.first/b.n,validRate=v.n?v.first/v.n:0;
+   let state='検証中',reason='最新データの検証件数待ち';
+   if(v.n>=8){
+    if(validRate>=te.baseline*1.15&&validRate-te.baseline>=.04){state='継続';reason='最新データでも基準率を上回る';}
+    else if(validRate<te.baseline*.9||validRate<te.baseline-.02){state='破棄';reason='最新データで優位性を再現できない';}
+    else{state='保留';reason='優位性がまだ安定していない';}
+   }
+   const prior=model.autoLaws[id]||{};
+   model.autoLaws[id]={id,kind:b.kind,label:b.label,state,reason,trainN:b.n,trainWins:b.first,trainRate,validationN:v.n,validationWins:v.first,validationRate,baselineTrain:tr.baseline,baselineValidation:te.baseline,updatedAt:new Date().toISOString(),firstSeen:prior.firstSeen||new Date().toISOString()};
   });
-  const rows=[...buckets.entries()].filter(([,b])=>b.n>=5).sort((a,b)=>(b[1].first/b[1].n)-(a[1].first/a[1].n)||b[1].n-a[1].n);
-  status.textContent='集計対象 '+races+'レース / 条件 '+rows.length+'件（各条件5出走以上）';
-  if(!races){out.textContent='結果入力済みレースがまだありません。結果が保存されると自動で集計します。';return;}
-  if(!rows.length){out.textContent='各条件の出走数が5回に達すると傾向を表示します。';return;}
-  out.innerHTML=rows.slice(0,18).map(([label,b])=>'<div class="flex justify-between items-center gap-2 border-b border-slate-700/60 py-2"><span>'+esc(label)+' <span class="text-slate-400">('+b.n+'出走)</span></span><span class="text-right whitespace-nowrap"><b class="text-emerald-300">'+(100*b.first/b.n).toFixed(1)+'%</b> 1着 <span class="text-cyan-300">'+(100*b.top2/b.n).toFixed(1)+'%</span> 2着以内</span></div>').join('')+'<p class="text-[10px] text-slate-500 mt-2">※出走数を分母にした単純集計。印はライン変換後の記号のみを集計し、空欄は印カテゴリに含めません。予測モデルの学習重みとは別の参考ノートです。</p>';
+  Object.keys(model.autoLaws).forEach(id=>{
+   if(!seen.has(id)){
+    const prior=model.autoLaws[id];
+    if(prior.state!=='破棄')model.autoLaws[id]={...prior,state:'保留',reason:'今回の学習範囲では候補条件を再確認できず',updatedAt:new Date().toISOString()};
+   }
+  });
+  save();
+  const races=ordered.length;
+  const rows=[...all.map.entries()].filter(([,b])=>b.n>=5).sort((a,b)=>(b[1].first/b[1].n)-(a[1].first/a[1].n)||b[1].n-a[1].n);
+  status.textContent='結果入力 '+races+'レース / 自動法則候補 '+candidates.length+'件 / 時系列検証 '+train.length+'R→'+test.length+'R';
+  const overview=!races?'結果入力済みレースがまだありません。':rows.length?rows.slice(0,12).map(([label,b])=>'<div class="flex justify-between items-center gap-2 border-b border-slate-700/60 py-2"><span>'+esc(label)+' <span class="text-slate-400">('+b.n+'出走)</span></span><span class="text-right whitespace-nowrap"><b class="text-emerald-300">'+(100*b.first/b.n).toFixed(1)+'%</b> 1着 <span class="text-cyan-300">'+(100*b.top2/b.n).toFixed(1)+'%</span> 2着以内</span></div>').join(''):'各条件の出走数が5回に達すると傾向を表示します。';
+  const laws=Object.values(model.autoLaws).sort((a,b)=>({継続:0,検証中:1,保留:2,破棄:3}[a.state]-({継続:0,検証中:1,保留:2,破棄:3}[b.state]))||b.validationN-a.validationN||b.trainN-a.trainN);
+  const lawHtml='<div class="mt-4 pt-3 border-t border-emerald-300/20"><b class="text-emerald-200">AUTO LAW ENGINE // AI自動発見・継続判定</b><p class="text-[10px] text-slate-400 mt-1 mb-2">過去70%で候補を発見し、新しい30%で再検証。候補は自動保存され、継続・検証中・保留・破棄を更新します。</p>'+
+   (laws.length?laws.slice(0,20).map(x=>'<div class="border-b border-slate-700/60 py-2"><div class="flex justify-between gap-2"><b>'+esc(x.label)+'</b><span class="font-bold '+(x.state==='継続'?'text-emerald-300':x.state==='破棄'?'text-rose-300':'text-amber-200')+'">'+x.state+'</span></div><div class="text-[10px] text-slate-400">発見側 '+x.trainN+'出走・1着率 '+(100*x.trainRate).toFixed(1)+'% / 検証側 '+x.validationN+'出走・1着率 '+(x.validationN?(100*x.validationRate).toFixed(1)+'%':'未評価')+' / '+esc(x.reason)+'</div></div>').join(''):'条件を満たす法則候補はまだありません。データが増えると自動で候補を作ります。')+'</div>';
+  out.innerHTML=overview+lawHtml+'<p class="text-[10px] text-slate-500 mt-2">※出走数を分母にした1着率。候補条件は印×位置、印×車番、位置×車番。候補の最低出走数20、最新検証の最低出走数8。単純集計による自動スクリーニングであり、因果関係を証明するものではありません。</p>';
  }
  function learnPending(){
   let count=0;
