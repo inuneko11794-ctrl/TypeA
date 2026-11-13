@@ -997,14 +997,12 @@ body.book-cover-active .app-shell{
    </div>
   </div>
   <div class="bbk-treasure-glow"></div>
-  <canvas id="bbkSootCanvas" aria-label="本の表紙を指でなぞってすすを払う"></canvas>
-  <div class="bbk-wipe-hint" id="bbkWipeHint">指でなぞって、古い研究書のすすを払おう</div>
   <div class="bbk-fairy fairy-one">✧🚲</div><div class="bbk-fairy fairy-two">✧🚲</div>
  </div>
  <div class="bbk-treasure-footer">
-  <div class="bbk-treasure-caption">封印されていた金装飾の研究書</div>
+  <div class="bbk-treasure-caption">BATTLE BANK-KUN — THE MASTER BOOK</div>
   <button id="bookCoverOpenBtn" type="button"><span class="bookmark-ribbon">DISCOVERED</span><span class="cover-open-label">本を開く</span><span class="cover-open-arrow">→</span></button>
-  <div class="cover-footnote">WIPE THE DUST · REVEAL THE KNOWLEDGE</div>
+  <div class="cover-footnote">THE ART & SCIENCE OF KEIRIN</div>
  </div>
 </dialog>
 
@@ -3896,38 +3894,23 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  #brandPanel>#bookContents{padding:14px!important}
  #brandPanel .bbk-index-entry{padding:8px 9px!important}
 }
+
+/* vol53: clean, fully revealed gold book — no chest, no soot */
+#bookCoverGate .bbk-book-reveal{
+ z-index:4!important;left:50%!important;bottom:50%!important;
+ transform:translate(-50%,50%) scale(1)!important;opacity:1!important;
+}
+#bookCoverGate .bbk-gold-book{
+ width:clamp(210px,42vw,290px)!important;
+ height:clamp(285px,58vw,390px)!important;
+ box-shadow:inset 0 0 0 2px #6c491d,0 22px 45px #000b,0 0 28px #c18b3555!important;
+}
+#bookCoverGate .bbk-treasure-glow{opacity:.48!important}
+#bookCoverGate #bookCoverOpenBtn{opacity:1!important;pointer-events:auto!important}
+#bookCoverGate .bbk-preview{opacity:.35!important}
+#bookCoverGate .bbk-treasure-footer{margin-top:10px}
 </style>
 
-<script id="bbk-soot-wipe-controller-vol52">
-(()=> {
- const gate=document.getElementById('bookCoverGate'),stage=document.getElementById('bbkTreasureStage'),canvas=document.getElementById('bbkSootCanvas'),hint=document.getElementById('bbkWipeHint');
- if(!gate||!stage||!canvas)return;
- const ctx=canvas.getContext('2d',{willReadFrequently:true});let drawing=false,last=null,cleared=0,ready=false,bookRect=null;
- function roundedRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
- function resize(){
-  const rect=stage.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
-  canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
-  const w=rect.width,h=rect.height,bw=Math.min(w*.58,270),bh=Math.min(w*.72,355),bookW=Math.max(205,bw),bookH=Math.max(270,bh);
-  bookRect={x:(w-bookW)/2-2,y:(h-bookH)/2-2,w:bookW+4,h:bookH+5};
-  ctx.clearRect(0,0,w,h);ctx.save();roundedRect(ctx,bookRect.x,bookRect.y,bookRect.w,bookRect.h,15);ctx.clip();
-  const grad=ctx.createLinearGradient(bookRect.x,bookRect.y,bookRect.x+bookRect.w,bookRect.y+bookRect.h);
-  grad.addColorStop(0,'rgba(7,6,5,.99)');grad.addColorStop(.5,'rgba(27,24,20,.98)');grad.addColorStop(1,'rgba(3,3,3,.99)');
-  ctx.fillStyle=grad;ctx.fillRect(bookRect.x,bookRect.y,bookRect.w,bookRect.h);
-  for(let i=0;i<3200;i++){const x=bookRect.x+Math.random()*bookRect.w,y=bookRect.y+Math.random()*bookRect.h,r=Math.random()*2.5+.3;ctx.fillStyle=Math.random()>.5?'rgba(0,0,0,.42)':'rgba(160,150,132,.15)';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
-  ctx.restore();ctx.globalCompositeOperation='source-over';cleared=0;ready=false;gate.classList.remove('dust-ready');
- }
- function point(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
- function erase(a,b){
-  if(!bookRect)return;
-  const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy);cleared+=Math.max(1,len)*58;
-  ctx.save();ctx.globalCompositeOperation='destination-out';ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=58;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.beginPath();ctx.arc(b.x,b.y,29,0,Math.PI*2);ctx.fill();ctx.restore();
-  if(!ready&&cleared/(bookRect.w*bookRect.h)>.46){ready=true;gate.classList.add('dust-ready');if(hint)hint.textContent='発見 — 金装飾のBATTLE BANK-KUN'}
- }
- canvas.addEventListener('pointerdown',e=>{const p=point(e);if(!bookRect||p.x<bookRect.x-30||p.x>bookRect.x+bookRect.w+30||p.y<bookRect.y-30||p.y>bookRect.y+bookRect.h+30)return;drawing=true;last=p;canvas.setPointerCapture(e.pointerId);erase(last,last)});
- canvas.addEventListener('pointermove',e=>{if(!drawing)return;const p=point(e);erase(last,p);last=p});
- const stop=()=>{drawing=false;last=null};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);
- resize();window.addEventListener('resize',resize,{passive:true});
-})();
-</script>
+
 </body>
 </html>
