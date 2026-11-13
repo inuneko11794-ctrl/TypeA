@@ -1114,6 +1114,17 @@ body.book-cover-active .app-shell{
 }
 </style>
 
+<link rel="preload" as="image" href="./BATTLE_BANK_KUN_top.png" fetchpriority="high">
+<style id="bbk-image-fast-display-vol56">
+/* 画像を初回表示時に先読みし、描画待ちを短縮 */
+#bookCoverGate .bbk-sunken-stage{
+  background-image:url("./BATTLE_BANK_KUN_top.png")!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  background-size:cover!important;
+}
+#bookCoverGate{transition:none!important}
+</style>
 </head>
 <body class="book-cover-active">
 
