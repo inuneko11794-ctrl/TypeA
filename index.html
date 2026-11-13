@@ -1162,6 +1162,23 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
  <div class="panel-content">
   <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 class="kicker border-l-4 border-cyan-500 pl-2">LINE HEAD PAIR + MARK RELATION LAB // 車番ペア・印の関係分析</h2><span class="discovery-chip">PAIR PAYOUT RANKING</span></div>
   <p class="text-xs text-sky-800 mb-4">ライン先頭の車番ペアごとの平均配当に加え、先頭2人の印の組み合わせと、2ライン全選手の印の並びも分析します。1－4と4－1は同じ車番ペアとして集計します。</p>
+  <div class="discovery-card mb-3 border border-sky-200 bg-sky-50/80">
+   <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+    <div class="text-xs font-black tracking-wide text-sky-900">初期搭載データ｜基礎統計スナップショット</div>
+    <span class="text-[10px] font-bold text-sky-700">25,477 RACES</span>
+   </div>
+   <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+    <div class="rounded-lg bg-white p-2"><div class="text-[10px] text-slate-500">2車単 中央値</div><div class="font-mono-tech text-xl font-black text-sky-900">¥990</div></div>
+    <div class="rounded-lg bg-white p-2"><div class="text-[10px] text-slate-500">2車単 平均</div><div class="font-mono-tech text-xl font-black text-sky-900">¥2,562</div></div>
+    <div class="rounded-lg bg-white p-2"><div class="text-[10px] text-slate-500">2,001円以上</div><div class="font-mono-tech text-xl font-black text-sky-900">31.9%</div><div class="text-[9px] text-slate-500">8,119 / 25,477R</div></div>
+    <div class="rounded-lg bg-white p-2"><div class="text-[10px] text-slate-500">3連単 中央値</div><div class="font-mono-tech text-xl font-black text-sky-900">¥3,950</div></div>
+   </div>
+   <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 text-[10px] text-slate-600">
+    <div class="rounded-lg bg-white/80 p-2"><b class="text-sky-900">時系列80%｜発見用</b><br>20,381R ／ 2024-07-30〜2026-03-22<br>2車単2,001円以上：32.06%</div>
+    <div class="rounded-lg bg-white/80 p-2"><b class="text-sky-900">最新20%｜検証用</b><br>5,096R ／ 2026-03-22〜2026-06-15<br>2車単2,001円以上：31.10%</div>
+   </div>
+   <div class="mt-2 text-[10px] text-slate-500">車立て内訳：6車 1,022R ／ 7車 22,020R ／ 8車 132R ／ 9車 2,303R。会場名は元CSVにないため会場別集計には使用しません。この欄は初期データの基準値で、個別レースのライン・印分析には下のCSV読込が必要です。</div>
+  </div>
   <div class="discovery-card mb-3">
    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
     <label class="text-xs font-bold">分析CSVを読み込む（brain races形式）<input id="trickCsvInput" type="file" accept=".csv,text/csv" class="field mt-1 text-xs"></label>
@@ -2287,16 +2304,6 @@ function parseCSV(text){
  return rows.map(a=>Object.fromEntries(headers.map((h,i)=>[h,(a[i]??'').trim()])));
 }
 function splitLines(value){return String(value||'').split('/').map(g=>g.trim()).filter(Boolean).map(g=>g.split(/[-‐‑‒–—\s]+/).map(x=>Number(x)).filter(n=>Number.isInteger(n)&&n>=1&&n<=9));}
-function makeRace(row){
- const girls=String(row.dai||'').toUpperCase()==='G'||String(row.gl||'').startsWith('G')||/ガールズ|L級/.test(String(row.race_class||''));
- const n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
- const category=girls?'ガールズ':(n>=5&&n<=9?`${n}車`:'不明');
- const lines=splitLines(row.lines).filter(g=>g.length>=2); // 単騎はライン位置①②③④に含めない
- if(!lines.length)return null;
- const marks={};Object.entries(markMap).forEach(([key,sym])=>{const n=Number(row[key]);if(n>=1&&n<=9)marks[n]=sym;});
- const result=String(row.result||'').split(/[-\s>→]+/).map(Number).filter(n=>n>=1&&n<=9).slice(0,3);
- return {date:String(row.date||row.raceDate||''),category,lines,marks,p3:Number(row.tri_yen||row.payout)||0,p2:Number(row.exa_yen||row.payout2ren)||0,result,rawLine:lines.map(g=>g.join('-')).join('/')};
-}
 function makeRace(row){
  const girls=String(row.dai||'').toUpperCase()==='G'||String(row.gl||'').toUpperCase().startsWith('G')||/ガールズ|L級/.test(String(row.race_class||''));
  const n=Number(row.car_count)||Number(String(row.kuruma||'').match(/\d+/)?.[0])||0;
