@@ -3596,14 +3596,14 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  }
  function renderDiscoveries(){
   const status=$('discoveryStatus'),out=$('discoveryOutput');if(!status||!out)return;
-  const buckets=new Map(),history=[...(Array.isArray(window.BBK_AI_HISTORY)?window.BBK_AI_HISTORY:[]),...(Array.isArray(savedRecords)?savedRecords:[])],dedup=new Map();history.forEach(r=>{if(validResult(r)&&rosterCars(r).length>=3){const k=r.sourceId||key(r);if(!dedup.has(k)||r.sourceId)dedup.set(k,r);}});const ordered=[...dedup.values()];
+  const buckets=new Map(),history=[...(Array.isArray(window.BBK_AI_HISTORY)?window.BBK_AI_HISTORY:[]),...(Array.isArray(savedRecords)?savedRecords:[])],dedup=new Map();history.forEach((r,i)=>{if(validResult(r)&&rosterCars(r).length>=3){const base=key(r),k=r.sourceId||(base==='||'?'saved-index:'+i:base);if(!dedup.has(k)||r.sourceId)dedup.set(k,r);}});const ordered=[...dedup.values()];
   ordered.sort((a,b)=>String(a.raceDate||'').localeCompare(String(b.raceDate||''))||String(key(a)).localeCompare(String(key(b))));
   const add=(label,pos)=>{
    if(!label)return;
    if(!buckets.has(label))buckets.set(label,{n:0,first:0,top2:0});
    const b=buckets.get(label);b.n++;if(pos===0)b.first++;if(pos>=0&&pos<2)b.top2++;
   };
-  const splitAt=Math.max(1,Math.floor(ordered.length*.8)),train=ordered.slice(0,splitAt),test=ordered.slice(splitAt);
+  const dates=[...new Set(ordered.map(r=>String(r.raceDate||'').slice(0,10)).filter(Boolean))].sort();const cutoff=dates.length?dates[Math.min(dates.length-1,Math.floor(dates.length*.8))]:'';const train=ordered.filter(r=>!r.raceDate||String(r.raceDate).slice(0,10)<cutoff),test=ordered.filter(r=>String(r.raceDate||'').slice(0,10)>=cutoff);
   const collect=(rows)=>{
    const map=new Map();let starters=0,winners=0;
    rows.forEach(r=>{
@@ -3627,6 +3627,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
      if(r.lineShape)features.push(['ライン構成',String(r.lineShape)]);
      if(carCount)features.push(['車数×位置','全'+carCount+'車 × '+role]);
      if(r.lineShape)features.push(['構成×位置',String(r.lineShape)+' × '+role]);
+     if(carCount&&r.lineType)features.push(['車数×分戦','全'+carCount+'車 × '+String(r.lineType)]);
      features.forEach(([kind,label])=>{
       const id=kind+'::'+label;
       if(!map.has(id))map.set(id,{id,kind,label,n:0,first:0});
@@ -3671,7 +3672,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   save();
   const races=ordered.length;
   const rows=[...all.map.entries()].filter(([,b])=>b.n>=5).sort((a,b)=>(b[1].first/b[1].n)-(a[1].first/a[1].n)||b[1].n-a[1].n);
-  status.textContent='学習対象 '+races.toLocaleString()+'レース（CSV '+(Array.isArray(window.BBK_AI_HISTORY)?window.BBK_AI_HISTORY.length:0).toLocaleString()+' + 追加 '+(Array.isArray(savedRecords)?savedRecords.length:0).toLocaleString()+'） / 候補 '+candidates.length+'件 / 時系列80:20 '+train.length.toLocaleString()+'R→'+test.length.toLocaleString()+'R';
+  status.textContent='学習対象 '+races.toLocaleString()+'レース（CSV '+(Array.isArray(window.BBK_AI_HISTORY)?window.BBK_AI_HISTORY.length:0).toLocaleString()+' + 追加 '+(Array.isArray(savedRecords)?savedRecords.length:0).toLocaleString()+'） / 候補 '+candidates.length+'件 / 日付境界 '+(cutoff||'未設定')+' / 時系列80:20 '+train.length.toLocaleString()+'R→'+test.length.toLocaleString()+'R';
   const overview=!races?'結果入力済みレースがまだありません。':rows.length?rows.slice(0,12).map(([label,b])=>'<div class="flex justify-between items-center gap-2 border-b border-slate-700/60 py-2"><span>'+esc(label)+' <span class="text-slate-400">('+b.n+'出走)</span></span><span class="text-right whitespace-nowrap"><b class="text-emerald-300">'+(100*b.first/b.n).toFixed(1)+'%</b> 1着 <span class="text-cyan-300">'+(100*b.top2/b.n).toFixed(1)+'%</span> 2着以内</span></div>').join(''):'各条件の出走数が5回に達すると傾向を表示します。';
   const laws=Object.values(model.autoLaws).sort((a,b)=>({継続:0,検証中:1,保留:2,破棄:3}[a.state]-({継続:0,検証中:1,保留:2,破棄:3}[b.state]))||b.validationN-a.validationN||b.trainN-a.trainN);
   const lawHtml='<div class="mt-4 pt-3 border-t border-emerald-300/20"><b class="text-emerald-200">AUTO LAW ENGINE // AI自動発見・継続判定</b><p class="text-[10px] text-slate-400 mt-1 mb-2">全車数・全ライン形式を対象に、古い80%で候補を発見し、新しい20%で再検証。ライン構成の順番も別条件として扱います。</p>'+
