@@ -1178,7 +1178,7 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
     <div class="rounded-lg bg-white/80 p-2"><b class="text-sky-900">時系列80%｜発見用</b><br>20,381R ／ 2024-07-30〜2026-03-22<br>2車単2,001円以上：32.06%</div>
     <div class="rounded-lg bg-white/80 p-2"><b class="text-sky-900">最新20%｜検証用</b><br>5,096R ／ 2026-03-22〜2026-06-15<br>2車単2,001円以上：31.10%</div>
    </div>
-   <div class="mt-2 text-[10px] text-slate-500">車立て内訳：6車 1,022R ／ 7車 22,020R（全体の86.4%）／ 8車 132R ／ 9車 2,303R。7車だけでは2車単中央値¥940、平均¥2,466、2,001円以上30.9%。会場名は元CSVにないため会場別集計には使用しません。この欄は初期データの基準値で、個別レースのライン・印分析には下のCSV読込が必要です。</div>
+   <div class="mt-2 text-[10px] text-slate-500">車立て内訳：6車 1,022R ／ 7車 22,020R（全体の86.4%）／ 8車 132R ／ 9車 2,303R。7車だけでは2車単中央値¥940、平均¥2,466、2,001円以上30.9%。会場名は元CSVにないため会場別集計には使用しません。基礎統計は初期表示。個別レースCSVは一度読み込むと、この端末に保存され次回起動時に自動復元します。</div>
   </div>
   <div class="discovery-card mb-3">
    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-end">
@@ -2288,6 +2288,34 @@ document.addEventListener('DOMContentLoaded',()=>{
 'use strict';
 let trickRows=[];
 const $t=id=>document.getElementById(id);
+// 研究CSVは端末内IndexedDBに保存し、次回起動時に自動復元する
+const RESEARCH_DB='battleBankResearchDB',RESEARCH_STORE='datasets',RESEARCH_KEY='brainRacesCSV_v1';
+function researchDb(){
+ return new Promise((resolve,reject)=>{
+  if(!('indexedDB' in window)){reject(new Error('IndexedDB unavailable'));return;}
+  const req=indexedDB.open(RESEARCH_DB,1);
+  req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(RESEARCH_STORE))db.createObjectStore(RESEARCH_STORE);};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('DB open failed'));
+ });
+}
+async function saveResearchCSV(raw){
+ const db=await researchDb();
+ await new Promise((resolve,reject)=>{const tx=db.transaction(RESEARCH_STORE,'readwrite');tx.objectStore(RESEARCH_STORE).put(raw,RESEARCH_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+ db.close();
+}
+async function restoreResearchCSV(){
+ try{
+  const db=await researchDb();
+  const raw=await new Promise((resolve,reject)=>{const tx=db.transaction(RESEARCH_STORE,'readonly');const q=tx.objectStore(RESEARCH_STORE).get(RESEARCH_KEY);q.onsuccess=()=>resolve(q.result||'');q.onerror=()=>reject(q.error);});
+  db.close();
+  if(!raw)return;
+  const rows=parseCSV(raw),mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');
+  trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));
+  const status=$t('trickCsvStatus');
+  if(status)status.textContent=`端末内データを自動復元：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース`;
+  const results=$t('trickResults');if(results)results.innerHTML='<div class="discovery-card text-center text-sky-700 text-xs">保存済みデータを復元しました。組み合わせ分析を実行できます。</div>';
+ }catch(e){console.warn('研究CSVの自動復元をスキップ:',e);}
+}
 const markMap={honmei:'◎',taikou:'◯',tanana:'△',renge:'✕'};
 function parseCSV(text){
  const rows=[];let row=[],cell='',quoted=false;
@@ -2319,7 +2347,7 @@ function makeRace(row){
 function allowedHeadPair(a,b){if(a===b)return false;const x=Math.min(a,b),y=Math.max(a,b);return !(x===1&&(y===2||y===3));}
 function pairKey(a,b){return [a,b].sort((x,y)=>x-y).join('－');}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function loadCSV(file){const reader=new FileReader();reader.onload=()=>{try{const rows=parseCSV(String(reader.result||''));const mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));$t('trickCsvStatus').textContent=`読込成功：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース（全員単騎・分類不明を除外）`;$t('trickSummary').innerHTML='';$t('trickResults').innerHTML='<div class="discovery-card text-center text-sky-700 text-xs">読み込み完了。組み合わせ分析を実行してください。</div>'; }catch(e){$t('trickCsvStatus').textContent='CSV読込エラー：列名・文字コードを確認してください。';console.error(e);}};reader.onerror=()=>{$t('trickCsvStatus').textContent='ファイルを読み込めませんでした。';};reader.readAsText(file,'UTF-8');}
+function loadCSV(file){const reader=new FileReader();reader.onload=()=>{try{const raw=String(reader.result||'');const rows=parseCSV(raw);const mapped=rows.map(makeRace).filter(Boolean).filter(r=>r.category!=='不明');trickRows=mapped.sort((a,b)=>a.date.localeCompare(b.date));$t('trickCsvStatus').textContent=`読込成功：${rows.length.toLocaleString()}行／分析対象 ${mapped.length.toLocaleString()}レース（全員単騎・分類不明を除外）・端末保存中`;$t('trickSummary').innerHTML='';$t('trickResults').innerHTML='<div class="discovery-card text-center text-sky-700 text-xs">読み込み完了。組み合わせ分析を実行してください。</div>';saveResearchCSV(raw).then(()=>{$t('trickCsvStatus').textContent+= '／次回起動時も自動復元';}).catch(e=>{$t('trickCsvStatus').textContent+='／端末保存は利用できません';console.warn(e);}); }catch(e){$t('trickCsvStatus').textContent='CSV読込エラー：列名・文字コードを確認してください。';console.error(e);}};reader.onerror=()=>{$t('trickCsvStatus').textContent='ファイルを読み込めませんでした。';};reader.readAsText(file,'UTF-8');}
 function renderMarkJsonComparison(){
  const host=$t('trickMarkJsonCompare');if(!host)return;
  if(!trickRows.length){host.innerHTML='<div class="discovery-card text-xs">CSVを読み込んでください。</div>';return;}
@@ -2592,7 +2620,7 @@ function runLinePositionMatrix(){
  summary.innerHTML=`<div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">配当入力済み・対象</div><div class="font-mono-tech text-lg font-bold">${rows.length.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">2ライン以上</div><div class="font-mono-tech text-lg font-bold">${eligible.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">高配当基準</div><div class="font-mono-tech text-lg font-bold">${yen(high)}</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">低配当基準</div><div class="font-mono-tech text-lg font-bold">${yen(low)}</div></div>`;
  out.innerHTML=eligible?render(headMap,'①②③④ LINE HEAD TUPLE // 先頭車番の並び')+render(fullMap,'FULL LINE SEQUENCE // ライン全体の並び'):'<div class="discovery-card text-xs">単騎を除外した後、2ライン以上ある配当入力済みレースがありません。</div>';
 }
-document.addEventListener('DOMContentLoaded',()=>{const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn'),m=$t('medianHeadRunBtn'),pl=$t('perLineRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);if(m)m.addEventListener('click',runMedianHeadPairs);if(pl)pl.addEventListener('click',runPerLineCombos);const lm=$t('lineMatrixRunBtn');if(lm)lm.addEventListener('click',runLinePositionMatrix); if($t('trickClass'))$t('trickClass').addEventListener('change',renderMarkJsonComparison); if($t('lowPayoutThreshold'))$t('lowPayoutThreshold').addEventListener('change',renderMarkJsonComparison); });
+document.addEventListener('DOMContentLoaded',()=>{restoreResearchCSV();const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn'),m=$t('medianHeadRunBtn'),pl=$t('perLineRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);if(m)m.addEventListener('click',runMedianHeadPairs);if(pl)pl.addEventListener('click',runPerLineCombos);const lm=$t('lineMatrixRunBtn');if(lm)lm.addEventListener('click',runLinePositionMatrix); if($t('trickClass'))$t('trickClass').addEventListener('change',renderMarkJsonComparison); if($t('lowPayoutThreshold'))$t('lowPayoutThreshold').addEventListener('change',renderMarkJsonComparison); });
 })();
 </script>
 
