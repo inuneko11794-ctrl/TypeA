@@ -2397,6 +2397,29 @@ function runTrick(){
  $t('trickMarkResults').innerHTML=markCards.length?markCards.join(''):'<div class="discovery-card text-xs">印の組み合わせデータがありません。</div>';
  renderMarkJsonComparison();
 }
+const HEAD_PAIR_POSITIONS=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
+const HEAD_PAIR_LABELS=['ライン① × ②','ライン① × ③','ライン① × ④','ライン② × ③','ライン② × ④','ライン③ × ④'];
+function collectLineHeadPairStats(rows,threshold=10000){
+ const stats=HEAD_PAIR_POSITIONS.map(()=>new Map());
+ let eligible=0,used=0;
+ rows.forEach(r=>{
+  // ライン内の先頭が明確な2車以上のラインだけを使う。単騎は含めない。
+  const lines=(r.lines||[]).slice(0,4).map(g=>Array.isArray(g)&&g.length>=2&&Number.isInteger(g[0])&&g[0]>=1&&g[0]<=9?g:null);
+  if(lines.filter(Boolean).length<2)return;
+  eligible++;
+  HEAD_PAIR_POSITIONS.forEach(([i,j],idx)=>{
+   const a=lines[i]?.[0],b=lines[j]?.[0];
+   if(!a||!b||a===b)return;
+   const key=`${a}－${b}`;
+   if(!stats[idx].has(key))stats[idx].set(key,{key,a,b,count:0,under:0,over:0,sum:0,min:Infinity,max:0,payouts:[]});
+   const g=stats[idx].get(key),payout=Number(r.p3)||0;
+   g.count++;g.sum+=payout;g.min=Math.min(g.min,payout);g.max=Math.max(g.max,payout);g.payouts.push(payout);
+   if(payout<=threshold)g.under++;else g.over++;
+   used++;
+  });
+ });
+ return {stats,eligible,used,labels:HEAD_PAIR_LABELS};
+}
 function runLowPayoutHeadPairs(){
  const out=$t('lowPayoutResults'),summary=$t('lowPayoutSummary');
  if(!trickRows.length){out.innerHTML='<div class="discovery-card text-center">先にCSVを読み込んでください。</div>';summary.innerHTML='';return;}
@@ -2404,25 +2427,7 @@ function runLowPayoutHeadPairs(){
  const threshold=Math.max(1,Number($t('lowPayoutThreshold').value)||10000);
  const minCount=Math.max(1,Math.floor(Number($t('lowPayoutMinCount').value)||20));
  const rows=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0);
- const positions=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
- const labels=['ライン① × ②','ライン① × ③','ライン① × ④','ライン② × ③','ライン② × ④','ライン③ × ④'];
- const stats=positions.map(()=>new Map());
- let eligible=0,used=0;
- rows.forEach(r=>{
-  // 単騎を除き、先頭車番が明確なラインだけを分析対象にする
-  const lines=(r.lines||[]).slice(0,4).map(g=>Array.isArray(g)&&g.length>=2&&Number.isInteger(g[0])&&g[0]>=1&&g[0]<=9?g:null);
-  if(lines.filter(Boolean).length<2)return;
-  eligible++;
-  positions.forEach(([i,j],idx)=>{
-   const a=lines[i]?.[0],b=lines[j]?.[0];
-   if(!a||!b||a===b)return;
-   const key=`${a}－${b}`;
-   if(!stats[idx].has(key))stats[idx].set(key,{key,a,b,count:0,under:0,over:0,sum:0,min:Infinity,max:0});
-   const g=stats[idx].get(key);g.count++;g.sum+=r.p3;g.min=Math.min(g.min,r.p3);g.max=Math.max(g.max,r.p3);
-   if(r.p3<=threshold)g.under++;else g.over++;
-   used++;
-  });
- });
+ const {stats,eligible,used,labels}=collectLineHeadPairStats(rows,threshold);
  const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
  const summaryData=[['対象クラス',cls==='MEN_ALL'?'男子・全車立て':cls],['配当入力済',rows.length.toLocaleString()+'件'],['ラインペア対象',eligible.toLocaleString()+'R／'+used.toLocaleString()+'件'],['基準以下',fmt(threshold)]];
  summary.innerHTML=summaryData.map(([k,v])=>`<div class="discovery-card"><div class="text-[9px] text-emerald-700 font-bold">${k}</div><div class="font-mono-tech text-lg font-bold text-emerald-900">${v}</div></div>`).join('');
@@ -2493,20 +2498,7 @@ function runMedianHeadPairs(){
  const cls=$t('trickClass')?.value||'MEN_ALL';
  const minCount=Math.max(1,Math.floor(Number($t('lowPayoutMinCount')?.value)||10));
  const rows=trickRows.filter(r=>(cls==='MEN_ALL'?r.category!=='ガールズ':r.category===cls)&&r.p3>0);
- const positions=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]];
- const labels=['ライン① × ②','ライン① × ③','ライン① × ④','ライン② × ③','ライン② × ④','ライン③ × ④'];
- const stats=positions.map(()=>new Map());
- rows.forEach(r=>{
-  const lines=(r.lines||[]).slice(0,4).map(g=>Array.isArray(g)&&g.length>=2&&Number.isInteger(g[0])&&g[0]>=1&&g[0]<=9?g:null);
-  if(lines.filter(Boolean).length<2)return;
-  positions.forEach(([i,j],idx)=>{
-   const a=lines[i]?.[0],b=lines[j]?.[0];
-   if(!a||!b||a===b)return;
-   const key=`${a}－${b}`;
-   if(!stats[idx].has(key))stats[idx].set(key,{key,a,b,payouts:[]});
-   stats[idx].get(key).payouts.push(r.p3);
-  });
- });
+ const {stats,labels}=collectLineHeadPairStats(rows);
  const fmt=n=>Math.round(n).toLocaleString('ja-JP')+'円';
  const cards=stats.map((map,idx)=>{
   const all=[...map.values()].map(g=>({...g,count:g.payouts.length,med:median(g.payouts),avg:g.payouts.reduce((s,n)=>s+n,0)/g.payouts.length}));
