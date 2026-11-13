@@ -3030,7 +3030,7 @@ if ("serviceWorker" in navigator) {
   tab.id='tabAnalysis'+(index+1);tab.dataset.tabTarget=name;
   tab.setAttribute('aria-selected','false');
   tab.setAttribute('aria-controls','analysisPage'+(index+1));
-  const researchNames=['研究｜パターン・印','研究｜3連単・ライン','研究｜会場・クラス','研究｜外部データ'];
+  const researchNames=['研究｜パターン・印','研究｜3連単・ライン','研究｜会場・クラス','研究｜外部データ','研究｜記録・法則'];
   tab.innerHTML='<span class="bookmark-label">'+(researchNames[index]||('研究 '+(index+1)))+'</span><span class="tab-sub">'+(5+index)+' / LABORATORY</span>';
   lastResearchTab.after(tab);
   lastResearchTab=tab;
