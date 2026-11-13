@@ -957,45 +957,54 @@ body.book-cover-active .app-shell{
 @media(max-height:700px){.bbk-treasure-stage{height:55vh;min-height:300px}.bbk-treasure-heading{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.bbk-fairy{animation:none}}
 </style>
+<style id="bbk-gold-book-only-vol52">
+/* VOL.52 — 宝箱を廃止し、金装飾の本そのものを発掘する */
+.bbk-chest{display:none!important}
+.bbk-book-reveal{z-index:2!important;left:50%!important;bottom:auto!important;top:50%!important;transform:translate(-50%,-50%) scale(1)!important;opacity:1!important;transition:transform 1.2s ease,filter 1.2s ease!important;filter:drop-shadow(0 22px 24px #000b)}
+.bbk-gold-book{width:min(58vw,270px)!important;height:min(72vw,355px)!important;min-width:205px;min-height:270px;padding:12px 12px 12px 23px!important;border:3px solid #d2a64e!important;border-radius:7px 16px 16px 7px!important;background:linear-gradient(100deg,#100b07,#050403 12%,#241609 17%,#090604 100%)!important;box-shadow:inset 0 0 0 3px #76501f,inset 0 0 28px #000,8px 14px 25px #000b,0 0 20px #c08b3b33!important}
+.bbk-book-cover-inner{border:3px double #e6c16b!important;outline:1px solid #8c6228!important;outline-offset:-10px!important;background:radial-gradient(ellipse,#493016 0%,#211307 58%,#090604 100%)!important;box-shadow:inset 0 0 28px #000,inset 0 0 0 7px #a87932!important}
+.bbk-book-crown{font-size:clamp(30px,7vw,44px)!important;color:#f5d78a;text-shadow:0 0 5px #ffdb86,0 0 16px #b77b26!important}
+.bbk-book-title{font-size:clamp(23px,6vw,31px)!important;line-height:1.08!important;color:#f0d080!important;text-shadow:0 2px 2px #000,0 0 9px #d49c3d!important}
+.bbk-book-wheel{width:54px!important;height:54px!important;border:3px double #e6bd61!important;color:#f2d28a;font-size:35px!important;box-shadow:0 0 15px #d49c3d66,inset 0 0 9px #d49c3d33!important}
+.bbk-book-subtitle{font-size:7px!important;color:#d9b66b;letter-spacing:.16em!important}
+.bbk-book-spine{left:8px!important;width:15px!important;background:linear-gradient(90deg,#050403,#6b451b 35%,#e0b85e 52%,#3a240f 75%,#090604)!important;border-right:2px solid #f1d48a!important}
+.bbk-book-pages{left:16px!important;right:-12px!important;bottom:-13px!important;height:14px!important;background:repeating-linear-gradient(0deg,#f0dfad 0 1px,#9b7841 2px 3px,#d9c18a 4px 5px)!important;border:1px solid #c59a50!important}
+.bbk-treasure-glow{z-index:1!important;left:22%!important;right:22%!important;top:18%!important;bottom:15%!important;height:auto!important;background:#dba94d!important;filter:blur(65px)!important;opacity:.14!important;transition:opacity 1s!important}
+#bbkSootCanvas{z-index:5!important}
+#bookCoverGate.dust-ready .bbk-book-reveal{transform:translate(-50%,-50%) scale(1.045)!important;filter:drop-shadow(0 0 25px #e6b95499)!important}
+#bookCoverGate.dust-ready .bbk-treasure-glow{opacity:.48!important}
+#bookCoverGate.is-opening .bbk-gold-book{animation:bbkBookAscend 1.6s cubic-bezier(.2,.8,.2,1) forwards}
+@media(max-width:390px){.bbk-gold-book{width:58vw!important;height:72vw!important;min-width:190px;min-height:250px}}
+</style>
 </head>
 <body class="book-cover-active">
 
-<dialog id="bookCoverGate" open aria-label="BATTLE BANK-KUN 宝箱" class="bbk-treasure-gate">
- <div class="bbk-treasure-heading">AN ANCIENT DISCOVERY <span>— BATTLE BANK-KUN —</span></div>
+<dialog id="bookCoverGate" open aria-label="BATTLE BANK-KUN 金装飾の研究書" class="bbk-treasure-gate">
+ <div class="bbk-treasure-heading">THE LOST MASTERPIECE <span>— BATTLE BANK-KUN —</span></div>
  <div class="bbk-treasure-stage" id="bbkTreasureStage">
   <div class="bbk-preview preview-left"><b>車番別研究</b><span>1着の条件を探る</span><i>01 · 02 · 03</i></div>
   <div class="bbk-preview preview-right"><b>ライン図鑑</b><span>並びの法則を解く</span><i>LINE / PATTERN</i></div>
-  <div class="bbk-chest">
-   <div class="bbk-chest-lid"><div class="bbk-chest-lid-band"></div><div class="bbk-chest-lock"></div></div>
-   <div class="bbk-chest-body">
-    <div class="bbk-chest-front">
-     <div class="bbk-chest-plate">BBK</div>
-     <div class="bbk-chest-rivet r1"></div><div class="bbk-chest-rivet r2"></div>
-     <div class="bbk-chest-rivet r3"></div><div class="bbk-chest-rivet r4"></div>
+  <div class="bbk-book-reveal">
+   <div class="bbk-gold-book">
+    <div class="bbk-book-spine"></div>
+    <div class="bbk-book-cover-inner">
+     <div class="bbk-book-crown">♛</div>
+     <div class="bbk-book-title">BATTLE<br>BANK-KUN</div>
+     <div class="bbk-book-wheel">✥</div>
+     <div class="bbk-book-subtitle">THE ART & SCIENCE OF KEIRIN</div>
     </div>
-    <div class="bbk-book-reveal">
-     <div class="bbk-gold-book">
-      <div class="bbk-book-spine"></div>
-      <div class="bbk-book-cover-inner">
-       <div class="bbk-book-crown">♛</div>
-       <div class="bbk-book-title">BATTLE<br>BANK-KUN</div>
-       <div class="bbk-book-wheel">✥</div>
-       <div class="bbk-book-subtitle">THE ART & SCIENCE OF KEIRIN</div>
-      </div>
-      <div class="bbk-book-pages"></div>
-     </div>
-    </div>
+    <div class="bbk-book-pages"></div>
    </div>
   </div>
   <div class="bbk-treasure-glow"></div>
-  <canvas id="bbkSootCanvas" aria-label="指でなぞって宝箱のすすを払う"></canvas>
-  <div class="bbk-wipe-hint" id="bbkWipeHint">指でなぞって、長い眠りから宝箱を目覚めさせよう</div>
+  <canvas id="bbkSootCanvas" aria-label="本の表紙を指でなぞってすすを払う"></canvas>
+  <div class="bbk-wipe-hint" id="bbkWipeHint">指でなぞって、古い研究書のすすを払おう</div>
   <div class="bbk-fairy fairy-one">✧🚲</div><div class="bbk-fairy fairy-two">✧🚲</div>
  </div>
  <div class="bbk-treasure-footer">
-  <div class="bbk-treasure-caption">封印された研究書を発掘する</div>
-  <button id="bookCoverOpenBtn" type="button"><span class="bookmark-ribbon">DISCOVERED</span><span class="cover-open-label">宝箱を開く</span><span class="cover-open-arrow">→</span></button>
-  <div class="cover-footnote">WIPE THE DUST · REVEAL THE TREASURE</div>
+  <div class="bbk-treasure-caption">封印されていた金装飾の研究書</div>
+  <button id="bookCoverOpenBtn" type="button"><span class="bookmark-ribbon">DISCOVERED</span><span class="cover-open-label">本を開く</span><span class="cover-open-arrow">→</span></button>
+  <div class="cover-footnote">WIPE THE DUST · REVEAL THE KNOWLEDGE</div>
  </div>
 </dialog>
 
@@ -3889,46 +3898,34 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
 }
 </style>
 
-<script id="bbk-soot-wipe-controller-vol51">
+<script id="bbk-soot-wipe-controller-vol52">
 (()=> {
- const gate=document.getElementById('bookCoverGate');
- const stage=document.getElementById('bbkTreasureStage');
- const canvas=document.getElementById('bbkSootCanvas');
- const hint=document.getElementById('bbkWipeHint');
+ const gate=document.getElementById('bookCoverGate'),stage=document.getElementById('bbkTreasureStage'),canvas=document.getElementById('bbkSootCanvas'),hint=document.getElementById('bbkWipeHint');
  if(!gate||!stage||!canvas)return;
- const ctx=canvas.getContext('2d',{willReadFrequently:true});
- let drawing=false,last=null,cleared=0,ready=false;
+ const ctx=canvas.getContext('2d',{willReadFrequently:true});let drawing=false,last=null,cleared=0,ready=false,bookRect=null;
+ function roundedRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
  function resize(){
   const rect=stage.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);
-  canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  const w=rect.width,h=rect.height;
-  const grad=ctx.createLinearGradient(0,0,w,h);
-  grad.addColorStop(0,'rgba(8,7,6,.97)');grad.addColorStop(.45,'rgba(31,27,22,.96)');grad.addColorStop(1,'rgba(5,4,3,.98)');
-  ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
-  for(let i=0;i<2600;i++){
-   const x=Math.random()*w,y=Math.random()*h,r=Math.random()*2.2+.25;
-   ctx.fillStyle=Math.random()>.5?'rgba(0,0,0,.34)':'rgba(180,164,139,.13)';
-   ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
-  }
-  ctx.globalCompositeOperation='source-over';
+  canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+  const w=rect.width,h=rect.height,bw=Math.min(w*.58,270),bh=Math.min(w*.72,355),bookW=Math.max(205,bw),bookH=Math.max(270,bh);
+  bookRect={x:(w-bookW)/2-2,y:(h-bookH)/2-2,w:bookW+4,h:bookH+5};
+  ctx.clearRect(0,0,w,h);ctx.save();roundedRect(ctx,bookRect.x,bookRect.y,bookRect.w,bookRect.h,15);ctx.clip();
+  const grad=ctx.createLinearGradient(bookRect.x,bookRect.y,bookRect.x+bookRect.w,bookRect.y+bookRect.h);
+  grad.addColorStop(0,'rgba(7,6,5,.99)');grad.addColorStop(.5,'rgba(27,24,20,.98)');grad.addColorStop(1,'rgba(3,3,3,.99)');
+  ctx.fillStyle=grad;ctx.fillRect(bookRect.x,bookRect.y,bookRect.w,bookRect.h);
+  for(let i=0;i<3200;i++){const x=bookRect.x+Math.random()*bookRect.w,y=bookRect.y+Math.random()*bookRect.h,r=Math.random()*2.5+.3;ctx.fillStyle=Math.random()>.5?'rgba(0,0,0,.42)':'rgba(160,150,132,.15)';ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
+  ctx.restore();ctx.globalCompositeOperation='source-over';cleared=0;ready=false;gate.classList.remove('dust-ready');
  }
  function point(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
  function erase(a,b){
-  const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy);
-  cleared+=Math.max(0,len)*58;
-  ctx.save();ctx.globalCompositeOperation='destination-out';ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=58;
-  ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-  ctx.beginPath();ctx.arc(b.x,b.y,29,0,Math.PI*2);ctx.fill();ctx.restore();
-  if(!ready&&cleared/(canvas.clientWidth*canvas.clientHeight)>.34){
-   ready=true;gate.classList.add('dust-ready');
-   if(hint)hint.textContent='発掘成功 — BATTLE BANK-KUNを発見した';
-  }
+  if(!bookRect)return;
+  const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy);cleared+=Math.max(1,len)*58;
+  ctx.save();ctx.globalCompositeOperation='destination-out';ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=58;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.beginPath();ctx.arc(b.x,b.y,29,0,Math.PI*2);ctx.fill();ctx.restore();
+  if(!ready&&cleared/(bookRect.w*bookRect.h)>.46){ready=true;gate.classList.add('dust-ready');if(hint)hint.textContent='発見 — 金装飾のBATTLE BANK-KUN'}
  }
- canvas.addEventListener('pointerdown',e=>{drawing=true;last=point(e);canvas.setPointerCapture(e.pointerId);erase(last,last)});
+ canvas.addEventListener('pointerdown',e=>{const p=point(e);if(!bookRect||p.x<bookRect.x-30||p.x>bookRect.x+bookRect.w+30||p.y<bookRect.y-30||p.y>bookRect.y+bookRect.h+30)return;drawing=true;last=p;canvas.setPointerCapture(e.pointerId);erase(last,last)});
  canvas.addEventListener('pointermove',e=>{if(!drawing)return;const p=point(e);erase(last,p);last=p});
- const stop=()=>{drawing=false;last=null};
- canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);
+ const stop=()=>{drawing=false;last=null};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);
  resize();window.addEventListener('resize',resize,{passive:true});
 })();
 </script>
