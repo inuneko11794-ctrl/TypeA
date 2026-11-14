@@ -1239,6 +1239,18 @@ body.book-cover-active .app-shell{
  </div>
  <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
+<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-14.1">
+ <div class="flex items-center justify-between gap-2 flex-wrap">
+  <div><div class="font-bold text-amber-200 tracking-wider">SITE UPDATE CHECK // 公開サイト更新確認</div><div class="text-[10px] text-slate-400 mt-1">この端末に表示中のサイトと、現在公開されているサイトのバージョンを比較します。</div></div>
+  <span id="siteUpdateBadge" class="rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold">未確認</span>
+ </div>
+ <div class="mt-2 flex flex-wrap gap-2">
+  <button id="checkSiteUpdateBtn" type="button" class="touch-btn btn-cyber px-3 py-2 rounded-lg text-[10px]">公開版を確認</button>
+  <button id="reloadUpdatedSiteBtn" type="button" class="touch-btn btn-alert px-3 py-2 rounded-lg text-[10px] hidden">最新版を読み込む</button>
+ </div>
+ <div id="siteUpdateDetail" class="mt-2 text-[10px] text-slate-300" aria-live="polite">表示中の版：2026-11-14.1 ／ まだ公開版を確認していません。</div>
+ <div id="siteUpdateCheckedAt" class="mt-1 text-[10px] text-slate-500">確認日時：未確認</div>
+</div>
 <section id="bookContents" class="bbk-contents-paper">
  <div class="bbk-contents-heading"><span>BOOK INDEX</span><strong>目次</strong></div>
  <p class="bbk-contents-note">栞を選ぶと、そのページへ移動します。</p>
@@ -2546,7 +2558,33 @@ function bindUserHub(){
  $('personalMusic').addEventListener('ended',()=>{$('musicState').textContent=$('personalMusic').loop?'再生中':'再生終了'});
 }
 
+
+const SITE_BUILD_ID='2026-11-14.1';
+async function checkPublishedSiteVersion(){
+ const badge=$('siteUpdateBadge'),detail=$('siteUpdateDetail'),checked=$('siteUpdateCheckedAt'),reload=$('reloadUpdatedSiteBtn'),button=$('checkSiteUpdateBtn');
+ if(button){button.disabled=true;button.textContent='確認中…';}
+ if(badge){badge.textContent='確認中';badge.className='rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold';}
+ try{
+  const response=await fetch(window.location.pathname+'?site_version_check='+Date.now(),{cache:'no-store'});
+  if(!response.ok)throw new Error('公開ページの取得に失敗（HTTP '+response.status+'）');
+  const html=await response.text();
+  const match=html.match(/id=["']siteUpdatePanel["'][^>]*data-site-build=["']([^"']+)["']/);
+  if(!match)throw new Error('公開ページのバージョン情報を読み取れません');
+  const live=match[1],same=live===SITE_BUILD_ID;
+  if(badge){badge.textContent=same?'公開版と一致':'新しい公開版あり';badge.className='rounded-full px-3 py-1 '+(same?'bg-emerald-900 text-emerald-200':'bg-amber-500 text-slate-950')+' text-[10px] font-bold';}
+  if(detail)detail.textContent='この画面：'+SITE_BUILD_ID+' ／ 公開サイト：'+live+(same?' ／ 更新済みの表示です':' ／ 新しい版が公開されています。');
+  if(reload)reload.classList.toggle('hidden',same);
+  if(checked)checked.textContent='確認日時：'+new Date().toLocaleString('ja-JP');
+ }catch(error){
+  if(badge){badge.textContent='確認できません';badge.className='rounded-full px-3 py-1 bg-rose-900 text-rose-200 text-[10px] font-bold';}
+  if(detail)detail.textContent='公開版を確認できませんでした：'+error.message+'（通信後にもう一度確認してください）';
+  if(reload)reload.classList.add('hidden');
+  if(checked)checked.textContent='確認日時：'+new Date().toLocaleString('ja-JP');
+ }finally{if(button){button.disabled=false;button.textContent='公開版を確認';}}
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
+ bind('checkSiteUpdateBtn',checkPublishedSiteVersion);bind('reloadUpdatedSiteBtn',()=>window.location.reload());
  bind('openBatchEditBtn',openBatchEdit);bind('deletePendingRecordsBtn',deletePendingRecords);bind('closeBatchEditBtn',()=>{const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';});bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);bind('saveAllBulkFromPasteBtn',saveAllBulkRecords);
  $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);$('recordSearch').addEventListener('input',renderRecordManager);$('recordStatus').addEventListener('change',renderRecordManager);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
