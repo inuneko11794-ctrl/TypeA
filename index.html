@@ -1262,7 +1262,7 @@ body.book-cover-active .app-shell{
  </div>
  <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
-<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.2">
+<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.3">
  <div class="flex items-center justify-between gap-2 flex-wrap">
   <div><div class="font-bold text-amber-200 tracking-wider">SITE UPDATE CHECK // 公開サイト更新確認</div><div class="text-[10px] text-slate-400 mt-1">この端末に表示中のサイトと、現在公開されているサイトのバージョンを比較します。</div></div>
   <span id="siteUpdateBadge" class="rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold">未確認</span>
@@ -2285,6 +2285,14 @@ function extractRaceDate(text){
 }
 function recordKey(r){return [String(r.venue||'').trim(),String(r.raceDate||'').trim(),String(r.raceName||'').trim()].join('|');}
 function hasValidResult(r){const p=String(r.pattern||'').split('-').map(Number);return p.length===3&&p.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(p).size===3;}
+function parseRaceWeather(block){
+ const row=(String(block||'').match(/^\\|\\s*天候\\s*\\|\\s*([^|]+)\\|/m)||[])[1]||'';
+ const raw=row.trim();if(!raw)return null;
+ const tempMatch=raw.match(/(-?\\d+(?:\\.\\d+)?)\\s*℃/);
+ const windMatch=raw.match(/([北南東西北南東西]+)?\\s*(\\d+(?:\\.\\d+)?)\\s*m\\s*\\/\\s*s/i);
+ const wind=windMatch?Number(windMatch[2]):null;
+ return {raw,rain:/雨|小雨|大雨/.test(raw),snow:/雪/.test(raw),temperature:tempMatch?Number(tempMatch[1]):null,windSpeed:Number.isFinite(wind)?wind:null,windDirection:windMatch?(windMatch[1]||''):''};
+}
 function parseMarkdownForBulk(inputData){
   const races = [];
   const headingPattern=/^#\s*競輪レースデータ：.*$/gm;
@@ -2329,6 +2337,7 @@ function parseMarkdownForBulk(inputData){
     }
     if(carCount>=5&&carCount<=9)category=carCount+"車";
    }
+   const weatherInfo=parseRaceWeather(block);
    // ライン位置を保持して①〜④の先頭車番をJSONに保存
    const lineGroups=parseLineGroupsFromText(block),lineHeads=lineGroups.slice(0,4).map(g=>g[0]||0),baseMarks=parseRosterBaseMarks(block),lineMarks=transformLineMarks(lineGroups,baseMarks),lineMarkGroups=makeLineMarkGroups(lineGroups,lineMarks);
    let line1Key=null;for(const g of lineGroups){if(g.length>=2){line1Key=g.join('-');break}}
@@ -2339,6 +2348,7 @@ function parseMarkdownForBulk(inputData){
      raceName,
      category,
      raceDate: extractRaceDate(block) || extractRaceDate(inputData),
+     weatherInfo,
      line1: line1Key || '',
      lineHeads,
      lineGroups,
@@ -2585,7 +2595,7 @@ function bindUserHub(){
 }
 
 
-const SITE_BUILD_ID='2026-11-15.2';
+const SITE_BUILD_ID='2026-11-15.3';
 async function checkPublishedSiteVersion(){
  const badge=$('siteUpdateBadge'),detail=$('siteUpdateDetail'),checked=$('siteUpdateCheckedAt'),reload=$('reloadUpdatedSiteBtn'),button=$('checkSiteUpdateBtn');
  if(button){button.disabled=true;button.textContent='確認中…';}
@@ -3583,9 +3593,10 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  'use strict';
  const KEY='battleBankAIModelV1';
  const $=id=>document.getElementById(id);
- const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008}},learned:[],updatedAt:null});
+ const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015,weatherRainHead:0,weatherWindHead:0},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01,weatherRainHead:0,weatherWindHead:0},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008,weatherRainHead:0,weatherWindHead:0}},learned:[],updatedAt:null});
  let model=initial();
  try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);if(v&&v.version===1&&v.weights&&v.predictions)model=v;}}catch(e){console.warn('AI model load failed',e);}
+ Object.keys(model.weights||{}).forEach(m=>{model.weights[m].weatherRainHead=Number(model.weights[m].weatherRainHead)||0;model.weights[m].weatherWindHead=Number(model.weights[m].weatherWindHead)||0;});
  model.metrics=model.metrics||{races:0,winHits:0,exactaHits:0,trifectaHits:0};
  model.autoLaws=model.autoLaws&&typeof model.autoLaws==='object'?model.autoLaws:{};
  model.metrics.races=Number(model.metrics.races)||0;
@@ -3602,9 +3613,12 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   let lineIndex=-1,pos=0,len=1,head=0;
   groups.forEach((g,i)=>{const p=(g||[]).map(Number).indexOf(Number(car));if(p>=0){lineIndex=i;pos=p;len=g.length;head=p===0?1:0;}});
   const mark=String((r.baseMarks||{})[car]||(r.lineMarks||{})[car]||'');
-  return {mark:(marks[mark]||0)/4,head,pos:len>1?pos/(len-1):0,len:Math.min(len,4)/4,car:Number(car)/9};
+  const wx=r.weatherInfo||{};
+  const rain=(wx.rain||wx.snow)?1:0;
+  const wind=Number.isFinite(Number(wx.windSpeed))?Math.max(0,Math.min(1.5,Number(wx.windSpeed)/5)):0;
+  return {mark:(marks[mark]||0)/4,head,pos:len>1?pos/(len-1):0,len:Math.min(len,4)/4,car:Number(car)/9,weatherRainHead:head*rain,weatherWindHead:head*wind};
  }
- function score(r,car,market){const f=features(r,car),w=model.weights[market];return f.mark*w.mark+f.head*w.head-f.pos*w.pos+f.len*w.len-f.car*w.car;}
+ function score(r,car,market){const f=features(r,car),w=model.weights[market];return f.mark*w.mark+f.head*w.head-f.pos*w.pos+f.len*w.len-f.car*w.car+f.weatherRainHead*(w.weatherRainHead||0)+f.weatherWindHead*(w.weatherWindHead||0);}
  function rosterCars(r){
   const set=new Set((r.starters||[]).map(Number).filter(n=>n>=1&&n<=9));(r.lineGroups||[]).forEach(g=>(g||[]).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));}));
   Object.keys(r.baseMarks||{}).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));});
@@ -3703,7 +3717,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   const trifecta=permutations(trifectaPool,3,1000).map(order=>({
    cars:order,score:(trifectaScores.get(order[0])?.score||0)*1+(trifectaScores.get(order[1])?.score||0)*.72+(trifectaScores.get(order[2])?.score||0)*.48
   })).sort((a,b)=>b.score-a.score||a.cars.join('').localeCompare(b.cars.join(''))).slice(0,10).map(x=>x.cars);
-  return {createdAt:new Date().toISOString(),generatedAfterResult:typeof validResult==='function'?validResult(r):!!r.pattern,predictionTiming:(typeof validResult==='function'?validResult(r):!!r.pattern)?'after-result':'before-result',race:{venue:r.venue||'',date:r.raceDate||'',race:r.raceName||'',category:r.category||'',lineGroups:r.lineGroups||[],baseMarks:r.baseMarks||{},lineMarks:r.lineMarks||{}},win:win.slice(0,2).map(x=>x.car),exacta,trifecta,scoreSnapshot:{win:win.slice(0,5),exacta:ex.slice(0,5),trifecta:tri.slice(0,5)},learned:false};
+  return {createdAt:new Date().toISOString(),generatedAfterResult:typeof validResult==='function'?validResult(r):!!r.pattern,predictionTiming:(typeof validResult==='function'?validResult(r):!!r.pattern)?'after-result':'before-result',race:{venue:r.venue||'',date:r.raceDate||'',race:r.raceName||'',category:r.category||'',lineGroups:r.lineGroups||[],baseMarks:r.baseMarks||{},lineMarks:r.lineMarks||{},weatherInfo:r.weatherInfo||null},win:win.slice(0,2).map(x=>x.car),exacta,trifecta,scoreSnapshot:{win:win.slice(0,5),exacta:ex.slice(0,5),trifecta:tri.slice(0,5)},learned:false};
  }
  function render(){
   window.BBK_AI_PREDICTIONS=model.predictions;
@@ -4043,7 +4057,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
     const incoming=typeof normalizeRecord==='function'?normalizeRecord({
      venue:x.venue||'不明',raceName:x.raceName||'UNKNOWN',raceDate,
      category:x.category||'9車',line1:x.line1||'',lineHeads:x.lineHeads||[],
-     lineGroups:x.lineGroups||[],baseMarks:x.baseMarks||{},lineMarks:x.lineMarks||{},
+     lineGroups:x.lineGroups||[],baseMarks:x.baseMarks||{},lineMarks:x.lineMarks||{},weatherInfo:x.weatherInfo||null,
      lineMarkGroups:x.lineMarkGroups||[],pattern:'',payout:0,payout2ren:0,
      sourceType:'text-auto-prediction',timestamp:Date.now()
     }):x;
