@@ -1262,7 +1262,7 @@ body.book-cover-active .app-shell{
  </div>
  <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
-<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.3">
+<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.4">
  <div class="flex items-center justify-between gap-2 flex-wrap">
   <div><div class="font-bold text-amber-200 tracking-wider">SITE UPDATE CHECK // 公開サイト更新確認</div><div class="text-[10px] text-slate-400 mt-1">この端末に表示中のサイトと、現在公開されているサイトのバージョンを比較します。</div></div>
   <span id="siteUpdateBadge" class="rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold">未確認</span>
@@ -2595,7 +2595,7 @@ function bindUserHub(){
 }
 
 
-const SITE_BUILD_ID='2026-11-15.3';
+const SITE_BUILD_ID='2026-11-15.4';
 async function checkPublishedSiteVersion(){
  const badge=$('siteUpdateBadge'),detail=$('siteUpdateDetail'),checked=$('siteUpdateCheckedAt'),reload=$('reloadUpdatedSiteBtn'),button=$('checkSiteUpdateBtn');
  if(button){button.disabled=true;button.textContent='確認中…';}
@@ -3593,10 +3593,10 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  'use strict';
  const KEY='battleBankAIModelV1';
  const $=id=>document.getElementById(id);
- const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015,weatherRainHead:0,weatherWindHead:0},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01,weatherRainHead:0,weatherWindHead:0},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008,weatherRainHead:0,weatherWindHead:0}},learned:[],updatedAt:null});
+ const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015,weatherRainHead:.03,weatherWindHead:0},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01,weatherRainHead:.03,weatherWindHead:0},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008,weatherRainHead:.03,weatherWindHead:0}},learned:[],updatedAt:null});
  let model=initial();
  try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);if(v&&v.version===1&&v.weights&&v.predictions)model=v;}}catch(e){console.warn('AI model load failed',e);}
- Object.keys(model.weights||{}).forEach(m=>{model.weights[m].weatherRainHead=Number(model.weights[m].weatherRainHead)||0;model.weights[m].weatherWindHead=Number(model.weights[m].weatherWindHead)||0;});
+ Object.keys(model.weights||{}).forEach(m=>{if(!Number.isFinite(Number(model.weights[m].weatherRainHead)))model.weights[m].weatherRainHead=.03;if(model.weights[m].weatherRainHead===undefined)model.weights[m].weatherRainHead=.03;if(!Number.isFinite(Number(model.weights[m].weatherWindHead)))model.weights[m].weatherWindHead=0;if(model.weights[m].weatherWindHead===undefined)model.weights[m].weatherWindHead=0;});
  model.metrics=model.metrics||{races:0,winHits:0,exactaHits:0,trifectaHits:0};
  model.autoLaws=model.autoLaws&&typeof model.autoLaws==='object'?model.autoLaws:{};
  model.metrics.races=Number(model.metrics.races)||0;
