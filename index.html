@@ -1256,6 +1256,12 @@ body.book-cover-active .app-shell{
     <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.markdown,.txt,text/plain,text/markdown,text/*,*/*" onchange="loadMarkdown(event)" oninput="loadMarkdown(event)">
     <p id="mdUploadStatus" role="status" aria-live="polite" class="text-[10px] text-slate-500 mt-2">Markdown / TXT ファイルを選択できます。</p></div>
     <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-2" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea><button id="clearDataInputBtn" type="button" class="touch-btn btn-ghost w-full py-2 rounded-lg text-xs mb-4">入力テキストを消去</button>
+    <div class="rounded-xl border border-cyan-300/30 bg-slate-950/70 p-3 mb-4">
+     <div class="text-xs font-bold text-cyan-200 mb-2">AI RESULT LINK // 保存済み結果との照合</div>
+     <p class="text-[10px] text-slate-400 mb-2">記録庫に保存された確定結果を、AI予測の結果待ちレースと照合します。入力欄のテキストは消去しても、保存済みデータは残ります。</p>
+     <button id="mainSyncSavedResultsBtn" type="button" class="touch-btn btn-cyber w-full py-3 rounded-xl text-xs mb-2">保存済み結果をAI予測に反映</button>
+     <div id="mainAiSyncReport" class="text-[10px] text-slate-300" aria-live="polite">まだ照合していません。照合後に更新件数・保存状態・確認時刻を表示します。</div>
+    </div>
     <div class="flex flex-col gap-3">
      <button id="extractBtn" type="button" class="touch-btn btn-cyber py-4 rounded-xl text-xs tracking-widest">📥 EXTRACT & ARCHIVE [データ抽出保存]</button>
      <button id="syncBtn" type="button" class="touch-btn btn-alert py-4 rounded-xl text-xs tracking-widest">📋 PRE-REGISTER [レース情報を事前登録]</button>
@@ -3804,8 +3810,9 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   const now=new Date().toLocaleString('ja-JP');
   const state=!outcome.saved?'保存失敗':learned>0?'更新あり':available>0?'照合対象あり・新規更新なし':'新規更新なし';
   const color=!outcome.saved?'text-rose-300':learned>0?'text-emerald-300':'text-amber-200';
-  const report=$('aiSyncReport');
-  if(report)report.innerHTML='<b class="'+color+'">照合結果：'+state+'</b>'+
+  const reportHtml='<b class="'+color+'">照合結果：'+state+'</b>'+'<div class="grid grid-cols-2 gap-x-3 gap-y-1 mt-2">'+'<div>AI予測履歴：<b>'+total+'件</b></div><div>新規更新：<b>'+learned+'件</b></div>'+'<div>結果を検出：<b>'+available+'件</b></div><div>結果待ち：<b>'+waiting+'件</b></div>'+'<div>照合済み：<b>'+alreadyLearned+'件</b></div><div>事後生成・対象外：<b>'+postResult+'件</b></div></div>'+'<div class="mt-2 '+(outcome.saved?'text-emerald-200':'text-rose-300')+'">AI学習データ保存：'+(outcome.saved?'成功':'失敗')+'</div>'+'<div class="mt-1 text-slate-400">最終確認：'+now+'</div>'+'<div class="mt-1 text-slate-400">'+(learned>0?'新しい結果をAI学習へ反映しました。':available>0?'一致する結果はありますが、新規学習対象はありません。':'一致する未照合結果は見つかりませんでした。')+'</div>';
+  const report=$('aiSyncReport');if(report)report.innerHTML=reportHtml;
+  const mainReport=$('mainAiSyncReport');if(mainReport)mainReport.innerHTML=reportHtml;'<b class="'+color+'">照合結果：'+state+'</b>'+
    '<div class="grid grid-cols-2 gap-x-3 gap-y-1 mt-2">'+
    '<div>AI予測履歴：<b>'+total+'件</b></div><div>新規更新：<b>'+learned+'件</b></div>'+
    '<div>結果を検出：<b>'+available+'件</b></div><div>結果待ち：<b>'+waiting+'件</b></div>'+
@@ -3887,6 +3894,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   $('aiPredictionStatus').textContent='入力テキストを消去しました。保存済みデータとAI予測履歴は保持されています。';
  });
  $('syncSavedResultsBtn')?.addEventListener('click',syncSavedResultsToAI);
+ $('mainSyncSavedResultsBtn')?.addEventListener('click',syncSavedResultsToAI);
  window.bbkRunMissingAIPredictions=function(keys){
   const target=keys?new Set(keys):null;run(target);
   refreshPredictionQueue();
