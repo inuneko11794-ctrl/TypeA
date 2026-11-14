@@ -1125,6 +1125,18 @@ body.book-cover-active .app-shell{
 }
 #bookCoverGate{transition:none!important}
 </style>
+
+<style id="ai-prediction-readable-colors">
+/* AI予測欄：暗い背景でも本文・状態・結果が読みやすい配色 */
+#aiPredictionOutput,#aiPredictionResultsList{color:#f8fafc!important;font-size:14px!important;line-height:1.8!important;}
+#aiPredictionOutput b,#aiPredictionResultsList b{color:#ffffff!important;font-weight:800!important;}
+#aiPredictionOutput .text-emerald-300,#aiPredictionResultsList .text-emerald-300{color:#86efac!important;font-weight:800!important;}
+#aiPredictionOutput .text-cyan-100,#aiPredictionResultsList .text-cyan-100{color:#a5f3fc!important;font-weight:800!important;}
+#aiPredictionOutput .text-amber-200,#aiPredictionResultsList .text-amber-200{color:#fde68a!important;font-weight:700!important;}
+#aiPredictionOutput .text-slate-400,#aiPredictionResultsList .text-slate-400{color:#d1dbe8!important;}
+#aiPredictionOutput .text-\\[10px\\],#aiPredictionResultsList .text-\\[10px\\]{font-size:12px!important;}
+#aiPredictionStatus,#aiPredictionResultsCount{color:#f1f5f9!important;font-size:13px!important;font-weight:700!important;line-height:1.7!important;}
+</style>
 </head>
 <body class="book-cover-active">
 
@@ -1239,7 +1251,7 @@ body.book-cover-active .app-shell{
  </div>
  <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
-<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-14.4">
+<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-14.5">
  <div class="flex items-center justify-between gap-2 flex-wrap">
   <div><div class="font-bold text-amber-200 tracking-wider">SITE UPDATE CHECK // 公開サイト更新確認</div><div class="text-[10px] text-slate-400 mt-1">この端末に表示中のサイトと、現在公開されているサイトのバージョンを比較します。</div></div>
   <span id="siteUpdateBadge" class="rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold">未確認</span>
@@ -2562,7 +2574,7 @@ function bindUserHub(){
 }
 
 
-const SITE_BUILD_ID='2026-11-14.4';
+const SITE_BUILD_ID='2026-11-14.5';
 async function checkPublishedSiteVersion(){
  const badge=$('siteUpdateBadge'),detail=$('siteUpdateDetail'),checked=$('siteUpdateCheckedAt'),reload=$('reloadUpdatedSiteBtn'),button=$('checkSiteUpdateBtn');
  if(button){button.disabled=true;button.textContent='確認中…';}
