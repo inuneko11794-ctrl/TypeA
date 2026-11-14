@@ -3796,10 +3796,10 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   let parsed=[];
   try{parsed=parseMarkdownForBulk(raw);}catch(e){$('aiPredictionStatus').textContent='テキスト解析エラー：'+(e.message||e);return;}
   if(!parsed.length){$('aiPredictionStatus').textContent='レースを検出できません。DataMap形式のレース見出し・出走表を確認してください。';return;}
-  const headingPattern=/^#\\s*競輪レースデータ[：:].*$/gm,heads=[...raw.matchAll(headingPattern)];
-  let blocks=heads.length?heads.map((m,i)=>raw.slice(m.index,i+1<heads.length?heads[i+1].index:raw.length)):raw.split(/(?=^\\s*(?:\\d{1,2}R|レース名))/m);
+  const headingPattern=/^#\s*競輪レースデータ[：:].*$/gm,heads=[...raw.matchAll(headingPattern)];
+  let blocks=heads.length?heads.map((m,i)=>raw.slice(m.index,i+1<heads.length?heads[i+1].index:raw.length)):raw.split(/(?=^\s*(?:\d{1,2}R|レース名))/m);
   const findResult=b=>{
-   const m=b.match(/(?:確定着順|3連単結果|レース結果|着順)\\s*[：:=|＞>→-]\\s*([1-9])\\s*[-ー→>／/]\\s*([1-9])\\s*[-ー→>／/]\\s*([1-9])/);
+   const m=b.match(/(?:確定着順|3連単結果|レース結果|着順)\s*[：:=|＞>→-]\s*([1-9])\s*[-ー→>／/]\s*([1-9])\s*[-ー→>／/]\s*([1-9])/);
    if(!m)return '';
    const a=m.slice(1,4);return new Set(a).size===3?a.join('-'):'';
   };
