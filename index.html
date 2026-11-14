@@ -1239,7 +1239,7 @@ body.book-cover-active .app-shell{
  </div>
  <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
-<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-14.1">
+<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-14.2">
  <div class="flex items-center justify-between gap-2 flex-wrap">
   <div><div class="font-bold text-amber-200 tracking-wider">SITE UPDATE CHECK // 公開サイト更新確認</div><div class="text-[10px] text-slate-400 mt-1">この端末に表示中のサイトと、現在公開されているサイトのバージョンを比較します。</div></div>
   <span id="siteUpdateBadge" class="rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold">未確認</span>
@@ -1310,7 +1310,7 @@ body.book-cover-active .app-shell{
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.18</h2>
     <p class="text-xs text-slate-400 mb-3">まずは上の DATA UPLINK のテキスト欄を解析して予測します。保存済みDBは予測元に使いません。テキスト内に結果が明記されている場合は事後生成として区別します。</p><button id="predictFromTextBtn" type="button" class="touch-btn btn-alert w-full py-3 rounded-xl text-xs mb-3">入力テキストからAI予測</button>
-    <button id="clearAIInputTextBtn" type="button" class="touch-btn btn-ghost w-full py-2 rounded-xl text-xs mb-3">入力テキストを消去</button>
+    <button id="clearAIInputTextBtn" type="button" class="touch-btn btn-alert w-full py-3 rounded-xl text-xs font-bold mb-3" style="display:block;min-height:48px">DATA UPLINKの入力文章を全消去</button>
     <button id="syncSavedResultsBtn" type="button" class="touch-btn btn-cyber w-full py-3 rounded-xl text-xs mb-3">保存済み結果とAI予測を照合・学習</button>
     <div id="aiSyncReport" class="rounded-xl border border-slate-500/50 bg-slate-950/70 p-3 text-xs text-slate-200 mb-3" aria-live="polite"><b>照合状況</b><div class="mt-1 text-slate-400">まだ照合していません。ボタンを押すと更新件数・保存結果・確認時刻を表示します。</div></div>
     <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
@@ -2561,7 +2561,7 @@ function bindUserHub(){
 }
 
 
-const SITE_BUILD_ID='2026-11-14.1';
+const SITE_BUILD_ID='2026-11-14.2';
 async function checkPublishedSiteVersion(){
  const badge=$('siteUpdateBadge'),detail=$('siteUpdateDetail'),checked=$('siteUpdateCheckedAt'),reload=$('reloadUpdatedSiteBtn'),button=$('checkSiteUpdateBtn');
  if(button){button.disabled=true;button.textContent='確認中…';}
