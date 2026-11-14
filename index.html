@@ -1262,7 +1262,7 @@ body.book-cover-active .app-shell{
  </div>
  <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
-<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.5">
+<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.6">
  <div class="flex items-center justify-between gap-2 flex-wrap">
   <div><div class="font-bold text-amber-200 tracking-wider">SITE UPDATE CHECK // 公開サイト更新確認</div><div class="text-[10px] text-slate-400 mt-1">この端末に表示中のサイトと、現在公開されているサイトのバージョンを比較します。</div></div>
   <span id="siteUpdateBadge" class="rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold">未確認</span>
@@ -1552,7 +1552,7 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
   </div>
   <div id="markPositionSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
   <div id="markPositionResults" class="space-y-3"><div class="discovery-card text-xs">研究CSVの読み込み後、「配置順を全件分析」を実行してください。</div></div>
-  <p class="text-[10px] text-slate-500 mt-3">集計母数は読み込まれた全レース。結果が有効なレースだけを着順率の分母に使用します。単騎はライン内位置分析から除外し、元の印を保持します。ここで得た統計は学習用に記録し、ポイントの増減は別途検証後に判断します。</p>
+  <p class="text-[10px] text-slate-500 mt-3">集計母数は読み込まれた全レース。結果が有効なレースだけを着順率の分母に使用します。単騎はライン内位置分析から除外し、元の印を保持します。配置順特徴量はAIの単勝・2車単・3連単スコアに接続済み。初期係数は0で、事前予測の結果照合後にのみ学習更新します。</p>
  </div>
 </section>
 
@@ -2614,7 +2614,7 @@ function bindUserHub(){
 }
 
 
-const SITE_BUILD_ID='2026-11-15.5';
+const SITE_BUILD_ID='2026-11-15.6';
 async function checkPublishedSiteVersion(){
  const badge=$('siteUpdateBadge'),detail=$('siteUpdateDetail'),checked=$('siteUpdateCheckedAt'),reload=$('reloadUpdatedSiteBtn'),button=$('checkSiteUpdateBtn');
  if(button){button.disabled=true;button.textContent='確認中…';}
@@ -3074,7 +3074,7 @@ function runMarkPositionLab(){
   sections.push('<div class="discovery-card"><div class="font-bold text-xs text-violet-800 mb-2">相手ライン先頭印の組み合わせ</div><div class="overflow-x-auto"><table class="w-full min-w-[620px] text-xs"><thead><tr><th>①先頭 → ②先頭</th><th class="text-right">出現数</th><th class="text-right">判定数</th><th class="text-right">どちらか1着率</th><th class="text-right">どちらか2着以内</th></tr></thead><tbody>'+pairItems.slice(0,30).map(g=>'<tr><td class="font-bold">'+escHtml(g.key)+'</td><td class="text-right">'+g.count+'</td><td class="text-right">'+g.valid+'</td><td class="text-right">'+(g.valid?fmt(g.wins/g.valid*100):'—')+'</td><td class="text-right">'+(g.valid?fmt(g.top2/g.valid*100):'—')+'</td></tr>').join('')+'</tbody></table></div></div>');
  }
  const shapeText=[...shapes.entries()].sort((a,b)=>b[1]-a[1]).slice(0,12).map(([k,v])=>k+'：'+v.toLocaleString()+'R').join(' ／ ');
- host.innerHTML='<div class="discovery-card text-xs mb-2">全'+trickRows.length.toLocaleString()+'レースを対象に集計。結果判定可能 '+valid.toLocaleString()+'レース。最低出現数 '+min+'件。ポイントへの加点・減点は未実施。</div><div class="discovery-card text-[10px] mb-2">ライン構成上位：'+escHtml(shapeText||'データなし')+'</div>'+sections.join('');
+ host.innerHTML='<div class="discovery-card text-xs mb-2">全'+trickRows.length.toLocaleString()+'レースを対象に集計。結果判定可能 '+valid.toLocaleString()+'レース。最低出現数 '+min+'件。配置順特徴量はAIスコアに接続済み。結果照合後に係数を学習。</div><div class="discovery-card text-[10px] mb-2">ライン構成上位：'+escHtml(shapeText||'データなし')+'</div>'+sections.join('');
  const vol=document.getElementById('releaseVol');if(vol)vol.textContent='UPDATE VOL.51';
 }
 
@@ -3679,10 +3679,10 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  'use strict';
  const KEY='battleBankAIModelV1';
  const $=id=>document.getElementById(id);
- const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015,weatherRainHead:0,weatherWindHead:0,weatherRainFrontLine:.01},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01,weatherRainHead:0,weatherWindHead:0,weatherRainFrontLine:.01},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008,weatherRainHead:0,weatherWindHead:0,weatherRainFrontLine:.01}},learned:[],updatedAt:null});
+ const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015,weatherRainHead:0,weatherWindHead:0,weatherRainFrontLine:.01,lineHeadSecondMark:0,lineHeadThirdMark:0,lineSecondHeadMark:0,lineThirdHeadMark:0,lineThirdSecondMark:0,opponentHeadMark:0,opponentSecondMark:0},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01,weatherRainHead:0,weatherWindHead:0,weatherRainFrontLine:.01,lineHeadSecondMark:0,lineHeadThirdMark:0,lineSecondHeadMark:0,lineThirdHeadMark:0,lineThirdSecondMark:0,opponentHeadMark:0,opponentSecondMark:0},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008,weatherRainHead:0,weatherWindHead:0,weatherRainFrontLine:.01,lineHeadSecondMark:0,lineHeadThirdMark:0,lineSecondHeadMark:0,lineThirdHeadMark:0,lineThirdSecondMark:0,opponentHeadMark:0,opponentSecondMark:0}},learned:[],updatedAt:null});
  let model=initial();
  try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);if(v&&v.version===1&&v.weights&&v.predictions)model=v;}}catch(e){console.warn('AI model load failed',e);}
- Object.keys(model.weights||{}).forEach(m=>{model.weights[m].weatherRainHead=0;if(!Number.isFinite(Number(model.weights[m].weatherWindHead)))model.weights[m].weatherWindHead=0;if(model.weights[m].weatherWindHead===undefined)model.weights[m].weatherWindHead=0;if(!Number.isFinite(Number(model.weights[m].weatherRainFrontLine)))model.weights[m].weatherRainFrontLine=.01;if(model.weights[m].weatherRainFrontLine===undefined)model.weights[m].weatherRainFrontLine=.01;});
+ Object.keys(model.weights||{}).forEach(m=>{model.weights[m].weatherRainHead=0;if(!Number.isFinite(Number(model.weights[m].weatherWindHead)))model.weights[m].weatherWindHead=0;if(model.weights[m].weatherWindHead===undefined)model.weights[m].weatherWindHead=0;if(!Number.isFinite(Number(model.weights[m].weatherRainFrontLine)))model.weights[m].weatherRainFrontLine=.01;if(model.weights[m].weatherRainFrontLine===undefined)model.weights[m].weatherRainFrontLine=.01;['lineHeadSecondMark','lineHeadThirdMark','lineSecondHeadMark','lineThirdHeadMark','lineThirdSecondMark','opponentHeadMark','opponentSecondMark'].forEach(k=>{if(!Number.isFinite(Number(model.weights[m][k])))model.weights[m][k]=0;});});
  model.metrics=model.metrics||{races:0,winHits:0,exactaHits:0,trifectaHits:0};
  model.autoLaws=model.autoLaws&&typeof model.autoLaws==='object'?model.autoLaws:{};
  model.metrics.races=Number(model.metrics.races)||0;
@@ -3696,16 +3696,30 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  const marks={'◎':4,'◯':3,'〇':3,'○':3,'△':2,'✕':1,'×':1,'⑳':3.5,'●':2.5,'▲':1.7,'✖':.8,'☆':.5,'★':.2};
  function features(r,car){
   const groups=Array.isArray(r.lineGroups)?r.lineGroups:[];
+  const lineMarks=r.lineMarks&&Object.keys(r.lineMarks).length?r.lineMarks:(typeof transformLineMarks==='function'?transformLineMarks(groups,r.baseMarks||{}):(r.baseMarks||{}));
   let lineIndex=-1,pos=0,len=1,head=0;
   groups.forEach((g,i)=>{const p=(g||[]).map(Number).indexOf(Number(car));if(p>=0){lineIndex=i;pos=p;len=g.length;head=p===0?1:0;}});
-  const mark=String((r.baseMarks||{})[car]||(r.lineMarks||{})[car]||'');
+  const mark=String(lineMarks[car]||(r.baseMarks||{})[car]||'');
+  const ownLine=lineIndex>=0?(groups[lineIndex]||[]):[];
+  const markAt=(group,index)=>(group&&group.length>index?(marks[String(lineMarks[group[index]]||(r.baseMarks||{})[group[index]]||'')]||0)/4:0);
+  const otherLines=groups.filter((g,i)=>i!==lineIndex&&g&&g.length>=2);
+  const meanOther=(index)=>otherLines.length?otherLines.reduce((sum,g)=>sum+markAt(g,index),0)/otherLines.length:0;
   const wx=r.weatherInfo||{};
   const rain=(wx.rain||wx.snow)?1:0;
   const frontLine=groups.length&&groups[0].map(Number).includes(Number(car))?1:0;
   const wind=Number.isFinite(Number(wx.windSpeed))?Math.max(0,Math.min(1.5,Number(wx.windSpeed)/5)):0;
-  return {mark:(marks[mark]||0)/4,head,pos:len>1?pos/(len-1):0,len:Math.min(len,4)/4,car:Number(car)/9,weatherWindHead:head*wind,weatherRainFrontLine:frontLine*rain};
+  return {
+   mark:(marks[mark]||0)/4,head,pos:len>1?pos/(len-1):0,len:Math.min(len,4)/4,car:Number(car)/9,
+   weatherWindHead:head*wind,weatherRainFrontLine:frontLine*rain,
+   lineHeadSecondMark:pos===0?markAt(ownLine,1):0,
+   lineHeadThirdMark:pos===0?markAt(ownLine,2):0,
+   lineSecondHeadMark:pos===1?markAt(ownLine,0):0,
+   lineThirdHeadMark:pos===2?markAt(ownLine,0):0,
+   lineThirdSecondMark:pos===2?markAt(ownLine,1):0,
+   opponentHeadMark:meanOther(0),opponentSecondMark:meanOther(1)
+  };
  }
- function score(r,car,market){const f=features(r,car),w=model.weights[market];return f.mark*w.mark+f.head*w.head-f.pos*w.pos+f.len*w.len-f.car*w.car+f.weatherWindHead*(w.weatherWindHead||0)+f.weatherRainFrontLine*(w.weatherRainFrontLine||0);}
+ function score(r,car,market){const f=features(r,car),w=model.weights[market];return f.mark*w.mark+f.head*w.head-f.pos*w.pos+f.len*w.len-f.car*w.car+f.weatherWindHead*(w.weatherWindHead||0)+f.weatherRainFrontLine*(w.weatherRainFrontLine||0)+f.lineHeadSecondMark*(w.lineHeadSecondMark||0)+f.lineHeadThirdMark*(w.lineHeadThirdMark||0)+f.lineSecondHeadMark*(w.lineSecondHeadMark||0)+f.lineThirdHeadMark*(w.lineThirdHeadMark||0)+f.lineThirdSecondMark*(w.lineThirdSecondMark||0)+f.opponentHeadMark*(w.opponentHeadMark||0)+f.opponentSecondMark*(w.opponentSecondMark||0);}
  function rosterCars(r){
   const set=new Set((r.starters||[]).map(Number).filter(n=>n>=1&&n<=9));(r.lineGroups||[]).forEach(g=>(g||[]).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));}));
   Object.keys(r.baseMarks||{}).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));});
