@@ -1290,6 +1290,8 @@ body.book-cover-active .app-shell{
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.18</h2>
     <p class="text-xs text-slate-400 mb-3">まずは上の DATA UPLINK のテキスト欄を解析して予測します。保存済みDBは予測元に使いません。テキスト内に結果が明記されている場合は事後生成として区別します。</p><button id="predictFromTextBtn" type="button" class="touch-btn btn-alert w-full py-3 rounded-xl text-xs mb-3">入力テキストからAI予測</button>
+    <button id="clearAIInputTextBtn" type="button" class="touch-btn btn-ghost w-full py-2 rounded-xl text-xs mb-3">入力テキストを消去</button>
+    <button id="syncSavedResultsBtn" type="button" class="touch-btn btn-cyber w-full py-3 rounded-xl text-xs mb-3">保存済み結果とAI予測を照合・学習</button>
     <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
     <input id="aiRaceDate" type="date" class="field text-sm mb-3">
     <div class="mb-3">
@@ -3737,12 +3739,32 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
    (laws.length?laws.slice(0,20).map(x=>'<div class="border-b border-slate-700/60 py-2"><div class="flex justify-between gap-2"><b>'+esc(x.label)+'</b><span class="font-bold '+(x.state==='継続'?'text-emerald-300':x.state==='破棄'?'text-rose-300':'text-amber-200')+'">'+x.state+'</span></div><div class="text-[10px] text-slate-400">全件 '+x.trainN+'出走・1着率 '+(100*x.trainRate).toFixed(1)+'% / '+esc(x.reason)+'</div></div>').join(''):'条件を満たす法則候補はまだありません。データが増えると自動で候補を作ります。')+'</div>';
   out.innerHTML=overview+lawHtml+'<p class="text-[10px] text-slate-500 mt-2">※出走数を分母にした1着率。印・車番・位置に加え、車数、分戦形式、順序付きライン構成（例：3+2+2と2+3+2）を評価します。単騎はライン位置に混ぜず独立扱い。候補の最低出走数20。全件集計のため独立検証ではありません。単純集計による自動スクリーニングであり、因果関係や将来の再現性を証明するものではありません。</p>';
  }
+ function normalizedRaceIdentity(r){
+  const venue=String(r?.venue||'').replace(/\s+/g,'').trim();
+  const date=String(r?.raceDate||r?.date||'').replace(/\D/g,'');
+  const raceRaw=String(r?.raceName||r?.race||'');
+  const raceMatch=raceRaw.match(/(\d{1,2})\s*R?/i);
+  const race=raceMatch?String(Number(raceMatch[1]))+'R':'';
+  return venue&&date&&race?[venue,date,race].join('|'):'';
+ }
+ function findSavedResultForPrediction(prediction,predictionKey){
+  const exact=(Array.isArray(savedRecords)?savedRecords:[]).find(r=>key(r)===predictionKey&&validResult(r));
+  if(exact)return exact;
+  const identity=normalizedRaceIdentity({venue:prediction?.race?.venue,date:prediction?.race?.date,race:prediction?.race?.race});
+  if(!identity)return null;
+  return (Array.isArray(savedRecords)?savedRecords:[]).find(r=>validResult(r)&&normalizedRaceIdentity(r)===identity)||null;
+ }
  function learnPending(){
   let count=0;
-  (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
-   if(!validResult(r))return;
-   const k=key(r),p=model.predictions[k];if(!p||p.learned||p.generatedAfterResult)return;
-   const actual=String(r.pattern).split('-').map(Number),cars=rosterCars(r);if(p.generatedAfterResult!==false||actual.length!==3||!cars.length)return;
+  Object.entries(model.predictions||{}).forEach(([predictionKey,p])=>{
+   if(!p||p.learned||p.generatedAfterResult)return;
+   const saved=findSavedResultForPrediction(p,predictionKey);if(!saved)return;
+   const r={...p.race,...saved,
+    lineGroups:Array.isArray(saved.lineGroups)&&saved.lineGroups.length?saved.lineGroups:(p.race?.lineGroups||[]),
+    baseMarks:saved.baseMarks&&Object.keys(saved.baseMarks).length?saved.baseMarks:(p.race?.baseMarks||{}),
+    lineMarks:saved.lineMarks&&Object.keys(saved.lineMarks).length?saved.lineMarks:(p.race?.lineMarks||{})};
+   const actual=String(saved.pattern||'').split('-').map(Number),cars=rosterCars(r);
+   if(p.generatedAfterResult!==false||actual.length!==3||!cars.length)return;
    [['win',[actual[0]]],['exacta',actual.slice(0,2)],['trifecta',actual.slice(0,3)]].forEach(([market,targets])=>{
     const w=model.weights[market],rate=market==='win'?1:market==='exacta'?.55:.35;
     cars.forEach(car=>{
@@ -3751,19 +3773,32 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
      Object.keys(f).forEach(kf=>{w[kf]=Math.max(-3,Math.min(5,(Number(w[kf])||0)+step*f[kf]));});
     });
    });
-   const hitWin=p.win.includes(actual[0]);
-   const hitExacta=p.exacta.some(x=>x[0]===actual[0]&&x[1]===actual[1]);
-   const hitTrifecta=p.trifecta.some(x=>x[0]===actual[0]&&x[1]===actual[1]&&x[2]===actual[2]);
+   const hitWin=(p.win||[]).includes(actual[0]);
+   const hitExacta=(p.exacta||[]).some(x=>x[0]===actual[0]&&x[1]===actual[1]);
+   const hitTrifecta=(p.trifecta||[]).some(x=>x[0]===actual[0]&&x[1]===actual[1]&&x[2]===actual[2]);
    model.metrics.races++;
    if(hitWin)model.metrics.winHits++;
    if(hitExacta)model.metrics.exactaHits++;
    if(hitTrifecta)model.metrics.trifectaHits++;
    p.learned=true;p.result=actual;p.evaluation={win:hitWin,exacta:hitExacta,trifecta:hitTrifecta,checkedAt:new Date().toISOString()};
-   p.learnedAt=new Date().toISOString();model.learned.push({key:k,result:actual,evaluation:p.evaluation,at:p.learnedAt});count++;
+   p.learnedAt=new Date().toISOString();model.learned.push({key:predictionKey,result:actual,evaluation:p.evaluation,at:p.learnedAt});count++;
   });
-  if(count){model.updatedAt=new Date().toISOString();save();if(typeof logToTerminal==='function')logToTerminal('> AI自動学習：'+count+'レースを反映しました。','success');}
+  if(count){model.updatedAt=new Date().toISOString();save();if(typeof logToTerminal==='function')logToTerminal('> 保存済み結果とのAI照合・学習：'+count+'レースを反映しました。','success');}
   render();
  }
+ function syncSavedResultsToAI(){
+  let waiting=0,available=0;
+  Object.entries(model.predictions||{}).forEach(([k,p])=>{
+   if(!p||p.learned||p.generatedAfterResult)return;
+   if(findSavedResultForPrediction(p,k))available++;else waiting++;
+  });
+  const before=model.metrics.races||0;
+  learnPending();
+  const learned=(model.metrics.races||0)-before;
+  $('aiPredictionStatus').textContent='保存済み結果との照合完了：新規照合・学習 '+learned+'件 / 結果待ち '+waiting+'件 / 結果データ検出 '+available+'件';
+  refreshResultChoices();render();
+ }
+
  window.addEventListener('bbk-extra-seed-ready',()=>{try{render();}catch(e){console.warn('外部学習データ反映後のAI更新に失敗',e);}});
  function run(targetKeys){
   const date=$('aiRaceDate').value;
@@ -3828,6 +3863,12 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   predictFromCurrentText();
  };
  $('predictFromTextBtn')?.addEventListener('click',predictFromCurrentText);
+ $('clearAIInputTextBtn')?.addEventListener('click',()=>{
+  const el=$('dataInput');if(el)el.value='';
+  const st=$('mdUploadStatus');if(st)st.textContent='入力テキストを消去しました。保存済みレースデータ・AI予測履歴は削除されません。';
+  $('aiPredictionStatus').textContent='入力テキストを消去しました。保存済みデータとAI予測履歴は保持されています。';
+ });
+ $('syncSavedResultsBtn')?.addEventListener('click',syncSavedResultsToAI);
  window.bbkRunMissingAIPredictions=function(keys){
   const target=keys?new Set(keys):null;run(target);
   refreshPredictionQueue();
