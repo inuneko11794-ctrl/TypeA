@@ -1255,7 +1255,7 @@ body.book-cover-active .app-shell{
     <button id="openManualBtn" type="button" class="touch-btn btn-alert w-full py-4 px-4 mb-5 rounded-xl flex justify-between items-center text-sm tracking-widest"><span>⚡ 手動入力モード</span><span>▶</span></button>
     <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.markdown,.txt,text/plain,text/markdown,text/*,*/*" onchange="loadMarkdown(event)" oninput="loadMarkdown(event)">
     <p id="mdUploadStatus" role="status" aria-live="polite" class="text-[10px] text-slate-500 mt-2">Markdown / TXT ファイルを選択できます。</p></div>
-    <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-4" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea>
+    <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-2" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea><button id="clearDataInputBtn" type="button" class="touch-btn btn-ghost w-full py-2 rounded-lg text-xs mb-4">入力テキストを消去</button>
     <div class="flex flex-col gap-3">
      <button id="extractBtn" type="button" class="touch-btn btn-cyber py-4 rounded-xl text-xs tracking-widest">📥 EXTRACT & ARCHIVE [データ抽出保存]</button>
      <button id="syncBtn" type="button" class="touch-btn btn-alert py-4 rounded-xl text-xs tracking-widest">📋 PRE-REGISTER [レース情報を事前登録]</button>
@@ -1289,7 +1289,7 @@ body.book-cover-active .app-shell{
   <div class="glass-panel p-4 sm:p-5 mb-5" id="aiPredictionLab">
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.18</h2>
-    <p class="text-xs text-slate-400 mb-3">出走表の保存データから単勝・2車単・3連単を別々に予測します。結果登録後は未学習レースだけを自動学習します。</p>
+    <p class="text-xs text-slate-400 mb-3">保存済み出走表から予測します。結果入力済みレースも予測対象ですが、結果入力後に作った予測は事後生成として学習・的中率集計から除外します。</p>
     <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
     <input id="aiRaceDate" type="date" class="field text-sm mb-3">
     <div class="mb-3">
@@ -1303,6 +1303,7 @@ body.book-cover-active .app-shell{
     </div>
     <div id="aiPredictionStatus" class="text-xs text-slate-300 mb-2" aria-live="polite">予測履歴 0件 / 学習済み 0件</div>
     <div id="aiPredictionOutput" class="rounded-xl border border-fuchsia-300/30 bg-slate-950/70 p-3 text-xs text-slate-200 max-h-96 overflow-y-auto">出走表を読み込んで「未予測レースを予測」を押してください。</div>
+    <div id="aiPredictionResultsPage" class="mt-4 rounded-xl border border-cyan-300/30 bg-slate-950/70 p-3"><div class="flex flex-wrap items-center justify-between gap-2 mb-2"><b class="text-cyan-200 text-sm">AI PREDICTION RESULTS // 予測結果一覧</b><select id="aiPredictionResultsFilter" class="field text-xs w-auto"><option value="all">すべて</option><option value="before">事前予測</option><option value="after">事後生成</option><option value="learned">照合・学習済み</option></select></div><div id="aiPredictionResultsCount" class="text-[10px] text-slate-400 mb-2">予測履歴 0件</div><div id="aiPredictionResultsList" class="max-h-[560px] overflow-y-auto text-xs text-slate-200">予測結果はまだありません。</div></div>
     <div class="mt-4 rounded-xl border border-emerald-300/30 bg-slate-950/70 p-3">
      <div class="flex items-center justify-between gap-2 mb-2"><b class="text-emerald-200 text-sm">AI DISCOVERY NOTE // 発見ノート</b><button id="refreshDiscoveryBtn" type="button" class="touch-btn btn-ghost px-3 py-2 rounded-lg text-[10px]">再集計</button></div>
      <p class="text-[10px] text-slate-400 mb-2">保存済みの結果入力レースを全件集計。車番・ライン位置・印ごとの出現数と1着率／2着以内率を記録します。予測モデルの重みは変更しません。</p>
@@ -3632,7 +3633,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   refreshPredictionQueue();
   const rows=Object.values(model.predictions),learned=rows.filter(x=>x.learned).length;
   $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 学習済み '+learned+'件';
-  const recent=rows.slice(-8).reverse();
+  const recent=rows.slice().reverse();
   const payoutModel=payoutLearner();
   $('aiPredictionOutput').innerHTML=recent.length?recent.map(p=>{
    const race=savedRecords.find(r=>key(r)===[p.race.venue||'',p.race.date||'',p.race.race||''].join('|'))||p.race;
@@ -3640,6 +3641,16 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
    const evalText=p.learned?' / 的中：単勝 '+(p.evaluation?.win?'○':'×')+'・2車単 '+(p.evaluation?.exacta?'○':'×')+'・3連単 '+(p.evaluation?.trifecta?'○':'×'):p.generatedAfterResult?' / 事後生成のため的中率・学習対象外':'';
    return '<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.generatedAfterResult?'事後生成':p.learned?'事前予測・学習済み':'事前予測・結果待ち')+'</span><div class="mt-1">単勝（2点）：'+p.win.join('・')+'</div><div>2車単（4点）：'+p.exacta.map(x=>x.join('-')).join(' / ')+'</div><div>3連単（10点）：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div><div class="text-[10px] text-slate-400">結果照合'+evalText+'</div></div>';
   }).join(''):'予測履歴はまだありません。';
+  const filter=$('aiPredictionResultsFilter')?.value||'all';
+  const filtered=rows.slice().reverse().filter(p=>filter==='after'?!!p.generatedAfterResult:filter==='before'?!p.generatedAfterResult:filter==='learned'?!!p.learned:true);
+  const resultRows=filtered.map(p=>{
+   const state=p.generatedAfterResult?'事後生成':p.learned?'事前予測・照合済み':'事前予測・未照合';
+   const actual=p.result?' / 実着順 '+p.result.join('-'):'';
+   const evalText=p.evaluation?' / 単勝 '+(p.evaluation.win?'○':'×')+'・2車単 '+(p.evaluation.exacta?'○':'×')+'・3連単 '+(p.evaluation.trifecta?'○':'×'):'';
+   return '<div class="border-b border-cyan-300/20 py-3"><div class="font-bold text-cyan-100">'+esc(p.race.venue||'開催地不明')+' '+esc(p.race.date||'日付未設定')+' '+esc(p.race.race||'')+'</div><div class="text-[10px] text-amber-200 my-1">'+state+actual+evalText+'</div><div>単勝 2点：'+(p.win||[]).join('・')+'</div><div>2車単 4点：'+(p.exacta||[]).map(x=>x.join('-')).join(' / ')+'</div><div>3連単 10点：'+(p.trifecta||[]).map(x=>x.join('-')).join(' / ')+'</div></div>';
+  }).join('');
+  if($('aiPredictionResultsCount'))$('aiPredictionResultsCount').textContent='表示 '+filtered.length+'件 / 全予測 '+rows.length+'件';
+  if($('aiPredictionResultsList'))$('aiPredictionResultsList').innerHTML=resultRows||'この条件の予測結果はありません。';
   const m=model.metrics;
   const pct=(n,d)=>d?((100*n/d).toFixed(1)+'%'):'—';
   $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 学習済み '+learned+'件 / 的中率 単勝 '+pct(m.winHits,m.races)+'・2車単 '+pct(m.exactaHits,m.races)+'・3連単 '+pct(m.trifectaHits,m.races)+'（検証 '+m.races+'R） / 配当学習 '+payoutModel.count+'件（外部 '+(payoutModel.externalCount||0)+'件）';
@@ -3759,16 +3770,15 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   let made=0,skipped=0,dateChanged=false;
   (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
    const k=key(r);if(targetKeys&&!targetKeys.has(k))return;
-   if(!Array.isArray(r.lineGroups)||!r.lineGroups.length){skipped++;return;}
    if(!r.raceDate&&date){r.raceDate=date;dateChanged=true;}
-   if(!r.raceDate){skipped++;return;}
+   if(rosterCars(r).length<3){skipped++;return;}
    if(model.predictions[k])return;
    const p=predict(r);if(!p.win.length){skipped++;return;}
    model.predictions[k]=p;made++;
   });
   if(dateChanged&&typeof persist==='function')persist();
   const ok=save();render();refreshResultChoices();
-  $('aiPredictionStatus').textContent='今回の新規予測 '+made+'件 / 対象外 '+skipped+'件 / 保存 '+(ok?'成功':'失敗');
+  $('aiPredictionStatus').textContent='今回の新規予測 '+made+'件 / 対象外 '+skipped+'件（出走表の車番不足など） / 保存 '+(ok?'成功':'失敗');
   if(typeof logToTerminal==='function')logToTerminal('> AI予測：新規 '+made+'件。予測スナップショットを独立保存しました。',ok?'success':'error');
  }
  function refreshPredictionQueue(){
@@ -3883,7 +3893,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  $('exportAIModelBtn').addEventListener('click',exportModel);
  const saveButton=$('manSaveBtn');
  if(saveButton)saveButton.addEventListener('click',()=>{learnPending();});
- refreshResultChoices();render();renderDiscoveries();
+ $('aiPredictionResultsFilter')?.addEventListener('change',render);\n $('clearDataInputBtn')?.addEventListener('click',()=>{const el=$('dataInput');if(el)el.value='';const st=$('mdUploadStatus');if(st)st.textContent='入力テキストを消去しました。保存済みレースデータは削除されません。';});\n refreshResultChoices();render();renderDiscoveries();
  window.addEventListener('beforeunload',()=>{save();});
 })();
 </script>
