@@ -3593,10 +3593,10 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  'use strict';
  const KEY='battleBankAIModelV1';
  const $=id=>document.getElementById(id);
- const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015,weatherRainHead:.03,weatherWindHead:0},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01,weatherRainHead:.03,weatherWindHead:0},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008,weatherRainHead:.03,weatherWindHead:0}},learned:[],updatedAt:null});
+ const initial=()=>({version:1,predictions:{},weights:{win:{mark:1,head:1.15,pos:.55,len:.2,car:.015,weatherRainHead:.03,weatherWindHead:0,weatherRainFrontLine:.01},exacta:{mark:1,head:1.1,pos:.5,len:.18,car:.01,weatherRainHead:.03,weatherWindHead:0,weatherRainFrontLine:.01},trifecta:{mark:1,head:1.05,pos:.45,len:.16,car:.008,weatherRainHead:.03,weatherWindHead:0,weatherRainFrontLine:.01}},learned:[],updatedAt:null});
  let model=initial();
  try{const raw=localStorage.getItem(KEY);if(raw){const v=JSON.parse(raw);if(v&&v.version===1&&v.weights&&v.predictions)model=v;}}catch(e){console.warn('AI model load failed',e);}
- Object.keys(model.weights||{}).forEach(m=>{if(!Number.isFinite(Number(model.weights[m].weatherRainHead)))model.weights[m].weatherRainHead=.03;if(model.weights[m].weatherRainHead===undefined)model.weights[m].weatherRainHead=.03;if(!Number.isFinite(Number(model.weights[m].weatherWindHead)))model.weights[m].weatherWindHead=0;if(model.weights[m].weatherWindHead===undefined)model.weights[m].weatherWindHead=0;});
+ Object.keys(model.weights||{}).forEach(m=>{if(!Number.isFinite(Number(model.weights[m].weatherRainHead)))model.weights[m].weatherRainHead=.03;if(model.weights[m].weatherRainHead===undefined)model.weights[m].weatherRainHead=.03;if(!Number.isFinite(Number(model.weights[m].weatherWindHead)))model.weights[m].weatherWindHead=0;if(model.weights[m].weatherWindHead===undefined)model.weights[m].weatherWindHead=0;if(!Number.isFinite(Number(model.weights[m].weatherRainFrontLine)))model.weights[m].weatherRainFrontLine=.01;if(model.weights[m].weatherRainFrontLine===undefined)model.weights[m].weatherRainFrontLine=.01;});
  model.metrics=model.metrics||{races:0,winHits:0,exactaHits:0,trifectaHits:0};
  model.autoLaws=model.autoLaws&&typeof model.autoLaws==='object'?model.autoLaws:{};
  model.metrics.races=Number(model.metrics.races)||0;
@@ -3615,10 +3615,11 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   const mark=String((r.baseMarks||{})[car]||(r.lineMarks||{})[car]||'');
   const wx=r.weatherInfo||{};
   const rain=(wx.rain||wx.snow)?1:0;
+  const frontLine=groups.length&&groups[0].map(Number).includes(Number(car))?1:0;
   const wind=Number.isFinite(Number(wx.windSpeed))?Math.max(0,Math.min(1.5,Number(wx.windSpeed)/5)):0;
-  return {mark:(marks[mark]||0)/4,head,pos:len>1?pos/(len-1):0,len:Math.min(len,4)/4,car:Number(car)/9,weatherRainHead:head*rain,weatherWindHead:head*wind};
+  return {mark:(marks[mark]||0)/4,head,pos:len>1?pos/(len-1):0,len:Math.min(len,4)/4,car:Number(car)/9,weatherRainHead:head*rain,weatherWindHead:head*wind,weatherRainFrontLine:frontLine*rain};
  }
- function score(r,car,market){const f=features(r,car),w=model.weights[market];return f.mark*w.mark+f.head*w.head-f.pos*w.pos+f.len*w.len-f.car*w.car+f.weatherRainHead*(w.weatherRainHead||0)+f.weatherWindHead*(w.weatherWindHead||0);}
+ function score(r,car,market){const f=features(r,car),w=model.weights[market];return f.mark*w.mark+f.head*w.head-f.pos*w.pos+f.len*w.len-f.car*w.car+f.weatherRainHead*(w.weatherRainHead||0)+f.weatherWindHead*(w.weatherWindHead||0)+f.weatherRainFrontLine*(w.weatherRainFrontLine||0);}
  function rosterCars(r){
   const set=new Set((r.starters||[]).map(Number).filter(n=>n>=1&&n<=9));(r.lineGroups||[]).forEach(g=>(g||[]).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));}));
   Object.keys(r.baseMarks||{}).forEach(n=>{if(Number(n)>=1&&Number(n)<=9)set.add(Number(n));});
@@ -3955,14 +3956,14 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
    const b=blocks[i]||raw,groups=Array.isArray(x.lineGroups)?x.lineGroups:[];
    const starters=[...new Set(groups.flat().concat(Object.keys(x.baseMarks||{}).map(Number)).filter(n=>Number.isInteger(n)&&n>=1&&n<=9))];
    const result=findResult(b);
-   const rec={venue:x.venue,raceDate:x.raceDate||extractRaceDate(raw)||'',raceName:x.raceName,category:x.category,lineGroups:groups,lineHeads:x.lineHeads||[],baseMarks:x.baseMarks||{},lineMarks:x.lineMarks||{},starters,pattern:result};
+   const rec={venue:x.venue,raceDate:x.raceDate||extractRaceDate(raw)||'',raceName:x.raceName,category:x.category,lineGroups:groups,lineHeads:x.lineHeads||[],baseMarks:x.baseMarks||{},lineMarks:x.lineMarks||{},weatherInfo:x.weatherInfo||null,starters,pattern:result};
    if(rosterCars(rec).length<3){skipped++;return;}
    const k=key(rec);
    if(model.predictions[k]){already++;return;}
    const p=predict(rec);
    if(!p.win.length){skipped++;return;}
    p.generatedAfterResult=!!result;p.predictionTiming=result?'after-result':'before-result';
-   p.race={venue:rec.venue||'',date:rec.raceDate||'',race:rec.raceName||'',category:rec.category||'',lineGroups:rec.lineGroups,baseMarks:rec.baseMarks,lineMarks:rec.lineMarks};
+   p.race={venue:rec.venue||'',date:rec.raceDate||'',race:rec.raceName||'',category:rec.category||'',lineGroups:rec.lineGroups,baseMarks:rec.baseMarks,lineMarks:rec.lineMarks,weatherInfo:rec.weatherInfo||null};
    if(result){p.textResult=result;after++;}
    model.predictions[k]=p;made++;
   });
