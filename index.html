@@ -1262,7 +1262,7 @@ body.book-cover-active .app-shell{
  </div>
  <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
-<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.4">
+<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.5">
  <div class="flex items-center justify-between gap-2 flex-wrap">
   <div><div class="font-bold text-amber-200 tracking-wider">SITE UPDATE CHECK // 公開サイト更新確認</div><div class="text-[10px] text-slate-400 mt-1">この端末に表示中のサイトと、現在公開されているサイトのバージョンを比較します。</div></div>
   <span id="siteUpdateBadge" class="rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold">未確認</span>
@@ -1534,6 +1534,25 @@ AWAITING COMMAND... MONITORS UNSTABLE</div>
   <div id="productMarkSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
   <div id="productMarkResults" class="space-y-3"><div class="discovery-card text-xs">CSVを読み込み、積×印分析を実行してください。</div></div>
   <p class="text-[10px] text-slate-500 mt-3">印は確定着順順に「1着－2着－3着」で表示。ライン内の印は⑳・●・▲・✖・☆・★へ変換して集計します。単騎は元の印を保持します。対象クラスは上の「対象」設定と連動します。</p>
+ </div>
+</section>
+
+
+<section class="glass-panel p-4 sm:p-5 mb-8" id="markPositionLearningLab" data-tab-panel="analysis">
+ <div class="panel-content">
+  <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+   <h2 class="kicker border-l-4 border-violet-500 pl-2">MARK POSITION LEARNING LAB // 印の配置順・全レース学習</h2>
+   <span class="discovery-chip">ALL RACES / NO POINT CHANGE</span>
+  </div>
+  <p class="text-xs text-sky-800 mb-3">ライン内の先頭・2番手・3番手以降の印配置と、相手ラインの先頭・2番手の印配置を独立した特徴量として集計します。全レースを対象にし、予測ポイントにはまだ反映しません。</p>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+   <div><label class="block text-[10px] font-bold text-violet-800 mb-1">最低出現数</label><select id="markPositionMin" class="field !py-2 text-xs"><option value="5">5件</option><option value="10" selected>10件</option><option value="20">20件</option><option value="30">30件</option><option value="50">50件</option></select></div>
+   <div class="flex items-end"><button id="markPositionRunBtn" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs">配置順を全件分析</button></div>
+   <div class="flex items-end"><button id="markPositionRefreshBtn" type="button" class="touch-btn btn-ghost w-full py-2.5 rounded-xl text-xs">再集計</button></div>
+  </div>
+  <div id="markPositionSummary" class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3"></div>
+  <div id="markPositionResults" class="space-y-3"><div class="discovery-card text-xs">研究CSVの読み込み後、「配置順を全件分析」を実行してください。</div></div>
+  <p class="text-[10px] text-slate-500 mt-3">集計母数は読み込まれた全レース。結果が有効なレースだけを着順率の分母に使用します。単騎はライン内位置分析から除外し、元の印を保持します。ここで得た統計は学習用に記録し、ポイントの増減は別途検証後に判断します。</p>
  </div>
 </section>
 
@@ -2595,7 +2614,7 @@ function bindUserHub(){
 }
 
 
-const SITE_BUILD_ID='2026-11-15.4';
+const SITE_BUILD_ID='2026-11-15.5';
 async function checkPublishedSiteVersion(){
  const badge=$('siteUpdateBadge'),detail=$('siteUpdateDetail'),checked=$('siteUpdateCheckedAt'),reload=$('reloadUpdatedSiteBtn'),button=$('checkSiteUpdateBtn');
  if(button){button.disabled=true;button.textContent='確認中…';}
@@ -2992,7 +3011,74 @@ function runLinePositionMatrix(){
  summary.innerHTML=`<div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">配当入力済み・対象</div><div class="font-mono-tech text-lg font-bold">${rows.length.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">2ライン以上</div><div class="font-mono-tech text-lg font-bold">${eligible.toLocaleString()}件</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">高配当基準</div><div class="font-mono-tech text-lg font-bold">${yen(high)}</div></div><div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">低配当基準</div><div class="font-mono-tech text-lg font-bold">${yen(low)}</div></div>`;
  out.innerHTML=eligible?render(headMap,'①②③④ LINE HEAD TUPLE // 先頭車番の並び')+render(fullMap,'FULL LINE SEQUENCE // ライン全体の並び'):'<div class="discovery-card text-xs">単騎を除外した後、2ライン以上ある配当入力済みレースがありません。</div>';
 }
-document.addEventListener('DOMContentLoaded',()=>{restoreResearchCSV();const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn'),m=$t('medianHeadRunBtn'),pl=$t('perLineRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);if(m)m.addEventListener('click',runMedianHeadPairs);if(pl)pl.addEventListener('click',runPerLineCombos);const lm=$t('lineMatrixRunBtn');if(lm)lm.addEventListener('click',runLinePositionMatrix); if($t('trickClass'))$t('trickClass').addEventListener('change',renderMarkJsonComparison); if($t('lowPayoutThreshold'))$t('lowPayoutThreshold').addEventListener('change',renderMarkJsonComparison); });
+
+function runMarkPositionLab(){
+ const host=$t('markPositionResults'),summary=$t('markPositionSummary');
+ if(!host||!summary)return;
+ if(!trickRows.length){host.innerHTML='<div class="discovery-card text-xs">研究CSVの読み込みを待っています。読み込み後に再実行してください。</div>';return;}
+ const min=Math.max(1,Number($t('markPositionMin')?.value)||10);
+ const validResult=r=>Array.isArray(r.result)&&r.result.length>=3&&r.result.slice(0,3).every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(r.result.slice(0,3)).size===3;
+ const fmt=v=>Number(v||0).toFixed(1)+'%';
+ const escHtml=v=>esc(v);
+ const stats=new Map(),headPairs=new Map(),shapes=new Map();
+ let valid=0,withLines=0,lineObs=0;
+ const add=(map,key,headWon,headTop2)=>{
+  if(!map.has(key))map.set(key,{key,count:0,valid:0,wins:0,top2:0});
+  const g=map.get(key);g.count++;
+  if(headWon!==null){g.valid++;if(headWon)g.wins++;if(headTop2)g.top2++;}
+ };
+ trickRows.forEach(r=>{
+  const lines=(r.lines||[]).filter(g=>Array.isArray(g)&&g.length>=2);
+  if(!lines.length)return;
+  withLines++;
+  const has=validResult(r),result=has?r.result.slice(0,3):[];
+  if(has)valid++;
+  const lineShape=lines.map(g=>g.length).join('+');
+  shapes.set(lineShape,(shapes.get(lineShape)||0)+1);
+  lines.forEach((line,index)=>{
+   const marks=line.map(car=>String(r.marks?.[car]||'無'));
+   const key='①②③④'[index]||('L'+(index+1));
+   const sequence=marks.join('－');
+   const head=Number(line[0]);
+   const won=has?result[0]===head:null;
+   const top2=has?result.slice(0,2).includes(head):false;
+   add(stats,key+'::'+sequence,won,top2);
+   lineObs++;
+  });
+  if(lines.length>=2){
+   const a=String(r.marks?.[lines[0][0]]||'無'),b=String(r.marks?.[lines[1][0]]||'無');
+   const key=a+' → '+b;
+   add(headPairs,key,has?result[0]===Number(lines[0][0])||result[0]===Number(lines[1][0]):null,has&&(result.slice(0,2).includes(Number(lines[0][0]))||result.slice(0,2).includes(Number(lines[1][0]))));
+  }
+ });
+ const allPatterns=[...stats.values()];
+ const outcomeN=allPatterns.reduce((n,g)=>n+g.valid,0);
+ summary.innerHTML=[
+  ['分析対象レース',trickRows.length.toLocaleString()+' R'],
+  ['ラインあり',withLines.toLocaleString()+' R'],
+  ['位置別ライン観測',lineObs.toLocaleString()+' 件'],
+  ['着順判定可能',valid.toLocaleString()+' R']
+ ].map(x=>'<div class="discovery-card"><div class="text-[9px] text-violet-700 font-bold">'+x[0]+'</div><div class="font-mono-tech text-lg font-bold">'+x[1]+'</div></div>').join('');
+ const renderTable=(title,items,empty)=>{
+  const filtered=items.filter(g=>g.count>=min).sort((a,b)=>b.count-a.count);
+  if(!filtered.length)return '<div class="discovery-card text-xs">'+empty+'</div>';
+  return '<div class="discovery-card"><div class="font-bold text-xs text-violet-800 mb-2">'+title+' ／ '+filtered.length+'パターン</div><div class="overflow-x-auto"><table class="w-full min-w-[620px] text-xs"><thead><tr><th>配置順</th><th class="text-right">出現数</th><th class="text-right">着順判定数</th><th class="text-right">先頭1着率</th><th class="text-right">先頭2着以内</th></tr></thead><tbody>'+filtered.slice(0,40).map(g=>'<tr><td class="font-bold">'+escHtml(g.key.split('::').pop())+'</td><td class="text-right">'+g.count.toLocaleString()+'</td><td class="text-right">'+g.valid.toLocaleString()+'</td><td class="text-right">'+(g.valid?fmt(g.wins/g.valid*100):'—')+'</td><td class="text-right">'+(g.valid?fmt(g.top2/g.valid*100):'—')+'</td></tr>').join('')+'</tbody></table></div></div>';
+ };
+ const sections=[];
+ ['①','②','③','④'].forEach(pos=>{
+  const items=allPatterns.filter(g=>g.key.startsWith(pos+'::'));
+  sections.push(renderTable('ライン'+pos+'の印配置',items,'この位置に該当する配置パターンはありません。'));
+ });
+ const pairItems=[...headPairs.values()].filter(g=>g.count>=min).sort((a,b)=>b.count-a.count);
+ if(pairItems.length){
+  sections.push('<div class="discovery-card"><div class="font-bold text-xs text-violet-800 mb-2">相手ライン先頭印の組み合わせ</div><div class="overflow-x-auto"><table class="w-full min-w-[620px] text-xs"><thead><tr><th>①先頭 → ②先頭</th><th class="text-right">出現数</th><th class="text-right">判定数</th><th class="text-right">どちらか1着率</th><th class="text-right">どちらか2着以内</th></tr></thead><tbody>'+pairItems.slice(0,30).map(g=>'<tr><td class="font-bold">'+escHtml(g.key)+'</td><td class="text-right">'+g.count+'</td><td class="text-right">'+g.valid+'</td><td class="text-right">'+(g.valid?fmt(g.wins/g.valid*100):'—')+'</td><td class="text-right">'+(g.valid?fmt(g.top2/g.valid*100):'—')+'</td></tr>').join('')+'</tbody></table></div></div>');
+ }
+ const shapeText=[...shapes.entries()].sort((a,b)=>b[1]-a[1]).slice(0,12).map(([k,v])=>k+'：'+v.toLocaleString()+'R').join(' ／ ');
+ host.innerHTML='<div class="discovery-card text-xs mb-2">全'+trickRows.length.toLocaleString()+'レースを対象に集計。結果判定可能 '+valid.toLocaleString()+'レース。最低出現数 '+min+'件。ポイントへの加点・減点は未実施。</div><div class="discovery-card text-[10px] mb-2">ライン構成上位：'+escHtml(shapeText||'データなし')+'</div>'+sections.join('');
+ const vol=document.getElementById('releaseVol');if(vol)vol.textContent='UPDATE VOL.51';
+}
+
+document.addEventListener('DOMContentLoaded',()=>{restoreResearchCSV();const f=$t('trickCsvInput'),b=$t('trickRunBtn'),p=$t('productMarkRunBtn'),l=$t('lowPayoutRunBtn'),m=$t('medianHeadRunBtn'),pl=$t('perLineRunBtn');if(f)f.addEventListener('change',e=>{if(e.target.files?.[0])loadCSV(e.target.files[0]);});if(b)b.addEventListener('click',runTrick);if(p)p.addEventListener('click',runProductMarkLab);if(l)l.addEventListener('click',runLowPayoutHeadPairs);if(m)m.addEventListener('click',runMedianHeadPairs);if(pl)pl.addEventListener('click',runPerLineCombos);const lm=$t('lineMatrixRunBtn');if(lm)lm.addEventListener('click',runLinePositionMatrix);const mp=$t('markPositionRunBtn'),mpr=$t('markPositionRefreshBtn');if(mp)mp.addEventListener('click',runMarkPositionLab);if(mpr)mpr.addEventListener('click',runMarkPositionLab); if($t('trickClass'))$t('trickClass').addEventListener('change',renderMarkJsonComparison); if($t('lowPayoutThreshold'))$t('lowPayoutThreshold').addEventListener('change',renderMarkJsonComparison); });
 })();
 </script>
 
