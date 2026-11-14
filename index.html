@@ -3842,6 +3842,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
    const predicted=[...targets].filter(k=>!!model.predictions[k]).length;
    $('aiPredictionStatus').textContent='TXT自動取込 '+targets.size+'R / 新規 '+added+' / 更新 '+updated+' / 予測履歴 '+predicted+'件'+(missingLine?' / ライン未検出 '+missingLine+'件':'');
    $('aiPredictionOutput').scrollTop=0;
+   const lab=$('aiPredictionLab');if(lab&&typeof lab.scrollIntoView==='function')lab.scrollIntoView({behavior:'smooth',block:'start'});
    if(typeof logToTerminal==='function')logToTerminal('> VOL.18 TXT連携：'+targets.size+'レースを取込、予測 '+predicted+'件。','success');
    return {parsed:parsed.length,targets:targets.size,predicted,added,updated,missingLine};
   }catch(err){
