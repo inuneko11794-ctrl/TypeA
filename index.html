@@ -1273,12 +1273,13 @@ body.book-cover-active .app-shell{
     <h2 class="kicker border-l-4 border-emerald-400 pl-2 mb-2">AI DATA VIEW // 分析用テキスト出力</h2>
     <p class="text-xs text-slate-400 mb-3">保存済みレースの数値・ライン・印・結果を、チャットへ貼り付けられる文章に変換します。ファイル添付は不要です。</p>
     <div class="grid grid-cols-2 gap-2 mb-3">
-     <select id="aiDataScope" class="field text-xs"><option value="all">全レース</option><option value="result">結果入力済み</option><option value="pending">結果未入力</option><option value="line">ライン情報あり</option></select>
+     <select id="aiDataScope" class="field text-xs"><option value="all">全レース</option><option value="result">結果入力済み</option><option value="pending">AI予測未入力</option><option value="line">ライン情報あり</option></select>
      <select id="aiDataLimit" class="field text-xs"><option value="30">最新30件</option><option value="50" selected>最新50件</option><option value="100">最新100件</option><option value="all">対象すべて</option></select>
     </div>
     <div class="grid grid-cols-2 gap-2 mb-3">
      <button id="generateAIDataBtn" type="button" class="touch-btn btn-cyber py-3 rounded-xl text-xs">テキストを生成</button>
      <button id="copyAIDataBtn" type="button" class="touch-btn btn-alert py-3 rounded-xl text-xs">テキストをコピー</button>
+     <button id="clearAIDataBtn" type="button" class="touch-btn btn-ghost py-2 rounded-xl text-xs col-span-2">表示テキストを消去</button>
     </div>
     <div class="flex justify-between text-[10px] text-slate-400 mb-2"><span id="aiDataStatus">未生成</span><span id="aiDataCharCount">0文字</span></div>
     <textarea id="aiDataOutput" rows="9" readonly class="field font-mono-tech text-[11px] resize-y" placeholder="「テキストを生成」を押すと、ここに分析用データが表示されます。"></textarea>
@@ -1291,8 +1292,13 @@ body.book-cover-active .app-shell{
     <p class="text-xs text-slate-400 mb-3">出走表の保存データから単勝・2車単・3連単を別々に予測します。結果登録後は未学習レースだけを自動学習します。</p>
     <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
     <input id="aiRaceDate" type="date" class="field text-sm mb-3">
+    <div class="mb-3">
+     <label class="block text-xs text-slate-300 mb-1" for="aiUnpredictedRaceSelect">AI予測未入力レース一覧（結果入力済みも含む）</label>
+     <select id="aiUnpredictedRaceSelect" class="field text-sm"><option value="">未予測レースを確認中…</option></select>
+     <button id="predictSelectedRaceBtn" type="button" class="touch-btn btn-alert w-full py-3 rounded-xl text-xs mt-2">選択したレースを予測</button>
+    </div>
     <div class="grid grid-cols-2 gap-2 mb-3">
-     <button id="runAIPredictionBtn" type="button" class="touch-btn btn-cyber py-3 rounded-xl text-xs">未予測レースを予測</button>
+     <button id="runAIPredictionBtn" type="button" class="touch-btn btn-cyber py-3 rounded-xl text-xs">未予測レースを一括予測</button>
      <button id="exportAIModelBtn" type="button" class="touch-btn btn-ghost py-3 rounded-xl text-xs">AI学習データを書出</button>
     </div>
     <div id="aiPredictionStatus" class="text-xs text-slate-300 mb-2" aria-live="polite">予測履歴 0件 / 学習済み 0件</div>
@@ -2387,6 +2393,7 @@ function saveAllBulkRecords(){
   try{renderRecordManager()}catch(e){stage('記録一覧更新エラー：'+e.message,'error')}
   stage('一括登録完了：新規 '+saved+'件／更新 '+updated+'件／対象外 '+skipped+'件','success');
   closeBulkInputModal();
+  if(typeof window.bbkRunMissingAIPredictions==='function')window.bbkRunMissingAIPredictions();
   ['bulkPasteOrder','bulkPastePayout3','bulkPastePayout2'].forEach(id=>{const el=$(id);if(el)el.value='';});
   try{playBeep(880,'sine',.2)}catch(e){}
  }catch(e){
@@ -3454,7 +3461,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   const records=Array.isArray(savedRecords)?savedRecords:[];
   let filtered=records.filter(r=>{
    if(scope.value==='result')return typeof hasValidResult==='function'?hasValidResult(r):!!r.pattern;
-   if(scope.value==='pending')return !(typeof hasValidResult==='function'?hasValidResult(r):!!r.pattern);
+   if(scope.value==='pending')return !window.BBK_AI_PREDICTIONS?.[ [r.venue||'',r.raceDate||'',r.raceName||''].join('|') ];
    if(scope.value==='line')return !!(r.line1||(r.lineGroups||[]).length||(r.lineHeads||[]).length);
    return true;
   }).slice().sort((a,b)=>(Number(b.timestamp)||0)-(Number(a.timestamp)||0));
@@ -3480,6 +3487,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   chars.textContent=out.value.length.toLocaleString()+'文字';
  }
  $id('generateAIDataBtn').addEventListener('click',generate);
+ $id('clearAIDataBtn')?.addEventListener('click',()=>{out.value='';status.textContent='表示テキストを消去しました（保存データは変更していません）';chars.textContent='0文字';});
  $id('copyAIDataBtn').addEventListener('click',async()=>{
   if(!out.value.trim())generate();
   if(!out.value.trim()){status.textContent='コピー対象がありません';return;}
@@ -3620,6 +3628,8 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   return {createdAt:new Date().toISOString(),race:{venue:r.venue||'',date:r.raceDate||'',race:r.raceName||'',category:r.category||'',lineGroups:r.lineGroups||[],baseMarks:r.baseMarks||{},lineMarks:r.lineMarks||{}},win:win.slice(0,2).map(x=>x.car),exacta,trifecta,scoreSnapshot:{win:win.slice(0,5),exacta:ex.slice(0,5),trifecta:tri.slice(0,5)},learned:false};
  }
  function render(){
+  window.BBK_AI_PREDICTIONS=model.predictions;
+  refreshPredictionQueue();
   const rows=Object.values(model.predictions),learned=rows.filter(x=>x.learned).length;
   $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 学習済み '+learned+'件';
   const recent=rows.slice(-8).reverse();
@@ -3761,6 +3771,23 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   $('aiPredictionStatus').textContent='今回の新規予測 '+made+'件 / 対象外 '+skipped+'件 / 保存 '+(ok?'成功':'失敗');
   if(typeof logToTerminal==='function')logToTerminal('> AI予測：新規 '+made+'件。予測スナップショットを独立保存しました。',ok?'success':'error');
  }
+ function refreshPredictionQueue(){
+  const sel=$('aiUnpredictedRaceSelect');if(!sel)return;
+  const previous=sel.value;
+  const items=(Array.isArray(savedRecords)?savedRecords:[]).filter(r=>!model.predictions[key(r)]&&rosterCars(r).length>=3);
+  sel.innerHTML='<option value="">AI予測未入力 '+items.length+'レース</option>'+items.map(r=>'<option value="'+esc(key(r))+'">'+esc(r.raceDate||'日付なし')+' / '+esc(r.venue||'開催地不明')+' / '+esc(r.raceName||'レース不明')+(validResult(r)?' / 結果入力済み':' / 結果未入力')+'</option>').join('');
+  if(items.some(r=>key(r)===previous))sel.value=previous;
+  if(!items.length)sel.innerHTML='<option value="">AI予測未入力レースはありません</option>';
+ }
+ window.bbkRunMissingAIPredictions=function(keys){
+  const target=keys?new Set(keys):null;run(target);
+  refreshPredictionQueue();
+ };
+ $('predictSelectedRaceBtn')?.addEventListener('click',()=>{
+  const k=$('aiUnpredictedRaceSelect')?.value;
+  if(!k){$('aiPredictionStatus').textContent='予測するレースを選択してください。';return;}
+  window.bbkRunMissingAIPredictions([k]);
+ });
  function exportModel(){
   const blob=new Blob([JSON.stringify(model,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
   a.href=url;a.download='battle-bank-ai-learning.json';a.click();URL.revokeObjectURL(url);
@@ -3791,8 +3818,9 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   Object.assign(r,typeof normalizeRecord==='function'?normalizeRecord(r):r);
   const ok=typeof persist==='function'&&persist();
   if(!ok){$('aiResultStatus').textContent='保存に失敗しました。入力内容は画面に残しています。';return;}
-  if(p)learnPending();render();if(typeof updateCountDisplay==='function')updateCountDisplay();if(typeof runAnalysis==='function')runAnalysis();
-  $('aiResultStatus').textContent='保存完了：'+raw+' / 2車単 ¥'+p2.toLocaleString()+' / 3連単 ¥'+p3.toLocaleString()+' / 3連複 ¥'+pf.toLocaleString()+(p?'。AI学習を実行しました。':'。このレースはAI予測がないため、結果保存のみ行いました。');
+  if(p)learnPending();else if(typeof window.bbkRunMissingAIPredictions==='function')window.bbkRunMissingAIPredictions([k]);
+  render();if(typeof updateCountDisplay==='function')updateCountDisplay();if(typeof runAnalysis==='function')runAnalysis();
+  $('aiResultStatus').textContent='保存完了：'+raw+' / 2車単 ¥'+p2.toLocaleString()+' / 3連単 ¥'+p3.toLocaleString()+' / 3連複 ¥'+pf.toLocaleString()+(p?'。既存AI予測を照合して学習しました。':'。結果入力後にAI予測も作成しました（事後予測として保存）。');
   ['aiResultOrder','aiResultPayout2','aiResultPayout3','aiResultPayoutF'].forEach(id=>$(id).value='');
   refreshResultChoices();
  }
