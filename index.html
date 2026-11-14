@@ -3893,7 +3893,9 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  $('exportAIModelBtn').addEventListener('click',exportModel);
  const saveButton=$('manSaveBtn');
  if(saveButton)saveButton.addEventListener('click',()=>{learnPending();});
- $('aiPredictionResultsFilter')?.addEventListener('change',render);\n $('clearDataInputBtn')?.addEventListener('click',()=>{const el=$('dataInput');if(el)el.value='';const st=$('mdUploadStatus');if(st)st.textContent='入力テキストを消去しました。保存済みレースデータは削除されません。';});\n refreshResultChoices();render();renderDiscoveries();
+ $('aiPredictionResultsFilter')?.addEventListener('change',render);
+ $('clearDataInputBtn')?.addEventListener('click',()=>{const el=$('dataInput');if(el)el.value='';const st=$('mdUploadStatus');if(st)st.textContent='入力テキストを消去しました。保存済みレースデータは削除されません。';});
+ refreshResultChoices();render();renderDiscoveries();
  window.addEventListener('beforeunload',()=>{save();});
 })();
 </script>
