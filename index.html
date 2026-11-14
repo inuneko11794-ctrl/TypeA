@@ -2286,10 +2286,10 @@ function extractRaceDate(text){
 function recordKey(r){return [String(r.venue||'').trim(),String(r.raceDate||'').trim(),String(r.raceName||'').trim()].join('|');}
 function hasValidResult(r){const p=String(r.pattern||'').split('-').map(Number);return p.length===3&&p.every(n=>Number.isInteger(n)&&n>=1&&n<=9)&&new Set(p).size===3;}
 function parseRaceWeather(block){
- const row=(String(block||'').match(/^\\|\\s*天候\\s*\\|\\s*([^|]+)\\|/m)||[])[1]||'';
+ const row=(String(block||'').match(/^\|\s*天候\s*\|\s*([^|]+)\|/m)||[])[1]||'';
  const raw=row.trim();if(!raw)return null;
- const tempMatch=raw.match(/(-?\\d+(?:\\.\\d+)?)\\s*℃/);
- const windMatch=raw.match(/([北南東西北南東西]+)?\\s*(\\d+(?:\\.\\d+)?)\\s*m\\s*\\/\\s*s/i);
+ const tempMatch=raw.match(/(-?\d+(?:\.\d+)?)\s*℃/);
+ const windMatch=raw.match(/([北南東西]+)?\s*(\d+(?:\.\d+)?)\s*m\s*\/\s*s/i);
  const wind=windMatch?Number(windMatch[2]):null;
  return {raw,rain:/雨|小雨|大雨/.test(raw),snow:/雪/.test(raw),temperature:tempMatch?Number(tempMatch[1]):null,windSpeed:Number.isFinite(wind)?wind:null,windDirection:windMatch?(windMatch[1]||''):''};
 }
