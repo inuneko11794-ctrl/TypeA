@@ -3742,7 +3742,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
    if(!validResult(r))return;
    const k=key(r),p=model.predictions[k];if(!p||p.learned||p.generatedAfterResult)return;
-   const actual=String(r.pattern).split('-').map(Number),cars=rosterCars(r);if(actual.length!==3||!cars.length)return;
+   const actual=String(r.pattern).split('-').map(Number),cars=rosterCars(r);if(p.generatedAfterResult!==false||actual.length!==3||!cars.length)return;
    [['win',[actual[0]]],['exacta',actual.slice(0,2)],['trifecta',actual.slice(0,3)]].forEach(([market,targets])=>{
     const w=model.weights[market],rate=market==='win'?1:market==='exacta'?.55:.35;
     cars.forEach(car=>{
@@ -3895,7 +3895,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  if(saveButton)saveButton.addEventListener('click',()=>{learnPending();});
  $('aiPredictionResultsFilter')?.addEventListener('change',render);
  $('clearDataInputBtn')?.addEventListener('click',()=>{const el=$('dataInput');if(el)el.value='';const st=$('mdUploadStatus');if(st)st.textContent='入力テキストを消去しました。保存済みレースデータは削除されません。';});
- refreshResultChoices();render();renderDiscoveries();
+ learnPending();refreshResultChoices();render();renderDiscoveries();
  window.addEventListener('beforeunload',()=>{save();});
 })();
 </script>
