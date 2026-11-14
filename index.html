@@ -1127,22 +1127,26 @@ body.book-cover-active .app-shell{
 </style>
 
 <style id="ai-prediction-readable-colors">
-/* AI prediction paper: dark text on light card for reliable contrast */
-#aiPredictionOutput{background:#f8fafc!important;color:#172554!important;font-size:14px!important;line-height:1.85!important;border-color:#94a3b8!important;}
-#aiPredictionOutput *{color:#24324b!important;text-shadow:none!important;opacity:1!important;}
-#aiPredictionOutput b{color:#111c3a!important;font-weight:850!important;}
-#aiPredictionOutput .text-emerald-300{color:#087443!important;font-weight:800!important;}
-#aiPredictionOutput .text-cyan-100{color:#086b83!important;font-weight:800!important;}
-#aiPredictionOutput .text-amber-200{color:#875400!important;font-weight:800!important;}
-#aiPredictionOutput .text-slate-400{color:#526176!important;}
-#aiPredictionOutput .text-\\[10px\\]{font-size:12px!important;}
-#aiPredictionResultsList{color:#f8fafc!important;font-size:14px!important;line-height:1.8!important;}
-#aiPredictionResultsList b{color:#fff!important;font-weight:800!important;}
-#aiPredictionResultsList .text-emerald-300{color:#86efac!important;font-weight:800!important;}
-#aiPredictionResultsList .text-cyan-100{color:#a5f3fc!important;font-weight:800!important;}
-#aiPredictionResultsList .text-amber-200{color:#fde68a!important;font-weight:700!important;}
-#aiPredictionResultsList .text-slate-400{color:#d1dbe8!important;}
+/* AI prediction paper cards: consistent high-contrast ink */
+#aiPredictionOutput,#aiPredictionResultsPage{background:#f8fafc!important;color:#172554!important;border-color:#94a3b8!important;}
+#aiPredictionOutput,#aiPredictionResultsPage,#aiPredictionResultsPage *{font-size:14px!important;line-height:1.8!important;text-shadow:none!important;opacity:1!important;}
+#aiPredictionOutput *{color:#24324b!important;}
+#aiPredictionOutput b,#aiPredictionResultsPage b{color:#111c3a!important;font-weight:850!important;}
+#aiPredictionOutput .text-emerald-300,#aiPredictionResultsPage .text-emerald-300{color:#087443!important;font-weight:800!important;}
+#aiPredictionOutput .text-cyan-100,#aiPredictionResultsPage .text-cyan-100,#aiPredictionResultsPage .text-cyan-200{color:#086b83!important;font-weight:800!important;}
+#aiPredictionOutput .text-amber-200,#aiPredictionResultsPage .text-amber-200{color:#875400!important;font-weight:800!important;}
+#aiPredictionOutput .text-slate-400,#aiPredictionResultsPage .text-slate-400{color:#526176!important;}
+#aiPredictionResultsPage select{background:#fff!important;color:#172554!important;border:1px solid #64748b!important;}
+#aiPredictionResultsList{color:#24324b!important;}
+#aiPredictionResultsList *{color:#24324b!important;}
+#aiPredictionResultsList b{color:#111c3a!important;font-weight:850!important;}
+#aiPredictionResultsList .text-emerald-300{color:#087443!important;font-weight:800!important;}
+#aiPredictionResultsList .text-cyan-100{color:#086b83!important;font-weight:800!important;}
+#aiPredictionResultsList .text-amber-200{color:#875400!important;font-weight:800!important;}
+#aiPredictionResultsList .text-slate-400{color:#526176!important;}
 #aiPredictionStatus,#aiPredictionResultsCount{color:#f1f5f9!important;font-size:13px!important;font-weight:700!important;line-height:1.7!important;}
+#discoveryStatus,#discoveryOutput{color:#24324b!important;}
+#discoveryOutput .text-slate-400,#discoveryOutput .text-slate-500{color:#526176!important;}
 </style>
 </head>
 <body class="book-cover-active">
@@ -1258,7 +1262,7 @@ body.book-cover-active .app-shell{
  </div>
  <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
-<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.1">
+<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-15.2">
  <div class="flex items-center justify-between gap-2 flex-wrap">
   <div><div class="font-bold text-amber-200 tracking-wider">SITE UPDATE CHECK // 公開サイト更新確認</div><div class="text-[10px] text-slate-400 mt-1">この端末に表示中のサイトと、現在公開されているサイトのバージョンを比較します。</div></div>
   <span id="siteUpdateBadge" class="rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold">未確認</span>
@@ -2581,7 +2585,7 @@ function bindUserHub(){
 }
 
 
-const SITE_BUILD_ID='2026-11-15.1';
+const SITE_BUILD_ID='2026-11-15.2';
 async function checkPublishedSiteVersion(){
  const badge=$('siteUpdateBadge'),detail=$('siteUpdateDetail'),checked=$('siteUpdateCheckedAt'),reload=$('reloadUpdatedSiteBtn'),button=$('checkSiteUpdateBtn');
  if(button){button.disabled=true;button.textContent='確認中…';}
