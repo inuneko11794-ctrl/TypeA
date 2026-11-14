@@ -1267,17 +1267,9 @@ body.book-cover-active .app-shell{
     <button id="openManualBtn" type="button" class="touch-btn btn-alert w-full py-4 px-4 mb-5 rounded-xl flex justify-between items-center text-sm tracking-widest"><span>⚡ 手動入力モード</span><span>▶</span></button>
     <div class="flex justify-between items-center mb-3 gap-2"><h2 class="kicker border-l-4 border-cyan-300 pl-2">DATA UPLINK // データ受信</h2><button id="fileUploadBtn" type="button" class="touch-btn btn-ghost text-[10px] px-3 py-2 rounded-lg">📄 FILE UPLOAD</button><input type="file" id="mdFileInput" class="hidden" accept=".md,.markdown,.txt,text/plain,text/markdown,text/*,*/*" onchange="loadMarkdown(event)" oninput="loadMarkdown(event)">
     <p id="mdUploadStatus" role="status" aria-live="polite" class="text-[10px] text-slate-500 mt-2">Markdown / TXT ファイルを選択できます。</p></div>
-    <textarea id="dataInput" rows="7" class="field font-mono-tech text-xs resize-y mb-2" placeholder="> 例: 小倉 1R 出走表データをここにペースト..."></textarea>
-    <div id="handwritePanel" class="rounded-xl border border-cyan-300/40 bg-slate-950/80 p-3 mb-3">
-     <div class="flex items-center justify-between gap-2 mb-2"><b class="text-xs text-cyan-200">HANDWRITING INPUT // 手書き入力</b><span id="handwriteStatus" class="text-[10px] text-slate-400">指・ペンで入力</span></div>
-     <canvas id="handwriteCanvas" width="900" height="360" class="w-full rounded-lg bg-[#f4edda] touch-none border border-amber-900/40" style="height:180px;touch-action:none"></canvas>
-     <div class="grid grid-cols-3 gap-2 mt-2">
-      <button id="handwriteUndoBtn" type="button" class="touch-btn btn-ghost py-2 rounded-lg text-[10px]">1画面戻す</button>
-      <button id="handwriteClearBtn" type="button" class="touch-btn btn-ghost py-2 rounded-lg text-[10px]">手書きを消去</button>
-      <button id="handwriteOcrBtn" type="button" class="touch-btn btn-cyber py-2 rounded-lg text-[10px]">文字認識して追加</button>
-     </div>
-     <p class="text-[10px] text-slate-400 mt-2">手書き文字を画像認識して、上のテキスト欄へ追加します。日本語OCRは初回に認識エンジンの読み込みが必要です。</p>
-    </div><button id="clearDataInputBtn" type="button" class="touch-btn btn-ghost w-full py-2 rounded-lg text-xs mb-4">入力テキストを消去</button>
+    <textarea id="dataInput" rows="7" autocapitalize="off" autocomplete="off" spellcheck="false" class="field font-mono-tech text-xs resize-y mb-2" style="user-select:text;-webkit-user-select:text;touch-action:pan-y" placeholder="> 例: 小倉 1R 出走表データをここに直接入力、または貼り付け..."></textarea>
+    <p class="text-[10px] text-slate-400 mb-2">文字欄を長押しすると「すべて選択・コピー・切り取り・貼り付け」が使えます。</p>
+    <button id="clearDataInputBtn" type="button" class="touch-btn btn-ghost w-full py-2 rounded-lg text-xs mb-4">入力テキストを消去</button>
     <div class="rounded-xl border border-cyan-300/30 bg-slate-950/70 p-3 mb-4">
      <div class="text-xs font-bold text-cyan-200 mb-2">AI RESULT LINK // 保存済み結果との照合</div>
      <p class="text-[10px] text-slate-400 mb-2">記録庫に保存された確定結果を、AI予測の結果待ちレースと照合します。入力欄のテキストは消去しても、保存済みデータは残ります。</p>
@@ -2594,39 +2586,11 @@ async function checkPublishedSiteVersion(){
 }
 
 
-function initHandwritingPad(){
- const canvas=$('handwriteCanvas');if(!canvas||canvas.dataset.ready)return;canvas.dataset.ready='1';
- const ctx=canvas.getContext('2d');let drawing=false,strokes=[],current=null;
- ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#172033';ctx.lineWidth=8;
- const redraw=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#f4edda';ctx.fillRect(0,0,canvas.width,canvas.height);strokes.forEach(points=>{if(points.length<2)return;ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);points.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();});};
- const point=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};};
- canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture(e.pointerId);drawing=true;current=[point(e)];strokes.push(current);redraw();});
- canvas.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();current.push(point(e));redraw();});
- const stop=()=>{drawing=false;current=null;};canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);
- $('handwriteUndoBtn')?.addEventListener('click',()=>{strokes.pop();redraw();});
- $('handwriteClearBtn')?.addEventListener('click',()=>{strokes=[];redraw();$('handwriteStatus').textContent='手書きを消去しました';});
- $('handwriteOcrBtn')?.addEventListener('click',async()=>{
-  if(!strokes.length){$('handwriteStatus').textContent='先に文字を書いてください';return;}
-  const btn=$('handwriteOcrBtn');btn.disabled=true;$('handwriteStatus').textContent='日本語OCRを読み込み中…';
-  try{
-   if(!window.Tesseract){await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';script.onload=resolve;script.onerror=()=>reject(new Error('OCRエンジンを読み込めません'));document.head.appendChild(script);});}
-   $('handwriteStatus').textContent='手書き文字を認識中…';
-   const result=await window.Tesseract.recognize(canvas,'jpn',{logger:m=>{if(m.status==='recognizing text')$('handwriteStatus').textContent='文字認識 '+Math.round((m.progress||0)*100)+'%';}});
-   const text=String(result?.data?.text||'').trim();
-   if(!text)throw new Error('文字を認識できませんでした。太く大きく書いて再試行してください');
-   const input=$('dataInput');input.value+=(input.value?'\n':'')+text;input.dispatchEvent(new Event('input',{bubbles:true}));
-   $('handwriteStatus').textContent='認識完了：'+text.length+'文字を入力欄へ追加';
-  }catch(err){$('handwriteStatus').textContent=err.message||'文字認識に失敗しました';}
-  finally{btn.disabled=false;}
- });
- redraw();
-}
 
 document.addEventListener('DOMContentLoaded',()=>{
  bind('checkSiteUpdateBtn',checkPublishedSiteVersion);bind('reloadUpdatedSiteBtn',()=>window.location.reload());
  bind('clearDataInputBtn',()=>{const el=$('dataInput');if(el){el.value='';el.dispatchEvent(new Event('input',{bubbles:true}));}const st=$('mdUploadStatus');if(st)st.textContent='入力テキストを消去しました。保存済みデータは保持されています。';});
  bind('clearAIInputTextBtn',()=>{const el=$('dataInput');if(el){el.value='';el.dispatchEvent(new Event('input',{bubbles:true}));}const st=$('mdUploadStatus');if(st)st.textContent='入力テキストを消去しました。保存済みデータ・AI予測履歴は保持されています。';});
- initHandwritingPad();
  bind('openBatchEditBtn',openBatchEdit);bind('deletePendingRecordsBtn',deletePendingRecords);bind('closeBatchEditBtn',()=>{const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';});bind('saveBatchEditBtn',saveBatchEdit);bind('extractBtn',triggerExtract);bind('syncBtn',triggerSync);bind('audioToggleBtn',toggleAudioSystem);bind('fileUploadBtn',()=>$('mdFileInput').click());bind('editPayoutBtn',showPayoutEditor);bind('analysisBtn',runAnalysis);bind('deepScanBtn',deepScan7Car);bind('discoverBtn',discoverPatterns);bind('line1AnalyzeBtn',analyzeLine1Payouts);$('line1ClassFilter').addEventListener('change',analyzeLine1Payouts);$('line1HighThreshold').addEventListener('change',analyzeLine1Payouts);bind('exportBtn',exportData);bind('importTriggerBtn',()=>$('fileInput').click());bind('clearBtn',clearData);bind('clearLogBtn',()=>$('outputArea').innerHTML='');bind('openManualBtn',openManualModal);bind('closeManualBtn',closeManualModal);bind('manSaveBtn',saveManualData);bind('closeBulkBtn',closeBulkInputModal);bind('closeBulkBtn2',closeBulkInputModal);bind('saveAllBulkBtn',saveAllBulkRecords);bind('saveAllBulkFromPasteBtn',saveAllBulkRecords);
  $('mdFileInput').addEventListener('change',loadMarkdown);$('fileInput').addEventListener('change',importData);$('recordSearch').addEventListener('input',renderRecordManager);$('recordStatus').addEventListener('change',renderRecordManager);initManualSelects();
  try{const stored=localStorage.getItem('battleBankProData');if(stored){const parsed=JSON.parse(stored);if(Array.isArray(parsed)){savedRecords=parsed.map(normalizeRecord);}}}catch(e){savedRecords=[]}
