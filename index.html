@@ -1239,7 +1239,7 @@ body.book-cover-active .app-shell{
  </div>
  <div id="dataCount" class="font-mono-tech text-xl px-5 py-3 rounded-xl shadow-lg flex items-center gap-3 whitespace-nowrap"><span class="text-[10px] font-bold">DB.RECORDS</span><span class="font-bold tracking-widest">[ 00000 ]</span></div>
 </header>
-<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-14.3">
+<div class="rounded-xl border border-amber-300/50 bg-slate-950/85 p-3 mb-5 text-xs text-slate-200" id="siteUpdatePanel" data-site-build="2026-11-14.4">
  <div class="flex items-center justify-between gap-2 flex-wrap">
   <div><div class="font-bold text-amber-200 tracking-wider">SITE UPDATE CHECK // 公開サイト更新確認</div><div class="text-[10px] text-slate-400 mt-1">この端末に表示中のサイトと、現在公開されているサイトのバージョンを比較します。</div></div>
   <span id="siteUpdateBadge" class="rounded-full px-3 py-1 bg-slate-700 text-slate-200 text-[10px] font-bold">未確認</span>
@@ -2562,7 +2562,7 @@ function bindUserHub(){
 }
 
 
-const SITE_BUILD_ID='2026-11-14.3';
+const SITE_BUILD_ID='2026-11-14.4';
 async function checkPublishedSiteVersion(){
  const badge=$('siteUpdateBadge'),detail=$('siteUpdateDetail'),checked=$('siteUpdateCheckedAt'),reload=$('reloadUpdatedSiteBtn'),button=$('checkSiteUpdateBtn');
  if(button){button.disabled=true;button.textContent='確認中…';}
@@ -3879,11 +3879,16 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
    if(rosterCars(r).length<3){skipped++;return;}
    if(model.predictions[k])return;
    const p=predict(r);if(!p.win.length){skipped++;return;}
+   // 保存済みDBの結果は予測入力に使わず、事前情報だけで再予測した履歴として扱う。
+   // 着順・配当は予測作成後の照合・学習専用。
+   p.generatedAfterResult=false;p.predictionTiming='before-result';
    model.predictions[k]=p;made++;
   });
   if(dateChanged&&typeof persist==='function')persist();
-  const ok=save();render();refreshResultChoices();
-  $('aiPredictionStatus').textContent='今回の新規予測 '+made+'件 / 対象外 '+skipped+'件（出走表の車番不足など） / 保存 '+(ok?'成功':'失敗');
+  const ok=save();
+  const learnedOutcome=learnPending();
+  render();refreshResultChoices();
+  $('aiPredictionStatus').textContent='今回の新規予測 '+made+'件 / 保存済み結果との照合・学習 '+learnedOutcome.count+'件 / 対象外 '+skipped+'件（出走表の車番不足など） / 保存 '+(ok&&learnedOutcome.saved?'成功':'失敗');
   if(typeof logToTerminal==='function')logToTerminal('> AI予測：新規 '+made+'件。予測スナップショットを独立保存しました。',ok?'success':'error');
  }
  function refreshPredictionQueue(){
