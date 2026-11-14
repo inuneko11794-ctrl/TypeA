@@ -3625,7 +3625,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   const trifecta=permutations(trifectaPool,3,1000).map(order=>({
    cars:order,score:(trifectaScores.get(order[0])?.score||0)*1+(trifectaScores.get(order[1])?.score||0)*.72+(trifectaScores.get(order[2])?.score||0)*.48
   })).sort((a,b)=>b.score-a.score||a.cars.join('').localeCompare(b.cars.join(''))).slice(0,10).map(x=>x.cars);
-  return {createdAt:new Date().toISOString(),race:{venue:r.venue||'',date:r.raceDate||'',race:r.raceName||'',category:r.category||'',lineGroups:r.lineGroups||[],baseMarks:r.baseMarks||{},lineMarks:r.lineMarks||{}},win:win.slice(0,2).map(x=>x.car),exacta,trifecta,scoreSnapshot:{win:win.slice(0,5),exacta:ex.slice(0,5),trifecta:tri.slice(0,5)},learned:false};
+  return {createdAt:new Date().toISOString(),generatedAfterResult:typeof validResult==='function'?validResult(r):!!r.pattern,predictionTiming:(typeof validResult==='function'?validResult(r):!!r.pattern)?'after-result':'before-result',race:{venue:r.venue||'',date:r.raceDate||'',race:r.raceName||'',category:r.category||'',lineGroups:r.lineGroups||[],baseMarks:r.baseMarks||{},lineMarks:r.lineMarks||{}},win:win.slice(0,2).map(x=>x.car),exacta,trifecta,scoreSnapshot:{win:win.slice(0,5),exacta:ex.slice(0,5),trifecta:tri.slice(0,5)},learned:false};
  }
  function render(){
   window.BBK_AI_PREDICTIONS=model.predictions;
@@ -3637,8 +3637,8 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   $('aiPredictionOutput').innerHTML=recent.length?recent.map(p=>{
    const race=savedRecords.find(r=>key(r)===[p.race.venue||'',p.race.date||'',p.race.race||''].join('|'))||p.race;
    const payoutText=p.exacta.map(pair=>pair.join('-')+' ['+payoutLabel(race,pair,payoutModel)+']').join(' / ');
-   const evalText=p.learned?' / 的中：単勝 '+(p.evaluation?.win?'○':'×')+'・2車単 '+(p.evaluation?.exacta?'○':'×')+'・3連単 '+(p.evaluation?.trifecta?'○':'×'):'';
-   return '<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.learned?'学習済み':'結果待ち')+'</span><div class="mt-1">単勝（2点）：'+p.win.join('・')+'</div><div>2車単（4点）：'+p.exacta.map(x=>x.join('-')).join(' / ')+'</div><div>3連単（10点）：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div><div class="text-[10px] text-slate-400">結果照合'+evalText+'</div></div>';
+   const evalText=p.learned?' / 的中：単勝 '+(p.evaluation?.win?'○':'×')+'・2車単 '+(p.evaluation?.exacta?'○':'×')+'・3連単 '+(p.evaluation?.trifecta?'○':'×'):p.generatedAfterResult?' / 事後生成のため的中率・学習対象外':'';
+   return '<div class="border-b border-slate-700/70 py-2"><b>'+esc(p.race.venue)+' '+esc(p.race.date)+' '+esc(p.race.race)+'</b> <span class="text-emerald-300">'+(p.generatedAfterResult?'事後生成':p.learned?'事前予測・学習済み':'事前予測・結果待ち')+'</span><div class="mt-1">単勝（2点）：'+p.win.join('・')+'</div><div>2車単（4点）：'+p.exacta.map(x=>x.join('-')).join(' / ')+'</div><div>3連単（10点）：'+p.trifecta.map(x=>x.join('-')).join(' / ')+'</div><div class="text-[10px] text-slate-400">結果照合'+evalText+'</div></div>';
   }).join(''):'予測履歴はまだありません。';
   const m=model.metrics;
   const pct=(n,d)=>d?((100*n/d).toFixed(1)+'%'):'—';
@@ -3730,7 +3730,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   let count=0;
   (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
    if(!validResult(r))return;
-   const k=key(r),p=model.predictions[k];if(!p||p.learned)return;
+   const k=key(r),p=model.predictions[k];if(!p||p.learned||p.generatedAfterResult)return;
    const actual=String(r.pattern).split('-').map(Number),cars=rosterCars(r);if(actual.length!==3||!cars.length)return;
    [['win',[actual[0]]],['exacta',actual.slice(0,2)],['trifecta',actual.slice(0,3)]].forEach(([market,targets])=>{
     const w=model.weights[market],rate=market==='win'?1:market==='exacta'?.55:.35;
