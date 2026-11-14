@@ -2322,11 +2322,12 @@ function openBulkInputModal(races){
   const value=common.value;
   [...container.querySelectorAll('input[type="date"]')].forEach(input=>{input.value=value;});
  };
- $('bulkInputModal').classList.remove('hidden');$('bulkInputModal').classList.add('flex');
+ $('bulkInputModal').classList.remove('hidden');$('bulkInputModal').classList.add('flex');document.body.classList.add('bbk-bulk-modal-open');
 }
 function closeBulkInputModal(){
   $('bulkInputModal').classList.add('hidden');
   $('bulkInputModal').classList.remove('flex');
+  document.body.classList.remove('bbk-bulk-modal-open');
 }
 
 function parseBulkPasteLines(id,kind,count){
@@ -2939,6 +2940,14 @@ if ("serviceWorker" in navigator) {
 
 
 
+<style id="bulk-modal-navigation-layer-fix-vol1">
+/* 一括入力中は固定ページ移動バーを隠し、入力・保存操作を最前面にする */
+body.bbk-bulk-modal-open .bbk-book-controls{display:none!important;pointer-events:none!important}
+#bulkInputModal{z-index:100000!important}
+#bulkInputModal.flex{z-index:100000!important}
+#bulkInputModal .modal-card{position:relative;z-index:100001;max-height:95dvh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#bulkInputModal #saveAllBulkFromPasteBtn{position:sticky;bottom:0;z-index:5;box-shadow:0 -4px 12px rgba(40,25,10,.14)}
+</style>
 <style id="research-memory-library-style-vol1">
 #researchMemoryLibraryVol1 .research-memory-card{background:linear-gradient(145deg,#fffdf6,#f4ead5);border:1px solid #d8c49b;border-radius:14px;padding:14px;box-shadow:0 5px 16px #5b452015}
 #researchMemoryLibraryVol1 .research-memory-card h3{color:#5e431d;font-weight:900;font-size:13px;letter-spacing:.04em}
