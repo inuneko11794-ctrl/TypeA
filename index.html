@@ -3632,7 +3632,7 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   window.BBK_AI_PREDICTIONS=model.predictions;
   refreshPredictionQueue();
   const rows=Object.values(model.predictions),learned=rows.filter(x=>x.learned).length;
-  $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 学習済み '+learned+'件';
+  $('aiPredictionStatus').textContent='予測履歴 '+rows.length+'件 / 事前予測 '+rows.filter(x=>!x.generatedAfterResult).length+'件 / 事後生成 '+rows.filter(x=>x.generatedAfterResult).length+'件 / 学習済み '+learned+'件';
   const recent=rows.slice().reverse();
   const payoutModel=payoutLearner();
   $('aiPredictionOutput').innerHTML=recent.length?recent.map(p=>{
@@ -3828,9 +3828,9 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   Object.assign(r,typeof normalizeRecord==='function'?normalizeRecord(r):r);
   const ok=typeof persist==='function'&&persist();
   if(!ok){$('aiResultStatus').textContent='保存に失敗しました。入力内容は画面に残しています。';return;}
-  if(p)learnPending();else if(typeof window.bbkRunMissingAIPredictions==='function')window.bbkRunMissingAIPredictions([k]);
+  if(p&&!p.generatedAfterResult)learnPending();else if(!p&&typeof window.bbkRunMissingAIPredictions==='function')window.bbkRunMissingAIPredictions([k]);
   render();if(typeof updateCountDisplay==='function')updateCountDisplay();if(typeof runAnalysis==='function')runAnalysis();
-  $('aiResultStatus').textContent='保存完了：'+raw+' / 2車単 ¥'+p2.toLocaleString()+' / 3連単 ¥'+p3.toLocaleString()+' / 3連複 ¥'+pf.toLocaleString()+(p?'。既存AI予測を照合して学習しました。':'。結果入力後にAI予測も作成しました（事後予測として保存）。');
+  $('aiResultStatus').textContent='保存完了：'+raw+' / 2車単 ¥'+p2.toLocaleString()+' / 3連単 ¥'+p3.toLocaleString()+' / 3連複 ¥'+pf.toLocaleString()+(p&&!p.generatedAfterResult?'。事前予測を照合して学習しました。':p?'。これは事後生成のため学習・的中率集計の対象外です。':'。結果入力後にAI予測も作成しました（事後生成として保存）。');
   ['aiResultOrder','aiResultPayout2','aiResultPayout3','aiResultPayoutF'].forEach(id=>$(id).value='');
   refreshResultChoices();
  }
