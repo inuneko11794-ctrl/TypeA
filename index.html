@@ -1836,6 +1836,8 @@ function loadMarkdown(event){
     const duplicateNote=duplicateNumbers.length?' ／ 重複：'+[...new Set(duplicateNumbers)].join('・'):'';
     setMarkdownStatus(`解析完了：${races.length}件［${numberSummary}］${duplicateNote}。開催日を確認して保存してください。`,duplicateNumbers.length>0);
     logToTerminal(`> ${races.length}レース検出：${numberSummary}${duplicateNote}。事前登録フォームに展開しました。`,duplicateNumbers.length?'error':'success');
+    // 読み込んだ出走表をAI PREDICTION LABへ自動転送し、予測結果を表示
+    if(typeof window.bbkAutoPredictImportedText==='function')window.bbkAutoPredictImportedText(text);
    }else{
     setMarkdownStatus('テキストは読み込みましたが、レース見出しを検出できません。',true);
     logToTerminal('> レース見出しを検出できません。テキストは入力欄に読み込み済みです。','error');
@@ -3742,14 +3744,15 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   render();
  }
  window.addEventListener('bbk-extra-seed-ready',()=>{try{render();}catch(e){console.warn('外部学習データ反映後のAI更新に失敗',e);}});
- function run(){
+ function run(targetKeys){
   const date=$('aiRaceDate').value;
   let made=0,skipped=0,dateChanged=false;
   (Array.isArray(savedRecords)?savedRecords:[]).forEach(r=>{
+   const k=key(r);if(targetKeys&&!targetKeys.has(k))return;
    if(!Array.isArray(r.lineGroups)||!r.lineGroups.length){skipped++;return;}
    if(!r.raceDate&&date){r.raceDate=date;dateChanged=true;}
    if(!r.raceDate){skipped++;return;}
-   const k=key(r);if(model.predictions[k])return;
+   if(model.predictions[k])return;
    const p=predict(r);if(!p.win.length){skipped++;return;}
    model.predictions[k]=p;made++;
   });
@@ -3800,6 +3803,53 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  });
  $('saveAIResultBtn').addEventListener('click',saveAIResult);
  const discoveryRefresh=$('refreshDiscoveryBtn');if(discoveryRefresh)discoveryRefresh.addEventListener('click',renderDiscoveries);window.addEventListener('bbkResearchDataReady',renderDiscoveries);
+ // TXT/Markdown読込から予測ラボへ直結。対象レースだけを登録・予測する。
+ window.bbkAutoPredictImportedText=function(rawText){
+  try{
+   if(typeof parseMarkdownForBulk!=='function')throw new Error('出走表解析機能を利用できません');
+   const parsed=parseMarkdownForBulk(String(rawText||''));
+   if(!parsed.length)throw new Error('レース見出しを検出できません');
+   const fallbackDate=$('aiRaceDate')?.value||'';
+   const targets=new Set();let added=0,updated=0,missingLine=0;
+   parsed.forEach(x=>{
+    const raceDate=x.raceDate||fallbackDate;
+    if(!raceDate)return;
+    const incoming=typeof normalizeRecord==='function'?normalizeRecord({
+     venue:x.venue||'不明',raceName:x.raceName||'UNKNOWN',raceDate,
+     category:x.category||'9車',line1:x.line1||'',lineHeads:x.lineHeads||[],
+     lineGroups:x.lineGroups||[],baseMarks:x.baseMarks||{},lineMarks:x.lineMarks||{},
+     lineMarkGroups:x.lineMarkGroups||[],pattern:'',payout:0,payout2ren:0,
+     sourceType:'text-auto-prediction',timestamp:Date.now()
+    }):x;
+    const k=key(incoming);if(!incoming.raceName||incoming.raceName==='UNKNOWN')return;
+    const idx=savedRecords.findIndex(z=>key(z)===k);
+    if(idx>=0){
+     const old=savedRecords[idx];
+     savedRecords[idx]=normalizeRecord({...old,...incoming,
+      pattern:old.pattern||'',payout:old.payout||0,payout2ren:old.payout2ren||0,
+      lineGroups:incoming.lineGroups?.length?incoming.lineGroups:(old.lineGroups||[]),
+      baseMarks:Object.keys(incoming.baseMarks||{}).length?incoming.baseMarks:(old.baseMarks||{}),
+      lineMarks:Object.keys(incoming.lineMarks||{}).length?incoming.lineMarks:(old.lineMarks||{})
+     });updated++;
+    }else{savedRecords.push(incoming);added++;}
+    targets.add(k);
+    if(!Array.isArray(incoming.lineGroups)||!incoming.lineGroups.length)missingLine++;
+   });
+   if(!targets.size)throw new Error('開催日がありません。開催日を指定してから再度読み込んでください');
+   if(typeof persist==='function')persist();
+   if(typeof updateCountDisplay==='function')updateCountDisplay();
+   run(targets);
+   const predicted=[...targets].filter(k=>!!model.predictions[k]).length;
+   $('aiPredictionStatus').textContent='TXT自動取込 '+targets.size+'R / 新規 '+added+' / 更新 '+updated+' / 予測履歴 '+predicted+'件'+(missingLine?' / ライン未検出 '+missingLine+'件':'');
+   $('aiPredictionOutput').scrollTop=0;
+   if(typeof logToTerminal==='function')logToTerminal('> VOL.18 TXT連携：'+targets.size+'レースを取込、予測 '+predicted+'件。','success');
+   return {parsed:parsed.length,targets:targets.size,predicted,added,updated,missingLine};
+  }catch(err){
+   $('aiPredictionStatus').textContent='TXT自動予測：'+(err?.message||String(err));
+   if(typeof logToTerminal==='function')logToTerminal('> VOL.18 TXT連携エラー：'+(err?.message||String(err)),'error');
+   return {error:err?.message||String(err)};
+  }
+ };
  $('runAIPredictionBtn').addEventListener('click',run);
  $('exportAIModelBtn').addEventListener('click',exportModel);
  const saveButton=$('manSaveBtn');
