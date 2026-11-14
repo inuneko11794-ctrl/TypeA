@@ -1292,6 +1292,7 @@ body.book-cover-active .app-shell{
     <p class="text-xs text-slate-400 mb-3">まずは上の DATA UPLINK のテキスト欄を解析して予測します。保存済みDBは予測元に使いません。テキスト内に結果が明記されている場合は事後生成として区別します。</p><button id="predictFromTextBtn" type="button" class="touch-btn btn-alert w-full py-3 rounded-xl text-xs mb-3">入力テキストからAI予測</button>
     <button id="clearAIInputTextBtn" type="button" class="touch-btn btn-ghost w-full py-2 rounded-xl text-xs mb-3">入力テキストを消去</button>
     <button id="syncSavedResultsBtn" type="button" class="touch-btn btn-cyber w-full py-3 rounded-xl text-xs mb-3">保存済み結果とAI予測を照合・学習</button>
+    <div id="aiSyncReport" class="rounded-xl border border-slate-500/50 bg-slate-950/70 p-3 text-xs text-slate-200 mb-3" aria-live="polite"><b>照合状況</b><div class="mt-1 text-slate-400">まだ照合していません。ボタンを押すと更新件数・保存結果・確認時刻を表示します。</div></div>
     <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
     <input id="aiRaceDate" type="date" class="field text-sm mb-3">
     <div class="mb-3">
@@ -3783,19 +3784,36 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
    p.learned=true;p.result=actual;p.evaluation={win:hitWin,exacta:hitExacta,trifecta:hitTrifecta,checkedAt:new Date().toISOString()};
    p.learnedAt=new Date().toISOString();model.learned.push({key:predictionKey,result:actual,evaluation:p.evaluation,at:p.learnedAt});count++;
   });
-  if(count){model.updatedAt=new Date().toISOString();save();if(typeof logToTerminal==='function')logToTerminal('> 保存済み結果とのAI照合・学習：'+count+'レースを反映しました。','success');}
+  let saveOk=true;
+  if(count){model.updatedAt=new Date().toISOString();saveOk=save();if(typeof logToTerminal==='function')logToTerminal('> 保存済み結果とのAI照合・学習：'+count+'レースを反映しました。',saveOk?'success':'error');}
   render();
+  return {count,saved:saveOk};
  }
  function syncSavedResultsToAI(){
-  let waiting=0,available=0;
+  let waiting=0,available=0,alreadyLearned=0,postResult=0;
   Object.entries(model.predictions||{}).forEach(([k,p])=>{
-   if(!p||p.learned||p.generatedAfterResult)return;
+   if(!p)return;
+   if(p.generatedAfterResult){postResult++;return;}
+   if(p.learned){alreadyLearned++;return;}
    if(findSavedResultForPrediction(p,k))available++;else waiting++;
   });
   const before=model.metrics.races||0;
-  learnPending();
+  const outcome=learnPending();
   const learned=(model.metrics.races||0)-before;
-  $('aiPredictionStatus').textContent='保存済み結果との照合完了：新規照合・学習 '+learned+'件 / 結果待ち '+waiting+'件 / 結果データ検出 '+available+'件';
+  const total=Object.keys(model.predictions||{}).length;
+  const now=new Date().toLocaleString('ja-JP');
+  const state=!outcome.saved?'保存失敗':learned>0?'更新あり':available>0?'照合対象あり・新規更新なし':'新規更新なし';
+  const color=!outcome.saved?'text-rose-300':learned>0?'text-emerald-300':'text-amber-200';
+  const report=$('aiSyncReport');
+  if(report)report.innerHTML='<b class="'+color+'">照合結果：'+state+'</b>'+
+   '<div class="grid grid-cols-2 gap-x-3 gap-y-1 mt-2">'+
+   '<div>AI予測履歴：<b>'+total+'件</b></div><div>新規更新：<b>'+learned+'件</b></div>'+
+   '<div>結果を検出：<b>'+available+'件</b></div><div>結果待ち：<b>'+waiting+'件</b></div>'+
+   '<div>照合済み：<b>'+alreadyLearned+'件</b></div><div>事後生成・対象外：<b>'+postResult+'件</b></div></div>'+
+   '<div class="mt-2 '+(outcome.saved?'text-emerald-200':'text-rose-300')+'">AI学習データ保存：'+(outcome.saved?'成功':'失敗')+'</div>'+
+   '<div class="mt-1 text-slate-400">最終確認：'+now+'</div>'+
+   '<div class="mt-1 text-slate-400">'+(learned>0?'新しい結果をAI学習へ反映しました。':available>0?'一致する結果はありますが、新規学習対象はありません。':'一致する未照合結果は見つかりませんでした。')+'</div>';
+  $('aiPredictionStatus').textContent='照合完了：新規更新 '+learned+'件 / 結果検出 '+available+'件 / 結果待ち '+waiting+'件 / 保存 '+(outcome.saved?'成功':'失敗');
   refreshResultChoices();
  }
 
