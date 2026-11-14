@@ -1289,7 +1289,7 @@ body.book-cover-active .app-shell{
   <div class="glass-panel p-4 sm:p-5 mb-5" id="aiPredictionLab">
    <div class="panel-content">
     <h2 class="kicker border-l-4 border-fuchsia-400 pl-2 mb-2">AI PREDICTION LAB // VOL.18</h2>
-    <p class="text-xs text-slate-400 mb-3">保存済み出走表から予測します。結果入力済みレースも予測対象ですが、結果入力後に作った予測は事後生成として学習・的中率集計から除外します。</p>
+    <p class="text-xs text-slate-400 mb-3">まずは上の DATA UPLINK のテキスト欄を解析して予測します。保存済みDBは予測元に使いません。テキスト内に結果が明記されている場合は事後生成として区別します。</p><button id="predictFromTextBtn" type="button" class="touch-btn btn-alert w-full py-3 rounded-xl text-xs mb-3">入力テキストからAI予測</button>
     <label class="block text-xs text-slate-300 mb-1" for="aiRaceDate">開催日（出走表に日付がない場合に指定）</label>
     <input id="aiRaceDate" type="date" class="field text-sm mb-3">
     <div class="mb-3">
@@ -3789,6 +3789,45 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
   if(items.some(r=>key(r)===previous))sel.value=previous;
   if(!items.length)sel.innerHTML='<option value="">AI予測未入力レースはありません</option>';
  }
+ function predictFromCurrentText(){
+  const raw=String($('dataInput')?.value||'').trim();
+  if(!raw){$('aiPredictionStatus').textContent='先に DATA UPLINK のテキスト欄へ出走表を貼り付けてください。';return;}
+  if(typeof parseMarkdownForBulk!=='function'){$('aiPredictionStatus').textContent='テキスト解析機能を利用できません。';return;}
+  let parsed=[];
+  try{parsed=parseMarkdownForBulk(raw);}catch(e){$('aiPredictionStatus').textContent='テキスト解析エラー：'+(e.message||e);return;}
+  if(!parsed.length){$('aiPredictionStatus').textContent='レースを検出できません。DataMap形式のレース見出し・出走表を確認してください。';return;}
+  const headingPattern=/^#\\s*競輪レースデータ[：:].*$/gm,heads=[...raw.matchAll(headingPattern)];
+  let blocks=heads.length?heads.map((m,i)=>raw.slice(m.index,i+1<heads.length?heads[i+1].index:raw.length)):raw.split(/(?=^\\s*(?:\\d{1,2}R|レース名))/m);
+  const findResult=b=>{
+   const m=b.match(/(?:確定着順|3連単結果|レース結果|着順)\\s*[：:=|＞>→-]\\s*([1-9])\\s*[-ー→>／/]\\s*([1-9])\\s*[-ー→>／/]\\s*([1-9])/);
+   if(!m)return '';
+   const a=m.slice(1,4);return new Set(a).size===3?a.join('-'):'';
+  };
+  let made=0,already=0,skipped=0,after=0;
+  parsed.forEach((x,i)=>{
+   const b=blocks[i]||raw,groups=Array.isArray(x.lineGroups)?x.lineGroups:[];
+   const starters=[...new Set(groups.flat().concat(Object.keys(x.baseMarks||{}).map(Number)).filter(n=>Number.isInteger(n)&&n>=1&&n<=9))];
+   const result=findResult(b);
+   const rec={venue:x.venue,raceDate:x.raceDate||extractRaceDate(raw)||'',raceName:x.raceName,category:x.category,lineGroups:groups,lineHeads:x.lineHeads||[],baseMarks:x.baseMarks||{},lineMarks:x.lineMarks||{},starters,pattern:result};
+   if(rosterCars(rec).length<3){skipped++;return;}
+   const k=key(rec);
+   if(model.predictions[k]){already++;return;}
+   const p=predict(rec);
+   if(!p.win.length){skipped++;return;}
+   p.generatedAfterResult=!!result;p.predictionTiming=result?'after-result':'before-result';
+   p.race={venue:rec.venue||'',date:rec.raceDate||'',race:rec.raceName||'',category:rec.category||'',lineGroups:rec.lineGroups,baseMarks:rec.baseMarks,lineMarks:rec.lineMarks};
+   if(result){p.textResult=result;after++;}
+   model.predictions[k]=p;made++;
+  });
+  save();render();
+  $('aiPredictionStatus').textContent='テキスト解析 '+parsed.length+'レース / 新規予測 '+made+'件 / 既存予測 '+already+'件 / 結果記載あり '+after+'件（事後生成） / 出走情報不足 '+skipped+'件';
+  if(typeof logToTerminal==='function')logToTerminal('> テキスト直接予測：'+made+'件 / 結果記載あり '+after+'件 / 対象外 '+skipped+'件','success');
+ }
+ window.bbkAutoPredictImportedText=function(text){
+  if($('dataInput'))$('dataInput').value=String(text||'');
+  predictFromCurrentText();
+ };
+ $('predictFromTextBtn')?.addEventListener('click',predictFromCurrentText);
  window.bbkRunMissingAIPredictions=function(keys){
   const target=keys?new Set(keys):null;run(target);
   refreshPredictionQueue();
