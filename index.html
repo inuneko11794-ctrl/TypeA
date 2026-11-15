@@ -1844,7 +1844,10 @@ function saveManualData(){
   if(!saved){stage('端末の通常保存に失敗。画面は閉じずに保持します','error');alert('端末への保存確認ができませんでした。画面を閉じずに残しています。画面下の診断ログを確認してください。');return;}
   stage('ブラウザ保存領域への書き込み成功','success');
   editingIndex=-1;$('manSaveBtn').textContent='SAVE RECORD';
-  ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>$(id).value='');
+  // 保存成功後、手動登録フォーム内の文字・数値入力をすべて空にする（選択肢・開催日は維持）
+  const manualForm=$('manualInputModal');
+  if(manualForm)manualForm.querySelectorAll('input:not([type="hidden"]):not([type="date"]),textarea').forEach(el=>{el.value='';});
+  ['manCar1','manCar2','manCar3','manPayout','manPayout2ren'].forEach(id=>{const el=$(id);if(el)el.value='';});
   closeManualModal();
   try{updateCountDisplay();stage('件数表示更新OK')}catch(e){stage('件数表示更新エラー：'+(e.message||e),'error')}
   try{runAnalysis();stage('分析更新OK')}catch(e){stage('分析更新エラー：'+(e.message||e),'error')}
@@ -2472,6 +2475,8 @@ function saveAllBulkRecords(){
   closeBulkInputModal();
   if(typeof window.bbkRunMissingAIPredictions==='function')window.bbkRunMissingAIPredictions();
   ['bulkPasteOrder','bulkPastePayout3','bulkPastePayout2'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  const importedText=$('dataInput');if(importedText)importedText.value='';
+  const uploadStatus=$('mdUploadStatus');if(uploadStatus)uploadStatus.textContent='登録完了：入力テキストを消去しました。';
   try{playBeep(880,'sine',.2)}catch(e){}
  }catch(e){
   console.error('Bulk manual save failed',e);
@@ -2531,7 +2536,8 @@ function saveBatchEdit(){
   const p2=val('p2'),p3=val('p3');if(p2!=='')r.payout2ren=Math.max(0,Number(p2)||0);if(p3!=='')r.payout=Math.max(0,Number(p3)||0);Object.assign(r,normalizeRecord(r));
   updated++;
  }
- persist();updateCountDisplay();runAnalysis();renderRecordManager();const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';logToTerminal(`> 一括保存完了：${updated}レースを更新しました。`,'success');playBeep(920,'sine',.16);
+ const ok=persist();if(!ok){alert('保存を確認できなかったため、入力内容は消去していません。');return;}
+ updateCountDisplay();runAnalysis();renderRecordManager();const p=$('batchEditPanel');p.classList.add('hidden');p.style.display='';document.body.style.overflow='';$('batchEditRows').replaceChildren();logToTerminal(`> 一括保存完了：${updated}レースを更新しました。入力欄を消去しました。`,'success');playBeep(920,'sine',.16);
 }
 function deletePendingRecords(){
  const targets=savedRecords.map((r,i)=>({r,i})).filter(({r})=>!hasValidResult(r)&&!(Number(r.payout)>0)&&!(Number(r.payout2ren)>0));
