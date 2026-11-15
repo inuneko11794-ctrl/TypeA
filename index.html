@@ -1351,7 +1351,22 @@ body.book-cover-active .app-shell{
     <div id="aiPredictionStatus" class="text-xs text-slate-300 mb-2" aria-live="polite">予測履歴 0件 / 学習済み 0件</div>
     <div id="aiPredictionOutput" class="rounded-xl border border-fuchsia-300/30 bg-slate-950/70 p-3 text-xs text-slate-200 max-h-96 overflow-y-auto">出走表を読み込んで「未予測レースを予測」を押してください。</div>
     <div id="aiPredictionResultsPage" class="mt-4 rounded-xl border border-cyan-300/30 bg-slate-950/70 p-3"><div class="flex flex-wrap items-center justify-between gap-2 mb-2"><b class="text-cyan-200 text-sm">AI PREDICTION RESULTS // 予測結果一覧</b><select id="aiPredictionResultsFilter" class="field text-xs w-auto"><option value="all">すべて</option><option value="before">事前予測</option><option value="after">事後生成</option><option value="learned">照合・学習済み</option></select></div><div id="aiPredictionResultsCount" class="text-[10px] text-slate-400 mb-2">予測履歴 0件</div><div id="aiPredictionResultsList" class="max-h-[560px] overflow-y-auto text-xs text-slate-200">予測結果はまだありません。</div></div>
-    <div class="mt-4 rounded-xl border border-emerald-300/30 bg-slate-950/70 p-3">
+    
+    <div id="balsaraLab" class="mt-4 rounded-xl border border-amber-300/30 bg-slate-950/80 p-3">
+     <div class="flex flex-wrap items-center justify-between gap-2 mb-2"><b class="text-amber-200 text-sm">BALSARA BANKROLL LAB // AI予測の資金検証</b><span class="text-[10px] text-slate-400">事前予測・結果照合済みのみ</span></div>
+     <p class="text-[10px] text-slate-400 mb-3">AIが結果確定前に作成した予測を、指定期間で検証します。各買い目100円の均等購入を基準に、的中率・回収率・資金推移と、履歴を再標本化した資金枯渇シミュレーションを表示します。</p>
+     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+      <label class="text-[10px] text-slate-300">開始日<input id="balsaraStart" type="date" class="field mt-1 w-full text-xs"></label>
+      <label class="text-[10px] text-slate-300">終了日<input id="balsaraEnd" type="date" class="field mt-1 w-full text-xs"></label>
+      <label class="text-[10px] text-slate-300">対象券種<select id="balsaraMarket" class="field mt-1 w-full text-xs"><option value="exacta">2車単（4点）</option><option value="trifecta">3連単（10点）</option></select></label>
+      <label class="text-[10px] text-slate-300">初期資金（円）<input id="balsaraBankroll" type="number" min="100" step="1000" value="100000" class="field mt-1 w-full text-xs"></label>
+     </div>
+     <button id="balsaraRun" type="button" class="touch-btn btn-alert w-full py-2.5 rounded-xl text-xs mb-3">期間を指定して資金検証</button>
+     <div id="balsaraSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs"><div class="col-span-2 sm:col-span-4 text-slate-400">予測履歴の読み込み後に検証できます。</div></div>
+     <div id="balsaraDetails" class="mt-3 text-[10px] text-slate-300 leading-relaxed"></div>
+    </div>
+
+<div class="mt-4 rounded-xl border border-emerald-300/30 bg-slate-950/70 p-3">
      <div class="flex items-center justify-between gap-2 mb-2"><b class="text-emerald-200 text-sm">AI DISCOVERY NOTE // 発見ノート</b><button id="refreshDiscoveryBtn" type="button" class="touch-btn btn-ghost px-3 py-2 rounded-lg text-[10px]">再集計</button></div>
      <p class="text-[10px] text-slate-400 mb-2">保存済みの結果入力レースを全件集計。車番・ライン位置・印ごとの出現数と1着率／2着以内率を記録します。予測モデルの重みは変更しません。</p>
      <div id="discoveryStatus" class="text-[10px] text-slate-300 mb-2">集計待ち</div>
@@ -4772,5 +4787,87 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
  #recordManager .bbk-record-place{font-size:13px}
 }
 </style>
+
+<script id="balsara-ai-analysis">
+(function(){
+ const $=id=>document.getElementById(id);
+ const yen=n=>'¥'+Math.round(Number(n)||0).toLocaleString('ja-JP');
+ const pct=n=>(Number(n)||0).toFixed(2)+'%';
+ const day=v=>String(v||'').slice(0,10);
+ function records(){
+  try{const x=JSON.parse(localStorage.getItem('battleBankProData')||'[]');return Array.isArray(x)?x:[];}catch(e){return [];}
+ }
+ function sourceRows(){
+  const predictions=window.BBK_AI_PREDICTIONS||{};
+  const db=records();
+  return Object.values(predictions).filter(p=>p&&!p.generatedAfterResult&&!p.afterResult&&p.learned&&Array.isArray(p.result)&&p.result.length>=2).map(p=>{
+   const race=p.race||{},d=day(race.date);
+   const rec=db.find(r=>String(r.venue||'')===String(race.venue||'')&&day(r.raceDate)===d&&String(r.raceName||'')===String(race.race||''));
+   return {p,race,date:d,record:rec};
+  }).filter(x=>x.date&&x.record);
+ }
+ function simulate(rows,market,initial){
+  const isExacta=market==='exacta',count=isExacta?4:10,stake=count*100;
+  const usable=rows.map(x=>{
+   const result=x.p.result.map(Number);
+   const picks=isExacta?(x.p.exacta||[]):(x.p.trifecta||[]);
+   const hit=picks.some(a=>Array.isArray(a)&&a.length>=(isExacta?2:3)&&a.slice(0,isExacta?2:3).every((v,i)=>Number(v)===result[i]));
+   const payout=Number(isExacta?x.record.payout2ren:x.record.payout)||0;
+   if(!Number.isFinite(payout)||payout<0)return null;
+   return {hit,payout:payout,stake,net:(hit?payout:0)-stake,gross:hit&&payout>0?payout/stake:0};
+  }).filter(Boolean);
+  const n=usable.length,hits=usable.filter(x=>x.hit&&x.payout>0),invest=usable.reduce((a,x)=>a+x.stake,0),returns=usable.reduce((a,x)=>a+(x.hit?x.payout:0),0);
+  const hitRate=n?hits.length/n:0,roi=invest?returns/invest*100:0,avgGross=hits.length?hits.reduce((a,x)=>a+x.gross,0)/hits.length:0;
+  let balance=initial,peak=initial,maxDD=0,lossStreak=0,maxLossStreak=0;
+  usable.forEach(x=>{balance+=x.net;if(balance>peak)peak=balance;maxDD=Math.max(maxDD,(peak-balance)/peak);if(x.net<0){lossStreak++;maxLossStreak=Math.max(maxLossStreak,lossStreak);}else lossStreak=0;});
+  const kelly=avgGross>1?Math.max(0,Math.min(.08,(hitRate*avgGross-1)/(avgGross-1))):0;
+  const fraction=Math.min(.02,kelly*.25);
+  let ruin=0,finals=[];
+  if(n&&fraction>0){
+   let seed=2166136261;usable.forEach((x,i)=>{seed=Math.imul(seed^Math.round(x.gross*100000+i),16777619);});
+   const rand=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return (seed>>>0)/4294967296;};
+   const runs=1200,steps=n;
+   for(let run=0;run<runs;run++){
+    let b=initial,failed=false;
+    for(let j=0;j<steps;j++){
+     const x=usable[Math.floor(rand()*n)];
+     b*=x.hit&&x.gross>0?(1-fraction)+fraction*x.gross:(1-fraction);
+     if(b<initial*.1){failed=true;break;}
+    }
+    if(failed)ruin++;
+    finals.push(b);
+   }
+  }
+  finals.sort((a,b)=>a-b);
+  return {n,hits:hits.length,hitRate,invest,returns,roi,net:returns-invest,balance,maxDD,maxLossStreak,avgGross,kelly,fraction,ruinRate:finals.length?ruin/finals.length*100:null,medianFinal:finals.length?finals[Math.floor(finals.length/2)]:null,usable};
+ }
+ function render(){
+  const start=$('balsaraStart').value,end=$('balsaraEnd').value,market=$('balsaraMarket').value,initial=Math.max(100,Number($('balsaraBankroll').value)||100000);
+  const all=sourceRows();
+  const rows=all.filter(x=>(!start||x.date>=start)&&(!end||x.date<=end)).sort((a,b)=>a.date.localeCompare(b.date));
+  const s=simulate(rows,market,initial),box=$('balsaraSummary'),detail=$('balsaraDetails');
+  if(!s.n){box.innerHTML='<div class="col-span-2 sm:col-span-4 text-amber-200">指定期間に、結果と配当が揃った事前AI予測がありません。</div>';detail.textContent='予測の結果照合と、対象券種の配当登録が済んだレースが検証対象です。';return;}
+  const card=(label,value)=>'<div class="rounded-lg border border-slate-700 bg-slate-900 p-2"><div class="text-[9px] text-slate-400">'+label+'</div><b class="text-sm text-amber-100">'+value+'</b></div>';
+  box.innerHTML=card('対象レース',s.n+' R')+card('的中率',pct(s.hitRate*100)) +card('回収率',pct(s.roi))+card('損益',yen(s.net));
+  const ruin=s.ruinRate===null?'算出不可':pct(s.ruinRate);
+  detail.innerHTML='<div class="grid grid-cols-2 gap-2 mb-2">'+
+   '<div>投資合計：<b>'+yen(s.invest)+'</b></div><div>払戻合計：<b>'+yen(s.returns)+'</b></div>'+
+   '<div>最終資金（固定100円/点）：<b>'+yen(initial+s.net)+'</b></div><div>最大ドローダウン：<b>'+pct(s.maxDD*100)+'</b></div>'+
+   '<div>最大連敗：<b>'+s.maxLossStreak+'レース</b></div><div>的中時平均・総投資倍率：<b>'+s.avgGross.toFixed(2)+'倍</b></div>'+
+   '<div>理論ケリー比率：<b>'+pct(s.kelly*100)+'</b></div><div>推奨試算比率（1/4ケリー・上限2%）：<b>'+pct(s.fraction*100)+'</b></div>'+
+   '<div>資金が初期の10%未満になる推定確率：<b>'+ruin+'</b></div><div>再標本化後の最終資金中央値：<b>'+(s.medianFinal===null?'—':yen(s.medianFinal))+'</b></div></div>'+
+   '<p class="text-slate-400">期間内の予測 '+s.n+'件中、配当が確認できる予測を使用。購入は各候補100円、2車単4点／3連単10点として計算。ケリー比率は「レース全体の購入額」に対する割合です。資金枯渇確率は履歴を1,200回再標本化し、初期資金の10%未満を枯渇と定義した推定値です。平均的中倍率を使う近似であり、将来の破産確率を保証するものではありません。</p>';
+ }
+ function init(){
+  const rows=sourceRows(),dates=rows.map(x=>x.date).filter(Boolean).sort();
+  if(dates.length){$('balsaraStart').value=dates[0];$('balsaraEnd').value=dates[dates.length-1];}
+  $('balsaraRun').addEventListener('click',render);
+  ['balsaraStart','balsaraEnd','balsaraMarket','balsaraBankroll'].forEach(id=>$(id).addEventListener('change',render));
+  render();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+
 </body>
 </html>
