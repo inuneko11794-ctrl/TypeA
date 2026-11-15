@@ -2485,14 +2485,30 @@ function renderRecordManager(){
  const query=($('recordSearch')?.value||'').trim().toLowerCase(),status=$('recordStatus')?.value||'all';
  const counts={all:savedRecords.length,pending:0,result:0,payout:0,incomplete:0};
  savedRecords.forEach(r=>{const result=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;if(!result)counts.pending++;else counts.result++;if(p3>0||p2>0)counts.payout++;if(p3===0||p2===0)counts.incomplete++;});
- $('recordSummary').textContent=`登録 ${counts.all}件 ／ 着順未入力 ${counts.pending}件 ／ 配当入力済 ${counts.payout}件`;
+ const summary=$('recordSummary');
+ if(summary)summary.innerHTML=`<span class="bbk-record-stat"><b>${counts.all.toLocaleString()}</b><small>登録</small></span><span class="bbk-record-stat is-pending"><b>${counts.pending.toLocaleString()}</b><small>着順待ち</small></span><span class="bbk-record-stat is-result"><b>${counts.result.toLocaleString()}</b><small>着順入力済</small></span><span class="bbk-record-stat is-payout"><b>${counts.payout.toLocaleString()}</b><small>配当入力あり</small></span>`;
  const filtered=savedRecords.map((r,i)=>({...r,_idx:i})).filter(r=>{
   const text=[r.venue,r.raceDate,r.raceName,r.category,r.pattern,r.line1].join(' ').toLowerCase();if(query&&!text.includes(query))return false;
   const result=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;
   if(status==='pending'&&result)return false;if(status==='result'&&!result)return false;if(status==='payout'&&p3===0&&p2===0)return false;if(status==='incomplete'&&p3>0&&p2>0)return false;return true;
  }).sort((a,b)=>(b.raceDate||'').localeCompare(a.raceDate||'')||String(a.venue).localeCompare(String(b.venue),'ja')||(parseInt(a.raceName)||0)-(parseInt(b.raceName)||0));
- if(!filtered.length){host.innerHTML='<div class="discovery-card text-xs">該当するレースはありません。</div>';return;}
- host.innerHTML=filtered.slice(0,250).map(r=>{const done=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;return `<div class="discovery-result flex flex-col sm:flex-row sm:items-center justify-between gap-2"><div class="min-w-0"><div class="font-black text-sm text-sky-950">${escapeHTML(r.venue||'不明')} ${escapeHTML(r.raceName||'')}</div><div class="text-[10px] text-slate-600">${escapeHTML(r.raceDate||'開催日未設定')} ・ ${escapeHTML(r.category||'')}</div><div class="text-xs mt-1 font-bold">${done?`着順 ${escapeHTML(r.pattern)}`:'着順未入力'} <span class="text-slate-500 font-normal">／ 2単 ${p2?`¥${p2.toLocaleString()}`:'未入力'} ／ 3単 ${p3?`¥${p3.toLocaleString()}`:'未入力'}</span></div></div><div class="flex gap-2 shrink-0"><button type="button" class="touch-btn btn-cyber px-3 py-2 text-xs" onclick="openEditModal(${r._idx})">編集</button><button type="button" class="touch-btn btn-ghost px-3 py-2 text-xs" onclick="deleteRecord(${r._idx})">削除</button></div></div>`;}).join('')+(filtered.length>250?'<div class="text-xs text-slate-500 text-center">表示は先頭250件までです。検索で絞り込んでください。</div>':'');
+ if(!filtered.length){host.innerHTML='<div class="bbk-record-empty">該当するレースはありません。</div>';return;}
+ host.innerHTML=filtered.slice(0,250).map(r=>{
+  const done=hasValidResult(r),p3=Number(r.payout)||0,p2=Number(r.payout2ren)||0;
+  const statusLabel=done?'着順入力済':'着順未入力',statusClass=done?'is-done':'is-waiting';
+  return `<article class="bbk-record-card">
+   <div class="bbk-record-main">
+    <div class="bbk-record-heading"><div class="bbk-record-place">${escapeHTML(r.venue||'不明')} <strong>${escapeHTML(r.raceName||'')}</strong></div><span class="bbk-record-status ${statusClass}">${statusLabel}</span></div>
+    <div class="bbk-record-meta"><span>${escapeHTML(r.raceDate||'開催日未設定')}</span><i></i><span>${escapeHTML(r.category||'車立て未設定')}</span></div>
+    <div class="bbk-record-data">
+     <div class="bbk-record-result"><small>RESULT</small><b>${done?escapeHTML(r.pattern):'— — —'}</b></div>
+     <div class="bbk-record-payout"><small>2車単</small><b>${p2?'¥'+p2.toLocaleString():'未入力'}</b></div>
+     <div class="bbk-record-payout"><small>3連単</small><b>${p3?'¥'+p3.toLocaleString():'未入力'}</b></div>
+    </div>
+   </div>
+   <div class="bbk-record-actions"><button type="button" class="touch-btn bbk-record-edit" onclick="openEditModal(${r._idx})">編集する</button><button type="button" class="touch-btn bbk-record-delete" onclick="deleteRecord(${r._idx})">削除</button></div>
+  </article>`;
+ }).join('')+(filtered.length>250?'<div class="bbk-record-limit">表示は先頭250件までです。検索・絞り込みで対象を指定してください。</div>':'');
 }
 function openBatchEdit(){
  const panel=$('batchEditPanel'),host=$('batchEditRows');if(!panel||!host)return;
@@ -4709,5 +4725,46 @@ window.BBK_EXTRA_SEED_DATA={byn3:BYN3_DATA,mansha:MANSHANOTE_DATA};
 </style>
 
 
+
+<style id="bbk-record-manager-layout-v1">
+/* 登録レース管理：一覧性を優先したカードレイアウト */
+#recordManager .bbk-record-stat{display:inline-flex;align-items:baseline;gap:5px;padding:5px 9px;margin:2px 5px 2px 0;border:1px solid #d8cbea;border-radius:9px;background:#fff;color:#4b4770;white-space:nowrap}
+#recordManager .bbk-record-stat b{font:800 15px 'Share Tech Mono',monospace;color:#6247a5}
+#recordManager .bbk-record-stat small{font-size:9px;color:#77718d}
+#recordManager .bbk-record-stat.is-pending b{color:#c16a37}
+#recordManager .bbk-record-stat.is-result b{color:#218b77}
+#recordManager .bbk-record-stat.is-payout b{color:#477ac0}
+#recordManager #recordSummary{display:flex;align-items:center;flex-wrap:wrap;gap:2px;min-height:48px;padding:5px 7px;background:#f8f6ff!important;border-color:#ded5f0!important}
+#recordManager #recordList{display:grid;grid-template-columns:1fr;gap:10px}
+#recordManager .bbk-record-card{display:flex;align-items:stretch;justify-content:space-between;gap:12px;padding:13px;border:1px solid #ded5ed;border-radius:14px;background:linear-gradient(145deg,#fff 0%,#faf8ff 100%);box-shadow:0 3px 10px rgba(70,55,110,.06);color:#343451;min-width:0}
+#recordManager .bbk-record-main{flex:1;min-width:0}
+#recordManager .bbk-record-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#recordManager .bbk-record-place{font-size:14px;font-weight:800;color:#3e365f;min-width:0}
+#recordManager .bbk-record-place strong{display:inline-block;margin-left:4px;padding:2px 8px;border-radius:7px;background:#eee8fb;color:#6247a5;font:800 12px 'Share Tech Mono',monospace}
+#recordManager .bbk-record-status{display:inline-flex;align-items:center;padding:4px 8px;border-radius:20px;font-size:10px;font-weight:800;white-space:nowrap}
+#recordManager .bbk-record-status.is-waiting{background:#fff1e4;color:#a65c28;border:1px solid #f1d1b5}
+#recordManager .bbk-record-status.is-done{background:#e5f5ef;color:#23745f;border:1px solid #c2e5d8}
+#recordManager .bbk-record-meta{display:flex;align-items:center;gap:7px;margin-top:5px;color:#827c98;font-size:10px}
+#recordManager .bbk-record-meta i{width:3px;height:3px;border-radius:50%;background:#b7a9d3}
+#recordManager .bbk-record-data{display:grid;grid-template-columns:minmax(84px,1.2fr) repeat(2,minmax(78px,1fr));gap:7px;margin-top:10px}
+#recordManager .bbk-record-data>div{display:flex;flex-direction:column;gap:3px;min-width:0;padding:7px 9px;border:1px solid #ece7f5;border-radius:9px;background:rgba(255,255,255,.8)}
+#recordManager .bbk-record-data small{font-size:9px;color:#928ba5;letter-spacing:.04em}
+#recordManager .bbk-record-data b{font-size:12px;color:#4c4568;overflow-wrap:anywhere}
+#recordManager .bbk-record-result b{font:800 15px 'Share Tech Mono',monospace;color:#218b77}
+#recordManager .bbk-record-actions{display:flex;flex-direction:column;justify-content:center;gap:7px;flex:0 0 78px}
+#recordManager .bbk-record-actions button{min-height:38px;padding:8px 7px;border-radius:9px;font-size:11px;font-weight:800}
+#recordManager .bbk-record-edit{background:linear-gradient(120deg,#7f67d7,#ae83e8);color:white;box-shadow:0 3px 8px #8067c333}
+#recordManager .bbk-record-delete{border:1px solid #e5cbd2;background:#fff7f8;color:#a65d70}
+#recordManager .bbk-record-empty,#recordManager .bbk-record-limit{padding:14px;text-align:center;border:1px dashed #d8cbea;border-radius:12px;background:#faf8ff;color:#77718d;font-size:11px}
+@media(max-width:520px){
+ #recordManager .bbk-record-card{gap:8px;padding:10px}
+ #recordManager .bbk-record-actions{flex-basis:66px}
+ #recordManager .bbk-record-actions button{font-size:10px;padding:7px 4px}
+ #recordManager .bbk-record-data{grid-template-columns:1.1fr 1fr 1fr;gap:5px}
+ #recordManager .bbk-record-data>div{padding:6px 5px}
+ #recordManager .bbk-record-data b{font-size:11px}
+ #recordManager .bbk-record-place{font-size:13px}
+}
+</style>
 </body>
 </html>
